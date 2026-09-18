@@ -10,19 +10,19 @@ head:
       content: Java Collections best practices,kiểm tra collection rỗng,Arrays.asList,subList,concurrent container,lưu ý sử dụng collection,tối ưu performance
 ---
 
-Bài viết này tổng hợp các lưu ý thường gặp khi sử dụng collection và nguyên lý cụ thể của chúng dựa trên 《Alibaba Java Coding Guidelines》.
+Bài viết này tổng hợp các lưu ý thường gặp khi sử dụng collection và nguyên lý cụ thể đằng sau chúng dựa trên 《Alibaba Java Coding Guidelines》.
 
-Bạn nên đọc kỹ vài lần để tránh gặp những lỗi cơ bản này khi tự viết code.
+Bạn nên đọc kỹ vài lần để tránh mắc những lỗi cơ bản này khi tự viết code.
 
 ## Kiểm tra collection rỗng
 
 《Alibaba Java Coding Guidelines》 mô tả như sau:
 
-> **Để kiểm tra các phần tử bên trong mọi collection có rỗng hay không, hãy sử dụng method `isEmpty()`, không sử dụng cách `size()==0`.**
+> **Để kiểm tra collection có rỗng hay không, hãy sử dụng method `isEmpty()`, không sử dụng `size()==0`.**
 
 Lý do là method `isEmpty()` dễ đọc hơn và có độ phức tạp thời gian là `O(1)`.
 
-Phần lớn collection mà chúng ta sử dụng có method `size()` với độ phức tạp thời gian cũng là `O(1)`. Tuy nhiên, cũng có nhiều collection có độ phức tạp khác `O(1)`, chẳng hạn `ConcurrentLinkedQueue` trong package `java.util.concurrent`. Method `isEmpty()` của `ConcurrentLinkedQueue` phán đoán thông qua method `first()`. Method `first()` trả về node đầu tiên trong queue có value khác `null` (node có value `null` vì được dùng cho logic xóa mềm trong iterator).
+Phần lớn collection mà chúng ta sử dụng có method `size()` với độ phức tạp thời gian cũng là `O(1)`. Tuy nhiên, cũng có nhiều collection có độ phức tạp khác `O(1)`, chẳng hạn `ConcurrentLinkedQueue` trong package `java.util.concurrent`. Method `isEmpty()` của `ConcurrentLinkedQueue` kiểm tra thông qua method `first()`. Method `first()` trả về node đầu tiên trong queue có value khác `null` (node có value `null` vì được dùng cho việc xóa logic trong iterator).
 
 ```java
 public boolean isEmpty() { return first() == null; }
@@ -43,7 +43,7 @@ Node<E> first() {
 }
 ```
 
-Vì method `updateHead(h, p)` đều được thực thi khi insert và delete phần tử, nên độ phức tạp thời gian thực thi method này có thể được xem xấp xỉ là `O(1)`. Còn method `size()` cần duyệt toàn bộ linked list, nên độ phức tạp thời gian là `O(n)`.
+Vì method `updateHead(h, p)` đều được thực thi khi chèn và xóa phần tử, nên độ phức tạp thời gian của method này có thể xem xấp xỉ là `O(1)`. Còn method `size()` cần duyệt toàn bộ linked list, nên độ phức tạp thời gian là `O(n)`.
 
 ```java
 public int size() {
@@ -56,7 +56,7 @@ public int size() {
 }
 ```
 
-Ngoài ra, trong `ConcurrentHashMap` 1.7, độ phức tạp thời gian của method `size()` và method `isEmpty()` cũng khác nhau. `ConcurrentHashMap` 1.7 lưu số lượng phần tử trong mỗi `Segment`; method `size()` cần thống kê số lượng của từng `Segment`, còn `isEmpty()` chỉ cần tìm `Segment` đầu tiên không rỗng. Tuy nhiên, trong `ConcurrentHashMap` 1.8, cả method `size()` và `isEmpty()` đều cần gọi method `sumCount()` để tổng hợp số đếm trong `baseCount` và `CounterCell[]`. Dưới đây là source code của method `sumCount()`:
+Ngoài ra, trong `ConcurrentHashMap` 1.7, độ phức tạp thời gian của method `size()` và method `isEmpty()` cũng khác nhau. `ConcurrentHashMap` 1.7 lưu số lượng phần tử trong mỗi `Segment`; method `size()` cần thống kê số lượng của từng `Segment`, còn `isEmpty()` chỉ cần tìm `Segment` đầu tiên không rỗng. Tuy nhiên, trong `ConcurrentHashMap` 1.8, cả method `size()` và `isEmpty()` đều cần gọi method `sumCount()` để cộng các bộ đếm trong `baseCount` và `CounterCell[]`. Dưới đây là source code của method `sumCount()`:
 
 ```java
 final long sumCount() {
@@ -70,13 +70,13 @@ final long sumCount() {
 }
 ```
 
-Trong môi trường concurrent, khi `ConcurrentHashMap` 1.8 phân tán việc cập nhật counter bằng `baseCount` và `CounterCell[]`, nó giảm cạnh tranh thay vì lưu số lượng node trong mỗi `Node`. Trong `ConcurrentHashMap` 1.7, số lượng phần tử được lưu trong mỗi `Segment`; method `size()` cần thống kê số lượng của từng `Segment`, còn `isEmpty()` chỉ cần tìm `Segment` đầu tiên không rỗng.
+Trong môi trường concurrent, `ConcurrentHashMap` 1.8 phân tán việc cập nhật counter vào `baseCount` và `CounterCell[]` để giảm cạnh tranh, thay vì lưu số lượng node trong mỗi `Node`. Trong `ConcurrentHashMap` 1.7, số lượng phần tử được lưu trong mỗi `Segment`; method `size()` cần thống kê số lượng của từng `Segment`, còn `isEmpty()` chỉ cần tìm `Segment` đầu tiên không rỗng.
 
 ## Chuyển collection thành Map
 
 《Alibaba Java Coding Guidelines》 mô tả như sau:
 
-> **Khi sử dụng method `toMap()` của class `java.util.stream.Collectors` để chuyển thành collection `Map`, cần đặc biệt chú ý rằng khi value là `null`, exception NPE sẽ được throw.**
+> **Khi sử dụng method `toMap()` của class `java.util.stream.Collectors` để chuyển thành `Map`, cần đặc biệt chú ý rằng nếu value là `null` thì sẽ ném NPE.**
 
 ```java
 class Person {
@@ -109,9 +109,9 @@ Collector<T, ?, M> toMap(Function<? super T, ? extends K> keyMapper,
 }
 ```
 
-Method `merge()` của interface `Map` như sau. Đây là default implementation trong interface.
+Method `merge()` của interface `Map` như sau. Đây là default implementation của interface.
 
-> Nếu bạn chưa hiểu các new feature của Java 8, hãy xem bài viết này: [《Tổng hợp Java8 New Features》](https://mp.weixin.qq.com/s/ojyl7B6PiHaTWADqmUq2rw).
+> Nếu bạn chưa hiểu các tính năng mới của Java 8, hãy xem bài viết này: [《Tổng hợp tính năng mới của Java8》](https://mp.weixin.qq.com/s/ojyl7B6PiHaTWADqmUq2rw).
 
 ```java
 default V merge(K key, V value,
@@ -130,7 +130,7 @@ default V merge(K key, V value,
 }
 ```
 
-Method `merge()` trước tiên sẽ gọi method `Objects.requireNonNull()` để kiểm tra value có rỗng hay không.
+Method `merge()` trước tiên sẽ gọi method `Objects.requireNonNull()` để kiểm tra value có phải `null` hay không.
 
 ```java
 public static <T> T requireNonNull(T obj) {
@@ -140,21 +140,21 @@ public static <T> T requireNonNull(T obj) {
 }
 ```
 
-> `Collectors` cũng cung cấp method `toMap()` không cần `mergeFunction`. Tuy nhiên, nếu xảy ra xung đột key, exception `duplicateKeyException` sẽ được throw. Vì vậy, khi sử dụng method `toMap()`, bạn nên luôn truyền `mergeFunction`.
+> `Collectors` cũng cung cấp method `toMap()` không cần `mergeFunction`. Tuy nhiên, nếu xảy ra xung đột key, exception `duplicateKeyException` sẽ được ném. Vì vậy, khi sử dụng method `toMap()`, bạn nên luôn truyền `mergeFunction`.
 
 ## Duyệt collection
 
 《Alibaba Java Coding Guidelines》 mô tả như sau:
 
-> **Không thực hiện thao tác `remove/add` phần tử trong vòng lặp foreach. Khi remove phần tử, hãy sử dụng `Iterator`; nếu thao tác concurrent, cần lock object `Iterator`.**
+> **Không thực hiện thao tác `remove/add` phần tử trong vòng lặp foreach. Khi xóa phần tử, hãy sử dụng `Iterator`; nếu thao tác concurrent, cần khóa object `Iterator`.**
 
-Cần lưu ý rằng chỉ lock object `Iterator` không thể ngăn thread khác sửa collection. Lấy wrapper đồng bộ được trả về bởi `Collections.synchronizedXxx()` làm ví dụ: khi duyệt, cần đồng bộ trên collection đã được wrap và bảo đảm mọi truy cập đều được thực hiện thông qua wrapper đó.
+Cần lưu ý rằng chỉ khóa object `Iterator` không thể ngăn thread khác sửa collection. Lấy wrapper đồng bộ được trả về bởi `Collections.synchronizedXxx()` làm ví dụ: khi duyệt, cần đồng bộ trên collection đã được bọc và bảo đảm mọi truy cập đều được thực hiện thông qua wrapper đó.
 
-Thông qua decompile, bạn sẽ thấy cú pháp foreach ở tầng dưới thực chất vẫn dựa trên `Iterator`. Tuy nhiên, thao tác `remove/add` trực tiếp gọi method của chính collection, chứ không gọi method `remove/add` của `Iterator`.
+Thông qua việc decompile, bạn sẽ thấy cú pháp foreach ở bên trong thực chất vẫn dựa trên `Iterator`. Tuy nhiên, thao tác `remove/add` trực tiếp gọi method của chính collection, chứ không gọi method `remove/add` của `Iterator`.
 
-Điều này khiến `Iterator` bất ngờ phát hiện phần tử của mình đã bị `remove/add`, sau đó throw `ConcurrentModificationException` để thông báo đã xảy ra concurrent modification exception. Đây chính là **fail-fast mechanism** phát sinh trong trạng thái single-thread.
+Điều này khiến `Iterator` phát hiện phần tử của mình đã bị `remove/add`, sau đó ném `ConcurrentModificationException` để thông báo đã xảy ra concurrent modification. Đây chính là **cơ chế fail-fast** phát sinh ngay cả trong môi trường single-thread.
 
-> **fail-fast mechanism**: Khi nhiều thread sửa một fail-fast collection, có thể throw `ConcurrentModificationException`. Ngay cả trong single-thread cũng có thể xảy ra tình huống này, như đã đề cập ở trên.
+> **Cơ chế fail-fast**: Khi nhiều thread sửa một fail-fast collection, có thể ném `ConcurrentModificationException`. Ngay cả trong single-thread cũng có thể xảy ra tình huống này, như đã đề cập ở trên.
 >
 > Đọc thêm: [fail-fast là gì](https://www.cnblogs.com/54chensongxia/p/12470446.html).
 
@@ -179,7 +179,7 @@ Ngoài cách trực tiếp sử dụng `Iterator` để duyệt như trên, bạ
 
 《Alibaba Java Coding Guidelines》 mô tả như sau:
 
-> **Có thể tận dụng đặc tính phần tử unique của `Set` để nhanh chóng loại bỏ phần tử trùng trong một collection, tránh dùng `contains()` của `List` để duyệt nhằm loại bỏ phần tử trùng hoặc kiểm tra việc chứa phần tử.**
+> **Có thể tận dụng tính duy nhất của phần tử trong `Set` để nhanh chóng loại bỏ phần tử trùng trong một collection, tránh dùng `contains()` của `List` để duyệt nhằm loại bỏ phần tử trùng hoặc kiểm tra việc chứa phần tử.**
 
 Ở đây, chúng ta dùng `HashSet` và `ArrayList` làm ví dụ.
 
@@ -211,9 +211,9 @@ public static <T> List<T> removeDuplicateByList(List<T> data) {
 
 ```
 
-Điểm khác biệt cốt lõi của hai cách nằm ở implementation của method `contains()`.
+Điểm khác biệt cốt lõi giữa hai cách nằm ở implementation của method `contains()`.
 
-Method `contains()` của `HashSet` ở tầng dưới phụ thuộc vào method `containsKey()` của `HashMap`, với độ phức tạp thời gian gần `O(1)` (khi không xảy ra hash collision là `O(1)`).
+Method `contains()` của `HashSet` ở bên trong phụ thuộc vào method `containsKey()` của `HashMap`, với độ phức tạp thời gian gần `O(1)` (khi không xảy ra hash collision là `O(1)`).
 
 ```java
 private transient HashMap<E,Object> map;
@@ -222,7 +222,7 @@ public boolean contains(Object o) {
 }
 ```
 
-Nếu có N phần tử được insert vào Set, độ phức tạp thời gian sẽ gần `O(n)`.
+Nếu có N phần tử được chèn vào Set, độ phức tạp thời gian sẽ gần `O(n)`.
 
 Method `contains()` của `ArrayList` thực hiện bằng cách duyệt mọi phần tử, nên độ phức tạp thời gian gần `O(n)`.
 
@@ -249,7 +249,7 @@ public int indexOf(Object o) {
 
 《Alibaba Java Coding Guidelines》 mô tả như sau:
 
-> **Khi sử dụng method chuyển collection thành array, bắt buộc dùng `toArray(T[] array)` của collection và truyền vào một empty array có type hoàn toàn giống với type cần trả về, độ dài bằng 0.**
+> **Khi chuyển collection thành array, bắt buộc dùng `toArray(T[] array)` của collection và truyền vào một array rỗng có type hoàn toàn giống với type cần trả về, độ dài bằng 0.**
 
 Tham số của method `toArray(T[] array)` là một generic array. Nếu method `toArray` không truyền tham số, kết quả trả về là một array có type `Object`.
 
@@ -263,17 +263,17 @@ Collections.reverse(list);
 s=list.toArray(new String[0]);
 ```
 
-Nhờ JVM optimization, hiện nay việc dùng `new String[0]` làm tham số của method `Collection.toArray()` có performance tốt hơn. `new String[0]` đóng vai trò template để chỉ định type của array trả về, còn `0` giúp tiết kiệm space vì nó chỉ dùng để chỉ rõ type trả về. Xem thêm: <https://shipilev.net/blog/2016/arrays-wisdom-ancients/>
+Nhờ tối ưu hóa của JVM, hiện nay việc dùng `new String[0]` làm tham số của method `Collection.toArray()` có performance tốt hơn. `new String[0]` đóng vai trò template để chỉ định type của array trả về, còn `0` giúp tiết kiệm bộ nhớ vì nó chỉ dùng để chỉ rõ type trả về. Xem thêm: <https://shipilev.net/blog/2016/arrays-wisdom-ancients/>
 
 ## Chuyển array thành collection
 
 《Alibaba Java Coding Guidelines》 mô tả như sau:
 
-> **Khi sử dụng utility class `Arrays.asList()` để chuyển array thành collection, không được sử dụng các method liên quan đến việc sửa collection; các method `add/remove/clear` của nó sẽ throw exception `UnsupportedOperationException`.**
+> **Khi sử dụng utility class `Arrays.asList()` để chuyển array thành collection, không được sử dụng các method thay đổi collection; các method `add/remove/clear` của nó sẽ ném exception `UnsupportedOperationException`.**
 
 Trước đây, tôi từng gặp một bẫy tương tự trong một project.
 
-`Arrays.asList()` khá phổ biến trong quá trình development hằng ngày. Chúng ta có thể dùng nó để chuyển một array thành một collection `List`.
+`Arrays.asList()` khá phổ biến trong quá trình phát triển hằng ngày. Chúng ta có thể dùng nó để chuyển một array thành một collection `List`.
 
 ```java
 String[] myArray = {"Apple", "Banana", "Orange"};
@@ -297,7 +297,7 @@ public static <T> List<T> asList(T... a) {
 
 Sau đây là phần tổng hợp các lưu ý khi sử dụng.
 
-**1. `Arrays.asList()` sẽ không tự động autobox và trải array primitive thành các phần tử của list.**
+**1. `Arrays.asList()` sẽ không tự động thực hiện autoboxing và tách array primitive thành các phần tử của list.**
 
 ```java
 int[] myArray = {1, 2, 3};
@@ -317,7 +317,7 @@ Chúng ta có thể giải quyết vấn đề này bằng cách sử dụng arr
 Integer[] myArray = {1, 2, 3};
 ```
 
-**2. Sử dụng các method sửa collection: `add()`, `remove()`, `clear()` sẽ throw exception.**
+**2. Sử dụng các method thay đổi collection: `add()`, `remove()`, `clear()` sẽ ném exception.**
 
 ```java
 List myList = Arrays.asList(1, 2, 3);
@@ -326,7 +326,7 @@ myList.remove(1);//lỗi khi runtime: UnsupportedOperationException
 myList.clear();//lỗi khi runtime: UnsupportedOperationException
 ```
 
-Method `Arrays.asList()` trả về không phải `java.util.ArrayList`, mà là một inner class của `java.util.Arrays`. Inner class này không implement các method sửa collection, hay nói cách khác là không override các method này.
+Method `Arrays.asList()` trả về không phải `java.util.ArrayList`, mà là một inner class của `java.util.Arrays`. Inner class này không implement các method thay đổi collection, hay nói cách khác là không override các method này.
 
 ```java
 List myList = Arrays.asList(1, 2, 3);
@@ -378,7 +378,7 @@ Dưới đây là source code đơn giản của `java.util.Arrays$ArrayList`; c
     }
 ```
 
-Tiếp tục xem method `add/remove/clear` của `java.util.AbstractList`, chúng ta sẽ hiểu tại sao chúng throw `UnsupportedOperationException`.
+Tiếp tục xem method `add/remove/clear` của `java.util.AbstractList`, chúng ta sẽ hiểu tại sao chúng ném `UnsupportedOperationException`.
 
 ```java
 public E remove(int index) {
@@ -406,7 +406,7 @@ protected void removeRange(int fromIndex, int toIndex) {
 
 **Vậy làm thế nào để chuyển array thành `ArrayList` đúng cách?**
 
-1. Tự implement utility class
+1. Tự viết utility class
 
 ```java
 // JDK1.5+
@@ -435,7 +435,7 @@ List list = new ArrayList<>(Arrays.asList("a", "b", "c"))
 ```java
 Integer [] myArray = { 1, 2, 3 };
 List myList = Arrays.stream(myArray).collect(Collectors.toList());
-// array primitive cũng có thể chuyển đổi (phụ thuộc vào thao tác autoboxing boxed)
+// array primitive cũng có thể chuyển đổi (nhờ thao tác boxing của boxed())
 int [] myArray2 = { 1, 2, 3 };
 List myList = Arrays.stream(myArray2).boxed().collect(Collectors.toList());
 ```
