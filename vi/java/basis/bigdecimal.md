@@ -1,5 +1,5 @@
 ---
-title: BigDecimal giải thích chi tiết
+title: Giải thích chi tiết về BigDecimal
 description: "Giải thích chi tiết cách sử dụng BigDecimal: giải quyết vấn đề mất độ chính xác của số floating-point, nắm vững phép cộng trừ nhân chia, quy tắc làm tròn của RoundingMode, phương thức so sánh compareTo, phù hợp với các trường hợp cần tính toán độ chính xác cao như tính toán tài chính."
 category: Java
 tag:
@@ -26,9 +26,9 @@ System.out.println(a == b);// false
 
 **Tại sao khi tính toán với số floating-point `float` hoặc `double` lại có nguy cơ mất độ chính xác?**
 
-Điều này liên quan rất lớn đến cơ chế máy tính lưu số thập phân. Như bạn biết, máy tính sử dụng hệ nhị phân, đồng thời độ rộng khi biểu diễn một số là hữu hạn. Nhiều số thập phân khi chuyển sang nhị phân sẽ lặp vô hạn, chỉ có thể làm tròn về một số chữ số hữu hạn, vì vậy tồn tại nguy cơ mất độ chính xác. Tuy nhiên, những giá trị như 0.5 và 0.25 có thể biểu diễn bằng số thập phân nhị phân hữu hạn thì vẫn được biểu diễn chính xác.
+Điều này liên quan rất lớn đến cơ chế máy tính lưu số. Như bạn biết, máy tính sử dụng hệ nhị phân, đồng thời số bit dùng để biểu diễn một số là hữu hạn. Nhiều số thập phân khi chuyển sang nhị phân sẽ lặp vô hạn, chỉ có thể làm tròn về một số chữ số hữu hạn, vì vậy tồn tại nguy cơ mất độ chính xác. Tuy nhiên, những giá trị như 0.5 và 0.25 có thể biểu diễn bằng số nhị phân hữu hạn nên vẫn được biểu diễn chính xác.
 
-Ví dụ, 0.2 trong hệ thập phân không thể chuyển chính xác thành số thập phân nhị phân:
+Ví dụ, 0.2 trong hệ thập phân không thể chuyển chính xác thành số nhị phân:
 
 ```java
 // Quá trình chuyển 0.2 sang số nhị phân là liên tục nhân với 2 cho đến khi không còn phần thập phân,
@@ -41,7 +41,7 @@ Ví dụ, 0.2 trong hệ thập phân không thể chuyển chính xác thành s
 ...
 ```
 
-Về nội dung chi tiết hơn về số floating-point, bạn nên xem bài viết [Cơ sở hệ thống máy tính (4): Số floating-point](http://kaito-kidd.com/2018/08/08/computer-system-float-point/).
+Để tìm hiểu thêm về số floating-point, bạn nên xem bài viết [Cơ sở hệ thống máy tính (4): Số floating-point](http://kaito-kidd.com/2018/08/08/computer-system-float-point/).
 
 ## Giới thiệu về BigDecimal
 
@@ -49,7 +49,7 @@ Về nội dung chi tiết hơn về số floating-point, bạn nên xem bài vi
 
 Thông thường, hầu hết các trường hợp nghiệp vụ cần kết quả tính toán số thập phân chính xác (chẳng hạn các trường hợp liên quan đến tiền) đều sử dụng `BigDecimal`.
 
-《Sổ tay phát triển Java của Alibaba》 có đề cập: **Khi kiểm tra giá trị bằng nhau giữa các số floating-point, kiểu dữ liệu nguyên thủy không được dùng `==` để so sánh, kiểu dữ liệu wrapper không được dùng `equals` để phán đoán.**
+《Sổ tay phát triển Java của Alibaba》 có đề cập: **Khi kiểm tra giá trị bằng nhau giữa các số floating-point, kiểu dữ liệu nguyên thủy không được dùng `==` để so sánh, wrapper type không được dùng `equals` để so sánh.**
 
 ![](https://oss.javaguide.cn/javaguide/image-20211213101646884.png)
 
@@ -88,7 +88,7 @@ BigDecimal b = new BigDecimal("0.9");
 System.out.println(a.add(b));// 1.9
 System.out.println(a.subtract(b));// 0.1
 System.out.println(a.multiply(b));// 0.90
-System.out.println(a.divide(b));// Không chia hết, ném exception ArithmeticException
+System.out.println(a.divide(b));// Không thể chia hết, ném ArithmeticException
 System.out.println(a.divide(b, 2, RoundingMode.HALF_UP));// 1.11
 ```
 
@@ -123,7 +123,7 @@ public enum RoundingMode {
 }
 ```
 
-### So sánh lớn nhỏ
+### So sánh lớn, nhỏ
 
 `a.compareTo(b)`: trả về -1 nếu `a` nhỏ hơn `b`, 0 nếu `a` bằng `b`, 1 nếu `a` lớn hơn `b`.
 
@@ -135,7 +135,7 @@ System.out.println(a.compareTo(b));// 1
 
 ### Giữ lại bao nhiêu chữ số thập phân
 
-Sử dụng phương thức `setScale` để thiết lập số chữ số thập phân cần giữ lại và quy tắc giữ lại. Có khá nhiều quy tắc giữ lại, không cần ghi nhớ; IDEA sẽ gợi ý.
+Sử dụng phương thức `setScale` để thiết lập số chữ số sau dấu thập phân cần giữ lại và quy tắc làm tròn. Có khá nhiều quy tắc làm tròn, không cần ghi nhớ; IDEA sẽ gợi ý.
 
 ```java
 BigDecimal m = new BigDecimal("1.255433");
@@ -149,7 +149,7 @@ System.out.println(n);// 1.255
 
 ![](https://oss.javaguide.cn/github/javaguide/java/basis/image-20220714161315993.png)
 
-Ví dụ code phát sinh vấn đề khi `BigDecimal` sử dụng phương thức `equals()` để so sánh giá trị bằng nhau:
+Ví dụ code cho thấy vấn đề khi `BigDecimal` sử dụng phương thức `equals()` để so sánh giá trị bằng nhau:
 
 ```java
 BigDecimal a = new BigDecimal("1");
@@ -157,9 +157,9 @@ BigDecimal b = new BigDecimal("1.0");
 System.out.println(a.equals(b));//false
 ```
 
-Đó là vì phương thức `equals()` không chỉ so sánh độ lớn của giá trị (value) mà còn so sánh độ chính xác (scale), trong khi phương thức `compareTo()` sẽ bỏ qua độ chính xác khi so sánh.
+Đó là vì phương thức `equals()` không chỉ so sánh giá trị (value) mà còn so sánh `scale`, trong khi phương thức `compareTo()` sẽ bỏ qua `scale` khi so sánh.
 
-Scale của 1.0 là 1, scale của 1 là 0, vì vậy kết quả của `a.equals(b)` là false.
+`scale` của 1.0 là 1, `scale` của 1 là 0, vì vậy kết quả của `a.equals(b)` là false.
 
 ![](https://oss.javaguide.cn/github/javaguide/java/basis/image-20220714164706390.png)
 
@@ -171,11 +171,11 @@ BigDecimal b = new BigDecimal("1.0");
 System.out.println(a.compareTo(b));//0
 ```
 
-## Giới thiệu utility class BigDecimal
+## Chia sẻ utility class BigDecimal
 
-Trên Internet có một utility class `BigDecimal` được khá nhiều người sử dụng, cung cấp nhiều static method để đơn giản hóa thao tác với `BigDecimal`.
+Trên Internet có một utility class thao tác với `BigDecimal` được khá nhiều người sử dụng, cung cấp nhiều static method để đơn giản hóa thao tác với `BigDecimal`.
 
-Tôi đã cải tiến đơn giản utility class này và chia sẻ source code:
+Tôi đã cải tiến một chút utility class này và chia sẻ source code:
 
 ```java
 import java.math.BigDecimal;
@@ -235,7 +235,7 @@ public class BigDecimalUtil {
 
     /**
      * Cung cấp phép chia tương đối chính xác; khi không chia hết, giữ chính xác đến
-     * 10 chữ số sau dấu thập phân, các chữ số sau đó làm tròn HALF_EVEN.
+     * 10 chữ số sau dấu thập phân, các chữ số sau đó được làm tròn theo HALF_EVEN.
      *
      * @param v1 số bị chia
      * @param v2 số chia
@@ -246,12 +246,12 @@ public class BigDecimalUtil {
     }
 
     /**
-     * Cung cấp phép chia tương đối chính xác. Khi không chia hết, độ chính xác được chỉ định
-     * bởi tham số scale, các chữ số sau đó làm tròn HALF_EVEN.
+     * Cung cấp phép chia tương đối chính xác. Khi không chia hết, số chữ số được chỉ định
+     * bởi tham số scale, các chữ số sau đó được làm tròn theo HALF_EVEN.
      *
      * @param v1    số bị chia
      * @param v2    số chia
-     * @param scale biểu thị cần chính xác đến bao nhiêu chữ số sau dấu thập phân.
+     * @param scale cho biết cần giữ bao nhiêu chữ số sau dấu thập phân.
      * @return thương của hai tham số
      */
     public static double divide(double v1, double v2, int scale) {
@@ -265,7 +265,7 @@ public class BigDecimalUtil {
     }
 
     /**
-     * Xử lý số chữ số thập phân được chỉ định theo quy tắc HALF_EVEN.
+     * Làm tròn đến số chữ số sau dấu thập phân được chỉ định theo quy tắc HALF_EVEN.
      *
      * @param v     số cần làm tròn HALF_EVEN
      * @param scale cần giữ lại bao nhiêu chữ số sau dấu thập phân
@@ -282,7 +282,7 @@ public class BigDecimalUtil {
     }
 
     /**
-     * Chuyển đổi thành Float; khi vượt quá độ chính xác hoặc phạm vi của float có thể xảy ra làm tròn hoặc overflow
+     * Chuyển đổi thành float; khi vượt quá độ chính xác hoặc phạm vi của float có thể xảy ra làm tròn hoặc tràn số
      *
      * @param v số cần chuyển đổi
      * @return kết quả chuyển đổi
@@ -293,7 +293,7 @@ public class BigDecimalUtil {
     }
 
     /**
-     * Chuyển đổi thành Int, không làm tròn; phần thập phân sẽ bị cắt, khi vượt quá phạm vi sẽ mất các bit cao
+     * Chuyển đổi thành int, không làm tròn; phần thập phân sẽ bị cắt, khi vượt quá phạm vi sẽ mất các bit cao
      *
      * @param v số cần chuyển đổi
      * @return kết quả chuyển đổi
@@ -304,7 +304,7 @@ public class BigDecimalUtil {
     }
 
     /**
-     * Chuyển đổi thành Long, không làm tròn; phần thập phân sẽ bị cắt, khi vượt quá phạm vi sẽ mất các bit cao
+     * Chuyển đổi thành long, không làm tròn; phần thập phân sẽ bị cắt, khi vượt quá phạm vi sẽ mất các bit cao
      *
      * @param v số cần chuyển đổi
      * @return kết quả chuyển đổi
@@ -356,7 +356,7 @@ public class BigDecimalUtil {
 }
 ```
 
-Issue liên quan: [Đề xuất đặt quy tắc giữ lại thành RoundingMode.HALF_EVEN, tức làm tròn HALF_EVEN,#2129](https://github.com/Snailclimb/JavaGuide/issues/2129).
+Issue liên quan: [Đề xuất đặt quy tắc làm tròn thành RoundingMode.HALF_EVEN, tức là làm tròn theo HALF_EVEN,#2129](https://github.com/Snailclimb/JavaGuide/issues/2129).
 
 ![RoundingMode.HALF_EVEN](https://oss.javaguide.cn/github/javaguide/java/basis/RoundingMode.HALF_EVEN.png)
 
@@ -364,6 +364,6 @@ Issue liên quan: [Đề xuất đặt quy tắc giữ lại thành RoundingMode
 
 Nhiều số thập phân không thể được biểu diễn chính xác bằng số nhị phân hữu hạn, vì vậy khi tính toán với `float` hoặc `double` tồn tại nguy cơ mất độ chính xác.
 
-Tuy nhiên, Java cung cấp `BigDecimal` để thao tác với số floating-point. Cách triển khai của `BigDecimal` sử dụng `BigInteger` (dùng để thao tác với số nguyên lớn); điểm khác biệt là `BigDecimal` bổ sung khái niệm chữ số thập phân.
+Tuy nhiên, Java cung cấp `BigDecimal` để thao tác với số floating-point. Cách triển khai của `BigDecimal` sử dụng `BigInteger` (dùng để thao tác với số nguyên lớn); điểm khác biệt là `BigDecimal` bổ sung khái niệm `scale`.
 
 <!-- @include: @article-footer.snippet.md -->
