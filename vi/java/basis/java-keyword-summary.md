@@ -14,7 +14,7 @@ head:
 
 ## Keyword final
 
-**Keyword final có nghĩa là cuối cùng, không thể sửa đổi, được dùng để modifier class, method và variable, với các đặc điểm sau:**
+**Keyword final có nghĩa là cuối cùng, không thể sửa đổi, được dùng làm modifier cho class, method và variable, với các đặc điểm sau:**
 
 1. Class được modifier bởi final không thể được kế thừa; mọi member method trong final class sẽ được ngầm định chỉ định là final method;
 
@@ -25,20 +25,20 @@ head:
 Giải thích: Có hai lý do sử dụng final method:
 
 1. Khóa method lại để ngăn mọi subclass sửa đổi ý nghĩa của nó;
-2. Hiệu năng. Trong các phiên bản Java thời kỳ đầu, final method được chuyển thành inline call. Tuy nhiên, nếu method quá lớn, có thể không thấy bất kỳ cải thiện performance nào từ inline call (các phiên bản Java hiện nay không còn cần dùng final method cho những optimization này).
+2. Hiệu năng. Trong các phiên bản Java thời kỳ đầu, final method được chuyển thành inline call. Tuy nhiên, nếu method quá lớn, có thể không thấy bất kỳ cải thiện performance nào từ inline call (các phiên bản Java hiện nay không còn cần dùng final method cho những tối ưu hóa này).
 
 ## Keyword static
 
 **Keyword static chủ yếu có bốn trường hợp sử dụng sau:**
 
-1. **Modifier member variable và member method:** Member được modifier bởi static thuộc về class, không thuộc về một object cụ thể nào của class đó, được mọi object trong class chia sẻ, có thể và nên được gọi thông qua tên class. Vị trí lưu trữ cụ thể của static variable là chi tiết triển khai của JVM; với HotSpot từ JDK 8 trở đi, class metadata nằm trong metaspace của native memory, còn class static variable nằm trên Java heap. Format gọi: `ClassName.staticVariableName` `ClassName.staticMethod()`
+1. **Modifier member variable và member method:** Member được modifier bởi static thuộc về class, không thuộc về một object cụ thể nào của class đó, được mọi object trong class chia sẻ, có thể và nên được gọi thông qua tên class. Vị trí lưu trữ cụ thể của static variable là chi tiết triển khai của JVM; với HotSpot từ JDK 8 trở đi, class metadata nằm trong metaspace của native memory, còn static variable của class nằm trên Java heap. Cú pháp gọi: `ClassName.staticVariableName` `ClassName.staticMethod()`
 2. **Static code block:** Static code block được định nghĩa bên ngoài method, bên trong class; static code block thực thi trước non-static code block (static code block -> non-static code block -> constructor). Dù class tạo bao nhiêu object, static code block cũng chỉ thực thi một lần.
-3. **Static inner class (class được modifier bởi static chỉ có thể là inner class):** Giữa static inner class và non-static inner class có một khác biệt lớn nhất: sau khi compile, non-static inner class ngầm lưu một reference trỏ tới outer class đã tạo nó, còn static inner class thì không. Không có reference này nghĩa là: 1. Việc tạo nó không cần phụ thuộc vào việc tạo outer class. 2. Nó không thể sử dụng bất kỳ non-static member variable và method nào của outer class.
-4. **Static import (dùng để import static resource trong class, là feature mới từ 1.5):** Format là `import static`. Hai keyword này khi dùng cùng nhau có thể chỉ định import static resource cụ thể trong một class; không cần dùng tên class để gọi static member trong class mà có thể dùng trực tiếp static member variable và member method của class.
+3. **Static inner class (class được modifier bởi static chỉ có thể là inner class):** Giữa static inner class và non-static inner class có một khác biệt lớn nhất: sau khi compile xong, non-static inner class ngầm lưu một reference trỏ tới outer class tạo ra nó, còn static inner class thì không. Không có reference này nghĩa là: 1. Việc tạo nó không cần phụ thuộc vào việc tạo outer class. 2. Nó không thể sử dụng bất kỳ non-static member variable và method nào của outer class.
+4. **Static import (dùng để import static resource trong class, là tính năng mới từ 1.5):** Format là `import static`. Hai keyword này khi dùng cùng nhau có thể chỉ định import static resource cụ thể trong một class; không cần dùng tên class để gọi static member trong class mà có thể dùng trực tiếp static member variable và member method của class.
 
 ## Keyword this
 
-Keyword this dùng để reference tới current instance của class. Ví dụ:
+Keyword this dùng để tham chiếu đến instance hiện tại của class. Ví dụ:
 
 ```java
 class Manager {
@@ -54,8 +54,8 @@ class Manager {
 
 Trong ví dụ trên, keyword this được dùng ở hai nơi:
 
-- this.employees.length: truy cập variable của current instance của class Manager.
-- this.report(): gọi method của current instance của class Manager.
+- this.employees.length: truy cập variable của instance hiện tại của class Manager.
+- this.report(): gọi method của instance hiện tại của class Manager.
 
 Keyword này là tùy chọn, nghĩa là ví dụ trên vẫn hoạt động như cũ nếu không dùng keyword này. Tuy nhiên, dùng keyword này có thể giúp code dễ đọc hoặc dễ hiểu hơn.
 
@@ -82,7 +82,7 @@ Trong ví dụ trên, class Sub truy cập member variable number của supercla
 
 **Lưu ý khi sử dụng this và super:**
 
-- Khi dùng `super()` trong constructor để gọi constructor khác của superclass, câu lệnh này phải ở dòng đầu tiên của constructor, nếu không compiler sẽ báo lỗi. Tương tự, khi dùng this để gọi constructor khác trong class hiện tại, cũng phải đặt ở dòng đầu tiên.
+- Khi dùng `super()` trong constructor để gọi constructor khác của superclass, câu lệnh này phải ở dòng đầu tiên của constructor, nếu không compiler sẽ báo lỗi. Tương tự, khi dùng `this()` để gọi constructor khác trong class hiện tại, cũng phải đặt ở dòng đầu tiên.
 - this và super không thể dùng trong static method.
 
 **Giải thích đơn giản:**
@@ -100,25 +100,25 @@ Member được modifier bởi static thuộc về class; static context không 
 
 1. Modifier member variable và member method
 2. Static code block
-3. Modifier class (chỉ có thể modifier inner class)
-4. Static import (dùng để import static resource trong class, là feature mới từ 1.5)
+3. Dùng làm modifier cho class (chỉ có thể modifier inner class)
+4. Static import (dùng để import static resource trong class, là tính năng mới từ 1.5)
 
 ### Modifier member variable và member method (thường dùng)
 
 Member được modifier bởi static thuộc về class, không thuộc về một object cụ thể nào của class đó, được mọi object trong class chia sẻ, có thể và nên được gọi thông qua tên class. Vị trí lưu trữ cụ thể của static variable là chi tiết triển khai của JVM.
 
-Method area cũng giống Java heap, là runtime data area được mọi thread chia sẻ. JVM specification quy định nơi này lưu structural information của mỗi class, chẳng hạn runtime constant pool, field và method data, cùng code của method và constructor. Layout lưu trữ cụ thể do JVM implementation quyết định.
+Method area cũng giống Java heap, là runtime data area được mọi thread chia sẻ. JVM specification quy định nơi này lưu thông tin cấu trúc của mỗi class, chẳng hạn runtime constant pool, field và method data, cùng code của method và constructor. Layout lưu trữ cụ thể do JVM implementation quyết định.
 
-Trong HotSpot của JDK 7 trở về trước, method area chủ yếu được triển khai bằng permanent generation, nhưng method area và permanent generation không tương đương. JDK 8 đã loại bỏ permanent generation: class metadata được chuyển sang metaspace trong native memory, còn string constant và class static variable nằm trên Java heap.
+Trong HotSpot của JDK 7 trở về trước, method area chủ yếu được triển khai bằng permanent generation, nhưng method area và permanent generation không tương đương. JDK 8 đã loại bỏ permanent generation: class metadata được chuyển sang metaspace trong native memory, còn string constant và static variable của class nằm trên Java heap.
 
-Format gọi:
+Cú pháp gọi:
 
 - `ClassName.staticVariableName`
 - `ClassName.staticMethod()`
 
 Nếu variable hoặc method được modifier bởi private, điều đó có nghĩa attribute hoặc method đó chỉ có thể được truy cập bên trong class, không thể được truy cập bên ngoài class.
 
-Method test:
+Phương thức kiểm thử:
 
 ```java
 public class StaticBean {
@@ -176,12 +176,12 @@ Static code block có thể gán value cho static variable được định ngh�
 
 ### Static inner class
 
-Giữa static inner class và non-static inner class có một khác biệt lớn nhất: non-static inner class ngầm lưu một reference trỏ tới outer class đã tạo nó sau khi compile, còn static inner class thì không. Không có reference này nghĩa là:
+Giữa static inner class và non-static inner class có một khác biệt lớn nhất: sau khi compile xong, non-static inner class ngầm lưu một reference trỏ tới outer class tạo ra nó, còn static inner class thì không. Không có reference này nghĩa là:
 
 1. Việc tạo nó không cần phụ thuộc vào việc tạo outer class.
 2. Nó không thể sử dụng bất kỳ non-static member variable và method nào của outer class.
 
-Example (static inner class triển khai singleton pattern)
+Ví dụ (static inner class triển khai singleton pattern)
 
 ```java
 public class Singleton {
@@ -198,13 +198,13 @@ public class Singleton {
 }
 ```
 
-Chỉ khi gọi `getUniqueInstance()` và lần đầu chủ động sử dụng `SingletonHolder.INSTANCE` thì `SingletonHolder` mới được initialization; lúc này `INSTANCE` được initialization. JVM có thể load `SingletonHolder` sớm hơn, nhưng sẽ không vì vậy mà thực thi static initialization của nó, đồng thời bảo đảm class này chỉ được initialization một lần.
+Chỉ khi gọi `getUniqueInstance()` và lần đầu chủ động sử dụng `SingletonHolder.INSTANCE` thì `SingletonHolder` mới được khởi tạo; lúc này `INSTANCE` cũng được khởi tạo. JVM có thể load `SingletonHolder` sớm hơn, nhưng sẽ không vì vậy mà thực thi static initialization của nó, đồng thời bảo đảm class này chỉ được khởi tạo một lần.
 
-Cách này không chỉ có ưu điểm lazy initialization mà còn được JVM hỗ trợ thread safety.
+Cách này không chỉ có ưu điểm lazy initialization mà còn được JVM hỗ trợ về thread safety.
 
 ### Static import
 
-Format là: import static
+Cú pháp là: import static
 
 Hai keyword này khi dùng cùng nhau có thể chỉ định import static resource cụ thể trong một class; không cần dùng tên class để gọi static member trong class mà có thể dùng trực tiếp static member variable và member method của class.
 
@@ -224,7 +224,7 @@ public class Demo {
 
 ### Static method và non-static method
 
-Static method thuộc về chính class, non-static method thuộc về từng object được tạo từ class đó. Nếu operation mà method thực hiện không phụ thuộc vào các variable và method riêng của class, hãy đặt nó là static (điều này giúp giảm footprint của program). Nếu không, method nên là non-static.
+Static method thuộc về chính class, non-static method thuộc về từng object được tạo từ class đó. Nếu operation do method thực hiện không phụ thuộc vào các variable và method của class, hãy khai báo method đó là static (điều này giúp giảm footprint của chương trình). Nếu không, method nên là non-static.
 
 Example
 
@@ -259,12 +259,12 @@ Tóm lại:
 
 Điểm giống nhau: đều có thể định nghĩa nhiều block trong class; nhiều static code block trong cùng một class được đưa vào quá trình class initialization theo thứ tự văn bản, nhiều instance initialization block được đưa vào quá trình instance initialization theo thứ tự văn bản.
 
-Điểm khác nhau: static code block thực thi một lần khi class initialization, thời điểm trigger không nhất thiết là lần đầu `new`; non-static code block (instance initialization block) thực thi mỗi lần khởi tạo instance mới, và được đưa cùng instance field initializer vào quá trình instance initialization theo thứ tự văn bản. Chúng chạy sau khi superclass constructor return và trước khi thực thi các câu lệnh tiếp theo của constructor; nếu constructor ủy quyền cho constructor khác trong cùng class thông qua `this(...)`, quá trình initialization này do constructor thực sự gọi superclass constructor trong delegation chain hoàn tất. Bare code block trong method thông thường chỉ là local code block, không phải instance initialization block.
+Điểm khác nhau: static code block thực thi một lần khi class initialization, thời điểm trigger không nhất thiết là lần đầu `new`; non-static code block (instance initialization block) thực thi mỗi lần khởi tạo instance mới, và được đưa cùng instance field initializer vào quá trình instance initialization theo thứ tự văn bản. Chúng chạy sau khi superclass constructor hoàn tất và trước khi thực thi các câu lệnh tiếp theo của constructor; nếu constructor ủy quyền cho constructor khác trong cùng class thông qua `this(...)`, quá trình initialization này do constructor thực sự gọi superclass constructor trong delegation chain hoàn tất. Bare code block trong method thông thường chỉ là local code block, không phải instance initialization block.
 
 > **🐛 Đính chính (xem [issue #677](https://github.com/Snailclimb/JavaGuide/issues/677))**: Static code block có thể thực thi khi lần đầu `new` object, nhưng không nhất thiết chỉ thực thi trong lần `new` đầu tiên. Ví dụ, khi tạo Class object thông qua `Class.forName("ClassDemo")`, nó cũng được thực thi; tức là cả `new` và `Class.forName("ClassDemo")` đều thực thi static code block.
-> Trong trường hợp thông thường, nếu một số code, chẳng hạn variable hoặc object được dùng phổ biến nhất trong project, phải được thực thi khi project khởi động thì cần dùng static code block; đây là code được chủ động thực thi. Nếu muốn thiết kế method trong class có thể được gọi mà không cần tạo object, chẳng hạn class `Arrays`, class `Character`, class `String`, thì cần dùng static method. Điểm khác nhau là static code block được tự động thực thi, còn static method chỉ thực thi khi được gọi.
+> Trong trường hợp thông thường, nếu một số code, chẳng hạn việc khởi tạo các variable hoặc object thường dùng trong project, phải được thực thi khi project khởi động thì cần dùng static code block; đây là code được chủ động thực thi. Nếu muốn thiết kế method trong class có thể được gọi mà không cần tạo object, chẳng hạn class `Arrays`, class `Character`, class `String`, thì cần dùng static method. Điểm khác nhau là static code block được tự động thực thi, còn static method chỉ thực thi khi được gọi.
 
-Example:
+Ví dụ:
 
 ```java
 public class Test {
@@ -310,7 +310,7 @@ Khi chỉ thực thi `Test test = new Test()`, output là:
 Static code block! --Non-static code block! --Default constructor! --
 ```
 
-Khác biệt giữa non-static code block và constructor là: non-static code block dùng để initialization thống nhất cho mọi object, còn constructor dùng để initialization cho object tương ứng. Vì có thể có nhiều constructor nên constructor nào được chạy sẽ tạo ra object tương ứng, nhưng dù tạo object nào thì cũng luôn thực thi code block chung trước. Nói cách khác, nội dung initialization chung của các object khác nhau được định nghĩa trong code block.
+Khác biệt giữa non-static code block và constructor là: non-static code block dùng để khởi tạo thống nhất cho mọi object, còn constructor dùng để khởi tạo object tương ứng. Vì có thể có nhiều constructor nên constructor nào được chạy sẽ tạo ra object tương ứng, nhưng dù tạo object nào thì cũng luôn thực thi code block chung trước. Nói cách khác, nội dung khởi tạo chung của các object khác nhau được định nghĩa trong code block.
 
 ### Tham khảo
 
