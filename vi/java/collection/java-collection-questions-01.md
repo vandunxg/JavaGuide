@@ -62,16 +62,16 @@ Tiếp theo hãy xem các collection bên dưới interface `Map`.
 - `Hashtable`: Gồm array + linked list; array là phần chính của `Hashtable`, còn linked list chủ yếu tồn tại để giải quyết hash collision.
 - `TreeMap`: red-black tree (cây nhị phân sắp xếp tự cân bằng).
 
-### Chọn Collection như thế nào?
+### Chọn collection như thế nào?
 
-Chúng ta chủ yếu chọn collection phù hợp dựa trên đặc điểm của collection. Ví dụ:
+Bạn chủ yếu chọn collection phù hợp dựa trên đặc điểm của từng collection. Ví dụ:
 
 - Khi cần lấy value dựa trên key, chọn collection bên dưới interface `Map`; khi cần sắp xếp thì chọn `TreeMap`, khi không cần sắp xếp thì chọn `HashMap`, khi cần đảm bảo thread-safe thì chọn `ConcurrentHashMap`.
-- Khi chỉ cần lưu trữ value, chọn collection triển khai interface `Collection`; khi cần đảm bảo phần tử duy nhất, chọn collection triển khai interface `Set` như `TreeSet` hoặc `HashSet`; khi không cần thì chọn collection triển khai interface `List` như `ArrayList` hoặc `LinkedList`, sau đó tiếp tục chọn dựa trên đặc điểm của collection triển khai các interface này.
+- Khi chỉ cần lưu trữ value, chọn collection triển khai interface `Collection`; khi cần đảm bảo phần tử duy nhất, chọn collection triển khai interface `Set` như `TreeSet` hoặc `HashSet`; khi không cần đảm bảo tính duy nhất, chọn collection triển khai interface `List` như `ArrayList` hoặc `LinkedList`, sau đó tiếp tục chọn dựa trên đặc điểm của collection triển khai các interface này.
 
 ### Tại sao cần sử dụng Collections?
 
-Khi cần lưu trữ một nhóm dữ liệu cùng kiểu, array là một trong những container thường dùng và cơ bản nhất. Tuy nhiên, việc dùng array để lưu trữ object có một số hạn chế, vì trong quá trình phát triển thực tế, kiểu dữ liệu và số lượng dữ liệu được lưu trữ rất đa dạng và không xác định. Lúc này Java Collections phát huy tác dụng. So với array, Java Collections cung cấp phương thức linh hoạt và hiệu quả hơn để lưu trữ nhiều data object. Các collection class và interface khác nhau trong Java Collections Framework có thể lưu trữ object thuộc nhiều kiểu và số lượng khác nhau, đồng thời còn hỗ trợ nhiều cách thao tác đa dạng. So với array, ưu điểm của Java Collections là kích thước có thể thay đổi, hỗ trợ generic và có algorithm tích hợp. Nhìn chung, Java Collections tăng tính linh hoạt trong việc lưu trữ và xử lý dữ liệu, thích ứng tốt hơn với nhu cầu dữ liệu đa dạng trong phát triển software hiện đại và hỗ trợ viết code chất lượng cao.
+Khi cần lưu trữ một nhóm dữ liệu cùng kiểu, array là một trong những container thường dùng và cơ bản nhất. Tuy nhiên, việc dùng array để lưu trữ object có một số hạn chế, vì trong quá trình phát triển thực tế, kiểu dữ liệu và số lượng dữ liệu được lưu trữ rất đa dạng và không xác định. Lúc này Java Collections phát huy tác dụng. So với array, Java Collections cung cấp phương thức linh hoạt và hiệu quả hơn để lưu trữ nhiều object dữ liệu. Các collection class và interface khác nhau trong Java Collections Framework có thể lưu trữ object thuộc nhiều kiểu và số lượng khác nhau, đồng thời còn hỗ trợ nhiều cách thao tác đa dạng. So với array, ưu điểm của Java Collections là kích thước có thể thay đổi, hỗ trợ generic và có algorithm tích hợp sẵn. Nhìn chung, Java Collections tăng tính linh hoạt trong việc lưu trữ và xử lý dữ liệu, thích ứng tốt hơn với nhu cầu dữ liệu đa dạng trong phát triển software hiện đại và hỗ trợ viết code chất lượng cao.
 
 ## List
 
@@ -129,7 +129,7 @@ Dưới đây là so sánh đơn giản khi sử dụng hai loại này:
 - `Vector` và `Stack` đều thread-safe, đều dùng keyword `synchronized` để đồng bộ hóa.
 - `Stack` kế thừa `Vector`, là stack LIFO, còn `Vector` là một list.
 
-Cùng với sự phát triển của lập trình concurrency trong Java, `Vector` và `Stack` đã bị loại bỏ, nên dùng concurrent collection class (ví dụ `ConcurrentHashMap`, `CopyOnWriteArrayList`...) hoặc tự triển khai phương thức thread-safe để cung cấp khả năng thao tác multi-thread an toàn.
+Cùng với sự phát triển của lập trình concurrency trong Java, `Vector` và `Stack` đã lỗi thời, nên dùng concurrent collection class (ví dụ `ConcurrentHashMap`, `CopyOnWriteArrayList`...) hoặc tự triển khai phương thức thread-safe để cung cấp khả năng thao tác multi-thread an toàn.
 
 ### ArrayList có thể thêm giá trị null không?
 
@@ -190,7 +190,7 @@ Dưới đây là một ví dụ đơn giản:
 - Insert/delete ở cuối: Chỉ cần sửa pointer của tail node là hoàn tất thao tác insert/delete, nên độ phức tạp thời gian là O(1).
 - Insert/delete tại vị trí chỉ định: Cần di chuyển đến vị trí chỉ định trước, sau đó sửa pointer của node tương ứng để hoàn tất insert/delete. Tuy nhiên, vì có pointer đầu và cuối, có thể bắt đầu từ pointer gần hơn, nên trung bình cần traverse n/4 phần tử, độ phức tạp thời gian là O(n).
 
-Dưới đây là một ví dụ đơn giản: giả sử cần xóa node 9, trước tiên cần traverse linked list để tìm node đó. Sau đó thay đổi hướng trỏ của pointer các node tương ứng. Xem source code cụ thể tại: [Phân tích source code LinkedList](https://javaguide.cn/java/collection/linkedlist-source-code.html).
+Dưới đây là một ví dụ đơn giản: giả sử cần xóa node 9, trước tiên cần traverse linked list để tìm node đó. Sau đó thay đổi liên kết của các node tương ứng. Xem source code cụ thể tại: [Phân tích source code LinkedList](https://javaguide.cn/java/collection/linkedlist-source-code.html).
 
 ![Logic của method unlink](https://oss.javaguide.cn/github/javaguide/java/collection/linkedlist-unlink.jpg)
 
@@ -201,7 +201,7 @@ Dưới đây là một ví dụ đơn giản: giả sử cần xóa node 9, tr�
 ### ⭐️ Sự khác nhau giữa ArrayList và LinkedList?
 
 - **Có đảm bảo thread-safe hay không:** `ArrayList` và `LinkedList` đều không synchronized, tức không đảm bảo thread-safe.
-- **Data structure bên dưới:** Bên dưới `ArrayList` dùng **array `Object`**; bên dưới `LinkedList` dùng data structure **linked list hai chiều** (trước JDK1.6 là linked list vòng, JDK1.7 đã bỏ tính vòng. Lưu ý sự khác nhau giữa linked list hai chiều và linked list hai chiều vòng được giới thiệu bên dưới!).
+- **Data structure bên dưới:** Bên dưới `ArrayList` dùng **mảng `Object`**; bên dưới `LinkedList` dùng data structure **linked list hai chiều** (trước JDK1.6 là linked list vòng, JDK1.7 đã bỏ tính vòng. Lưu ý sự khác nhau giữa linked list hai chiều và linked list hai chiều vòng được giới thiệu bên dưới!).
 - **Insert và delete có bị ảnh hưởng bởi vị trí phần tử hay không:**
   - `ArrayList` dùng array để lưu trữ, nên độ phức tạp thời gian của insert và delete bị ảnh hưởng bởi vị trí phần tử. Ví dụ khi thực hiện method `add(E e)`, `ArrayList` mặc định nối phần tử chỉ định vào cuối list, trường hợp này có độ phức tạp thời gian là O(1). Nhưng nếu insert và delete phần tử tại vị trí chỉ định i (`add(int index, E element)`), độ phức tạp thời gian là O(n). Vì khi thực hiện các thao tác trên, phần tử thứ i và (n-i) phần tử phía sau trong collection đều phải di chuyển về sau hoặc về trước một vị trí.
   - `LinkedList` dùng linked list để lưu trữ, nên insert hoặc delete ở đầu/cuối không bị ảnh hưởng bởi vị trí phần tử (`add(E e)`, `addFirst(E e)`, `addLast(E e)`, `removeFirst()`, `removeLast()`), độ phức tạp thời gian là O(1). Nếu insert và delete phần tử tại vị trí chỉ định `i` (`add(int index, E element)`, `remove(Object o)`, `remove(int index)`), độ phức tạp thời gian là O(n), vì cần di chuyển đến vị trí chỉ định trước rồi mới insert và delete.
@@ -231,7 +231,7 @@ public interface RandomAccess {
 }
 ```
 
-Xem source code, chúng ta nhận thấy interface `RandomAccess` thực tế không định nghĩa gì cả. Vì vậy, theo tôi interface `RandomAccess` chỉ là một marker. Marker điều gì? Marker rằng class triển khai interface này có chức năng random access.
+Xem source code, có thể nhận thấy interface `RandomAccess` thực tế không định nghĩa gì cả. Vì vậy, theo tôi interface `RandomAccess` chỉ là một marker. Đánh dấu điều gì? Đánh dấu rằng class triển khai interface này có chức năng random access.
 
 Trong method `binarySearch()`, method này kiểm tra list truyền vào có phải instance của `RandomAccess` hay không; nếu có thì gọi method `indexedBinarySearch()`, nếu không thì gọi method `iteratorBinarySearch()`.
 
@@ -261,7 +261,7 @@ Về `fail-fast`, dưới đây là cách một bài viết trên `medium` giả
 
 Tư tưởng fail nhanh là chủ động phát hiện và dừng hoạt động khi có thể xảy ra exception; phát hiện và dừng lỗi càng sớm thì càng giảm rủi ro hệ thống gặp lỗi lan truyền theo chuỗi.
 
-Phần lớn collection trong package `java.util` (như `ArrayList`, `HashMap`) không thread-safe. Để sớm phát hiện rủi ro thread-safe do thao tác concurrent, cơ chế này duy trì một `modCount` để ghi lại số lần sửa đổi; trong quá trình iterator, nó đối chiếu `expectedModCount` với `modCount` để kiểm tra có thao tác concurrent hay không, từ đó triển khai fail nhanh và tránh thực thi code phức tạp không cần thiết khi xảy ra exception.
+Phần lớn collection trong package `java.util` (như `ArrayList`, `HashMap`) không thread-safe. Để sớm phát hiện rủi ro mất tính thread-safe do thao tác concurrent, cơ chế này duy trì một `modCount` để ghi lại số lần sửa đổi; trong quá trình iterator, nó đối chiếu `expectedModCount` với `modCount` để kiểm tra có thao tác concurrent hay không, từ đó triển khai fail nhanh và tránh thực thi code phức tạp không cần thiết khi xảy ra exception.
 
 **Ví dụ `ArrayList` (fail-fast):**
 
@@ -323,7 +323,7 @@ Final list state: [0, 2, 3, 4]
 
 Sau khi thread t2 sửa list, thao tác iterator tiếp theo của thread t1 lập tức ném `ConcurrentModificationException`. Vì iterator của ArrayList sẽ kiểm tra `modCount` có bị thay đổi trong mỗi lần gọi `next()` hay không. Khi phát hiện collection bị sửa mà iterator không biết, nó lập tức fail nhanh để tránh tiếp tục thao tác trên dữ liệu không nhất quán và gây ra hậu quả không thể dự đoán.
 
-Dưới đây là method `next` bên trong iterator được lấy khi vòng `for` lấy phần tử tiếp theo. Có thể thấy `checkForComodification` bên trong chứa logic đối chiếu số lần sửa đổi:
+Dưới đây là method `next` của iterator được gọi khi vòng `for` lấy phần tử tiếp theo. Có thể thấy `checkForComodification` bên trong chứa logic đối chiếu số lần sửa đổi:
 
 ```java
  public E next() {
@@ -335,7 +335,7 @@ Dưới đây là method `next` bên trong iterator được lấy khi vòng `fo
         }
 
  final void checkForComodification() {
-        // Khi số lần traverse hiện tại và số lần sửa đổi dự kiến không nhất quán, sẽ ném ConcurrentModificationException
+         // Khi số lần duyệt hiện tại và số lần sửa đổi dự kiến không nhất quán, sẽ ném ConcurrentModificationException
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
         }
@@ -346,11 +346,11 @@ Còn `fail-safe`, tức fail an toàn, có nghĩa là ngay cả khi gặp tình 
 
 > Fail-safe systems take a different approach, aiming to recover and continue even in the face of unexpected conditions. This makes them particularly suited for uncertain or volatile environments.
 
-Tư tưởng này thường được dùng trong concurrent container. Implementation kinh điển nhất là `CopyOnWriteArrayList`, dùng tư tưởng copy-on-write để tạo một snapshot khi thực hiện thao tác sửa đổi; sau khi hoàn tất thao tác thêm hoặc xóa dựa trên snapshot này, reference array bên dưới của `CopyOnWriteArrayList` được trỏ đến vùng array mới, từ đó tránh vấn đề an toàn khi concurrent modification ảnh hưởng đến thao tác concurrent trong lúc traverse. Tất nhiên cách này cũng có nhược điểm: khi traverse không thể nhận được kết quả theo thời gian thực:
+Tư tưởng này thường được dùng trong concurrent container. Implementation kinh điển nhất là `CopyOnWriteArrayList`, dùng tư tưởng copy-on-write để tạo một snapshot khi thực hiện thao tác sửa đổi; sau khi hoàn tất thao tác thêm hoặc xóa dựa trên snapshot này, reference array bên dưới của `CopyOnWriteArrayList` được trỏ đến array mới, từ đó tránh bị concurrent modification ảnh hưởng khi traverse. Tất nhiên cách này cũng có nhược điểm: khi traverse không thể nhận được kết quả theo thời gian thực:
 
 ![](https://oss.javaguide.cn/github/javaguide/java/collection/fail-fast-and-fail-safe-copyonwritearraylist.png)
 
-Tương ứng, dưới đây là code cốt lõi để `CopyOnWriteArrayList` triển khai `fail-safe`. Có thể thấy implementation của nó lấy reference array thông qua `getArray`, sau đó dùng `Arrays.copyOf` để tạo snapshot của array; sau khi hoàn tất thao tác thêm dựa trên snapshot này, thay đổi reference address mà biến `array` bên dưới trỏ đến, từ đó hoàn tất copy-on-write:
+Tương ứng, dưới đây là code cốt lõi để `CopyOnWriteArrayList` triển khai `fail-safe`. Có thể thấy implementation của nó lấy reference của array thông qua `getArray`, sau đó dùng `Arrays.copyOf` để tạo snapshot của array; sau khi hoàn tất thao tác thêm dựa trên snapshot này, thay đổi địa chỉ tham chiếu mà biến `array` bên dưới trỏ đến, từ đó hoàn tất copy-on-write:
 
 ```java
 public boolean add(E e) {
@@ -382,7 +382,7 @@ Interface `Comparable` và interface `Comparator` đều là interface dùng đ�
 - Interface `Comparable` thực tế thuộc package `java.lang`, có method `compareTo(Object obj)` dùng để sắp xếp.
 - Interface `Comparator` thực tế thuộc package `java.util`, có method `compare(Object obj1, Object obj2)` dùng để sắp xếp.
 
-Thông thường, khi cần custom sort một collection, ta override method `compareTo()` hoặc `compare()`. Khi cần triển khai hai cách sort cho một collection, ví dụ tên bài hát và tên ca sĩ trong một object `song` lần lượt dùng một cách sort, ta có thể override method `compareTo()` và dùng `Comparator` tự tạo, hoặc dùng hai `Comparator` để triển khai sort tên bài hát và sort tên ca sĩ. Cách thứ hai nghĩa là chỉ có thể dùng phiên bản hai tham số của `Collections.sort()`.
+Thông thường, khi cần custom sort một collection, có thể override method `compareTo()` hoặc `compare()`. Khi cần triển khai hai cách sort cho một collection, ví dụ tên bài hát và tên ca sĩ trong một object `song` lần lượt dùng một cách sort, có thể override method `compareTo()` và dùng `Comparator` tự tạo, hoặc dùng hai `Comparator` để triển khai sort tên bài hát và sort tên ca sĩ. Cách thứ hai nghĩa là chỉ có thể dùng phiên bản hai tham số của `Collections.sort()`.
 
 #### Custom sort bằng Comparator
 
@@ -530,7 +530,7 @@ Output:
 | Delete đầu queue           | remove()      | poll()               |
 | Truy vấn phần tử đầu queue | element()     | peek()               |
 
-`Deque` là deque, có thể insert hoặc delete phần tử ở cả hai đầu queue.
+`Deque` là queue hai đầu, có thể insert hoặc delete phần tử ở cả hai đầu queue.
 
 `Deque` mở rộng interface `Queue`, bổ sung các method insert và delete ở đầu và cuối queue; tương tự, dựa trên cách xử lý sau khi thất bại có thể chia thành hai loại:
 
