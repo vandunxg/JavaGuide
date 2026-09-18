@@ -28,7 +28,7 @@ Phương án Long được đề cập dưới đây đều chỉ việc dùng s
 
 ## Vì sao tiền không thể dùng double?
 
-`double` và `float` lưu binary floating-point number. Nhiều số thập phân hữu hạn khi đổi sang binary sẽ trở thành số thập phân lặp vô hạn, chỉ có thể lấy giá trị gần nhất có thể biểu diễn.
+`double` và `float` lưu binary floating-point number. Nhiều số thập phân hữu hạn khi đổi sang binary sẽ trở thành phân số nhị phân lặp vô hạn, chỉ có thể lấy giá trị gần nhất có thể biểu diễn.
 
 ```java
 double a = 1.0;
@@ -50,9 +50,9 @@ System.out.println(new BigDecimal(0.1));
 // 0.1000000000000000055511151231257827021181583404541015625
 ```
 
-Đây cũng là lý do không nên khởi tạo money object từ `double`. Một giá trị đã phát sinh sai số sẽ không tự khôi phục thành số thập phân ban đầu khi được chuyển tiếp thành `BigDecimal`.
+Đây cũng là lý do không nên khởi tạo money object từ `double`. Một giá trị đã phát sinh sai số sẽ không tự khôi phục thành số thập phân ban đầu khi được chuyển sang `BigDecimal`.
 
-## Loại tiền nào phù hợp với Long?
+## Khoản tiền nào phù hợp với `long`?
 
 Nếu business quy định tiền CNY luôn chính xác đến cents, `19.99` CNY có thể được lưu thành `1999` cents. Các phép cộng trừ đều thực hiện trên số nguyên nên không phát sinh sai số thập phân.
 
@@ -77,7 +77,7 @@ Nếu dùng `amount`, chỉ nhìn vào giá trị thì không thể biết `amou
 
 **Cần lưu ý gì khi dùng long?**
 
-Lưu thống nhất tiền theo cents cũng cố định precision ở hai chữ số thập phân. Kết quả trung gian của exchange rate, interest, tax hoặc tính phí theo lượng có thể cần bốn, sáu hoặc nhiều chữ số thập phân hơn; những phép tính này không thể tiếp tục cố tính bằng “cents”.
+Lưu thống nhất tiền theo cents cũng cố định precision ở hai chữ số thập phân. Kết quả trung gian của exchange rate, interest, tax hoặc tính phí theo lượng có thể cần bốn, sáu hoặc nhiều chữ số thập phân hơn; những phép tính này không thể tiếp tục tính bằng “cents” một cách gượng ép.
 
 Cũng cần ngăn overflow. `+` và `*` thông thường không báo lỗi sau khi overflow; code tiền có thể dùng `Math.addExact()`, `Math.subtractExact()` và `Math.multiplyExact()`:
 
@@ -88,13 +88,13 @@ long balanceCents = Math.subtractExact(currentBalanceCents, paymentCents);
 
 Phép nhân còn phải kiểm tra kết quả trung gian. Việc amount cuối cùng không vượt quá `Long.MAX_VALUE` không có nghĩa là từng bước trong `unit price × quantity × multiplier` cũng sẽ không overflow.
 
-Hệ thống multi-currency cũng không thể giả định mọi currency đều có hai chữ số thập phân. Tiền ít nhất phải xuất hiện cùng currency; số chữ số của đơn vị nhỏ nhất do currency hoặc business rule quyết định, không thể suy ra từ một giá trị `long` riêng lẻ.
+Hệ thống multi-currency cũng không thể giả định mọi currency đều có hai chữ số thập phân. Khoản tiền ít nhất phải đi kèm currency; số chữ số của đơn vị nhỏ nhất do currency hoặc business rule quyết định, không thể suy ra từ một giá trị `long` riêng lẻ.
 
 ## Loại tiền nào phù hợp với BigDecimal?
 
-Discount, tax, interest và quy đổi exchange rate thường tạo ra kết quả trung gian vượt quá đơn vị nhỏ nhất của currency.
+Discount, tax, interest và quy đổi exchange rate thường tạo ra kết quả trung gian vượt quá đơn vị tiền tệ nhỏ nhất.
 
-`BigDecimal` biểu diễn số thập phân bằng integer có precision tùy ý và `scale`, có thể giữ lại các giá trị trung gian này rồi rounding tại vị trí do business quy định.
+`BigDecimal` biểu diễn số thập phân bằng số nguyên có độ chính xác tùy ý và `scale`, có thể giữ lại các giá trị trung gian này rồi rounding tại vị trí do business quy định.
 
 ```java
 BigDecimal price = new BigDecimal("19.99");
@@ -104,13 +104,13 @@ BigDecimal discountedPrice = price.multiply(discountRate);
 // 18.9905
 ```
 
-Money constant nên được khởi tạo trực tiếp bằng string. Nếu interface truyền đến string thì chuyển thẳng thành `BigDecimal`; nếu field trong database là `DECIMAL` thì mapping thẳng thành `BigDecimal`, không cần chuyển qua `double` ở giữa.
+Hằng số tiền tệ nên được khởi tạo trực tiếp bằng string. Nếu interface truyền đến string thì chuyển thẳng thành `BigDecimal`; nếu field trong database là `DECIMAL` thì mapping thẳng thành `BigDecimal`, không cần chuyển qua `double` ở giữa.
 
 **Nếu `divide()` không chia hết thì phải làm sao?**
 
 Khi đó cần chỉ định số chữ số giữ lại và cách rounding.
 
-Đoạn code dưới đây giữ lại hai chữ số thập phân và dùng `HALF_UP` (làm tròn thông thường). Nếu gọi trực tiếp `a.divide(b)`, chương trình sẽ throw `ArithmeticException`.
+Đoạn code dưới đây giữ lại hai chữ số thập phân và dùng `HALF_UP` (làm tròn nửa lên). Nếu gọi trực tiếp `a.divide(b)`, chương trình sẽ throw `ArithmeticException`.
 
 ```java
 BigDecimal a = new BigDecimal("10");
@@ -203,7 +203,7 @@ CREATE TABLE settlement_detail (
 );
 ```
 
-MySQL xếp integer và `DECIMAL` vào nhóm exact-value type. Trong `DECIMAL(18, 2)`, `18` là tổng số significant digit, còn `2` là số chữ số thập phân; nó có thể bao phủ amount của business hay không phải được suy ra từ giá trị lớn nhất, không thể cứ thấy money field là dùng chung một precision.
+MySQL xếp integer và `DECIMAL` vào nhóm exact-value type. Trong `DECIMAL(18, 2)`, `18` là tổng số chữ số có nghĩa, còn `2` là số chữ số thập phân; nó có thể bao phủ amount của business hay không phải được suy ra từ giá trị lớn nhất, không thể cứ thấy money field là dùng chung một precision.
 
 Không nên phụ thuộc vào việc MySQL tự rounding khi ghi `DECIMAL`. Code Java trước tiên gọi `setScale()` để rounding hoặc validation, sau đó mới ghi kết quả vào database; như vậy giá trị lưu trong database mới khớp với kết quả tính trong chương trình.
 
