@@ -193,7 +193,7 @@ Ta có thể chứng minh bằng code dưới đây:
 
 ```java
 /**
- * Tìm JavaGuide trên WeChat và nhắn "面试突击" (Sổ tay phỏng vấn) để nhận miễn phí handbook phỏng vấn Java do tác giả biên soạn
+ * Tìm JavaGuide trên WeChat và nhắn "面试突击" (Sổ tay phỏng vấn) để nhận miễn phí cẩm nang phỏng vấn Java do tác giả tự biên soạn
  *
  * @author Guide
  * @date 2022/08/03 13:40
@@ -311,14 +311,14 @@ Trong Java, các atomic variable class trong package `java.util.concurrent.atomi
 
 ```java
 // LongAdder có performance tốt hơn AtomicInteger và AtomicLong trong high concurrency scenario
-// Đổi lại sẽ tiêu tốn nhiều memory space hơn (đổi space lấy time)
+// Đổi lại sẽ tiêu tốn nhiều memory space hơn (đổi không gian lấy thời gian)
 LongAdder sum = new LongAdder();
 sum.increment();
 ```
 
 Trong high concurrency scenario, so với pessimistic lock, optimistic lock không có thread block do lock contention và cũng không gặp deadlock, thường có performance tốt hơn. Tuy nhiên, nếu conflict xảy ra thường xuyên (tỷ lệ write rất cao), thao tác sẽ thường xuyên fail và retry, điều này cũng ảnh hưởng nghiêm trọng đến performance và khiến CPU tăng vọt.
 
-Tuy nhiên, vấn đề nhiều lần fail và retry cũng có thể giải quyết. `LongAdder` được nhắc đến ở trên đã giải quyết vấn đề này bằng cách đổi space lấy time.
+Tuy nhiên, vấn đề nhiều lần fail và retry cũng có thể giải quyết. `LongAdder` được nhắc đến ở trên đã giải quyết vấn đề này bằng cách đổi không gian lấy thời gian.
 
 Về lý thuyết:
 
@@ -385,13 +385,13 @@ public final native boolean compareAndSwapInt(Object o, long offset, int expecte
 public final native boolean compareAndSwapLong(Object o, long offset, long expected, long update);
 ```
 
-Để xem giới thiệu chi tiết về class `Unsafe`, có thể đọc bài viết này: [Giải thích chi tiết về class magic Java Unsafe - JavaGuide - 2022](https://javaguide.cn/java/basis/unsafe.html).
+Để xem giới thiệu chi tiết về class `Unsafe`, có thể đọc bài viết này: [Giải thích chi tiết về lớp ma thuật Unsafe trong Java - JavaGuide - 2022](https://javaguide.cn/java/basis/unsafe.html).
 
 ### CAS trong Java được triển khai như thế nào?
 
 Trong Java, một class quan trọng để triển khai operation CAS (Compare-And-Swap, so sánh và hoán đổi) là `Unsafe`.
 
-Class `Unsafe` nằm trong package `sun.misc`, là class cung cấp các operation cấp thấp và không an toàn. Do có chức năng mạnh và tiềm ẩn nguy hiểm, class này thường được dùng bên trong JVM hoặc trong một số library cần performance rất cao và truy cập tầng thấp, không khuyến nghị developer thông thường sử dụng trong application. Có thể đọc bài viết này để xem giới thiệu chi tiết về class `Unsafe`: 📌[Giải thích chi tiết về class magic Java Unsafe](https://javaguide.cn/java/basis/unsafe.html).
+Class `Unsafe` nằm trong package `sun.misc`, là class cung cấp các operation cấp thấp và không an toàn. Do có chức năng mạnh và tiềm ẩn nguy hiểm, class này thường được dùng bên trong JVM hoặc trong một số library cần performance rất cao và truy cập tầng thấp, không khuyến nghị developer thông thường sử dụng trong application. Có thể đọc bài viết này để xem giới thiệu chi tiết về class `Unsafe`: 📌[Giải thích chi tiết về lớp ma thuật Unsafe trong Java](https://javaguide.cn/java/basis/unsafe.html).
 
 Class `Unsafe` trong package `sun.misc` cung cấp các method `compareAndSwapObject`, `compareAndSwapInt`, `compareAndSwapLong` để triển khai CAS operation cho các kiểu `Object`, `int`, `long`:
 
@@ -426,7 +426,7 @@ Package `java.util.concurrent.atomic` cung cấp một số class dùng cho atom
 
 Để xem giới thiệu và cách dùng các atomic class này, có thể đọc bài: [Tổng hợp atomic class](https://javaguide.cn/java/concurrent/atomic-classes.html).
 
-`AtomicInteger` là một trong các atomic class của Java, chủ yếu dùng để thực hiện atomic operation trên variable kiểu `int`; class này dùng các low-level atomic operation do `Unsafe` cung cấp để triển khai thread safety không lock.
+`AtomicInteger` là một trong các atomic class của Java, chủ yếu dùng để thực hiện atomic operation trên variable kiểu `int`; class này dùng các low-level atomic operation do `Unsafe` cung cấp để triển khai thread safety không cần lock.
 
 Dưới đây, thông qua việc đọc core source code của `AtomicInteger` (JDK1.8), ta sẽ giải thích Java dùng method của `Unsafe` để triển khai atomic operation như thế nào.
 
@@ -546,7 +546,7 @@ Ngoài cách dùng `AtomicReference`, cũng có thể dùng lock để bảo đ�
 
 ### synchronized là gì? Dùng để làm gì?
 
-`synchronized` là một từ khóa trong Java, có nghĩa là synchronized, chủ yếu giải quyết việc đồng bộ khi nhiều thread truy cập resource; nó bảo đảm method hoặc code block được nó bảo vệ tại bất kỳ thời điểm nào cũng chỉ có một thread được thực hiện.
+`synchronized` là một từ khóa trong Java, có nghĩa là đồng bộ, chủ yếu giải quyết việc đồng bộ khi nhiều thread truy cập resource; nó bảo đảm method hoặc code block được nó bảo vệ tại bất kỳ thời điểm nào cũng chỉ có một thread được thực hiện.
 
 Trong các version Java đầu tiên, `synchronized` là **heavyweight lock**, performance thấp. Nguyên nhân là monitor lock dựa vào `Mutex Lock` của operating system ở tầng dưới để triển khai, còn Java thread được map vào native thread của operating system. Khi suspend hoặc wakeup một thread, đều cần operating system thực hiện; khi operating system chuyển đổi giữa các thread, cần chuyển từ user mode sang kernel mode. Việc chuyển mode này tương đối lâu, nên time cost tương đối cao.
 
@@ -564,7 +564,7 @@ Từ khóa `synchronized` chủ yếu có 3 cách dùng:
 
 **1. Bảo vệ instance method** (lock current object instance)
 
-Lock current object instance; trước khi vào synchronized code cần lấy **lock của current object instance**.
+Áp dụng lock cho current object instance; trước khi vào synchronized code cần lấy **lock của current object instance**.
 
 ```java
 synchronized void method() {
@@ -574,7 +574,7 @@ synchronized void method() {
 
 **2. Bảo vệ static method** (lock current class)
 
-Lock current class, tác động đến tất cả object instance của class; trước khi vào synchronized code cần lấy **lock của current class**.
+Áp dụng lock cho current class, tác động đến tất cả object instance của class; trước khi vào synchronized code cần lấy **lock của current class**.
 
 Nguyên nhân là static member không thuộc về bất kỳ instance object nào mà thuộc về cả class, không phụ thuộc instance cụ thể của class và được mọi instance của class dùng chung.
 
@@ -603,7 +603,7 @@ synchronized(this) {
 
 - Thêm từ khóa `synchronized` vào `static` method và code block `synchronized(class)` đều là lock Class;
 - Thêm từ khóa `synchronized` vào instance method là lock object instance;
-- Hạn chế dùng `synchronized(String a)` vì string constant pool trong JVM có caching function.
+- Hạn chế dùng `synchronized(String a)` vì string constant pool trong JVM có cơ chế cache.
 
 ### Có thể dùng synchronized để bảo vệ constructor không?
 
@@ -736,7 +736,7 @@ Nguyên nhân gốc rễ của performance difference giữa hai loại nằm �
 | **Read overhead**           | Gần như giống ordinary variable                                                          | Cần lấy monitor lock, kể cả không contention cũng có overhead (biased lock/lightweight lock CAS) |
 | **Write overhead**          | Cần chèn `StoreStore` + `StoreLoad` memory barrier, có overhead nhưng không block thread | Cần lấy và release monitor lock, khi có contention sẽ block thread và context switch             |
 | **Behavior khi contention** | Không block thread, luôn non-blocking                                                    | Khi thread contention gay gắt, block và wakeup xảy ra thường xuyên, context switch overhead lớn  |
-| **Phạm vi chức năng**       | Chỉ bảo vệ variable, chỉ bảo đảm visibility và ordering                                  | Có thể bảo vệ method và code block, đồng thời bảo đảm visibility, ordering và atomicity          |
+| **Phạm vi chức năng**       | Chỉ áp dụng cho variable, chỉ bảo đảm visibility và ordering                             | Có thể bảo vệ method và code block, đồng thời bảo đảm visibility, ordering và atomicity          |
 
 **Gợi ý lựa chọn:**
 
@@ -747,7 +747,7 @@ Nguyên nhân gốc rễ của performance difference giữa hai loại nằm �
 
 ### ReentrantLock là gì?
 
-`ReentrantLock` implement interface `Lock`, là một reentrant và exclusive lock, tương tự từ khóa `synchronized`. Tuy nhiên, `ReentrantLock` linh hoạt và mạnh hơn, bổ sung các advanced function như polling, timeout, interrupt, fair lock và unfair lock.
+`ReentrantLock` implement interface `Lock`, là một exclusive lock có tính reentrant, tương tự từ khóa `synchronized`. Tuy nhiên, `ReentrantLock` linh hoạt và mạnh hơn, bổ sung các advanced function như polling, timeout, interrupt, fair lock và unfair lock.
 
 ```java
 public class ReentrantLock implements Lock, java.io.Serializable {}
@@ -800,7 +800,7 @@ Vì `synchronized` lock là reentrant, cùng một thread khi gọi `method1()` 
 
 #### synchronized phụ thuộc JVM còn ReentrantLock phụ thuộc API
 
-`synchronized` phụ thuộc vào JVM implementation. Như đã nói, virtual machine team đã tối ưu từ khóa `synchronized` rất nhiều trong JDK1.6, nhưng các optimization này được implement ở JVM layer và không expose trực tiếp cho chúng ta.
+`synchronized` phụ thuộc vào JVM implementation. Như đã nói, đội ngũ JVM đã tối ưu từ khóa `synchronized` rất nhiều trong JDK1.6, nhưng các optimization này được implement ở JVM layer và không expose trực tiếp cho chúng ta.
 
 `ReentrantLock` được implement ở JDK layer (tức API layer; cần phối hợp method `lock()` và `unlock()` với `try/finally` code block), vì vậy có thể xem source code để biết nó được implement như thế nào.
 
@@ -860,7 +860,7 @@ Bổ sung về **có thể interrupt khi chờ**:
 >             }
 >
 >             // 5, in số lần reentrant của lock; có thể thấy lockInterruptibly() không lấy lock thành công
->             System.out.println("lockInterruptibly() not able to Acquire lock: lock count :" + r.getHoldCount());
+>             System.out.println("lockInterruptibly() not able to Acqurie lock: lock count :" + r.getHoldCount());
 >
 >             r.unlock();
 >             System.out.println("lock count :" + r.getHoldCount());
@@ -930,7 +930,7 @@ public interface ReadWriteLock {
 - Quy tắc concurrency control của lock thông thường: read-read mutual exclusion, read-write mutual exclusion, write-write mutual exclusion.
 - Quy tắc concurrency control của read-write lock: read-read không mutual exclusion, read-write mutual exclusion, write-write mutual exclusion (chỉ read-read không mutual exclusion).
 
-`ReentrantReadWriteLock` thực tế gồm hai lock: `WriteLock` (write lock) và `ReadLock` (read lock). Read lock là shared lock, write lock là exclusive lock. Read lock cho phép nhiều thread cùng read và cùng được nhiều thread hold, còn write lock tối đa chỉ được một thread hold tại một thời điểm.
+`ReentrantReadWriteLock` thực tế gồm hai lock: `WriteLock` (write lock) và `ReadLock` (read lock). Read lock là shared lock, write lock là exclusive lock. Read lock có thể được nhiều thread cùng hold, còn write lock tối đa chỉ được một thread hold tại một thời điểm.
 
 Giống `ReentrantLock`, tầng dưới của `ReentrantReadWriteLock` cũng dựa trên AQS.
 
