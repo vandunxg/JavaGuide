@@ -14,13 +14,13 @@ head:
 >
 > Bài gốc: <https://mp.weixin.qq.com/s/o4XdEMq1DL-nBS-f8Za5Aw>
 
-Syntactic Sugar là một kiến thức thường được hỏi trong các buổi phỏng vấn Java tại các công ty lớn.
+Syntactic Sugar là một chủ đề thường được hỏi trong các buổi phỏng vấn Java tại các công ty lớn.
 
-Bài viết này đi sâu vào bytecode và class file từ góc độ nguyên lý compile của Java, phân tích từng lớp để tìm hiểu nguyên lý và cách sử dụng Syntactic Sugar trong Java, giúp bạn vừa học cách sử dụng Syntactic Sugar của Java, vừa hiểu nguyên lý phía sau chúng.
+Bài viết này đi sâu vào bytecode và class file từ góc độ nguyên lý biên dịch của Java, lần lượt làm rõ nguyên lý và cách sử dụng Syntactic Sugar trong Java, giúp bạn vừa học cách sử dụng Syntactic Sugar, vừa hiểu nguyên lý phía sau chúng.
 
 ## Syntactic Sugar là gì?
 
-**Syntactic Sugar** còn được gọi là syntax sugar, là một thuật ngữ do nhà khoa học máy tính người Anh Peter.J.Landin đặt ra. Thuật ngữ này chỉ một dạng syntax được thêm vào ngôn ngữ máy tính; nó không ảnh hưởng đến chức năng của ngôn ngữ nhưng giúp lập trình viên sử dụng thuận tiện hơn. Nói ngắn gọn, Syntactic Sugar làm cho chương trình ngắn gọn hơn và dễ đọc hơn.
+**Syntactic Sugar** còn được gọi là syntax sugar, là một thuật ngữ do nhà khoa học máy tính người Anh Peter.J.Landin đặt ra. Thuật ngữ này chỉ một dạng cú pháp được thêm vào ngôn ngữ máy tính; nó không ảnh hưởng đến chức năng của ngôn ngữ nhưng giúp lập trình viên sử dụng thuận tiện hơn. Nói ngắn gọn, Syntactic Sugar làm cho chương trình ngắn gọn hơn và dễ đọc hơn.
 
 ![](https://oss.javaguide.cn/github/javaguide/java/basis/syntactic-sugar/image-20220818175953954.png)
 
@@ -30,9 +30,9 @@ Hầu như mọi ngôn ngữ lập trình quen thuộc đều có Syntactic Suga
 
 ## Java có những Syntactic Sugar thường gặp nào?
 
-Như đã đề cập, Syntactic Sugar chủ yếu tồn tại để giúp developer sử dụng thuận tiện hơn. Tuy nhiên, **Java Virtual Machine không hỗ trợ những Syntactic Sugar này. Chúng sẽ được khôi phục thành các cấu trúc syntax cơ bản trong giai đoạn compile; quá trình này được gọi là desugar.**
+Như đã đề cập, Syntactic Sugar chủ yếu tồn tại để giúp lập trình viên sử dụng thuận tiện hơn. Tuy nhiên, **Java Virtual Machine không hỗ trợ những Syntactic Sugar này. Chúng sẽ được chuyển về các cấu trúc cú pháp cơ bản trong giai đoạn biên dịch; quá trình này được gọi là desugar.**
 
-Nói đến compile, chắc hẳn mọi người đều biết trong ngôn ngữ Java, lệnh `javac` có thể compile source file có hậu tố `.java` thành bytecode có hậu tố `.class`, có thể chạy trên Java Virtual Machine. Nếu xem source code của `com.sun.tools.javac.main.JavaCompiler`, bạn sẽ thấy trong `compile()` có một bước gọi `desugar()`; method này chịu trách nhiệm triển khai việc desugar.
+Nói đến biên dịch, chắc hẳn mọi người đều biết trong ngôn ngữ Java, lệnh `javac` có thể biên dịch source file có hậu tố `.java` thành bytecode có hậu tố `.class`, có thể chạy trên Java Virtual Machine. Nếu xem source code của `com.sun.tools.javac.main.JavaCompiler`, bạn sẽ thấy trong `compile()` có một bước gọi `desugar()`; method này thực hiện việc desugar.
 
 Các Syntactic Sugar được sử dụng phổ biến nhất trong Java chủ yếu gồm generic, varargs, conditional compilation, auto boxing/unboxing và inner class. Bài viết này chủ yếu phân tích nguyên lý phía sau các Syntactic Sugar đó, từng bước bóc lớp syntax sugar để xem bản chất của chúng.
 
@@ -42,7 +42,7 @@ Các Syntactic Sugar được sử dụng phổ biến nhất trong Java chủ y
 
 Như đã đề cập, từ Java 7, Syntactic Sugar trong ngôn ngữ Java dần phong phú hơn; một tính năng quan trọng là từ Java 7, `switch` bắt đầu hỗ trợ `String`.
 
-Trước hết, hãy tìm hiểu thêm: trong Java thời kỳ đầu, `switch` hỗ trợ `byte`, `short`, `char`, `int` và các wrapper type tương ứng, nhưng không hỗ trợ `boolean`, `long`, `float`, `double`. `char` biểu diễn UTF-16 code unit, không phải kiểu ASCII. Sau đó, Java bổ sung hỗ trợ cho enum, `String` và các reference type khác.
+Trước hết, hãy nói qua: trong Java thời kỳ đầu, `switch` hỗ trợ `byte`, `short`, `char`, `int` và các wrapper type tương ứng, nhưng không hỗ trợ `boolean`, `long`, `float`, `double`. `char` biểu diễn UTF-16 code unit, không phải kiểu ASCII. Sau đó, Java bổ sung hỗ trợ cho enum, `String` và các reference type khác.
 
 Tiếp theo, hãy xem `switch` hỗ trợ `String` như thế nào qua đoạn code sau:
 
@@ -93,9 +93,9 @@ public class switchDemoString
 }
 ```
 
-Từ code được tạo và decompile bởi phiên bản `javac` cụ thể này, có thể thấy **`switch` trên string được chuyển thành cơ chế dispatch bằng `hashCode()` và kiểm tra bằng `equals()`.** Đây là strategy triển khai của compiler, không phải dạng bytecode bắt buộc do JLS quy định.
+Từ code do phiên bản `javac` cụ thể này tạo ra và decompile, có thể thấy **`switch` trên string được chuyển thành cơ chế dispatch bằng `hashCode()` và kiểm tra bằng `equals()`.** Đây là strategy triển khai của compiler, không phải dạng bytecode bắt buộc do JLS quy định.
 
-Quan sát kỹ có thể thấy đối tượng thực sự được đưa vào `switch` là hash value, sau đó dùng method `equals` để so sánh nhằm kiểm tra an toàn. Việc kiểm tra này là cần thiết vì hash có thể xảy ra collision. Vì vậy performance của cách này kém hơn `switch` bằng enum hoặc pure integer constant, nhưng cũng không quá tệ.
+Quan sát kỹ có thể thấy giá trị thực sự được đưa vào `switch` là hash value, sau đó dùng method `equals` để so sánh nhằm kiểm tra an toàn. Việc kiểm tra này là cần thiết vì hash có thể xảy ra collision. Vì vậy hiệu năng của cách này thấp hơn `switch` bằng enum hoặc hằng số số nguyên thuần túy, nhưng cũng không quá tệ.
 
 ### Generic
 
@@ -160,7 +160,7 @@ Sau khi type erasure sẽ trở thành:
 
 ### Auto boxing và unboxing
 
-Auto boxing là việc Java tự động chuyển primitive type value thành object tương ứng, ví dụ chuyển biến kiểu `int` thành object `Integer`; quá trình ngược lại, chuyển object `Integer` thành value kiểu `int`, được gọi là unboxing. Vì việc boxing và unboxing ở đây được thực hiện tự động, không phải do con người thực hiện, nên được gọi là auto boxing và unboxing. Wrapper class tương ứng với primitive type `byte`, `short`, `char`, `int`, `long`, `float`, `double` và `boolean` lần lượt là `Byte`, `Short`, `Character`, `Integer`, `Long`, `Float`, `Double`, `Boolean`.
+Auto boxing là việc Java tự động chuyển giá trị của primitive type thành object tương ứng, ví dụ chuyển biến kiểu `int` thành object `Integer`; quá trình ngược lại, chuyển object `Integer` thành giá trị kiểu `int`, được gọi là unboxing. Vì boxing và unboxing ở đây được thực hiện tự động nên được gọi là auto boxing và unboxing. Wrapper class tương ứng với primitive type `byte`, `short`, `char`, `int`, `long`, `float`, `double` và `boolean` lần lượt là `Byte`, `Short`, `Character`, `Integer`, `Long`, `Float`, `Double`, `Boolean`.
 
 Trước hết, hãy xem code auto boxing:
 
@@ -207,9 +207,9 @@ Vì vậy, **quá trình boxing được thực hiện bằng cách gọi method
 
 ### Varargs
 
-Varargs (`variable arguments`) là một feature được đưa vào Java 1.5. Nó cho phép một method nhận một số lượng value bất kỳ làm parameter.
+Varargs (`variable arguments`) là một tính năng được đưa vào Java 1.5. Nó cho phép một method nhận một số lượng giá trị bất kỳ làm tham số.
 
-Hãy xem code varargs sau; method `print` nhận varargs:
+Hãy xem đoạn code varargs dưới đây; method `print` nhận các tham số biến đổi:
 
 ```java
 public static void main(String[] args)
@@ -244,13 +244,13 @@ public static transient void print(String strs[])
 }
 ```
 
-Code sau khi decompile cho thấy khi được sử dụng, varargs trước tiên tạo một array có length bằng số lượng argument thực tế được truyền khi gọi method, sau đó đưa toàn bộ parameter value vào array này và truyền array đó làm parameter cho method được gọi. (Lưu ý: `transient` chỉ có ý nghĩa khi dùng để modifier member variable. Việc “modifier method” ở đây là do trong javassist, cùng một value được dùng để biểu diễn cả `transient` và `vararg`, xem [tại đây](https://github.com/jboss-javassist/javassist/blob/7302b8b0a09f04d344a26ebe57f29f3db43f2a3e/src/main/javassist/bytecode/AccessFlag.java#L32).)
+Code sau khi decompile cho thấy khi được sử dụng, varargs trước tiên tạo một array có độ dài bằng số lượng argument thực tế được truyền khi gọi method, sau đó đưa toàn bộ parameter value vào array này và truyền array đó làm parameter cho method được gọi. (Lưu ý: `transient` chỉ có ý nghĩa khi dùng làm modifier cho member variable. Việc “modifier method” ở đây là do trong javassist, cùng một value được dùng để biểu diễn cả `transient` và `vararg`, xem [tại đây](https://github.com/jboss-javassist/javassist/blob/7302b8b0a09f04d344a26ebe57f29f3db43f2a3e/src/main/javassist/bytecode/AccessFlag.java#L32).)
 
 ### Enum
 
-Java SE5 cung cấp một type mới, enum type của Java. Keyword `enum` có thể tạo một type mới từ một tập hợp hữu hạn các value có tên, và những value có tên này có thể được sử dụng như các thành phần thông thường của chương trình. Đây là một feature rất hữu ích.
+Java SE5 cung cấp một type mới, enum type của Java. Keyword `enum` có thể tạo một type mới từ một tập hợp hữu hạn các value có tên, và những value có tên này có thể được sử dụng như các thành phần thông thường của chương trình. Đây là một tính năng rất hữu ích.
 
-Muốn xem source code thì trước hết phải có một class. Vậy enum type thực chất là class nào? Có phải là `enum` không? Câu trả lời rõ ràng là không. `enum` cũng giống `class`, chỉ là một keyword chứ không phải class. Vậy enum được class nào duy trì? Hãy viết một enum đơn giản:
+Để xem source code, trước hết phải có một class. Vậy enum type thực chất là class nào? Có phải là `enum` không? Câu trả lời rõ ràng là không. `enum` cũng giống `class`, chỉ là một keyword chứ không phải class. Vậy enum do class nào quản lý? Hãy viết một enum đơn giản:
 
 ```java
 public enum t {
@@ -296,7 +296,7 @@ public final class t extends Enum
 }
 ```
 
-Từ code sau khi decompile có thể thấy `public final class t extends Enum`, cho biết class này kế thừa class `Enum`; enum hiện tại không chứa constant-specific class body nên nó ngầm định là `final`.
+Từ code sau khi decompile có thể thấy `public final class t extends Enum`, cho biết class này kế thừa class `Enum`; enum này không chứa constant-specific class body nên nó ngầm định là `final`.
 
 **Enum class được định nghĩa bằng `enum` sẽ trực tiếp kế thừa `Enum`, vì vậy không thể explicit kế thừa class khác và cũng không thể được class thông thường kế thừa. Enum class không có constant-specific class body sẽ ngầm định là `final`; chỉ cần có enum constant khai báo constant-specific class body, enum class sẽ ngầm định là `sealed`, còn các class body riêng đó tương ứng với các anonymous subclass được cấp quyền.**
 
@@ -336,7 +336,7 @@ public class OuterClass {
 }
 ```
 
-Sau khi compile code trên sẽ tạo ra hai class file: `OuterClass$InnerClass.class`, `OuterClass.class`. Khi thử decompile file `OuterClass.class`, command line sẽ in nội dung sau: `Parsing OuterClass.class...Parsing inner class OuterClass$InnerClass.class... Generating OuterClass.jad`. Nó sẽ decompile cả hai file rồi tạo một file `OuterClass.jad`. Nội dung file như sau:
+Sau khi biên dịch code trên sẽ tạo ra hai class file: `OuterClass$InnerClass.class`, `OuterClass.class`. Khi thử decompile file `OuterClass.class`, dòng lệnh sẽ in nội dung sau: `Parsing OuterClass.class...Parsing inner class OuterClass$InnerClass.class... Generating OuterClass.jad`. Nó sẽ decompile cả hai file rồi tạo một file `OuterClass.jad`. Nội dung file như sau:
 
 ```java
 public class OuterClass
@@ -410,7 +410,7 @@ class OuterClass$InnerClass {
 
 ```
 
-Thực tế, sau khi compile, bên trong `inner` instance thường có một reference trỏ tới `outer` instance là `this$0`. Trong class file được tạo bởi JDK 10 và các version cũ hơn, compiler thường dùng synthetic access method tương tự `access$000` để triển khai việc truy cập member `private` giữa các nested class, vì vậy method `printOut()` sau khi decompile đại khái như sau. Từ JDK 11, nest-based access control được đưa vào; các class trong cùng một nest có thể trực tiếp truy cập member `private` của nhau, nên thường không còn cần các synthetic access method này:
+Thực tế, sau khi biên dịch, bên trong `inner` instance thường có một tham chiếu trỏ tới `outer` instance là `this$0`. Trong class file được tạo bởi JDK 10 và các phiên bản cũ hơn, compiler thường dùng synthetic access method tương tự `access$000` để triển khai việc truy cập thành viên `private` giữa các nested class, vì vậy method `printOut()` sau khi decompile đại khái như sau. Từ JDK 11, nest-based access control được đưa vào; các class trong cùng một nest có thể trực tiếp truy cập thành viên `private` của nhau, nên thường không còn cần các synthetic access method này:
 
 ```java
 public void printOut() {
@@ -420,9 +420,9 @@ public void printOut() {
 
 Bổ sung:
 
-1. Trong output `javac` điển hình của JDK 10 và các version cũ hơn, anonymous inner class, local inner class và static inner class cũng có thể lấy thuộc tính `private` thông qua synthetic access method; từ JDK 11 thường sử dụng nest-based access control.
-2. Static inner class không có reference `this$0`.
-3. Anonymous inner class và local inner class dùng bản sao của local variable; sau khi variable được khởi tạo thì không thể sửa nó. Ví dụ:
+1. Trong output `javac` điển hình của JDK 10 và các phiên bản cũ hơn, anonymous inner class, local inner class và static inner class cũng có thể lấy thuộc tính `private` thông qua synthetic access method; từ JDK 11 thường sử dụng nest-based access control.
+2. Static inner class không có tham chiếu `this$0`.
+3. Anonymous inner class và local inner class dùng bản sao của biến cục bộ; sau khi biến được khởi tạo thì không thể sửa nó. Ví dụ:
 
 ```java
 public class OuterClass {
@@ -457,9 +457,9 @@ class OuterClass$1Inner {
 
 ### Conditional compilation
 
-Thông thường, mọi dòng code trong chương trình đều tham gia compile. Nhưng đôi khi, để tối ưu code, chúng ta chỉ muốn compile một phần nội dung. Khi đó cần thêm condition vào chương trình để compiler chỉ compile code thỏa mãn condition và loại bỏ code không thỏa mãn. Đây là conditional compilation.
+Thông thường, mọi dòng code trong chương trình đều tham gia biên dịch. Nhưng đôi khi, để tối ưu code, chúng ta chỉ muốn biên dịch một phần nội dung. Khi đó cần thêm điều kiện vào chương trình để compiler chỉ biên dịch code thỏa mãn điều kiện và loại bỏ code không thỏa mãn. Đây là conditional compilation.
 
-Ví dụ trong C hoặc CPP, có thể thực hiện conditional compilation bằng preprocessor statement. Java thực ra cũng hỗ trợ conditional compilation. Hãy xem một đoạn code:
+Ví dụ trong C hoặc CPP, có thể thực hiện conditional compilation bằng preprocessor statement. Trong Java cũng có thể thực hiện conditional compilation. Hãy xem một đoạn code:
 
 ```java
 public class ConditionalCompilation {
@@ -497,9 +497,9 @@ public class ConditionalCompilation
 }
 ```
 
-Trước hết có thể thấy trong code sau khi decompile không có `System.out.println("Hello, ONLINE!");`; đây chính là conditional compilation. Khi `if(ONLINE)` là false, compiler không compile code bên trong nó.
+Trước hết có thể thấy trong code sau khi decompile không có `System.out.println("Hello, ONLINE!");`; đây chính là conditional compilation. Khi `if(ONLINE)` là false, compiler không biên dịch code bên trong nó.
 
-Vì vậy, **conditional compilation trong Java syntax được thực hiện bằng statement `if` có condition là constant. Nguyên lý của nó cũng là Syntactic Sugar của Java. Dựa vào giá trị true/false của condition trong `if`, compiler trực tiếp loại bỏ code block có branch là false. Conditional compilation theo cách này phải được thực hiện trong method body, không thể thực hiện trên structure của toàn bộ Java class hoặc thuộc tính của class; so với conditional compilation của C/C++, đây thực sự là một hạn chế. Java không đưa conditional compilation vào ngay từ khi thiết kế ngôn ngữ; dù có hạn chế, có vẫn tốt hơn không.**
+Vì vậy, **conditional compilation trong cú pháp Java được thực hiện bằng statement `if` có condition là constant. Nguyên lý của nó cũng là Syntactic Sugar của Java. Dựa vào giá trị true/false của condition trong `if`, compiler trực tiếp loại bỏ code block có branch là false. Conditional compilation theo cách này phải được thực hiện trong method body, không thể thực hiện trên structure của toàn bộ Java class hoặc thuộc tính của class; so với conditional compilation của C/C++, đây thực sự là một hạn chế. Java không đưa conditional compilation vào ngay từ khi thiết kế ngôn ngữ; dù có hạn chế, vẫn tốt hơn là không có.**
 
 ### Assertion
 
@@ -626,9 +626,9 @@ Code rất đơn giản: **nguyên lý triển khai của for-each thực chất
 
 ### Try-with-resources
 
-Trong Java, với các resource tốn kém như IO stream dùng để thao tác file và database connection, sau khi sử dụng phải kịp thời đóng chúng bằng method `close`; nếu không, resource sẽ luôn ở trạng thái mở và có thể gây ra các vấn đề như memory leak.
+Trong Java, với các tài nguyên tốn kém như IO stream dùng để thao tác với file và database connection, sau khi sử dụng phải kịp thời đóng chúng bằng method `close`; nếu không, tài nguyên sẽ luôn ở trạng thái mở và có thể gây ra các vấn đề như memory leak.
 
-Cách thường dùng để đóng resource là release trong block `finally`, tức gọi method `close`. Ví dụ, chúng ta thường viết code như sau:
+Cách thường dùng để đóng tài nguyên là giải phóng trong block `finally`, tức gọi method `close`. Ví dụ, chúng ta thường viết code như sau:
 
 ```java
 public static void main(String[] args) {
@@ -653,7 +653,7 @@ public static void main(String[] args) {
 }
 ```
 
-Từ Java 7, JDK cung cấp một cách tốt hơn để đóng resource: dùng statement `try-with-resources`. Viết lại code trên như sau:
+Từ Java 7, JDK cung cấp một cách tốt hơn để đóng tài nguyên: dùng statement `try-with-resources`. Viết lại code trên như sau:
 
 ```java
 public static void main(String... args) {
@@ -668,7 +668,7 @@ public static void main(String... args) {
 }
 ```
 
-Đây thực sự là một sự trợ giúp lớn. Trước đây tôi thường dùng `IOUtils` để đóng stream, không viết nhiều code trong `finally`, nhưng Syntactic Sugar mới này trông có vẻ thanh lịch hơn nhiều. Hãy xem phần bên trong:
+Đây đúng là một cải tiến lớn. Trước đây tôi thường dùng `IOUtils` để đóng stream, không viết nhiều code trong `finally`, nhưng Syntactic Sugar mới này trông có vẻ thanh lịch hơn nhiều. Hãy xem phần bên trong:
 
 ```java
 public static transient void main(String args[])
@@ -707,11 +707,11 @@ public static transient void main(String args[])
 }
 ```
 
-**Nguyên lý phía sau cũng rất đơn giản: các thao tác đóng resource mà chúng ta không viết đã được compiler thực hiện thay. Điều này một lần nữa khẳng định tác dụng của Syntactic Sugar là giúp lập trình viên sử dụng thuận tiện hơn, nhưng cuối cùng vẫn phải chuyển thành syntax mà compiler nhận biết.**
+**Nguyên lý phía sau cũng rất đơn giản: các thao tác đóng tài nguyên mà chúng ta không viết đã được compiler thực hiện thay. Điều này một lần nữa khẳng định tác dụng của Syntactic Sugar là giúp lập trình viên sử dụng thuận tiện hơn, nhưng cuối cùng vẫn phải chuyển thành cú pháp mà compiler nhận biết.**
 
 ### Lambda expression
 
-Về lambda expression, có người có thể nghi ngờ vì trên Internet có người nói nó không phải Syntactic Sugar. Thực ra cần đính chính cách nói này. **Lambda expression không phải Syntactic Sugar của anonymous inner class, nhưng nó cũng là một Syntactic Sugar. Cách triển khai thực tế dựa vào một số lambda-related API được cung cấp ở tầng dưới của JVM.**
+Về lambda expression, có người có thể nghi ngờ vì trên Internet có người nói nó không phải Syntactic Sugar. Thực ra cần đính chính cách nói này. **Lambda expression không phải Syntactic Sugar của anonymous inner class, nhưng nó cũng là một Syntactic Sugar. Cách triển khai thực tế dựa vào một số API liên quan đến lambda được cung cấp ở tầng dưới của JVM.**
 
 Trước hết, hãy xem một lambda expression đơn giản, duyệt một list:
 
@@ -723,7 +723,7 @@ public static void main(String... args) {
 }
 ```
 
-Vì sao nói nó không phải Syntactic Sugar của inner class? Như đã nói ở phần inner class, sau khi compile inner class sẽ có hai class file, nhưng class chứa lambda expression sau khi compile chỉ có một file.
+Vì sao nói nó không phải Syntactic Sugar của inner class? Như đã nói ở phần inner class, sau khi biên dịch inner class sẽ có hai class file, nhưng class chứa lambda expression sau khi biên dịch chỉ tạo ra một file.
 
 Code sau khi decompile:
 
@@ -738,9 +738,9 @@ private static /* synthetic */ void lambda$main$0(String s) {
 }
 ```
 
-Có thể thấy trong method `forEach`, thực tế gọi method `java.lang.invoke.LambdaMetafactory#metafactory`; parameter thứ tư của method này là `implMethod`, chỉ định method implementation. Có thể thấy ở đây thực tế gọi method `lambda$main$0` để output.
+Có thể thấy trong method `forEach`, thực tế gọi method `java.lang.invoke.LambdaMetafactory#metafactory`; parameter thứ tư của method này là `implMethod`, chỉ định method implementation. Có thể thấy ở đây thực tế gọi method `lambda$main$0` để xuất kết quả.
 
-Tiếp theo là ví dụ phức tạp hơn một chút: trước hết filter `List`, sau đó output:
+Tiếp theo là ví dụ phức tạp hơn một chút: trước hết lọc `List`, sau đó xuất kết quả:
 
 ```java
 public static void main(String... args) {
@@ -772,7 +772,7 @@ private static /* synthetic */ boolean lambda$main$0(String string) {
 
 Hai lambda expression lần lượt gọi method `lambda$main$1` và `lambda$main$0`.
 
-**Vì vậy, cách triển khai lambda expression thực tế dựa vào một số API tầng dưới. Trong giai đoạn compile, compiler sẽ desugar lambda expression thành cách gọi các API bên trong.**
+**Vì vậy, cách triển khai lambda expression thực tế dựa vào một số API tầng dưới. Trong giai đoạn biên dịch, compiler sẽ desugar lambda expression thành cách gọi các API bên trong.**
 
 ## Các vấn đề có thể gặp
 
@@ -793,7 +793,7 @@ public class GenericTypes {
 }
 ```
 
-Đoạn code trên có hai method overload vì parameter type khác nhau: một là `List<String>`, một là `List<Integer>`. Tuy nhiên, code này không thể compile thành công. Như đã nói, sau khi compile, parameter `List<Integer>` và `List<String>` đều bị type erasure, trở thành cùng raw type `List`; thao tác erase khiến signature đặc trưng của hai method hoàn toàn giống nhau.
+Đoạn code trên có hai method overload vì parameter type khác nhau: một là `List<String>`, một là `List<Integer>`. Tuy nhiên, code này không thể biên dịch thành công. Như đã nói, sau khi biên dịch, parameter `List<Integer>` và `List<String>` đều bị type erasure, trở thành cùng raw type `List`; thao tác erase khiến chữ ký của hai method hoàn toàn giống nhau.
 
 **2. Khi generic gặp `catch`**
 
@@ -817,13 +817,13 @@ class GT<T>{
 }
 ```
 
-Kết quả output của code trên là: 2!
+Kết quả in ra của code trên là: 2!
 
-Một số bạn có thể nhầm rằng generic class là các class khác nhau, tương ứng với các bytecode khác nhau. Thực tế, do type erasure, mọi generic class instance đều liên kết với cùng một bytecode; static variable của generic class được dùng chung. `GT<Integer>.var` và `GT<String>.var` trong ví dụ trên thực chất là cùng một variable.
+Một số bạn có thể nhầm rằng generic class là các class khác nhau, tương ứng với các bytecode khác nhau. Thực tế, do type erasure, mọi generic class instance đều liên kết với cùng một biểu diễn bytecode; static variable của generic class được dùng chung. `GT<Integer>.var` và `GT<String>.var` trong ví dụ trên thực chất là cùng một biến.
 
 ### Auto boxing và unboxing
 
-**So sánh object equality**
+**So sánh tính bằng nhau của object**
 
 ```java
 public static void main(String[] args) {
@@ -860,14 +860,14 @@ for (Student stu : students) {
 
 Code này sẽ ném exception `ConcurrentModificationException`.
 
-Ở đây liên quan đến cơ chế **fail-fast (fail nhanh)** của collection. Lấy `ArrayList` làm ví dụ, bên trong nó duy trì một counter `modCount`; mỗi lần cấu trúc collection bị thay đổi (chẳng hạn add hoặc delete), counter này tăng lên. Khi tạo `Iterator`, `modCount` hiện tại được ghi lại thành `expectedModCount`. Mỗi lần gọi `next()`, `Iterator` kiểm tra `modCount` có bằng `expectedModCount` hay không. Nếu không bằng, nghĩa là collection đã bị sửa theo cách khác trong lúc traverse, nên sẽ ném exception `java.util.ConcurrentModificationException`.
+Ở đây liên quan đến cơ chế **fail-fast (báo lỗi nhanh)** của collection. Lấy `ArrayList` làm ví dụ, bên trong nó duy trì một counter `modCount`; mỗi lần cấu trúc collection bị thay đổi (chẳng hạn add hoặc delete), counter này tăng lên. Khi tạo `Iterator`, `modCount` hiện tại được ghi lại thành `expectedModCount`. Mỗi lần gọi `next()`, `Iterator` kiểm tra `modCount` có bằng `expectedModCount` hay không. Nếu không bằng, nghĩa là collection đã bị sửa bằng cách khác trong lúc duyệt, nên sẽ ném exception `java.util.ConcurrentModificationException`.
 
-Vì vậy, khi `Iterator` hoạt động, object đang được iterate không được phép thay đổi. Tuy nhiên, bạn có thể dùng method `remove()` của chính `Iterator` để xóa object. Method `Iterator.remove()` sẽ đồng bộ cập nhật `expectedModCount` sau khi xóa element, từ đó tránh trigger exception này.
+Vì vậy, khi `Iterator` hoạt động, object đang được duyệt không được phép thay đổi. Tuy nhiên, bạn có thể dùng method `remove()` của chính `Iterator` để xóa object. Method `Iterator.remove()` sẽ cập nhật đồng thời `expectedModCount` sau khi xóa element, từ đó tránh kích hoạt exception này.
 
 ## Tổng kết
 
-Phần trên đã giới thiệu 12 Syntactic Sugar thường dùng trong Java. Syntactic Sugar chỉ là một dạng syntax được cung cấp để developer phát triển thuận tiện hơn. Tuy nhiên, syntax này chỉ developer nhận biết được. Muốn được thực thi, nó phải được desugar, tức chuyển thành syntax mà JVM nhận biết. Khi desugar những Syntactic Sugar này, bạn sẽ thấy các syntax thuận tiện thường dùng hằng ngày thực chất đều được cấu thành từ những syntax khác đơn giản hơn.
+Phần trên đã giới thiệu 12 Syntactic Sugar thường dùng trong Java. Syntactic Sugar chỉ là một dạng cú pháp được cung cấp để lập trình viên phát triển thuận tiện hơn. Tuy nhiên, cú pháp này chỉ lập trình viên nhận biết được. Muốn được thực thi, nó phải được desugar, tức chuyển thành cú pháp mà JVM nhận biết. Khi desugar những Syntactic Sugar này, bạn sẽ thấy các cú pháp thuận tiện thường dùng hằng ngày thực chất đều được cấu thành từ những cú pháp khác đơn giản hơn.
 
-Nhờ các Syntactic Sugar này, hiệu suất phát triển hằng ngày có thể được cải thiện đáng kể, nhưng cũng cần tránh lạm dụng. Tốt nhất nên tìm hiểu nguyên lý trước khi sử dụng để tránh gặp vấn đề.
+Nhờ các Syntactic Sugar này, năng suất phát triển hằng ngày có thể được cải thiện đáng kể, nhưng cũng cần tránh lạm dụng. Tốt nhất nên tìm hiểu nguyên lý trước khi sử dụng để tránh gặp vấn đề.
 
 <!-- @include: @article-footer.snippet.md -->
