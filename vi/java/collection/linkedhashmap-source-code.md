@@ -40,7 +40,7 @@ for (Map.Entry < String, String > entry: map.entrySet()) {
 }
 ```
 
-Output:
+Kết quả:
 
 ```java
 a:2
@@ -53,9 +53,9 @@ Có thể thấy thứ tự iteration của `LinkedHashMap` giống với thứ 
 
 ### Duyệt theo thứ tự access
 
-`LinkedHashMap` định nghĩa mode sắp xếp `accessOrder` (kiểu `boolean`, mặc định là `false`). Thứ tự access là `true`, còn thứ tự insertion là `false`.
+`LinkedHashMap` định nghĩa mode sắp xếp `accessOrder` (kiểu `boolean`, mặc định là `false`). `accessOrder` bằng `true` biểu thị thứ tự access, còn bằng `false` biểu thị thứ tự insertion.
 
-Để thực hiện iteration theo thứ tự access, ta có thể dùng constructor của `LinkedHashMap` nhận thuộc tính `accessOrder` và đặt `accessOrder` thành `true`, biểu thị rằng nó có thứ tự access.
+Để thực hiện iteration theo thứ tự access, ta có thể dùng constructor của `LinkedHashMap` truyền thuộc tính `accessOrder` và đặt `accessOrder` thành `true`, biểu thị rằng map có thứ tự access.
 
 ```java
 LinkedHashMap<Integer, String> map = new LinkedHashMap<>(16, 0.75f, true);
@@ -73,7 +73,7 @@ for (Map.Entry<Integer, String> entry : map.entrySet()) {
 }
 ```
 
-Output:
+Kết quả:
 
 ```java
 1 : one
@@ -116,7 +116,7 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
 }
 ```
 
-Code test như sau. Tác giả khởi tạo cache có capacity là 3, sau đó lần lượt thêm 5 phần tử.
+Code test như sau. Tác giả khởi tạo cache có capacity là 3, sau đó lần lượt thêm 4 phần tử.
 
 ```java
 LRUCache<Integer, String> cache = new LRUCache<>(3);
@@ -130,7 +130,7 @@ for (int i = 1; i <= 5; i++) {
 }
 ```
 
-Output:
+Kết quả:
 
 ```java
 null
@@ -146,7 +146,7 @@ Từ output có thể thấy, vì capacity của cache là 3 nên khi thêm ph�
 
 ### Thiết kế Node
 
-Trước khi thảo luận chính thức về `LinkedHashMap`, hãy nói về thiết kế của node `Entry` trong `LinkedHashMap`. Ta biết rằng các node trên bucket của `HashMap` chuyển thành linked list do collision sẽ chuyển linked list thành red-black tree khi thỏa mãn hai điều kiện sau:
+Trước khi thảo luận chính thức về `LinkedHashMap`, hãy nói về thiết kế của node `Entry` trong `LinkedHashMap`. Ta biết rằng các node trên bucket của `HashMap` được chuyển thành linked list do collision sẽ được chuyển thành red-black tree khi thỏa mãn hai điều kiện sau:
 
 1. ~~Số node trên linked list đạt ngưỡng treeification là 7, tức `TREEIFY_THRESHOLD - 1`.~~
 2. Capacity của bucket đạt capacity treeification tối thiểu, tức `MIN_TREEIFY_CAPACITY`.
@@ -159,7 +159,7 @@ Trước khi thảo luận chính thức về `LinkedHashMap`, hãy nói về th
 
 Trên nền `HashMap`, `LinkedHashMap` tạo một doubly linked list cho từng node trên bucket. Điều này khiến tree node sau khi chuyển thành red-black tree cũng phải có đặc điểm của doubly linked list, tức mỗi tree node cần có hai reference để lưu địa chỉ của predecessor và successor. Vì vậy, thiết kế class tree node `TreeNode` là một vấn đề khá khó.
 
-Về việc này, hãy xem class diagram của node giữa hai class. Có thể thấy:
+Về việc này, hãy xem class diagram các node của hai class. Có thể thấy:
 
 1. Inner class `Entry` của `LinkedHashMap` dựa trên nền tảng của `HashMap`, thêm các pointer `before` và `after` để node có đặc điểm của doubly linked list.
 2. Tree node `TreeNode` của `HashMap` kế thừa `Entry` của `LinkedHashMap`, class vốn có đặc điểm của doubly linked list.
@@ -192,7 +192,7 @@ static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
 }
 ```
 
-Về vấn đề này, hãy trích một đoạn comment của tác giả. Các tác giả cho rằng với thuật toán `hashCode` tốt, xác suất `HashMap` chuyển thành red-black tree không cao. Kể cả khi chuyển thành red-black tree và trở thành tree node, nó cũng có thể lại chuyển từ `TreeNode` thành `Node` do remove hoặc resize. Vì vậy, xác suất sử dụng `TreeNode` không lớn, và có thể chấp nhận sự lãng phí resource space ở mức này.
+Về vấn đề này, hãy trích một đoạn comment của tác giả. Các tác giả cho rằng với thuật toán `hashCode` tốt, xác suất `HashMap` chuyển thành red-black tree không cao. Kể cả khi chuyển thành red-black tree và trở thành tree node, nó cũng có thể lại chuyển từ `TreeNode` thành `Node` do remove hoặc resize. Vì vậy, xác suất sử dụng `TreeNode` không lớn, và có thể chấp nhận sự lãng phí bộ nhớ này.
 
 ```bash
 Because TreeNodes are about twice the size of regular nodes, we
@@ -206,7 +206,7 @@ nodes in bins follows a Poisson distribution
 
 ### Constructor
 
-`LinkedHashMap` có 4 implementation của constructor và cũng khá đơn giản: trực tiếp gọi constructor của parent class, tức `HashMap`, để hoàn tất initialization.
+`LinkedHashMap` có 4 constructor, implementation cũng khá đơn giản: trực tiếp gọi constructor của parent class, tức `HashMap`, để hoàn tất initialization.
 
 ```java
 public LinkedHashMap() {
@@ -273,7 +273,7 @@ void afterNodeAccess(Node < K, V > e) { // move node to last
         // Đặt pointer successor của node hiện tại thành null để ngắt liên kết với successor
         p.after = null;
 
-        // Nếu predecessor là null, nghĩa là node hiện tại là node đầu linked list, nên đặt successor thành node đầu
+        // Nếu predecessor là null, nghĩa là node hiện tại là node đầu linked list, nên để head trỏ đến successor
         if (b == null)
             head = a;
         else
@@ -308,7 +308,7 @@ Từ source code có thể thấy method `afterNodeAccess` thực hiện các th
 1. Nếu `accessOrder` là `true` và cuối linked list không phải node hiện tại p, ta cần chuyển node hiện tại đến cuối linked list.
 2. Lấy node hiện tại p, predecessor b và successor a của nó.
 3. Đặt pointer successor của node hiện tại p thành null để ngắt liên kết với successor p.
-4. Thử để predecessor trỏ đến successor. Nếu predecessor là null, nghĩa là node hiện tại p là node đầu linked list, nên trực tiếp đặt successor a thành node đầu, sau đó thêm p vào cuối a.
+4. Thử để predecessor trỏ đến successor. Nếu predecessor là null, nghĩa là node hiện tại p là node đầu linked list, nên trực tiếp đặt successor a thành node đầu, sau đó nối p vào cuối linked list.
 5. Tiếp tục để successor a trỏ đến predecessor b.
 6. Các thao tác trên đã liên kết predecessor với successor và tách node hiện tại p ra. Bước này thêm node hiện tại p vào cuối linked list. Nếu cuối linked list là null, nghĩa là linked list hiện tại chỉ có một node p, nên chỉ cần để head trỏ đến p.
 7. Các thao tác trên đã đưa p đến cuối linked list. Cuối cùng, chỉ cần để pointer tail, tức pointer trỏ đến cuối linked list, trỏ đến p.
@@ -335,15 +335,15 @@ Node<K,V> newNode(int hash, K key, V value, Node<K,V> next) {
 Node<K,V> newNode(int hash, K key, V value, Node<K,V> e) {
     LinkedHashMap.Entry<K,V> p =
         new LinkedHashMap.Entry<>(hash, key, value, e);
-    linkNodeLast(p);  // Điểm chính: link node mới vào cuối linked list
+    linkNodeLast(p);  // Điểm chính: nối node mới vào cuối linked list
     return p;
 }
 ```
 
-Implementation của method `linkNodeLast` như sau:
+Cách triển khai method `linkNodeLast` như sau:
 
 ```java
-// Link node vào cuối doubly linked list
+// Nối node vào cuối doubly linked list
 private void linkNodeLast(LinkedHashMap.Entry<K,V> p) {
     LinkedHashMap.Entry<K,V> last = tail;
     tail = p;  // tail trỏ đến node mới
@@ -524,7 +524,7 @@ Có thể kiểm chứng điều này từ iterator của hai class. Trước ti
  // Lấy Node tiếp theo
  final Node < K, V > nextNode() {
      Node < K, V > [] t;
-     // Lấy next của phần tử tiếp theo
+     // Lấy node tiếp theo
      Node < K, V > e = next;
      if (modCount != expectedModCount)
          throw new ConcurrentModificationException();
