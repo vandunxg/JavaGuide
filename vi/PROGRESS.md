@@ -3,7 +3,7 @@
 > **Nguồn sự thật duy nhất** về trạng thái dịch. Agent/người nào tiếp tục công việc: **đọc file này đầu tiên**.
 > Luật dịch: [`../CLAUDE.md`](../CLAUDE.md) · Thuật ngữ: [`GLOSSARY.md`](GLOSSARY.md)
 
-**Nội dung**: 12/455 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
+**Nội dung**: 106/455 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
 
 Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
@@ -11,7 +11,7 @@ Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
 ## 🚦 BẮT ĐẦU TỪ ĐÂY
 
-**File tiếp theo cần dịch**: `roadmap/java-to-ai-roadmap.md` (63KB)
+**File tiếp theo cần dịch**: `cs-basics/network/other-network-questions.md`
 
 Xem toàn bộ việc còn lại: `make sync`
 
@@ -79,122 +79,134 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 - [x] `snippets/rag-project.snippet.md`
 - [x] `snippets/yuanma.snippet.md`
 
-## Giai đoạn 1 — Trục lộ trình học · 4/8
+## Giai đoạn 1 — Trục lộ trình học · 8/8 ✅
 
 - [x] `README.md` — trang chủ
 - [x] `home.md` — mục lục tổng
 - [x] `roadmap/README.md` — tổng hợp lộ trình
 - [x] `roadmap/java-roadmap.md` — ⭐ lộ trình Java backend (77KB)
-- [ ] `roadmap/java-to-ai-roadmap.md` — lộ trình AI cho dev Java/Go (63KB)
-- [ ] `roadmap/backend-to-ai-agent-roadmap.md`
-- [ ] `roadmap/full-stack-roadmap.md`
-- [ ] `roadmap/test-development-roadmap.md`
+- [x] `roadmap/java-to-ai-roadmap.md` — lộ trình AI cho dev Java/Go (63KB)
+- [x] `roadmap/backend-to-ai-agent-roadmap.md` — đề xuất chuyển từ backend sang AI Agent
+- [x] `roadmap/full-stack-roadmap.md` — lộ trình full-stack
+- [x] `roadmap/test-development-roadmap.md` — lộ trình phát triển và kiểm thử
 
-## Giai đoạn 2 — Java core · 0/80
+## Giai đoạn 2 — Java core · 3/80
 
 ### 2.0 Mục lục
 
-- [ ] `java/README.md`
+- [x] `java/README.md`
 
 ### 2.1 Java Basics (15)
 
-- [ ] `java/basis/README.md`
-- [ ] `java/basis/java-basic-questions-01.md` (70KB)
-- [ ] `java/basis/java-basic-questions-02.md` (47KB)
-- [ ] `java/basis/java-basic-questions-03.md`
-- [ ] `java/basis/java-keyword-summary.md`
-- [ ] `java/basis/why-there-only-value-passing-in-java.md`
-- [ ] `java/basis/generics-and-wildcards.md`
-- [ ] `java/basis/reflection.md`
-- [ ] `java/basis/proxy.md`
-- [ ] `java/basis/spi.md`
-- [ ] `java/basis/serialization.md`
-- [ ] `java/basis/bigdecimal.md`
-- [ ] `java/basis/money-long-vs-bigdecimal.md`
-- [ ] `java/basis/unsafe.md`
-- [ ] `java/basis/syntactic-sugar.md`
+- [x] `java/basis/README.md`
+- [x] `java/basis/java-basic-questions-01.md` (70KB)
+- [x] `java/basis/java-basic-questions-02.md` (47KB)
+- [x] `java/basis/java-basic-questions-03.md`
+- [x] `java/basis/java-keyword-summary.md`
+- [x] `java/basis/why-there-only-value-passing-in-java.md`
+- [x] `java/basis/generics-and-wildcards.md`
+- [x] `java/basis/reflection.md`
+- [x] `java/basis/proxy.md`
+- [x] `java/basis/spi.md`
+- [x] `java/basis/serialization.md`
+- [x] `java/basis/bigdecimal.md`
+- [x] `java/basis/money-long-vs-bigdecimal.md`
+- [x] `java/basis/unsafe.md`
+- [x] `java/basis/syntactic-sugar.md`
 
-### 2.2 Collection (13)
+### 2.2 Collection (13) ✅
 
-- [ ] `java/collection/README.md`
-- [ ] `java/collection/java-collection-questions-01.md`
-- [ ] `java/collection/java-collection-questions-02.md`
-- [ ] `java/collection/java-collection-precautions-for-use.md`
-- [ ] `java/collection/arraylist-source-code.md`
-- [ ] `java/collection/linkedlist-source-code.md`
-- [ ] `java/collection/hashmap-source-code.md`
-- [ ] `java/collection/concurrent-hash-map-source-code.md`
-- [ ] `java/collection/linkedhashmap-source-code.md`
-- [ ] `java/collection/copyonwritearraylist-source-code.md`
-- [ ] `java/collection/arrayblockingqueue-source-code.md`
-- [ ] `java/collection/priorityqueue-source-code.md`
-- [ ] `java/collection/delayqueue-source-code.md`
+- [x] `java/collection/README.md`
+- [x] `java/collection/java-collection-questions-01.md`
+- [x] `java/collection/java-collection-questions-02.md`
+- [x] `java/collection/java-collection-precautions-for-use.md`
+- [x] `java/collection/arraylist-source-code.md`
+- [x] `java/collection/linkedlist-source-code.md`
+- [x] `java/collection/hashmap-source-code.md`
+- [x] `java/collection/concurrent-hash-map-source-code.md`
+- [x] `java/collection/linkedhashmap-source-code.md`
+- [x] `java/collection/copyonwritearraylist-source-code.md`
+- [x] `java/collection/arrayblockingqueue-source-code.md`
+- [x] `java/collection/priorityqueue-source-code.md`
+- [x] `java/collection/delayqueue-source-code.md`
 
-### 2.3 Concurrent (17)
+### 2.3 Concurrent (17) ✅
 
-- [ ] `java/concurrent/README.md`
-- [ ] `java/concurrent/java-concurrent-questions-01.md`
-- [ ] `java/concurrent/java-concurrent-questions-02.md` (66KB)
-- [ ] `java/concurrent/java-concurrent-questions-03.md` (97KB)
-- [ ] `java/concurrent/jmm.md`
-- [ ] `java/concurrent/java-lock.md`
-- [ ] `java/concurrent/optimistic-lock-and-pessimistic-lock.md`
-- [ ] `java/concurrent/cas.md`
-- [ ] `java/concurrent/aqs.md` (104KB)
-- [ ] `java/concurrent/reentrantlock.md` (48KB)
-- [ ] `java/concurrent/atomic-classes.md`
-- [ ] `java/concurrent/threadlocal.md`
-- [ ] `java/concurrent/java-thread-pool-summary.md` (52KB)
-- [ ] `java/concurrent/java-thread-pool-best-practices.md`
-- [ ] `java/concurrent/java-concurrent-collections.md`
-- [ ] `java/concurrent/completablefuture-intro.md`
-- [ ] `java/concurrent/virtual-thread.md`
+- [x] `java/concurrent/README.md`
+- [x] `java/concurrent/java-concurrent-questions-01.md`
+- [x] `java/concurrent/java-concurrent-questions-02.md` (66KB)
+- [x] `java/concurrent/java-concurrent-questions-03.md` (97KB)
+- [x] `java/concurrent/jmm.md`
+- [x] `java/concurrent/java-lock.md`
+- [x] `java/concurrent/optimistic-lock-and-pessimistic-lock.md`
+- [x] `java/concurrent/cas.md`
+- [x] `java/concurrent/aqs.md` (104KB)
+- [x] `java/concurrent/reentrantlock.md` (48KB)
+- [x] `java/concurrent/atomic-classes.md`
+- [x] `java/concurrent/threadlocal.md`
+- [x] `java/concurrent/java-thread-pool-summary.md` (52KB)
+- [x] `java/concurrent/java-thread-pool-best-practices.md`
+- [x] `java/concurrent/java-concurrent-collections.md`
+- [x] `java/concurrent/completablefuture-intro.md`
+- [x] `java/concurrent/virtual-thread.md`
 
-### 2.4 JVM (11)
+### 2.4 JVM (11) ✅
 
-- [ ] `java/jvm/README.md`
-- [ ] `java/jvm/memory-area.md`
-- [ ] `java/jvm/jvm-garbage-collection.md`
-- [ ] `java/jvm/class-file-structure.md`
-- [ ] `java/jvm/class-loading-process.md`
-- [ ] `java/jvm/classloader.md`
-- [ ] `java/jvm/jvm-parameters-intro.md`
-- [ ] `java/jvm/jvm-intro.md`
-- [ ] `java/jvm/jdk-monitoring-and-troubleshooting-tools.md`
-- [ ] `java/jvm/jvm-in-action.md`
-- [ ] `java/jvm/jvm-interview-questions.md`
+- [x] `java/jvm/README.md`
+- [x] `java/jvm/memory-area.md`
+- [x] `java/jvm/jvm-garbage-collection.md`
+- [x] `java/jvm/class-file-structure.md`
+- [x] `java/jvm/class-loading-process.md`
+- [x] `java/jvm/classloader.md`
+- [x] `java/jvm/jvm-parameters-intro.md`
+- [x] `java/jvm/jvm-intro.md`
+- [x] `java/jvm/jdk-monitoring-and-troubleshooting-tools.md`
+- [x] `java/jvm/jvm-in-action.md`
+- [x] `java/jvm/jvm-interview-questions.md`
 
-### 2.5 IO (5)
+### 2.5 IO (5) ✅
 
-- [ ] `java/io/README.md`
-- [ ] `java/io/io-basis.md`
-- [ ] `java/io/io-design-patterns.md`
-- [ ] `java/io/io-model.md`
-- [ ] `java/io/nio-basis.md`
+- [x] `java/io/README.md`
+- [x] `java/io/io-basis.md`
+- [x] `java/io/io-design-patterns.md`
+- [x] `java/io/io-model.md`
+- [x] `java/io/nio-basis.md`
 
-### 2.6 New Features (18)
+### 2.6 New Features (18) ✅
 
-- [ ] `java/new-features/README.md`
-- [ ] `java/new-features/java8-common-new-features.md`
-- [ ] `java/new-features/java8-tutorial-translate.md`
-- [ ] `java/new-features/java9.md`
-- [ ] `java/new-features/java10.md`
-- [ ] `java/new-features/java11.md`
-- [ ] `java/new-features/java12-13.md`
-- [ ] `java/new-features/java14-15.md`
-- [ ] `java/new-features/java16.md`
-- [ ] `java/new-features/java17.md`
-- [ ] `java/new-features/java18.md`
-- [ ] `java/new-features/java19.md`
-- [ ] `java/new-features/java20.md`
-- [ ] `java/new-features/java21.md`
-- [ ] `java/new-features/java22-23.md`
-- [ ] `java/new-features/java24.md`
-- [ ] `java/new-features/java25.md`
-- [ ] `java/new-features/java26.md`
+- [x] `java/new-features/README.md`
+- [x] `java/new-features/java8-common-new-features.md`
+- [x] `java/new-features/java8-tutorial-translate.md`
+- [x] `java/new-features/java9.md`
+- [x] `java/new-features/java10.md`
+- [x] `java/new-features/java11.md`
+- [x] `java/new-features/java12-13.md`
+- [x] `java/new-features/java14-15.md`
+- [x] `java/new-features/java16.md`
+- [x] `java/new-features/java17.md`
+- [x] `java/new-features/java18.md`
+- [x] `java/new-features/java19.md`
+- [x] `java/new-features/java20.md`
+- [x] `java/new-features/java21.md`
+- [x] `java/new-features/java22-23.md`
+- [x] `java/new-features/java24.md`
+- [x] `java/new-features/java25.md`
+- [x] `java/new-features/java26.md`
 
 ---
 
-## Giai đoạn 3-7 — Chưa mở
+## Giai đoạn 3 — CS basics · 10 file đã dịch
 
-Sẽ thêm chi tiết khi Giai đoạn 2 hoàn tất. Thứ tự: `cs-basics/` → `database/` → `system-design/` → `distributed-system/` + `high-performance/` + `high-availability/` → `ai/`, `ai-coding/`, `tools/`, còn lại.
+- [x] `cs-basics/README.md`
+- [x] `cs-basics/network/README.md`
+- [x] `cs-basics/network/osi-and-tcp-ip-model.md`
+- [x] `cs-basics/network/application-layer-protocol.md`
+- [x] `cs-basics/network/tcp-connection-and-disconnection.md`
+- [x] `cs-basics/network/tcp-byte-stream-udp-datagram.md`
+- [x] `cs-basics/network/http1.0-vs-http1.1.md`
+- [x] `cs-basics/operating-system/README.md`
+- [x] `cs-basics/algorithms/README.md`
+- [x] `cs-basics/data-structure/README.md`
+- [ ] `cs-basics/network/other-network-questions.md` — file tiếp theo
+
+Thứ tự tiếp theo: `cs-basics/` → `database/` → `system-design/` → `distributed-system/` + `high-performance/` + `high-availability/` → `ai/`, `ai-coding/`, `tools/`, còn lại.
