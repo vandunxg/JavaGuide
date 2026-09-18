@@ -22,7 +22,7 @@ Compiler có thể kiểm tra tham số generic, đồng thời tham số generi
 ArrayList<E> extends AbstractList<E>
 ```
 
-Ngoài ra, kiểu trả về của `List` raw là `Object`, cần chuyển kiểu thủ công mới có thể sử dụng; sau khi dùng Generics, compiler sẽ tự động chuyển kiểu.
+Ngoài ra, `List` raw có kiểu trả về là `Object`, cần chuyển kiểu thủ công mới có thể sử dụng; sau khi dùng Generics, compiler sẽ tự động chuyển kiểu.
 
 ### Có những cách sử dụng Generics nào?
 
@@ -31,7 +31,7 @@ Generics thường có ba cách sử dụng: **generic class**, **generic interf
 **1. Generic class**:
 
 ```java
-// T ở đây có thể viết thành bất kỳ identifier nào, các tham số thường gặp như T, E, K, V thường được dùng để biểu thị generic
+// T ở đây có thể viết thành bất kỳ identifier nào; các type parameter thường gặp như T, E, K, V được dùng để biểu thị generic
 // Khi khởi tạo generic class, bắt buộc phải chỉ định kiểu cụ thể của T
 public class Generic<T>{
 
@@ -115,7 +115,7 @@ printArray( stringArray  );
 
 ### Cơ chế type erasure của Generics là gì? Tại sao phải xóa kiểu?
 
-**Java Generics được triển khai thông qua type erasure: instance của generic không giữ lại type argument cụ thể khi runtime, nhưng class file vẫn có thể giữ thông tin khai báo generic trong các attribute như `Signature`, và có thể đọc thông qua reflection API.**
+**Java Generics được triển khai thông qua type erasure: generic instance không giữ lại type argument cụ thể khi runtime, nhưng class file vẫn có thể giữ thông tin khai báo generic trong các attribute như `Signature` và có thể đọc thông qua reflection API.**
 
 Trong quá trình compile, compiler sẽ tự động xóa `T` của generic thành `Object`, hoặc xóa `T extends xxx` thành kiểu giới hạn `xxx`.
 
@@ -234,7 +234,7 @@ Không thể compile, vì static field và static method của class không th�
 
 ### Wildcard là gì? Có tác dụng gì?
 
-Generic type là cố định, nên trong một số trường hợp sử dụng không đủ linh hoạt; khi đó wildcard xuất hiện! Wildcard cho phép type parameter thay đổi, dùng để giải quyết vấn đề Generics không thể covariance.
+Generic type là cố định, nên trong một số trường hợp sử dụng không đủ linh hoạt; khi đó wildcard xuất hiện! Wildcard cho phép type parameter thay đổi, dùng để giải quyết vấn đề generic type không hỗ trợ covariance.
 
 Ví dụ:
 
@@ -275,7 +275,7 @@ list2.add("sss");//thông báo cảnh báo
 
 ### Upper bounded wildcard là gì? Lower bounded wildcard là gì?
 
-Khi sử dụng Generics, chúng ta còn có thể giới hạn upper bound và lower bound cho generic type argument được truyền vào, chẳng hạn: **type argument chỉ được truyền vào là superclass hoặc subclass của một kiểu nhất định**.
+Khi sử dụng Generics, có thể giới hạn upper bound và lower bound cho generic type argument được truyền vào, chẳng hạn: **type argument chỉ được truyền vào là superclass hoặc subclass của một kiểu nhất định**.
 
 **Upper bounded wildcard `extends`** biểu thị rằng type argument phải là kiểu được chỉ định hoặc subclass của kiểu đó.
 
@@ -286,7 +286,7 @@ Ví dụ:
 <? extends Person>
 ```
 
-Type bound có thể thiết lập nhiều kiểu, đồng thời cũng có thể giới hạn kiểu `T`.
+Có thể thiết lập nhiều type bound, đồng thời cũng có thể giới hạn kiểu `T`.
 
 ```java
 <T extends T1 & T2>
