@@ -26,7 +26,7 @@ Như hình dưới đây, trong Windows, bằng cách xem Task Manager, chúng t
 
 #### Thread là gì?
 
-Thread tương tự process, nhưng thread là một đơn vị thực thi nhỏ hơn process. Một process có thể tạo ra nhiều thread trong quá trình thực thi. Khác với process, nhiều thread cùng loại chia sẻ tài nguyên **heap** và **method area** của process, nhưng mỗi thread có **program counter**, **virtual machine stack** và **native method stack** riêng. Vì vậy, khi hệ thống tạo một thread hoặc chuyển đổi giữa các thread, chi phí sẽ nhỏ hơn nhiều so với process. Cũng vì lý do đó, thread còn được gọi là process nhẹ.
+Thread tương tự process, nhưng thread là một đơn vị thực thi nhỏ hơn process. Một process có thể tạo ra nhiều thread trong quá trình thực thi. Khác với process, nhiều thread trong cùng process chia sẻ tài nguyên **heap** và **method area**, nhưng mỗi thread có **program counter**, **virtual machine stack** và **native method stack** riêng. Vì vậy, khi hệ thống tạo một thread hoặc chuyển đổi giữa các thread, chi phí sẽ nhỏ hơn nhiều so với process. Cũng vì lý do đó, thread còn được gọi là process nhẹ.
 
 Chương trình Java vốn đã là chương trình multi-thread. Chúng ta có thể dùng JMX để xem một chương trình Java thông thường có những thread nào, code như sau.
 
@@ -59,18 +59,18 @@ Từ output trên có thể thấy: **một chương trình Java chạy đồng 
 
 ### Thread Java và thread của hệ điều hành khác nhau thế nào?
 
-Các JDK đời đầu từng dùng green thread (Green Threads) để triển khai thread cấp user. Sau đó, trong HotSpot, thread truyền thống được tạo bằng `new Thread()` dùng platform thread (Platform Thread), platform thread thường ánh xạ theo tỷ lệ 1:1 tới thread của hệ điều hành và do hệ điều hành điều phối. Virtual thread (Virtual Thread) được Java 21 chính thức giới thiệu lại do JVM điều phối; một lượng lớn virtual thread có thể dùng chung ít platform thread làm thread mang, vì vậy không thể tiếp tục đồng nhất mọi thread Java với thread của hệ điều hành.
+Các JDK đời đầu từng dùng green thread (Green Threads) để triển khai thread cấp user. Sau đó, trong HotSpot, thread truyền thống được tạo bằng `new Thread()` dùng platform thread (Platform Thread), platform thread thường ánh xạ theo tỷ lệ 1:1 tới thread của hệ điều hành và do hệ điều hành điều phối. Virtual thread (Virtual Thread) được Java 21 chính thức giới thiệu và do JVM điều phối; một lượng lớn virtual thread có thể dùng chung một số platform thread làm carrier thread, vì vậy không thể tiếp tục đồng nhất mọi thread Java với thread của hệ điều hành.
 
 Ở trên chúng ta đã nhắc đến user thread và kernel thread. Vì nhiều độc giả chưa hiểu rõ sự khác nhau giữa hai loại này, dưới đây là phần giới thiệu ngắn:
 
-- User thread: thread do chương trình ở user space quản lý và điều phối, chạy trong user space (dành riêng cho application).
+- User thread: thread do chương trình ở user space quản lý và điều phối, chạy trong user space (dành riêng cho ứng dụng).
 - Kernel thread: thread do kernel của hệ điều hành quản lý và điều phối, chạy trong kernel space (chỉ chương trình kernel mới có thể truy cập).
 
 Tóm tắt ngắn gọn sự khác nhau và đặc điểm của user thread và kernel thread: user-level thread thường được runtime điều phối trong user space, chi phí tạo và chuyển đổi thấp hơn; khả năng tận dụng multi-core phụ thuộc vào mô hình ánh xạ giữa user thread và kernel thread, mô hình many-to-one không thể tận dụng multi-core để chạy song song, còn mô hình many-to-many thì có thể. Kernel thread do hệ điều hành điều phối, chi phí tạo và chuyển đổi thường cao hơn, nhưng có thể trực tiếp tận dụng multi-core.
 
 Tóm tắt mối quan hệ giữa thread Java và thread hệ điều hành trong một câu: **platform thread thường ánh xạ tới thread hệ điều hành, còn virtual thread do JVM điều phối và được gắn vào platform thread để thực thi**.
 
-Thread model là cách liên kết giữa user thread và kernel thread. Có ba thread model thường gặp:
+Thread model là cách liên kết giữa user thread và kernel thread. Có ba mô hình thread thường gặp:
 
 1. One-to-one (một user thread tương ứng với một kernel thread)
 2. Many-to-one (nhiều user thread ánh xạ tới một kernel thread)
@@ -98,7 +98,7 @@ Hãy suy nghĩ về câu hỏi sau: tại sao **program counter**, **virtual mac
 
 Program counter chủ yếu có hai tác dụng sau:
 
-1. Bytecode interpreter thay đổi program counter để lần lượt đọc instruction, từ đó thực hiện điều khiển luồng code, chẳng hạn như thực thi tuần tự, lựa chọn, vòng lặp và xử lý exception.
+1. Bytecode interpreter thay đổi program counter để lần lượt đọc instruction, từ đó điều khiển flow của code, chẳng hạn như thực thi tuần tự, lựa chọn, vòng lặp và xử lý exception.
 2. Trong trường hợp multi-thread, program counter dùng để ghi lại vị trí thread hiện đang thực thi, nhờ đó khi thread được chuyển về có thể biết lần trước thread đó đã chạy đến đâu.
 
 Cần lưu ý rằng nếu thực thi native method thì program counter ghi địa chỉ undefined; chỉ khi thực thi code Java, program counter mới ghi địa chỉ của instruction tiếp theo.
@@ -165,7 +165,7 @@ Trong quá trình thực thi, thread có điều kiện và trạng thái chạy
 
 Ba trường hợp đầu đều gây ra thread switch. Thread switch nghĩa là phải lưu context của thread hiện tại để khôi phục khi thread đó lần sau chiếm CPU, đồng thời load context của thread tiếp theo sẽ chiếm CPU. Đây chính là **context switch**.
 
-Context switch là chức năng cơ bản của hệ điều hành hiện đại. Vì mỗi lần đều cần lưu và khôi phục information, CPU, memory và các system resource khác phải xử lý, nên hiệu suất sẽ bị hao tổn nhất định. Nếu chuyển đổi quá thường xuyên, hiệu suất tổng thể sẽ thấp.
+Context switch là chức năng cơ bản của hệ điều hành hiện đại. Mỗi lần chuyển đổi đều cần lưu và khôi phục information, tiêu tốn CPU, memory và các system resource khác, nên hiệu suất sẽ bị hao tổn nhất định. Nếu chuyển đổi quá thường xuyên, hiệu suất tổng thể sẽ thấp.
 
 ### So sánh method Thread#sleep() và Object#wait()
 
@@ -184,7 +184,7 @@ Context switch là chức năng cơ bản của hệ điều hành hiện đại
 
 Câu hỏi tương tự: **Tại sao method `sleep()` được định nghĩa trong `Thread`?**
 
-Vì `sleep()` khiến thread hiện tại tạm dừng thực thi, không liên quan đến object class và cũng không cần lấy object lock.
+Vì `sleep()` khiến thread hiện tại tạm dừng thực thi, không liên quan đến object và cũng không cần lấy object lock.
 
 ### Có thể gọi trực tiếp method run của class Thread không?
 
@@ -212,24 +212,24 @@ Khi tạo một `Thread`, thread đi vào trạng thái mới tạo. Gọi metho
 
 Trước hết, xét từ góc độ tổng thể:
 
-- **Từ tầng dưới của computer:** Thread có thể được ví như process nhẹ, là đơn vị nhỏ nhất để chương trình thực thi; chi phí chuyển đổi và scheduling giữa các thread nhỏ hơn rất nhiều so với process. Ngoài ra, thời đại multi-core CPU có nghĩa là nhiều thread có thể chạy đồng thời, giúp giảm chi phí context switch của thread.
+- **Từ góc nhìn tầng dưới của máy tính:** Thread có thể được ví như process nhẹ, là đơn vị nhỏ nhất để chương trình thực thi; chi phí chuyển đổi và scheduling giữa các thread nhỏ hơn rất nhiều so với process. Ngoài ra, thời đại multi-core CPU có nghĩa là nhiều thread có thể chạy đồng thời, giúp giảm chi phí context switch của thread.
 - **Từ xu hướng phát triển Internet hiện đại:** Các system hiện nay thường yêu cầu concurrency ở mức hàng triệu, thậm chí hàng chục triệu. Lập trình concurrent bằng multi-thread chính là nền tảng để phát triển system high-concurrency; tận dụng tốt cơ chế multi-thread có thể nâng cao đáng kể concurrency và performance tổng thể của system.
 
 Tiếp tục đi sâu từ tầng dưới của computer:
 
-- **Thời đại single-core:** Trong thời đại single-core, multi-thread chủ yếu nhằm nâng cao hiệu suất process đơn tận dụng CPU và system I/O. Giả sử chỉ chạy một process Java, khi request I/O, nếu process Java chỉ có một thread thì khi thread này bị I/O block, toàn bộ process cũng bị block. CPU và thiết bị I/O chỉ có một bên đang chạy, nên có thể nói đơn giản rằng hiệu suất tổng thể của system chỉ là 50%. Khi dùng multi-thread, một thread bị I/O block thì các thread khác vẫn có thể tiếp tục dùng CPU, từ đó nâng cao hiệu suất tổng thể của process Java khi tận dụng system resource.
+- **Thời đại single-core:** Trong thời đại single-core, multi-thread chủ yếu nhằm nâng cao hiệu suất process đơn tận dụng CPU và system I/O. Giả sử chỉ chạy một process Java, khi request I/O, nếu process Java chỉ có một thread thì khi thread này bị I/O block, toàn bộ process cũng bị block. CPU và thiết bị I/O chỉ có một bên hoạt động, nên có thể nói đơn giản rằng hiệu suất tổng thể của system chỉ là 50%. Khi dùng multi-thread, một thread bị I/O block thì các thread khác vẫn có thể tiếp tục dùng CPU, từ đó nâng cao hiệu suất tổng thể của process Java khi tận dụng system resource.
 - **Thời đại multi-core:** Trong thời đại multi-core, multi-thread chủ yếu nhằm nâng cao khả năng process tận dụng multi-core CPU. Ví dụ, nếu cần tính một task phức tạp mà chỉ dùng một thread thì dù system có bao nhiêu CPU core cũng chỉ một CPU core được sử dụng. Nếu tạo nhiều thread, các thread này có thể được ánh xạ đến nhiều CPU core ở tầng dưới để thực thi. Khi các thread trong task không tranh chấp resource, hiệu suất thực thi task sẽ tăng đáng kể, xấp xỉ (thời gian thực thi trên single-core / số CPU core).
 
 ### ⭐️ Single-core CPU có hỗ trợ multi-thread Java không?
 
 Single-core CPU có hỗ trợ multi-thread Java. Hệ điều hành dùng cơ chế round-robin theo time slice để phân phối thời gian CPU cho các thread khác nhau. Dù single-core CPU chỉ có thể thực thi một task mỗi lần, việc chuyển đổi nhanh giữa nhiều thread khiến user cảm thấy nhiều task đang diễn ra đồng thời.
 
-Nhân tiện, hãy nói sơ qua về cách Java scheduling thread.
+Nhân tiện, hãy nói sơ qua về cách Java điều phối thread.
 
 Hệ điều hành chủ yếu dùng hai cách scheduling thread để quản lý việc thực thi multi-thread:
 
 - **Preemptive Scheduling:** Hệ điều hành quyết định khi nào tạm dừng thread đang chạy và chuyển sang thread khác. Việc chuyển đổi thường được kích hoạt bởi system clock interrupt (round-robin theo time slice) hoặc event ưu tiên cao khác (chẳng hạn I/O operation hoàn tất). Cách này có chi phí context switch, nhưng tính công bằng và hiệu suất tận dụng CPU tốt hơn, ít bị block.
-- **Cooperative Scheduling:** Sau khi thực thi xong, thread chủ động thông báo cho system chuyển sang thread khác. Cách này có thể giảm chi phí performance do context switch, nhưng tính công bằng kém hơn và dễ bị block.
+- **Cooperative Scheduling:** Sau khi thực thi xong, thread chủ động thông báo cho system chuyển sang thread khác. Cách này có thể giảm overhead do context switch, nhưng tính công bằng kém hơn và dễ bị block.
 
 Cách Java dùng để scheduling thread là preemptive. Nói cách khác, bản thân JVM không phụ trách scheduling thread mà ủy thác việc scheduling thread cho hệ điều hành. Hệ điều hành thường dựa trên thread priority và time slice để scheduling việc thực thi thread; thread có priority cao thường có nhiều cơ hội nhận time slice CPU hơn.
 
@@ -246,7 +246,7 @@ Vì vậy, với single-core CPU, nếu task là CPU-intensive thì tạo quá n
 
 ### Dùng multi-thread có thể gây ra vấn đề gì?
 
-Mục đích của lập trình concurrency là nâng cao hiệu suất thực thi chương trình và từ đó tăng tốc độ chạy chương trình, nhưng lập trình concurrency không phải lúc nào cũng làm chương trình chạy nhanh hơn; ngoài ra còn có thể gặp nhiều vấn đề như memory leak, deadlock, thread không an toàn và các vấn đề khác.
+Mục đích của lập trình concurrency là nâng cao hiệu suất thực thi chương trình và từ đó tăng tốc độ chạy chương trình, nhưng lập trình concurrency không phải lúc nào cũng làm chương trình chạy nhanh hơn; ngoài ra còn có thể gặp nhiều vấn đề như memory leak, deadlock, thread-unsafe và các vấn đề khác.
 
 ### Hiểu thread-safe và thread-unsafe như thế nào?
 
@@ -335,7 +335,7 @@ Trước hết, tìm thư mục bin của JDK, tìm jconsole rồi double-click 
 
 ![jconsole](https://oss.javaguide.cn/github/javaguide/java/concurrent/jdk-home-bin-jconsole.png)
 
-Với user MAC, có thể dùng `/usr/libexec/java_home -V` để xem thư mục cài JDK. Sau khi tìm được, dùng `open . + đường dẫn thư mục` để mở. Ví dụ, path JDK trên máy tôi là:
+Với người dùng Mac, có thể dùng `/usr/libexec/java_home -V` để xem thư mục cài JDK. Sau khi tìm được, dùng `open . + đường dẫn thư mục` để mở. Ví dụ, path JDK trên máy tôi là:
 
 ```bash
  open . /Users/guide/Library/Java/JavaVirtualMachines/corretto-1.8.0_252/Contents/Home
@@ -395,6 +395,6 @@ Process finished with exit code 0
 
 Hãy phân tích vì sao code trên tránh được deadlock.
 
-Thread 1 lấy monitor lock của `resource1` trước, lúc này thread 2 không thể lấy được lock đó. Sau đó thread 1 lấy monitor lock của `resource2` và có thể lấy thành công. Tiếp theo thread 1 release việc chiếm giữ monitor lock của `resource1` và `resource2`, thread 2 lấy được lock và có thể thực thi. Như vậy, điều kiện circular wait bị phá vỡ nên deadlock được tránh.
+Thread 1 lấy monitor lock của `resource1` trước, lúc này thread 2 không thể lấy được lock đó. Sau đó thread 1 lấy monitor lock của `resource2` và có thể lấy thành công. Tiếp theo thread 1 giải phóng monitor lock của `resource1` và `resource2`, thread 2 lấy được lock và có thể thực thi. Như vậy, điều kiện circular wait bị phá vỡ nên deadlock được tránh.
 
 <!-- @include: @article-footer.snippet.md -->
