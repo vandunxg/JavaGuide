@@ -16,26 +16,26 @@ head:
 
 ### ⭐️ Sự khác nhau giữa lập trình hướng đối tượng và lập trình hướng thủ tục
 
-Lập trình hướng thủ tục (Procedural-Oriented Programming, POP) và lập trình hướng đối tượng (Object-Oriented Programming, OOP) là hai paradigm lập trình phổ biến. Điểm khác nhau chính giữa chúng nằm ở cách giải quyết vấn đề:
+Lập trình hướng thủ tục (Procedural-Oriented Programming, POP) và lập trình hướng đối tượng (Object-Oriented Programming, OOP) là hai mô hình lập trình phổ biến. Điểm khác nhau chính giữa chúng nằm ở cách giải quyết vấn đề:
 
 - **Lập trình hướng thủ tục (POP)**: Lập trình hướng thủ tục chia quá trình giải quyết vấn đề thành từng method, rồi giải quyết vấn đề thông qua việc thực thi từng method.
 - **Lập trình hướng đối tượng (OOP)**: Lập trình hướng đối tượng trước hết trừu tượng hóa các object, sau đó giải quyết vấn đề bằng cách để object thực thi method.
 
-So với POP, chương trình được phát triển bằng OOP thường có các ưu điểm sau:
+So với POP, chương trình phát triển bằng OOP thường có các ưu điểm sau:
 
 - **Dễ bảo trì**: Nhờ cấu trúc và tính encapsulation tốt, chương trình OOP thường dễ bảo trì hơn.
 - **Dễ tái sử dụng**: Thông qua inheritance và polymorphism, thiết kế OOP khiến code có tính tái sử dụng cao hơn, thuận tiện mở rộng chức năng.
-- **Dễ mở rộng**: Thiết kế module hóa khiến việc mở rộng hệ thống trở nên dễ dàng và linh hoạt hơn.
+- **Dễ mở rộng**: Thiết kế module hóa giúp mở rộng hệ thống dễ dàng và linh hoạt hơn.
 
 Cách lập trình POP thường đơn giản và trực tiếp hơn, phù hợp để xử lý một số nhiệm vụ tương đối đơn giản.
 
-Chênh lệch performance giữa POP và OOP chủ yếu phụ thuộc vào cơ chế runtime của chúng, chứ không chỉ phụ thuộc vào bản thân paradigm lập trình. Vì vậy, so sánh performance một cách đơn giản giữa hai bên là một ngộ nhận phổ biến (issue liên quan: [Lập trình hướng thủ tục: performance của lập trình hướng thủ tục cao hơn lập trình hướng đối tượng??](https://github.com/Snailclimb/JavaGuide/issues/431)).
+Chênh lệch performance giữa POP và OOP chủ yếu phụ thuộc vào cơ chế runtime, chứ không chỉ vào bản thân mô hình lập trình. Vì vậy, so sánh performance một cách đơn giản giữa hai bên là một ngộ nhận phổ biến (issue liên quan: [Lập trình hướng thủ tục: performance của lập trình hướng thủ tục cao hơn lập trình hướng đối tượng??](https://github.com/Snailclimb/JavaGuide/issues/431)).
 
 ![So sánh performance giữa POP và OOP là không phù hợp](https://oss.javaguide.cn/github/javaguide/java/basis/pop-vs-oop-performance.png)
 
-Khi lựa chọn paradigm lập trình, performance không phải là yếu tố cân nhắc duy nhất. Khả năng bảo trì, khả năng mở rộng và hiệu suất phát triển cũng quan trọng không kém.
+Khi lựa chọn mô hình lập trình, performance không phải là yếu tố cân nhắc duy nhất. Khả năng bảo trì, khả năng mở rộng và hiệu suất phát triển cũng quan trọng không kém.
 
-Các ngôn ngữ lập trình hiện đại về cơ bản đều hỗ trợ nhiều paradigm lập trình: vừa có thể dùng cho lập trình hướng thủ tục, vừa có thể dùng cho lập trình hướng đối tượng.
+Các ngôn ngữ lập trình hiện đại về cơ bản đều hỗ trợ nhiều mô hình lập trình: vừa có thể dùng cho lập trình hướng thủ tục, vừa có thể dùng cho lập trình hướng đối tượng.
 
 Dưới đây là ví dụ tính diện tích và chu vi hình tròn, lần lượt minh họa hai cách giải quyết khác nhau theo hướng đối tượng và hướng thủ tục.
 
@@ -72,7 +72,7 @@ public class Circle {
 }
 ```
 
-Chúng ta định nghĩa một lớp `Circle` để biểu diễn hình tròn. Lớp này chứa thuộc tính bán kính hình tròn và các method tính diện tích, chu vi.
+Ta định nghĩa class `Circle` để biểu diễn hình tròn. Class này chứa thuộc tính bán kính và các method tính diện tích, chu vi.
 
 **Hướng thủ tục**:
 
@@ -93,11 +93,11 @@ public class Main {
 }
 ```
 
-Chúng ta trực tiếp định nghĩa bán kính hình tròn, rồi dùng bán kính đó để tính diện tích và chu vi hình tròn.
+Ta trực tiếp định nghĩa bán kính hình tròn, rồi dùng bán kính đó để tính diện tích và chu vi.
 
-### Dùng operator nào để tạo một object? Instance của object khác gì với reference của object?
+### Dùng operator nào để tạo object? Instance và reference của object khác nhau thế nào?
 
-Có thể dùng operator `new` để tạo instance của object. Heap của JVM dùng để phân bổ class instance và array; reference value có thể được lưu trong local variable, object field, static field hoặc array element, không nhất thiết phải nằm trong stack.
+Có thể dùng operator `new` để tạo object instance. Heap của JVM dùng để phân bổ class instance và array; reference value có thể được lưu trong local variable, object field, static field hoặc array element, không nhất thiết phải nằm trong stack.
 
 - Một object reference có thể trỏ tới 0 hoặc 1 object (một sợi dây có thể không buộc quả bóng nào, cũng có thể buộc một quả bóng);
 - Một object có thể được n reference trỏ tới (có thể dùng n sợi dây buộc một quả bóng).
@@ -105,7 +105,7 @@ Có thể dùng operator `new` để tạo instance của object. Heap của JVM
 ### ⭐️ Sự khác nhau giữa object equality và reference equality
 
 - Object equality thường được định nghĩa bởi `equals()`, dùng để so sánh logical state hoặc value theo quy ước của type.
-- Reference equality được xác định bằng `==`, biểu thị hai reference có trỏ tới cùng một object hay không (hoặc cùng là `null`). Ngôn ngữ Java không expose hoặc so sánh physical memory address.
+- Reference equality được xác định bằng `==`, biểu thị hai reference có trỏ tới cùng một object hay không (hoặc cùng là `null`). Ngôn ngữ Java không biểu diễn hoặc so sánh physical memory address.
 
 Ví dụ:
 
@@ -140,7 +140,7 @@ Có thể thấy từ kết quả output của code trên:
 
 Constructor là một method đặc biệt, chủ yếu dùng để hoàn tất việc khởi tạo object.
 
-Nếu một class không khai báo constructor thì vẫn có thể thực thi! Vì ngay cả khi class không khai báo constructor, nó vẫn có constructor mặc định không tham số. Nếu tự thêm constructor cho class (dù có tham số hay không), Java sẽ không thêm constructor mặc định không tham số nữa.
+Nếu một class không khai báo constructor thì vẫn có thể thực thi! Vì ngay cả khi class không khai báo constructor, nó vẫn có constructor mặc định không tham số. Nếu tự thêm constructor cho class (dù có tham số hay không), Java sẽ không tự thêm constructor mặc định không tham số nữa.
 
 Chúng ta vẫn vô thức sử dụng constructor. Đây cũng là lý do khi tạo object, phía sau phải thêm một cặp ngoặc (vì cần gọi constructor không tham số). Nếu overload constructor có tham số, hãy nhớ viết cả constructor không tham số (dù có dùng hay không), vì điều này giúp tránh bớt lỗi khi tạo object.
 
@@ -158,7 +158,7 @@ Constructor **không thể bị override**, nhưng **có thể bị overload**. 
 
 #### Encapsulation
 
-Encapsulation là việc ẩn thông tin state của một object (tức thuộc tính) bên trong object, không cho object bên ngoài truy cập trực tiếp vào thông tin nội bộ của object. Tuy nhiên, có thể cung cấp một số method cho bên ngoài truy cập để thao tác với thuộc tính. Điều này giống như chúng ta không nhìn thấy thông tin linh kiện bên trong điều hòa treo trên tường (tức thuộc tính), nhưng có thể điều khiển điều hòa bằng remote (method). Nếu không muốn thuộc tính bị bên ngoài truy cập, chúng ta có thể không cung cấp method cho bên ngoài. Nhưng nếu một class không cung cấp method để bên ngoài truy cập thì class đó cũng không có nhiều ý nghĩa. Cũng giống như nếu không có remote điều hòa thì không thể điều khiển điều hòa làm lạnh; bản thân điều hòa cũng mất ý nghĩa (tất nhiên hiện nay còn nhiều cách khác, ví dụ này chỉ để minh họa).
+Encapsulation là việc ẩn state của object (tức thuộc tính) bên trong object, không cho object bên ngoài truy cập trực tiếp vào thông tin nội bộ. Tuy nhiên, có thể cung cấp một số method để bên ngoài thao tác với thuộc tính. Điều này giống như ta không nhìn thấy linh kiện bên trong điều hòa treo trên tường (tức thuộc tính), nhưng có thể điều khiển điều hòa bằng remote (method). Nếu không muốn thuộc tính bị bên ngoài truy cập, ta có thể không cung cấp method tương ứng. Nhưng nếu một class không cung cấp method để bên ngoài truy cập thì class đó cũng không có nhiều ý nghĩa. Cũng giống như nếu không có remote điều hòa thì không thể điều khiển điều hòa làm lạnh; bản thân điều hòa cũng mất ý nghĩa (tất nhiên hiện nay còn nhiều cách khác, ví dụ này chỉ để minh họa).
 
 ```java
 public class Student {
@@ -199,7 +199,7 @@ Các object thuộc type khác nhau thường có một số điểm chung. Ví 
 
 #### Polymorphism
 
-Polymorphism, đúng như tên gọi, biểu thị một object có nhiều state, được thể hiện cụ thể bằng việc reference của superclass trỏ tới instance của subclass.
+Polymorphism, đúng như tên gọi, biểu thị một object có nhiều trạng thái, được thể hiện cụ thể bằng việc reference của superclass trỏ tới instance của subclass.
 
 **Đặc điểm của polymorphism:**
 
@@ -245,12 +245,12 @@ flowchart LR
 
 #### Điểm chung của interface và abstract class
 
-- **Instantiation**: Interface và abstract class đều không thể được instantiate trực tiếp, chỉ có thể tạo object cụ thể sau khi được implement (interface) hoặc inheritance (abstract class).
+- **Instantiation**: Interface và abstract class đều không thể được instantiate trực tiếp; chỉ có thể tạo object cụ thể sau khi interface được implement hoặc abstract class được inheritance.
 - **Abstract method**: Interface và abstract class đều có thể chứa abstract method. Abstract method không có method body, bắt buộc phải được triển khai trong subclass hoặc implementation class.
 
 #### Điểm khác nhau giữa interface và abstract class
 
-- **Mục đích thiết kế**: Interface chủ yếu dùng để ràng buộc behavior của class; khi implement một interface, bạn có behavior tương ứng. Abstract class chủ yếu dùng để tái sử dụng code, nhấn mạnh quan hệ thuộc về.
+- **Mục đích thiết kế**: Interface chủ yếu dùng để ràng buộc behavior của class; khi implement một interface, class có behavior tương ứng. Abstract class chủ yếu dùng để tái sử dụng code, nhấn mạnh quan hệ thuộc về.
 - **Inheritance và implementation**: Một class chỉ có thể inheritance một class (bao gồm abstract class), vì Java không hỗ trợ multiple inheritance. Nhưng một class có thể implement nhiều interface, và một interface cũng có thể inheritance nhiều interface khác.
 - **Member variable**: Member variable trong interface chỉ có thể có type `public static final`, không thể sửa đổi và bắt buộc phải có giá trị khởi tạo. Member variable của abstract class có thể có bất kỳ modifier nào (`private`, `protected`, `public`), có thể được định nghĩa lại hoặc gán giá trị trong subclass.
 - **Method**:
@@ -279,7 +279,7 @@ public interface MyInterface {
 }
 ```
 
-Java 9 cho phép sử dụng method `private` trong interface. Method `private` có thể dùng để chia sẻ code bên trong interface mà không expose ra bên ngoài.
+Java 9 cho phép sử dụng method `private` trong interface. Method `private` có thể dùng để chia sẻ code bên trong interface mà không công khai ra bên ngoài.
 
 ```java
 public interface MyInterface {
@@ -319,16 +319,16 @@ flowchart LR
     linkStyle default stroke-width:1.5px,opacity:0.8
 ```
 
-Về sự khác nhau giữa deep copy và shallow copy, trước hết tôi đưa ra kết luận:
+Về sự khác nhau giữa deep copy và shallow copy, trước hết có thể kết luận như sau:
 
-- **Shallow copy**: Shallow copy tạo một object mới trên heap (đây là một điểm khác với reference copy). Tuy nhiên, nếu thuộc tính bên trong object gốc là reference type thì shallow copy sẽ trực tiếp copy reference của object bên trong. Nói cách khác, object copy và object gốc dùng chung cùng một object bên trong.
-- **Deep copy**: Deep copy copy hoàn toàn toàn bộ object, bao gồm cả các object bên trong mà object đó chứa.
+- **Shallow copy**: Shallow copy tạo một object mới trên heap (đây là điểm khác với reference copy). Tuy nhiên, nếu thuộc tính bên trong object gốc là reference type thì shallow copy sẽ trực tiếp copy reference của object bên trong. Nói cách khác, object copy và object gốc dùng chung một object bên trong.
+- **Deep copy**: Deep copy sao chép toàn bộ object, bao gồm cả các object bên trong mà object đó chứa.
 
 Nếu chưa hiểu hoàn toàn kết luận trên cũng không sao, hãy xem một ví dụ cụ thể!
 
 #### Shallow copy
 
-Code ví dụ về shallow copy như sau. Ở đây chúng ta implement interface `Cloneable` và override method `clone()`.
+Code ví dụ về shallow copy như sau. Ở đây ta implement interface `Cloneable` và override method `clone()`.
 
 Implementation của method `clone()` rất đơn giản, chỉ trực tiếp gọi method `clone()` của superclass `Object`.
 
@@ -361,7 +361,7 @@ public class Person implements Cloneable {
 }
 ```
 
-Test:
+Kiểm thử:
 
 ```java
 Person person1 = new Person(new Address("Wuhan"));
@@ -370,11 +370,11 @@ Person person1Copy = person1.clone();
 System.out.println(person1.getAddress() == person1Copy.getAddress());
 ```
 
-Từ output có thể thấy object clone của `person1` và `person1` vẫn sử dụng cùng một object `Address`.
+Từ output có thể thấy bản clone của `person1` và `person1` vẫn sử dụng cùng một object `Address`.
 
 #### Deep copy
 
-Ở đây chúng ta chỉ cần sửa method `clone()` của class `Person`, đồng thời copy cả object `Address` bên trong object `Person`.
+Ở đây chỉ cần sửa method `clone()` của class `Person`, đồng thời copy cả object `Address` bên trong object `Person`.
 
 ```java
 @Override
@@ -398,7 +398,7 @@ Person person1Copy = person1.clone();
 System.out.println(person1.getAddress() == person1Copy.getAddress());
 ```
 
-Từ output có thể thấy rõ object clone của `person1` và object `Address` mà `person1` chứa đã là hai object khác nhau.
+Từ output có thể thấy rõ bản clone của `person1` và object `Address` mà `person1` chứa đã là hai object khác nhau.
 
 **Vậy reference copy là gì?** Nói đơn giản, reference copy là hai reference khác nhau cùng trỏ tới một object.
 
@@ -414,7 +414,7 @@ Class Object là một class đặc biệt, là superclass của mọi class, ch
 
 ```java
 /**
- * Native method, dùng để trả về Class object của object hiện tại tại runtime, được sửa bằng keyword final nên subclass không được override.
+ * Native method, dùng để trả về Class object của object hiện tại tại runtime, được khai báo bằng keyword final nên subclass không được override.
  */
 public final native Class<?> getClass()
 /**
@@ -430,11 +430,11 @@ public boolean equals(Object obj)
  */
 protected native Object clone() throws CloneNotSupportedException
 /**
- * Trả về một string biểu diễn hash code dạng hexadecimal của instance tên class. Khuyến nghị mọi subclass của Object nên override method này.
+ * Trả về string biểu diễn tên class và hash code của instance ở dạng hexadecimal. Khuyến nghị mọi subclass của Object nên override method này.
  */
 public String toString()
 /**
- * Native method và không thể override. Đánh thức một thread đang wait trên monitor của object này (monitor về bản chất là khái niệm lock). Nếu có nhiều thread đang wait thì chỉ đánh thức ngẫu nhiên một thread.
+ * Native method và không thể override. Đánh thức một thread bất kỳ đang wait trên monitor của object này (monitor về bản chất là khái niệm lock). Nếu có nhiều thread đang wait thì chỉ đánh thức một thread.
  */
 public final native void notify()
 /**
@@ -446,7 +446,7 @@ public final native void notifyAll()
  */
 public final native void wait(long timeout) throws InterruptedException
 /**
- * Có thêm tham số nanos, biểu thị khoảng thời gian bổ sung (đơn vị nanosecond, phạm vi 0-999999). Vì vậy thời gian timeout còn phải cộng thêm nanos nanosecond.
+ * Có thêm tham số nanos, biểu thị khoảng thời gian bổ sung (đơn vị nanosecond, phạm vi 0-999999). Vì vậy thời gian timeout còn phải cộng thêm số nanos này.
  */
 public final void wait(long timeout, int nanos) throws InterruptedException
 /**
@@ -454,7 +454,7 @@ public final void wait(long timeout, int nanos) throws InterruptedException
  */
 public final void wait() throws InterruptedException
 /**
- * Thao tác được kích hoạt khi instance bị garbage collector thu hồi.
+ * Thực hiện khi instance bị garbage collector thu hồi.
  */
 protected void finalize() throws Throwable { }
 ```
@@ -468,7 +468,7 @@ Tác dụng của **`==`** khác nhau đối với primitive type và reference 
 
 > Với `==`, bất kể so sánh primitive type hay reference type, thứ được so sánh đều là value của operand; reference value mô tả object mà nó trỏ tới, nhưng ngôn ngữ Java không định nghĩa nó là physical memory address có thể quan sát.
 
-**`equals()`** không thể dùng để phán đoán variable của primitive data type, chỉ dùng để phán đoán hai object có bằng nhau hay không. Method `equals()` tồn tại trong class `Object`, mà class `Object` là superclass trực tiếp hoặc gián tiếp của mọi class, vì vậy mọi class đều có method `equals()`.
+**`equals()`** không thể dùng để xác định variable của primitive data type, chỉ dùng để xác định hai object có bằng nhau hay không. Method `equals()` tồn tại trong class `Object`, mà class `Object` là superclass trực tiếp hoặc gián tiếp của mọi class, vì vậy mọi class đều có method `equals()`.
 
 Method `equals()` của class `Object`:
 
@@ -481,7 +481,7 @@ public boolean equals(Object obj) {
 Method `equals()` có hai trường hợp sử dụng:
 
 - **Class không override method `equals()`**: Khi dùng `equals()` để so sánh hai object của class đó, kết quả tương đương dùng “==” để so sánh hai object; mặc định sử dụng method `equals()` của class `Object`.
-- **Class override method `equals()`**: Thông thường chúng ta override method `equals()` để so sánh các thuộc tính trong hai object có bằng nhau hay không; nếu thuộc tính bằng nhau thì trả về true (tức xem hai object này là bằng nhau).
+- **Class override method `equals()`**: Thông thường ta override method `equals()` để so sánh các thuộc tính trong hai object có bằng nhau hay không; nếu thuộc tính bằng nhau thì trả về true (tức xem hai object này là bằng nhau).
 
 Ví dụ (chỉ để minh họa. Thực tế, nếu viết như bên dưới thì các IDE thông minh như IDEA sẽ nhắc bạn thay `==` bằng `equals()`):
 
@@ -498,7 +498,7 @@ System.out.println(42 == 42.0);// true
 
 Method `equals` trong `String` đã được override, vì method `equals` của `Object` xác định hai reference có trỏ tới cùng một object hay không, còn method `equals` của `String` so sánh value của string.
 
-Khi tạo object type `String` bằng string literal (ví dụ `String aa = "ab"`), VM sẽ tìm trong string constant pool xem đã có object có value giống value sắp tạo hay chưa. Nếu có thì gán nó cho reference hiện tại; nếu không thì tạo một object `String` trong string constant pool rồi gán cho reference hiện tại. Nhưng khi dùng keyword `new` để tạo object (ví dụ `String a = new String("ab")`), VM luôn **tạo một object mới** trong heap và dùng value trong string constant pool (nếu chưa có thì trước tiên tạo string object `"ab"` trong string constant pool) để khởi tạo, sau đó gán cho reference hiện tại.
+Khi tạo object type `String` bằng string literal (ví dụ `String aa = "ab"`), VM sẽ tìm trong string constant pool xem đã có object có value giống value cần tạo hay chưa. Nếu có thì gán nó cho reference hiện tại; nếu không thì tạo một object `String` trong string constant pool rồi gán cho reference hiện tại. Nhưng khi dùng keyword `new` để tạo object (ví dụ `String a = new String("ab")`), VM luôn **tạo một object mới** trong heap và dùng value trong string constant pool (nếu chưa có thì trước tiên tạo string object `"ab"` trong string constant pool) để khởi tạo, sau đó gán cho reference hiện tại.
 
 Method `equals()` của class `String`:
 
@@ -528,7 +528,7 @@ public boolean equals(Object anObject) {
 
 ### hashCode() dùng để làm gì?
 
-Tác dụng của `hashCode()` là lấy hash code (`int` integer), còn gọi là mã hash. Hash code này dùng để xác định vị trí index của object trong hash table.
+Tác dụng của `hashCode()` là lấy hash code kiểu `int`, còn gọi là mã hash. Hash code này dùng để xác định vị trí index của object trong hash table.
 
 ![Method hashCode()](https://oss.javaguide.cn/github/javaguide/java/basis/java-hashcode-method.png)
 
@@ -543,13 +543,13 @@ Tác dụng của `hashCode()` là lấy hash code (`int` integer), còn gọi l
 public native int hashCode();
 ```
 
-Hash table lưu trữ key-value (key-value pair), đặc điểm là: **có thể nhanh chóng tìm ra “value” tương ứng dựa trên “key”. Trong đó có sử dụng hash code! (Có thể nhanh chóng tìm được object cần thiết)**
+Hash table lưu trữ các cặp key-value, đặc điểm là: **có thể nhanh chóng tìm ra “value” tương ứng dựa trên “key”. Trong đó có sử dụng hash code! (Có thể nhanh chóng tìm được object cần thiết)**
 
 ### Vì sao cần có hashCode?
 
-Hãy lấy ví dụ “HashSet kiểm tra duplicate như thế nào” để giải thích vì sao cần có hashCode.
+Hãy lấy ví dụ “HashSet kiểm tra phần tử trùng lặp như thế nào” để giải thích vì sao cần có hashCode.
 
-Khi thêm object vào HashSet, HashSet trước tiên gọi method `hashCode()` của object để lấy một “hash value”, rồi dùng hash function nội bộ để chuyển đổi đơn giản thêm một lần nữa đối với hash value này (chẳng hạn lấy phần dư), quyết định data này nên được đặt vào bucket nào của array bên dưới (bucket tương ứng với một vị trí nào đó trong array bên dưới):
+Khi thêm object vào HashSet, HashSet trước tiên gọi method `hashCode()` của object để lấy một “hash value”, rồi dùng hash function nội bộ để tiếp tục biến đổi đơn giản hash value này (chẳng hạn lấy phần dư), quyết định data này nên được đặt vào bucket nào của array bên dưới (bucket tương ứng với một vị trí nào đó trong array bên dưới):
 
 1. Nếu bucket đó hiện đang rỗng thì trực tiếp insert node tương ứng với object vào bucket.
 2. Nếu bucket đó đã có element khác, HashSet sẽ lần lượt so sánh trong linked list hoặc red-black tree tương ứng với bucket:
@@ -558,13 +558,13 @@ Khi thêm object vào HashSet, HashSet trước tiên gọi method `hashCode()` 
      – Nếu `equals()` trả về true, nghĩa là collection đã có element tương đương với object hiện tại, `HashSet` sẽ không thêm nó lần nữa;
      – Nếu trả về false thì xem là element mới, thêm object đó dưới dạng node mới vào linked list hoặc red-black tree của **cùng bucket**.
 
-Bằng cách trước tiên dùng `hashCode()` thu hẹp phạm vi ứng viên vào cùng một bucket, sau đó gọi `equals()` trên số lượng nhỏ element trong bucket để phán đoán chính xác, `HashSet` giảm đáng kể số lần gọi `equals()`, từ đó nâng cao performance thực thi của việc tìm kiếm và insert.
+Bằng cách trước tiên dùng `hashCode()` thu hẹp phạm vi ứng viên vào cùng một bucket, sau đó gọi `equals()` trên số lượng nhỏ element trong bucket để so sánh chính xác, `HashSet` giảm đáng kể số lần gọi `equals()`, từ đó nâng cao performance thực thi của việc tìm kiếm và insert.
 
 **Vậy tại sao JDK vẫn cung cấp đồng thời hai method này?**
 
-Vì trong một số container (chẳng hạn `HashMap`, `HashSet`), sau khi có `hashCode()`, hiệu suất phán đoán element có nằm trong container tương ứng sẽ cao hơn (tham khảo quá trình thêm element vào `HashSet`).
+Vì trong một số container (chẳng hạn `HashMap`, `HashSet`), sau khi có `hashCode()`, hiệu suất xác định element có nằm trong container tương ứng sẽ cao hơn (tham khảo quá trình thêm element vào `HashSet`).
 
-Ở trên chúng ta cũng đã đề cập quá trình thêm element vào `HashSet`. Nếu khi so sánh, `HashSet` gặp nhiều object có cùng `hashCode`, nó sẽ tiếp tục dùng `equals()` để phán đoán có thực sự giống nhau hay không. Nói cách khác, `hashCode` giúp chúng ta thu hẹp đáng kể chi phí tìm kiếm.
+Ở trên ta cũng đã đề cập quá trình thêm element vào `HashSet`. Nếu khi so sánh, `HashSet` gặp nhiều object có cùng `hashCode`, nó sẽ tiếp tục dùng `equals()` để xác định có thực sự giống nhau hay không. Nói cách khác, `hashCode` giúp thu hẹp đáng kể chi phí tìm kiếm.
 
 **Vậy tại sao không chỉ cung cấp method `hashCode()`?**
 
@@ -572,27 +572,27 @@ Vì hai object có `hashCode` bằng nhau không có nghĩa hai object bằng nh
 
 **Vậy tại sao hai object có cùng `hashCode` nhưng vẫn không nhất thiết bằng nhau?**
 
-Vì hash algorithm mà `hashCode()` sử dụng có thể tình cờ khiến nhiều object trả về cùng một hash value. Hash algorithm càng kém thì càng dễ collision, nhưng điều này cũng liên quan đến đặc tính phân bố của miền value (hash collision nghĩa là các object khác nhau nhận cùng `hashCode`).
+Vì hash algorithm mà `hashCode()` sử dụng có thể tình cờ khiến nhiều object trả về cùng một hash value. Hash algorithm càng kém thì càng dễ collision, nhưng điều này cũng liên quan đến đặc tính phân bố của miền giá trị (hash collision nghĩa là các object khác nhau nhận cùng `hashCode`).
 
 Tóm lại:
 
 - Nếu hai object có `hashCode` bằng nhau thì hai object đó chưa chắc bằng nhau (hash collision).
-- Chỉ khi hai object có `hashCode` bằng nhau và method `equals()` cũng trả về `true`, chúng ta mới xem hai object đó là bằng nhau.
+- Chỉ khi hai object có `hashCode` bằng nhau và method `equals()` cũng trả về `true`, ta mới xem hai object đó là bằng nhau.
 - Nếu hai object có `hashCode` khác nhau thì có thể trực tiếp xem hai object đó không bằng nhau.
 
 Sau khi đọc phần giới thiệu trước đây về `hashCode()` và `equals()`, chắc hẳn câu hỏi tiếp theo không thể làm khó bạn nữa.
 
 ### Vì sao khi override equals() bắt buộc phải override method hashCode()?
 
-Vì `hashCode` của hai object bằng nhau bắt buộc phải bằng nhau. Nói cách khác, nếu method `equals` phán đoán hai object bằng nhau thì `hashCode` của hai object đó cũng phải bằng nhau.
+Vì `hashCode` của hai object bằng nhau phải giống nhau. Nói cách khác, nếu method `equals` xác định hai object bằng nhau thì `hashCode` của hai object đó cũng phải giống nhau.
 
-Nếu khi override `equals()` mà không override method `hashCode()` thì có thể dẫn tới việc hai object được method `equals` phán đoán là bằng nhau nhưng `hashCode` lại khác nhau.
+Nếu khi override `equals()` mà không override method `hashCode()` thì có thể dẫn tới việc method `equals` xác định hai object bằng nhau nhưng `hashCode` lại khác nhau.
 
 **Suy nghĩ**: Nếu override `equals()` mà không override method `hashCode()`, khi dùng `HashMap` có thể xảy ra vấn đề gì?
 
 **Tóm tắt**:
 
-- Nếu method `equals` phán đoán hai object bằng nhau thì `hashCode` của hai object đó cũng phải bằng nhau.
+- Nếu method `equals` xác định hai object bằng nhau thì `hashCode` của hai object đó cũng phải bằng nhau.
 - Hai object có cùng `hashCode` chưa chắc bằng nhau (hash collision).
 
 Có thể xem thêm nội dung về `hashCode()` và `equals()` tại: [Giải đáp một số vấn đề về Java hashCode() và equals()](https://www.cnblogs.com/skywang12345/p/3324958.html)
@@ -605,7 +605,7 @@ Có thể xem thêm nội dung về `hashCode()` và `equals()` tại: [Giải �
 
 `String` là immutable (sẽ phân tích chi tiết ở phần sau). Mỗi lần sửa đều tạo object mới và trỏ reference tới instance mới, còn `StringBuffer` và `StringBuilder` đều mutable. Khi sửa string, chúng không tạo object mới mà thao tác trực tiếp trên character array ban đầu.
 
-`StringBuilder` và `StringBuffer` đều inheritance từ class `AbstractStringBuilder`. `AbstractStringBuilder` cũng dùng character array để lưu string, nhưng không dùng keyword `final` và `private` để modifier; quan trọng nhất là class `AbstractStringBuilder` còn cung cấp nhiều method sửa string, chẳng hạn method `append`.
+`StringBuilder` và `StringBuffer` đều inheritance từ class `AbstractStringBuilder`. `AbstractStringBuilder` cũng dùng character array để lưu string, nhưng không khai báo bằng keyword `final` và `private`; quan trọng nhất là class `AbstractStringBuilder` còn cung cấp nhiều method sửa string, chẳng hạn method `append`.
 
 ```java
 abstract class AbstractStringBuilder implements Appendable, CharSequence {
@@ -625,7 +625,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
 
 **Tính thread-safe**
 
-Object trong `String` là immutable, cũng có thể hiểu là constant, nên thread-safe. `AbstractStringBuilder` là superclass chung của `StringBuilder` và `StringBuffer`, định nghĩa một số thao tác cơ bản trên string như `expandCapacity`, `append`, `insert`, `indexOf`. `StringBuffer` thêm synchronized lock cho method hoặc method được gọi, nên thread-safe. `StringBuilder` không thêm synchronized lock cho method, nên không thread-safe.
+Các object `String` là immutable, cũng có thể hiểu là constant, nên thread-safe. `AbstractStringBuilder` là superclass chung của `StringBuilder` và `StringBuffer`, định nghĩa một số thao tác cơ bản trên string như `expandCapacity`, `append`, `insert`, `indexOf`. `StringBuffer` thêm synchronized lock cho method hoặc method được gọi, nên thread-safe. `StringBuilder` không thêm synchronized lock cho method, nên không thread-safe.
 
 <img src="https://oss.javaguide.cn/github/javaguide/java/basis/stringbuffer-methods.png" style="zoom:50%;" />
 
@@ -633,7 +633,7 @@ Object trong `String` là immutable, cũng có thể hiểu là constant, nên t
 
 Chênh lệch performance giữa hai bên chủ yếu đến từ cơ chế thread-safe:
 
-- Method của `StringBuffer` thường là synchronized (thread-safe), nên có thêm một phần overhead performance;
+- Method của `StringBuffer` thường là synchronized (thread-safe), nên có thêm overhead;
 - `StringBuilder` không có overhead synchronized (không thread-safe), nên trong single-thread scenario thường có performance tốt hơn.
   Trong cùng điều kiện, dùng `StringBuilder` so với `StringBuffer` chỉ có thể đạt mức tăng performance khoảng 10%~15%, nhưng phải chấp nhận rủi ro không an toàn trong môi trường multi-thread.
   Ngoài ra, chênh lệch performance cụ thể không cố định. Trong JVM hiện đại, nhờ lock optimization (chẳng hạn lock elimination), chênh lệch performance giữa hai bên trong một số scenario có thể khá nhỏ.
@@ -646,7 +646,7 @@ Chênh lệch performance giữa hai bên chủ yếu đến từ cơ chế thre
 
 ### ⭐️ Vì sao String là immutable?
 
-Class `String` dùng keyword `final` để modifier character array lưu string, ~~vì vậy object `String` là immutable.~~
+Class `String` dùng keyword `final` để khai báo character array lưu string, ~~vì vậy object `String` là immutable.~~
 
 ```java
 public final class String implements java.io.Serializable, Comparable<String>, CharSequence {
@@ -655,12 +655,12 @@ public final class String implements java.io.Serializable, Comparable<String>, C
 }
 ```
 
-> 🐛 Đính chính: Chúng ta biết class được modifier bằng keyword `final` không thể inheritance, method được modifier bằng `final` không thể override, variable được modifier bằng `final` nếu là primitive data type thì value không thể thay đổi, nếu là reference type thì không thể trỏ sang object khác. Vì vậy, việc dùng keyword `final` để modifier array lưu string không phải nguyên nhân cốt lõi khiến `String` immutable, bởi string mà array này lưu là mutable (trường hợp variable reference type được modifier bằng `final`).
+> 🐛 Đính chính: Ta biết class được khai báo bằng keyword `final` không thể inheritance, method được khai báo bằng `final` không thể override, variable được khai báo bằng `final` nếu là primitive data type thì value không thể thay đổi, nếu là reference type thì không thể trỏ sang object khác. Vì vậy, việc dùng keyword `final` để khai báo array lưu string không phải nguyên nhân cốt lõi khiến `String` immutable, bởi string mà array này lưu là mutable (trường hợp variable reference type được khai báo bằng `final`).
 >
 > `String` thực sự immutable vì các nguyên nhân sau:
 >
-> 1. Array lưu string được modifier bằng `final` và là private, đồng thời class `String` không cung cấp/expose method sửa string này.
-> 2. Class `String` được modifier bằng `final` nên không thể inheritance, qua đó tránh subclass phá vỡ tính immutable của `String`.
+> 1. Array lưu string được khai báo bằng `final` và là private, đồng thời class `String` không cung cấp method sửa string này.
+> 2. Class `String` được khai báo bằng `final` nên không thể inheritance, qua đó tránh subclass phá vỡ tính immutable của `String`.
 >
 > Đọc thêm: [Hiểu thế nào về tính immutable của value type String? - Câu hỏi Zhihu](https://www.zhihu.com/question/20618891/answer/114125846)
 >
@@ -681,7 +681,7 @@ public final class String implements java.io.Serializable, Comparable<String>, C
 
 **Vì sao Java 9 đổi implementation bên trong của `String` từ `char[]` thành `byte[]`?**
 
-String phiên bản mới hỗ trợ hai scheme encoding: Latin-1 và UTF-16. Nếu tất cả character trong string có thể biểu diễn bằng Latin-1 thì dùng Latin-1; nếu không thì dùng UTF-16. Chữ Hán không nằm trong phạm vi character của Latin-1. Ở scheme Latin-1, nội dung mỗi character dùng một byte để lưu, so với `char[]` trước đây có thể tiết kiệm một nửa không gian dữ liệu character.
+String phiên bản mới hỗ trợ hai encoding scheme: Latin-1 và UTF-16. Nếu tất cả character trong string có thể biểu diễn bằng Latin-1 thì dùng Latin-1; nếu không thì dùng UTF-16. Chữ Hán không nằm trong phạm vi character của Latin-1. Với Latin-1, mỗi character dùng một byte để lưu, so với `char[]` trước đây có thể tiết kiệm một nửa không gian dữ liệu.
 
 JDK chính thức cho biết phần lớn string object chỉ chứa các character có thể biểu diễn bằng Latin-1.
 
@@ -738,7 +738,7 @@ System.out.println(s);
 
 Nếu dùng IDEA, cơ chế code inspection tích hợp trong IDEA cũng sẽ nhắc bạn sửa code.
 
-Trong JDK 9, phép cộng string “+” được đổi sang dùng dynamic method `makeConcatWithConstants()` để triển khai. Bằng cách phân bổ space trước, nó giảm một phần việc tạo temporary object. Tuy nhiên, optimization này chủ yếu nhắm tới phép nối string đơn giản, chẳng hạn `a+b+c`. Với lượng lớn thao tác nối trong loop, memory vẫn được phân bổ dynamic từng lần (tương tự khái niệm append từng cặp), không hiệu quả bằng việc dùng `StringBuilder` thủ công. Cải tiến này được đề xuất trong [JEP 280](https://openjdk.org/jeps/280) của JDK9. Để tìm hiểu chi tiết phần cải tiến này, nên đọc bài viết: [Vẫn dùng StringBuilder một cách máy móc? Hãy ôn lại phép nối string](https://juejin.cn/post/7182872058743750715) và tham khảo [issue#2442](https://github.com/Snailclimb/JavaGuide/issues/2442).
+Trong JDK 9, phép cộng string “+” được đổi sang dùng dynamic method `makeConcatWithConstants()` để triển khai. Bằng cách phân bổ trước không gian, nó giảm một phần việc tạo temporary object. Tuy nhiên, optimization này chủ yếu nhắm tới phép nối string đơn giản, chẳng hạn `a+b+c`. Với lượng lớn thao tác nối trong loop, memory vẫn được phân bổ dynamic từng lần (tương tự khái niệm append từng cặp), không hiệu quả bằng việc dùng `StringBuilder` thủ công. Cải tiến này được đề xuất trong [JEP 280](https://openjdk.org/jeps/280) của JDK 9. Để tìm hiểu chi tiết phần cải tiến này, nên đọc bài viết: [Vẫn dùng StringBuilder một cách máy móc? Hãy ôn lại phép nối string](https://juejin.cn/post/7182872058743750715) và tham khảo [issue#2442](https://github.com/Snailclimb/JavaGuide/issues/2442).
 
 ### String#equals() khác gì với Object#equals()?
 
@@ -746,7 +746,7 @@ Method `equals` trong `String` đã được override, so sánh value của Stri
 
 ### ⭐️ Bạn có biết tác dụng của string constant pool không?
 
-**String constant pool** là một vùng do JVM dành riêng cho string (class String) để nâng cao performance và giảm memory consumption, mục đích chính là tránh tạo string trùng lặp.
+**String constant pool** là một vùng do JVM dành riêng cho string (class String) để nâng cao performance và giảm mức tiêu thụ memory, mục đích chính là tránh tạo string trùng lặp.
 
 ```java
 // 1.Tìm string object "ab" trong string constant pool, nếu không có thì tạo "ab" và đưa vào string constant pool
@@ -763,7 +763,7 @@ Có thể xem thêm phần giới thiệu về string constant pool trong bài [
 
 Đáp án trước: sẽ tạo 1 hoặc 2 string object.
 
-1. `"abc"` không tồn tại trong string constant pool: sẽ tạo 2 string object. Một object trong string constant pool, được trigger tạo bởi instruction `ldc`. Một object trong heap, được tạo bởi `new String()` và khởi tạo bằng `"abc"` trong constant pool.
+1. `"abc"` không tồn tại trong string constant pool: sẽ tạo 2 string object. Một object trong string constant pool, được tạo khi instruction `ldc` kích hoạt. Một object trong heap, được tạo bởi `new String()` và khởi tạo bằng `"abc"` trong constant pool.
 2. `"abc"` đã tồn tại trong string constant pool: sẽ tạo 1 string object. Object này nằm trong heap, được tạo bởi `new String()` và khởi tạo bằng `"abc"` trong constant pool.
 
 Bắt đầu phân tích chi tiết.
@@ -897,7 +897,7 @@ Với `String str3 = "str" + "ing";`, compiler sẽ optimization thành `String 
 Không phải mọi constant đều được constant folding, chỉ constant mà compiler có thể xác định value tại compile time mới được:
 
 - Primitive data type (`byte`, `boolean`, `short`, `char`, `int`, `float`, `long`, `double`) và string constant.
-- Primitive data type và string variable được modifier bằng `final`.
+- Primitive data type và string variable được khai báo bằng `final`.
 - String tạo ra bằng phép nối “+”, phép tính số học giữa primitive data type (cộng trừ nhân chia), phép tính bit giữa primitive data type (<<, \>>, \>>>)
 
 **Value của reference không thể xác định tại compile time, nên compiler không thể optimization nó.**
@@ -923,7 +923,7 @@ String d = str1 + str2; // Object trong constant pool
 System.out.println(c == d);// true
 ```
 
-Sau khi được modifier bằng keyword `final`, `String` sẽ được compiler xử lý như constant. Compiler có thể xác định value của nó tại compile time, hiệu quả tương đương truy cập constant.
+Sau khi được khai báo bằng keyword `final`, `String` sẽ được compiler xử lý như constant. Compiler có thể xác định value của nó tại compile time, hiệu quả tương đương truy cập constant.
 
 Nếu compiler chỉ biết value chính xác của nó tại runtime thì không thể optimization.
 
