@@ -15,7 +15,7 @@ head:
       content: Java Basics,Java interview questions,Java keywords,Java pass-by-value,Java generics,Java reflection,Java proxy,Java serialization,Java SPI,Java Unsafe,Java syntactic sugar
 ---
 
-Java Basics là nền tảng cần có trước khi học collection, concurrency, JVM, Spring và các middleware. Phần này không chỉ để ghi nhớ cú pháp; quan trọng hơn là hiểu object model của Java, truyền tham số, type erasure của generic, lời gọi reflection, dynamic proxy, ranh giới serialization và cơ chế mở rộng của framework.
+Java Basics là nền tảng cần có trước khi học collection, concurrency, JVM, Spring và các middleware. Phần này không chỉ để ghi nhớ cú pháp; quan trọng hơn là hiểu object model của Java, truyền tham số, type erasure của generic, lời gọi bằng reflection, dynamic proxy, ranh giới serialization và cơ chế mở rộng của framework.
 
 ## Dành cho ai
 
@@ -26,27 +26,27 @@ Java Basics là nền tảng cần có trước khi học collection, concurrenc
 
 ## Trọng tâm học
 
-- Cú pháp cơ bản, lập trình hướng đối tượng, exception, các class thường dùng, keyword và chi tiết encoding của Java.
+- Cú pháp cơ bản, lập trình hướng đối tượng, exception, các class thường dùng, keyword và chi tiết về encoding của Java.
 - Mối quan hệ giữa truyền giá trị, reference variable, khả năng thay đổi của object và lời gọi method.
 - Generic, wildcard, type erasure và ảnh hưởng của chúng đến collection, thiết kế API và reflection.
 - Các cơ chế thường gặp ở tầng dưới của framework như reflection, dynamic proxy và SPI.
-- Các điểm kiến thức dễ gây lỗi trong dự án và phỏng vấn như serialization, `BigDecimal`, `Unsafe` và syntactic sugar.
+- Những kiến thức dễ khiến bạn mắc lỗi trong dự án và phỏng vấn như serialization, `BigDecimal`, `Unsafe` và syntactic sugar.
 
 ## Thứ tự đọc đề xuất
 
 1. [Tổng hợp câu hỏi phỏng vấn Java Basics thường gặp (phần 1)](./java-basic-questions-01.md): đọc qua trước về cú pháp cơ bản, lập trình hướng đối tượng và các class thường dùng của Java.
-2. [Tổng hợp câu hỏi phỏng vấn Java Basics thường gặp (phần 2)](./java-basic-questions-02.md) và [Tổng hợp câu hỏi phỏng vấn Java Basics thường gặp (phần 3)](./java-basic-questions-03.md): bổ sung exception, generic, reflection, annotation và các điểm dễ nhầm thường gặp.
+2. [Tổng hợp câu hỏi phỏng vấn Java Basics thường gặp (phần 2)](./java-basic-questions-02.md) và [Tổng hợp câu hỏi phỏng vấn Java Basics thường gặp (phần 3)](./java-basic-questions-03.md): bổ sung exception, generic, reflection, annotation và các điểm dễ mắc lỗi.
 3. [Tổng hợp Java keyword](./java-keyword-summary.md) và [Giải thích chi tiết Java pass-by-value](./why-there-only-value-passing-in-java.md): làm rõ những hiểu lầm thường gặp về các khái niệm nền tảng.
-4. [Giải thích chi tiết generic & wildcard](./generics-and-wildcards.md), [Giải thích chi tiết cơ chế Java reflection](./reflection.md), [Giải thích chi tiết Java proxy pattern](./proxy.md): hiểu các năng lực thường gặp ở tầng dưới của framework.
+4. [Giải thích chi tiết generic & wildcard](./generics-and-wildcards.md), [Giải thích chi tiết cơ chế Java reflection](./reflection.md), [Giải thích chi tiết Java proxy pattern](./proxy.md): hiểu các cơ chế thường gặp ở tầng dưới của framework.
 5. [Giải thích chi tiết Java serialization](./serialization.md), [Giải thích chi tiết cơ chế Java SPI](./spi.md), [Giải thích chi tiết lớp Unsafe đặc biệt của Java](./unsafe.md): tiếp tục bổ sung kiến thức mở rộng trong thực tiễn dự án và quá trình đọc source code.
 
 ## Bài viết cốt lõi
 
-### Câu hỏi phỏng vấn Basics
+### Câu hỏi phỏng vấn Java Basics
 
 - [Tổng hợp câu hỏi phỏng vấn Java Basics thường gặp (phần 1)](./java-basic-questions-01.md): bao quát đặc điểm ngôn ngữ Java, cú pháp cơ bản, lập trình hướng đối tượng, các class thường dùng và những điểm dễ nhầm.
 - [Tổng hợp câu hỏi phỏng vấn Java Basics thường gặp (phần 2)](./java-basic-questions-02.md): tiếp tục hệ thống hóa exception, generic, reflection, annotation và các năng lực nền tảng khác.
-- [Tổng hợp câu hỏi phỏng vấn Java Basics thường gặp (phần 3)](./java-basic-questions-03.md): bổ sung các câu hỏi phỏng vấn Basics thiên về chi tiết và nâng cao hơn.
+- [Tổng hợp câu hỏi phỏng vấn Java Basics thường gặp (phần 3)](./java-basic-questions-03.md): bổ sung các câu hỏi phỏng vấn Java Basics thiên về chi tiết và nâng cao hơn.
 
 ### Cơ chế ngôn ngữ
 
@@ -57,10 +57,10 @@ Java Basics là nền tảng cần có trước khi học collection, concurrenc
 
 ### Cơ chế tầng dưới của framework
 
-- [Giải thích chi tiết cơ chế Java reflection](./reflection.md): tìm hiểu object `Class`, lời gọi reflection, chi phí hiệu năng và các trường hợp sử dụng.
+- [Giải thích chi tiết cơ chế Java reflection](./reflection.md): tìm hiểu object Class, lời gọi reflection, chi phí hiệu năng và các trường hợp sử dụng.
 - [Giải thích chi tiết Java proxy pattern](./proxy.md): nắm được static proxy, JDK dynamic proxy và CGLIB proxy.
 - [Giải thích chi tiết cơ chế Java SPI](./spi.md): tìm hiểu service discovery và cơ chế mở rộng theo plugin.
-- [Giải thích chi tiết Java serialization](./serialization.md): tìm hiểu quy trình serialization, `serialVersionUID`, rủi ro bảo mật và các phương án thay thế.
+- [Giải thích chi tiết Java serialization](./serialization.md): tìm hiểu quy trình serialization, serialVersionUID, rủi ro bảo mật và các phương án thay thế.
 
 ### Chi tiết thực tiễn
 
