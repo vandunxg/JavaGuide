@@ -12,7 +12,7 @@ head:
 
 ## Giới thiệu về DelayQueue
 
-`DelayQueue` là delay queue do package JUC (`java.util.concurrent)` cung cấp, dùng để triển khai delayed task, chẳng hạn tự động hủy đơn hàng sau 15 phút nếu chưa thanh toán. Đây là một loại `BlockingQueue`, bên dưới là một unbounded queue dựa trên `PriorityQueue` và có tính thread-safe. Bạn có thể tham khảo bài viết [Phân tích source code PriorityQueue](./priorityqueue-source-code.md) do tác giả biên soạn.
+`DelayQueue` là delay queue do package JUC (`java.util.concurrent`) cung cấp, dùng để triển khai delayed task, chẳng hạn tự động hủy đơn hàng sau 15 phút nếu chưa thanh toán. Đây là một loại `BlockingQueue`, bên dưới là một unbounded queue dựa trên `PriorityQueue` và có tính thread-safe. Bạn có thể tham khảo bài viết [Phân tích source code PriorityQueue](./priorityqueue-source-code.md) do tác giả biên soạn.
 
 ![Các lớp triển khai của BlockingQueue](https://oss.javaguide.cn/github/javaguide/java/collection/blocking-queue-hierarchy.png)
 
@@ -34,7 +34,7 @@ Theo mặc định, `DelayQueue` sắp xếp task theo thứ tự tăng dần c�
 
 ![Delayed task](https://oss.javaguide.cn/github/javaguide/java/collection/delayed-task.png)
 
-Ta có thể dùng `DelayQueue` để triển khai việc này. Trước tiên, ta cần kế thừa `Delayed` để triển khai `DelayedTask`, triển khai phương thức `getDelay()` và phép so sánh priority `compareTo`.
+Ta có thể dùng `DelayQueue` để triển khai việc này. Trước tiên, ta cần implement `Delayed` để tạo `DelayedTask`, triển khai phương thức `getDelay()` và phép so sánh priority `compareTo`.
 
 ```java
 /**
@@ -82,7 +82,7 @@ public class DelayedTask implements Delayed {
 }
 ```
 
-Sau khi hoàn tất việc đóng gói task, cách sử dụng trở nên rất đơn giản: đặt thời gian đến hạn rồi submit task vào delay queue.
+Sau khi hoàn tất việc đóng gói task, cách sử dụng trở nên rất đơn giản: đặt thời gian đến hạn rồi thêm task vào delay queue.
 
 ```java
 // Tạo delay queue và thêm task
@@ -135,7 +135,7 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements B
 ```java
 // Reentrant lock, yếu tố then chốt để đảm bảo thread-safe
 private final transient ReentrantLock lock = new ReentrantLock();
-// Collection lưu trữ dữ liệu bên dưới delay queue, đảm bảo các phần tử được sắp xếp tăng dần theo thời điểm đến hạn
+// Collection lưu trữ dữ liệu ở tầng dưới của delay queue, đảm bảo các phần tử được sắp xếp tăng dần theo thời điểm đến hạn
 private final PriorityQueue<E> q = new PriorityQueue<E>();
 
 // Trỏ đến thread có priority cao nhất đang chuẩn bị thực thi
@@ -146,8 +146,8 @@ private final Condition available = lock.newCondition();
 
 - `lock`: Như đã biết, việc lưu và lấy trong `DelayQueue` là thread-safe. Vì vậy, để đảm bảo thread-safe khi lưu và lấy phần tử, ta cần lock trong lúc thao tác. `DelayQueue` dựa trên exclusive lock `ReentrantLock` để đảm bảo thread-safe cho các thao tác này.
 - `q`: Delay queue yêu cầu các phần tử được sắp xếp tăng dần theo thời điểm đến hạn, nên khi thêm phần tử chắc chắn cần sắp xếp theo priority. Vì vậy, việc lưu và lấy phần tử bên dưới `DelayQueue` đều được quản lý thông qua member variable `q` của priority queue `PriorityQueue` này.
-- `leader`: Task của delay queue chỉ thực thi sau khi đến hạn; task chưa đến hạn phải chờ. Để đảm bảo task có priority cao nhất được thực thi ngay khi đến hạn, nhà thiết kế dùng `leader` để quản lý delayed task. Chỉ thread mà `leader` trỏ tới mới có quyền timed wait cho đến khi task đến hạn rồi thực thi; các task có priority thấp hơn chỉ có thể chờ vô thời hạn, đến khi thread `leader` thực thi xong delayed task đang xử lý thì đánh thức chúng.
-- `available`: Tương tác chờ và đánh thức được đề cập khi nói về thread `leader` ở trên được triển khai thông qua `available`. Ví dụ, khi thread 1 cố lấy task từ một `DelayQueue` rỗng, `available` sẽ đưa nó vào waiting queue. Cho đến khi một thread thêm delayed task, rồi đánh thức nó bằng phương thức `signal` của `available`.
+- `leader`: Task của delay queue chỉ thực thi sau khi đến hạn; task chưa đến hạn phải chờ. Để đảm bảo task có priority cao nhất được thực thi ngay khi đến hạn, nhà thiết kế dùng `leader` để quản lý delayed task. Chỉ thread mà `leader` trỏ tới mới có quyền timed wait cho đến khi task đến hạn rồi thực thi; các thread còn lại chỉ có thể chờ vô thời hạn, đến khi thread `leader` xử lý xong delayed task hiện tại thì đánh thức chúng.
+- `available`: Tương tác chờ và đánh thức được đề cập khi nói về thread `leader` ở trên được triển khai thông qua `available`. Ví dụ, khi thread 1 cố lấy task từ một `DelayQueue` rỗng, `available` sẽ đưa nó vào waiting queue. Khi một thread thêm delayed task, nó sẽ đánh thức thread đang chờ bằng phương thức `signal` của `available`.
 
 ### Constructor
 
@@ -173,7 +173,7 @@ Logic tổng thể của phương thức `offer`:
 4. Hoàn tất các bước trên và release `lock`.
 5. Trả về true.
 
-Source code như sau, các comment đã được giải thích chi tiết:
+Source code như sau, kèm comment chi tiết:
 
 ```java
 public boolean offer(E e) {
@@ -206,13 +206,13 @@ Các cách lấy phần tử trong `DelayQueue` gồm blocking và non-blocking.
 > - [Giải thích AQS bằng hình ảnh và văn bản, cùng xem source code AQS... (bài khá dài)](https://xie.infoq.cn/article/5a3cc0b709012d40cb9f41986)
 > - [Đã đọc xong AQS thì không thể thiếu nguyên lý Condition!](https://xie.infoq.cn/article/0223d5e5f19726b36b084b10d)
 
-1. Trước tiên, 3 thread sẽ thử lấy reentrant lock `lock`. Giả sử hiện tại có 3 thread lần lượt là t1, t2, t3; sau đó t1 lấy được lock, còn t2 và t3 không tranh chấp được lock nên được đưa vào waiting queue.
+1. Trước tiên, 3 thread sẽ thử lấy reentrant lock `lock`. Giả sử hiện tại có 3 thread lần lượt là t1, t2, t3; sau đó t1 lấy được lock, còn t2 và t3 không lấy được lock nên được đưa vào waiting queue.
 
 ![](https://oss.javaguide.cn/github/javaguide/java/collection/delayqueue-take-0.png)
 
 2. Ngay sau đó, t1 bắt đầu logic lấy phần tử.
 
-3. Trước tiên thread t1 kiểm tra xem phần tử đầu queue của `DelayQueue` có rỗng hay không.
+3. Trước tiên thread t1 kiểm tra phần tử đầu của queue `DelayQueue` có tồn tại hay không.
 
 4. Nếu phần tử rỗng, điều đó cho thấy queue hiện không có phần tử nào, nên t1 bị block và được lưu vào queue `conditionWaiter`.
 
@@ -222,7 +222,7 @@ Lưu ý, sau khi gọi `await`, t1 sẽ release lock `lock`. Nếu `DelayQueue` 
 
 ![](https://oss.javaguide.cn/github/javaguide/java/collection/delayqueue-take-2.png)
 
-Nếu phần tử không rỗng, kiểm tra task hiện tại đã đến hạn hay chưa. Nếu task đã đến hạn, trả về trực tiếp. Nếu task chưa đến hạn, kiểm tra thread `leader` hiện tại (reference duy nhất của thread có thể wait và lấy phần tử trong `DelayQueue`) có rỗng hay không. Nếu không rỗng, điều đó cho thấy `leader` hiện đang chờ một phần tử có priority cao hơn phần tử hiện tại đến hạn, nên thread t1 chỉ có thể gọi `await` để chờ vô thời hạn, đợi đến khi `leader` lấy phần tử rồi đánh thức nó. Ngược lại, nếu thread `leader` rỗng, đặt thread hiện tại làm leader và đi vào trạng thái chờ có thời hạn; khi hết thời gian chờ thì lấy phần tử ra và trả về.
+Nếu queue có phần tử, kiểm tra task hiện tại đã đến hạn hay chưa. Nếu task đã đến hạn, trả về trực tiếp. Nếu task chưa đến hạn, kiểm tra thread `leader` hiện tại (thread duy nhất có thể timed wait và lấy phần tử trong `DelayQueue`) có rỗng hay không. Nếu không rỗng, điều đó cho thấy `leader` hiện đang chờ một phần tử có priority cao hơn phần tử hiện tại đến hạn, nên thread t1 chỉ có thể gọi `await` để chờ vô thời hạn, đợi đến khi `leader` lấy phần tử rồi đánh thức nó. Ngược lại, nếu thread `leader` rỗng, đặt thread hiện tại làm leader và đi vào trạng thái chờ có thời hạn; khi hết thời gian chờ thì lấy phần tử ra và trả về.
 
 Sau khi hoàn tất logic lấy blocking, source code như sau, bạn có thể tự tham khảo:
 
@@ -241,7 +241,7 @@ public E take() throws InterruptedException {
             else {
                 // Nếu phần tử không rỗng, xem còn bao lâu thì phần tử hiện tại đến hạn
                 long delay = first.getDelay(NANOSECONDS);
-                // Nếu nhỏ hơn 0 thì đã đến hạn, trả về trực tiếp
+                // Nếu nhỏ hơn hoặc bằng 0 thì đã đến hạn, trả về trực tiếp
                 if (delay <= 0)
                     return q.poll();
                 // Nếu lớn hơn 0 thì task chưa đến hạn; trước tiên cần release reference tới phần tử này
@@ -331,15 +331,15 @@ public E peek() {
 
 ### Nguyên lý triển khai của DelayQueue là gì?
 
-Bên dưới `DelayQueue` dùng priority queue `PriorityQueue` để lưu trữ phần tử, còn `PriorityQueue` áp dụng tư tưởng binary min-heap để đảm bảo phần tử có giá trị nhỏ hơn đứng trước. Nhờ đó, việc quản lý priority của delayed task trong `DelayQueue` trở nên rất thuận tiện. Đồng thời, để đảm bảo thread-safe, `DelayQueue` sử dụng reentrant lock `ReentrantLock`, đảm bảo tại một thời điểm chỉ có một thread có thể thao tác với delay queue. Cuối cùng, để triển khai hiệu quả việc chờ và đánh thức giữa nhiều thread, `DelayQueue` còn sử dụng `Condition`, hoàn tất việc chờ và đánh thức giữa nhiều thread thông qua các phương thức `await` và `signal` của `Condition`.
+Bên dưới `DelayQueue` dùng priority queue `PriorityQueue` để lưu trữ phần tử, còn `PriorityQueue` áp dụng tư tưởng binary min-heap để đảm bảo phần tử có giá trị nhỏ hơn đứng trước. Nhờ đó, việc quản lý priority của delayed task trong `DelayQueue` trở nên rất thuận tiện. Đồng thời, để đảm bảo thread-safe, `DelayQueue` sử dụng reentrant lock `ReentrantLock`, đảm bảo tại một thời điểm chỉ có một thread có thể thao tác với delay queue. Cuối cùng, để triển khai hiệu quả việc chờ và đánh thức giữa nhiều thread, `DelayQueue` còn sử dụng `Condition`, thực hiện việc chờ và đánh thức giữa nhiều thread thông qua các phương thức `await` và `signal` của `Condition`.
 
 ### DelayQueue có thread-safe không?
 
-`DelayQueue` có thread-safe. Nó dùng `ReentrantLock` để triển khai truy cập độc quyền và dùng `Condition` để triển khai thao tác chờ, đánh thức giữa các thread, từ đó đảm bảo tính an toàn và tin cậy trong môi trường nhiều thread.
+`DelayQueue` là thread-safe. Nó dùng `ReentrantLock` để triển khai truy cập độc quyền và dùng `Condition` để triển khai thao tác chờ, đánh thức giữa các thread, từ đó đảm bảo tính an toàn và tin cậy trong môi trường nhiều thread.
 
 ### DelayQueue có những trường hợp sử dụng nào?
 
-`DelayQueue` thường được dùng để triển khai scheduled task và xóa cache hết hạn. Trong scheduled task, cần đóng gói task cần thực thi thành delayed task object rồi thêm vào `DelayQueue`; phần tử đầu queue đã hết hạn có thể được lấy ra, còn thời điểm task thực sự được thực thi vẫn phụ thuộc vào việc scheduling của consumer thread. Với trường hợp cache hết hạn, sau khi dữ liệu được cache vào memory, ta có thể đóng gói key của cache thành một delayed deletion task rồi thêm vào `DelayQueue`. Khi dữ liệu hết hạn, lấy key của task và xóa key đó khỏi memory.
+`DelayQueue` thường được dùng để triển khai scheduled task và xóa cache hết hạn. Trong scheduled task, cần đóng gói task cần thực thi thành delayed task object rồi thêm vào `DelayQueue`; phần tử đầu queue đã hết hạn có thể được lấy ra, còn thời điểm task thực sự được thực thi vẫn phụ thuộc vào scheduling của consumer thread. Với trường hợp cache hết hạn, sau khi dữ liệu được cache vào memory, ta có thể đóng gói key của cache thành một delayed deletion task rồi thêm vào `DelayQueue`. Khi dữ liệu hết hạn, lấy key của task và xóa key đó khỏi memory.
 
 ### Interface Delayed trong DelayQueue có tác dụng gì?
 
