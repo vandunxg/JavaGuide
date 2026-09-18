@@ -14,11 +14,11 @@ head:
 
 ## Giới thiệu về LinkedList
 
-`LinkedList` là một collection class được triển khai dựa trên doubly linked list, thường được so sánh với `ArrayList`. Về so sánh chi tiết giữa `LinkedList` và `ArrayList`, chúng tôi đã giới thiệu trong [Tổng hợp câu hỏi phỏng vấn Java Collections thường gặp (phần 1)](./java-collection-questions-01.md).
+`LinkedList` là một collection class được triển khai dựa trên doubly linked list, thường được so sánh với `ArrayList`. Phần [Tổng hợp câu hỏi phỏng vấn Java Collections thường gặp (phần 1)](./java-collection-questions-01.md) có giới thiệu chi tiết về sự khác biệt giữa `LinkedList` và `ArrayList`.
 
 ![Doubly linked list](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/bidirectional-linkedlist.png)
 
-Tuy nhiên, trong project, chúng ta thường không sử dụng `LinkedList`. Hầu hết trường hợp cần `LinkedList` đều có thể dùng `ArrayList` thay thế, hơn nữa performance thường tốt hơn! Ngay cả tác giả của `LinkedList`, Joshua Bloch, cũng từng nói rằng ông chưa bao giờ sử dụng `LinkedList`.
+Tuy nhiên, trong project, thường không sử dụng `LinkedList`. Hầu hết trường hợp cần `LinkedList` đều có thể dùng `ArrayList` thay thế, hơn nữa performance thường tốt hơn! Ngay cả tác giả của `LinkedList`, Joshua Bloch, cũng từng nói rằng ông chưa bao giờ sử dụng `LinkedList`.
 
 ![](https://oss.javaguide.cn/github/javaguide/redisimage-20220412110853807.png)
 
@@ -131,7 +131,7 @@ public void add(int index, E element) {
 void linkLast(E e) {
     // Gán phần tử cuối cùng (truyền reference) cho node l
     final Node<E> l = last;
-    // Tạo node và chỉ định predecessor là tail node last, successor là null
+    // Tạo node, chỉ định node trước là node cuối last và node sau là null
     final Node<E> newNode = new Node<>(l, e, null);
     // Trỏ reference last đến node mới
     last = newNode;
@@ -156,7 +156,7 @@ void linkBefore(E e, Node<E> succ) {
     final Node<E> newNode = new Node<>(pred, e, succ);
     // Trỏ reference prev của node succ đến node mới
     succ.prev = newNode;
-    // Kiểm tra predecessor có rỗng hay không; rỗng nghĩa là succ là node đầu tiên
+    // Kiểm tra predecessor có phải null không; null nghĩa là succ là node đầu tiên
     if (pred == null)
         // Node mới trở thành node đầu tiên
         first = newNode;
@@ -195,7 +195,7 @@ public E getLast() {
 
 // Lấy phần tử tại vị trí chỉ định của linked list
 public E get(int index) {
-  // Kiểm tra index có vượt quá phạm vi hay không; nếu vượt quá thì ném exception
+  // Kiểm tra index có vượt phạm vi hay không; nếu vượt phạm vi thì ném exception
   checkElementIndex(index);
   // Trả về phần tử tương ứng với index trong linked list
   return node(index).item;
@@ -362,7 +362,7 @@ for (String fruit : list) {
 Điểm cốt lõi khi duyệt `LinkedList` chính là triển khai iterator của nó.
 
 ```java
-// Bidirectional iterator
+// Iterator hai chiều
 private class ListItr implements ListIterator<E> {
     // Node đã đi qua khi gọi next() hoặc previous() lần gần nhất;
     private Node<E> lastReturned;
@@ -370,7 +370,7 @@ private class ListItr implements ListIterator<E> {
     private Node<E> next;
     // Index của node sẽ được duyệt tiếp theo, tức index của successor node của node hiện tại;
     private int nextIndex;
-    // Giá trị modification count được kỳ vọng trong lần duyệt hiện tại, dùng để so sánh với modCount của LinkedList và xác định linked list có bị thread khác sửa hay không.
+    // Giá trị modification count được kỳ vọng trong lần duyệt hiện tại, dùng để so sánh với modCount của LinkedList và xác định linked list có bị sửa bởi thread khác hay không.
     private int expectedModCount = modCount;
     …………
 }
@@ -432,7 +432,7 @@ list.add("apple");
 list.add(null);
 list.add("banana");
 
-// Method removeIf của interface Collection bên dưới vẫn dựa trên iterator
+// Method removeIf của interface Collection về cơ bản vẫn dựa trên iterator
 list.removeIf(Objects::isNull);
 
 for (String fruit : list) {
@@ -509,7 +509,7 @@ list.clear();
 System.out.println("Linked list sau khi xóa toàn bộ: " + list);
 ```
 
-Output:
+Kết quả:
 
 ```plain
 Phần tử tại index 2: banana
