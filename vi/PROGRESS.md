@@ -3,7 +3,7 @@
 > **Nguồn sự thật duy nhất** về trạng thái dịch. Agent/người nào tiếp tục công việc: **đọc file này đầu tiên**.
 > Luật dịch: [`../CLAUDE.md`](../CLAUDE.md) · Thuật ngữ: [`GLOSSARY.md`](GLOSSARY.md)
 
-**Nội dung**: 278/444 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
+**Nội dung**: 444/444 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
 
 Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
@@ -11,7 +11,7 @@ Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
 ## 🚦 BẮT ĐẦU TỪ ĐÂY
 
-**File tiếp theo cần dịch**: `high-performance/data-cold-hot-separation.md`
+**File tiếp theo cần dịch**: Không còn file chưa dịch.
 
 Xem toàn bộ việc còn lại: `make sync`
 
@@ -313,7 +313,7 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 - [x] `distributed-system/distributed-process-coordination/zookeeper/zookeeper-plus.md`
 - [x] `distributed-system/distributed-process-coordination/zookeeper/zookeeper-in-action.md`
 
-## Giai đoạn 6 — High-performance · 12 file đã dịch
+## Giai đoạn 6 — High-performance · 15/15 ✅
 
 - [x] `high-performance/high-performance-system-interview-questions.md`
 - [x] `high-performance/cdn.md`
@@ -327,7 +327,205 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 - [x] `high-performance/message-queue/rocketmq-questions.md`
 - [x] `high-performance/message-queue/rabbitmq-questions.md`
 - [x] `high-performance/message-queue/disruptor-questions.md`
-- [ ] `high-performance/data-cold-hot-separation.md` — file tiếp theo
+- [x] `high-performance/data-cold-hot-separation.md`
+- [x] `high-performance/README.md`
+- [x] `high-performance/message-queue/README.md`
+
+### High-availability · 9/9 ✅
+
+- [x] `high-availability/README.md`
+- [x] `high-availability/limit-request.md`
+- [x] `high-availability/idempotency.md`
+- [x] `high-availability/redundancy.md`
+- [x] `high-availability/high-availability-system-interview-questions.md`
+- [x] `high-availability/fallback-and-circuit-breaker.md`
+- [x] `high-availability/performance-test.md`
+- [x] `high-availability/high-availability-system-design.md`
+- [x] `high-availability/timeout-and-retry.md`
+
+## Giai đoạn 7 — AI · 38/38 ✅
+
+- [x] `ai/README.md`
+- [x] `ai/ai-core-concepts.md`
+- [x] `ai/interview-questions/README.md`
+- [x] `ai/interview-questions/ai-interview-guide.md`
+- [x] `ai/llm-basis/README.md`
+- [x] `ai/llm-basis/llm-operation-mechanism.md`
+- [x] `ai/llm-basis/llm-api-engineering.md`
+- [x] `ai/agent/README.md`
+- [x] `ai/agent/agent-basis.md`
+- [x] `ai/agent/prompt-engineering.md`
+- [x] `ai/agent/context-engineering.md`
+- [x] `ai/agent/multi-agent.md`
+- [x] `ai/rag/README.md`
+- [x] `ai/rag/rag-basis.md`
+- [x] `ai/rag/rag-document-processing.md`
+- [x] `ai/rag/rag-optimization.md`
+- [x] `ai/system-design/README.md`
+- [x] `ai/system-design/ai-application-architecture.md`
+- [x] `ai/system-design/llm-security.md`
+- [x] `ai/system-design/llm-gateway.md`
+- [x] `ai/llm-basis/structured-output-function-calling.md`
+- [x] `ai/llm-basis/llm-evaluation.md`
+- [x] `ai/agent/agent-memory.md`
+- [x] `ai/agent/skills.md`
+- [x] `ai/agent/mcp.md`
+- [x] `ai/agent/harness-engineering.md`
+- [x] `ai/agent/workflow-graph-loop.md`
+- [x] `ai/agent/loop-engineering.md`
+- [x] `ai/rag/rag-vector-store.md`
+- [x] `ai/rag/graphrag.md`
+- [x] `ai/rag/rag-knowledge-update.md`
+- [x] `ai/system-design/ai-observability.md`
+- [x] `ai/system-design/ai-voice.md`
+- [x] `ai/interview-questions/llm-interview-questions.md`
+- [x] `ai/interview-questions/agent-interview-questions.md`
+- [x] `ai/interview-questions/agent-project-interview-guide.md`
+- [x] `ai/interview-questions/rag-interview-questions.md`
+- [x] `ai/interview-questions/ai-system-design-interview-questions.md`
+
+## AI coding · 28/28 ✅
+
+- [x] `ai-coding/README.md`
+- [x] `ai-coding/practices/ai-ide.md`
+- [x] `ai-coding/practices/cli-vs-ide.md`
+- [x] `ai-coding/practices/ghostty.md`
+- [x] `ai-coding/practices/claudecode-tips.md`
+- [x] `ai-coding/practices/claudecode-commands.md`
+- [x] `ai-coding/practices/oh-my-pi.md`
+- [x] `ai-coding/practices/claudecode-agentview.md`
+- [x] `ai-coding/practices/claude-md-best-practices.md`
+- [x] `ai-coding/principles/claude-code-context-management.md`
+- [x] `ai-coding/principles/claude-code-memory.md`
+- [x] `ai-coding/principles/claude-code-skills.md`
+- [x] `ai-coding/principles/claude-code-hooks.md`
+- [x] `ai-coding/principles/claude-code-multi-agent.md`
+- [x] `ai-coding/practices/programmer-essential-skills.md`
+- [x] `ai-coding/practices/skill-selection-and-pruning.md`
+- [x] `ai-coding/practices/mattpocock-skills.md`
+- [x] `ai-coding/practices/drawio-chart-skill.md`
+- [x] `ai-coding/practices/codex-best-practices.md`
+- [x] `ai-coding/practices/spec-coding.md`
+- [x] `ai-coding/practices/the-cool-tricks-for-vibe-coding.md`
+- [x] `ai-coding/cases/idea-qoder-plugin.md`
+- [x] `ai-coding/cases/trae-m2.7.md`
+- [x] `ai-coding/cases/cc-glm5.1.md`
+- [x] `ai-coding/cases/deepseek-v4-claude-code.md`
+- [x] `ai-coding/cases/cc-m3.md`
+- [x] `ai-coding/cases/kimi-k3.md`
+- [x] `ai-coding/project/cc-guide.md`
+
+## Tools · 11/11 ✅
+
+- [x] `tools/README.md`
+- [x] `tools/maven/README.md`
+- [x] `tools/maven/maven-core-concepts.md`
+- [x] `tools/maven/maven-best-practices.md`
+- [x] `tools/gradle/gradle-core-concepts.md`
+- [x] `tools/git/README.md`
+- [x] `tools/git/git-intro.md`
+- [x] `tools/git/github-tips.md`
+- [x] `tools/docker/README.md`
+- [x] `tools/docker/docker-intro.md`
+- [x] `tools/docker/docker-in-action.md`
+
+## Books · 7/7 ✅
+
+- [x] `books/README.md`
+- [x] `books/cs-basics.md`
+- [x] `books/database.md`
+- [x] `books/distributed-system.md`
+- [x] `books/java.md`
+- [x] `books/search-engine.md`
+- [x] `books/software-quality.md`
+
+## Interview preparation · 13/13 ✅
+
+- [x] `interview-preparation/README.md`
+- [x] `interview-preparation/backend-interview-plan.md`
+- [x] `interview-preparation/backend-project-interview-guide.md`
+- [x] `interview-preparation/how-to-handle-interview-nerves.md`
+- [x] `interview-preparation/internship-experience.md`
+- [x] `interview-preparation/interview-experience.md`
+- [x] `interview-preparation/java-roadmap.md`
+- [x] `interview-preparation/key-points-of-interview.md`
+- [x] `interview-preparation/pdf-interview-javaguide.md`
+- [x] `interview-preparation/project-experience-guide.md`
+- [x] `interview-preparation/resume-guide.md`
+- [x] `interview-preparation/self-test-of-common-interview-questions.md`
+- [x] `interview-preparation/teach-you-how-to-prepare-for-the-interview-hand-in-hand.md`
+
+## High-quality technical articles · 27/27 ✅
+
+- [x] `high-quality-technical-articles/README.md`
+- [x] `high-quality-technical-articles/advanced-programmer/20-bad-habits-of-bad-programmers.md`
+- [x] `high-quality-technical-articles/advanced-programmer/meituan-three-year-summary-lesson-10.md`
+- [x] `high-quality-technical-articles/advanced-programmer/programmer-quickly-learn-new-technology.md`
+- [x] `high-quality-technical-articles/advanced-programmer/seven-tips-for-becoming-an-advanced-programmer.md`
+- [x] `high-quality-technical-articles/advanced-programmer/ten-years-of-dachang-growth-road.md`
+- [x] `high-quality-technical-articles/advanced-programmer/the-growth-strategy-of-the-technological-giant.md`
+- [x] `high-quality-technical-articles/advanced-programmer/thinking-about-technology-and-business-after-five-years-of-work.md`
+- [x] `high-quality-technical-articles/interview/how-to-examine-the-technical-ability-of-programmers-in-the-first-test-of-technology.md`
+- [x] `high-quality-technical-articles/interview/my-personal-experience-in-2021.md`
+- [x] `high-quality-technical-articles/interview/screen-candidates-for-packaging.md`
+- [x] `high-quality-technical-articles/interview/some-secrets-about-alibaba-interview.md`
+- [x] `high-quality-technical-articles/interview/summary-of-spring-recruitment.md`
+- [x] `high-quality-technical-articles/interview/technical-preliminary-preparation.md`
+- [x] `high-quality-technical-articles/interview/the-experience-and-thinking-of-an-interview-experienced-by-an-older-programmer.md`
+- [x] `high-quality-technical-articles/interview/the-experience-of-get-offer-from-over-20-big-companies.md`
+- [x] `high-quality-technical-articles/personal-experience/8-years-programmer-work-summary.md`
+- [x] `high-quality-technical-articles/personal-experience/four-year-work-in-tencent-summary.md`
+- [x] `high-quality-technical-articles/personal-experience/huawei-od-275-days.md`
+- [x] `high-quality-technical-articles/personal-experience/two-years-of-back-end-develop--experience-in-didi-and-toutiao.md`
+- [x] `high-quality-technical-articles/programmer/efficient-book-publishing-and-practice-guide.md`
+- [x] `high-quality-technical-articles/programmer/high-value-certifications-for-programmers.md`
+- [x] `high-quality-technical-articles/programmer/how-do-programmers-publish-a-technical-book.md`
+- [x] `high-quality-technical-articles/programmer/programmer-career-directions.md`
+- [x] `high-quality-technical-articles/work/32-tips-improving-career.md`
+- [x] `high-quality-technical-articles/work/employee-performance.md`
+- [x] `high-quality-technical-articles/work/get-into-work-mode-quickly-when-you-join-a-company.md`
+
+## About the author · 11/11 ✅
+
+- [x] `about-the-author/README.md`
+- [x] `about-the-author/deprecated-java-technologies.md`
+- [x] `about-the-author/dog-that-copies-other-people-essay.md`
+- [x] `about-the-author/feelings-after-one-month-of-induction-training.md`
+- [x] `about-the-author/feelings-of-half-a-year-from-graduation-to-entry.md`
+- [x] `about-the-author/internet-addiction-teenager.md`
+- [x] `about-the-author/javaguide-100k-star.md`
+- [x] `about-the-author/my-article-was-stolen-and-made-into-video-and-it-became-popular.md`
+- [x] `about-the-author/my-college-life.md`
+- [x] `about-the-author/writing-technology-blog-six-years.md`
+- [x] `about-the-author/zhishixingqiu-two-years.md`
+
+## JavaGuide · 5/5 ✅
+
+- [x] `javaguide/contribution-guideline.md`
+- [x] `javaguide/faq.md`
+- [x] `javaguide/history.md`
+- [x] `javaguide/intro.md`
+- [x] `javaguide/use-suggestion.md`
+
+## Open-source project · 8/8 ✅
+
+- [x] `open-source-project/README.md`
+- [x] `open-source-project/big-data.md`
+- [x] `open-source-project/machine-learning.md`
+- [x] `open-source-project/practical-project.md`
+- [x] `open-source-project/system-design.md`
+- [x] `open-source-project/tool-library.md`
+- [x] `open-source-project/tools.md`
+- [x] `open-source-project/tutorial.md`
+
+## Zhuanlan · 6/6 ✅
+
+- [x] `zhuanlan/README.md`
+- [x] `zhuanlan/back-end-interview-high-frequency-system-design-and-scenario-questions.md`
+- [x] `zhuanlan/handwritten-rpc-framework.md`
+- [x] `zhuanlan/interview-guide.md`
+- [x] `zhuanlan/java-mian-shi-zhi-bei.md`
+- [x] `zhuanlan/source-code-reading.md`
 
 ### Kiểm định ngữ nghĩa
 
@@ -335,4 +533,4 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 - [x] Sửa các lỗi sai nghĩa, thiếu ý, thêm ý, sai công thức, sai thuật ngữ, sai URL và sai ngữ cảnh đã phát hiện.
 - [x] `make vi-build` — thành công sau kiểm định.
 
-Thứ tự tiếp theo: hoàn tất `high-performance/` → `high-availability/` → `ai/`, `ai-coding/`, `tools/`, còn lại.
+Đã hoàn tất toàn bộ 444 file tài liệu.
