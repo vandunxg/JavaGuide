@@ -376,7 +376,7 @@ public class TtlContextHolder {
         try {
             // 3. Set context trong parent thread
             CONTEXT.set("value-set-in-parent");
-            log.info("Context parent thread: {}", CONTEXT.get());
+            log.info("Context của parent thread: {}", CONTEXT.get());
 
             // 4. Dùng Lambda để đơn giản hóa việc submit task
             TTL_EXECUTOR_SERVICE.execute(() -> {
@@ -407,7 +407,7 @@ public class TtlContextHolder {
 Output:
 
 ```ba
-09:06:31.438 INFO  [main] TtlContextHolder - Context parent thread: value-set-in-parent
+09:06:31.438 INFO  [main] TtlContextHolder - Context của parent thread: value-set-in-parent
 09:06:31.452 INFO  [ttl-worker-1663166483] TtlContextHolder - Task bất đồng bộ (Runnable) đọc context: value-set-in-parent
 09:06:31.453 INFO  [ttl-worker-841283083] TtlContextHolder - Task bất đồng bộ (Callable) đọc context: value-set-in-parent
 09:06:31.453 INFO  [main] TtlContextHolder - Context cuối cùng của parent thread: value-set-in-parent
@@ -466,7 +466,7 @@ Nói ngắn gọn, **`InheritableThreadLocal` gắn với thread và chỉ có h
 
 ### ⭐️ Vì sao phải dùng thread pool?
 
-Chắc hẳn bạn đã gặp pooled technology rất nhiều: thread pool, database connection pool, HTTP connection pool... đều là ứng dụng của tư tưởng này. Tư tưởng pooled technology chủ yếu nhằm giảm chi phí lấy resource mỗi lần và nâng cao utilization của resource.
+Chắc hẳn bạn đã gặp kỹ thuật pool hóa rất nhiều: thread pool, database connection pool, HTTP connection pool... đều là ứng dụng của tư tưởng này. Kỹ thuật pool hóa chủ yếu nhằm giảm chi phí lấy resource mỗi lần và nâng cao utilization của resource.
 
 Thread pool cung cấp cách giới hạn và quản lý resource, bao gồm cả việc thực thi task. Mỗi thread pool còn duy trì một số statistic cơ bản, chẳng hạn số task đã hoàn tất. Dùng thread pool chủ yếu mang lại các lợi ích sau:
 
@@ -785,7 +785,7 @@ Output:
 18:19:48.203 INFO  [pool-1-thread-1] c.j.concurrent.ThreadPoolTest - Core thread thực thi task thứ nhất
 18:19:48.203 INFO  [pool-1-thread-2] c.j.concurrent.ThreadPoolTest - Non-core thread xử lý task thứ ba
 18:19:48.203 INFO  [main] c.j.concurrent.ThreadPoolTest - Main thread xử lý task thứ tư
-18:20:48.212 INFO  [pool-1-thread-2] c.j.concurrent.ThreadPoolTest - Non-core thread xử lý task thứ hai đã vào queue
+18:20:48.212 INFO  [pool-1-thread-2] c.j.concurrent.ThreadPoolTest - Non-core thread xử lý task thứ hai trong queue
 18:21:48.219 INFO  [pool-1-thread-2] c.j.concurrent.ThreadPoolTest - Core thread thực thi task thứ năm
 ```
 
@@ -799,7 +799,7 @@ Tiếp cận từ bản chất vấn đề, caller chọn `CallerRunsPolicy` vì
 
 Nếu resource của server đã đạt giới hạn có thể sử dụng, điều đó có nghĩa cần thay đổi scheduling strategy của thread pool. Bản chất khiến main thread bị treo là vì ta không muốn bỏ bất kỳ task nào. Đổi hướng suy nghĩ: có cách nào vừa bảo đảm task không bị bỏ, vừa xử lý kịp thời khi server còn capacity không?
 
-Một hướng là **persistence task**. Persistence task ở đây bao gồm nhưng không giới hạn ở:
+Một hướng là **lưu trữ task**. Việc lưu trữ task ở đây bao gồm nhưng không giới hạn ở:
 
 1. Thiết kế một task table để lưu task vào database MySQL.
 2. Cache task bằng Redis.
@@ -807,7 +807,7 @@ Một hướng là **persistence task**. Persistence task ở đây bao gồm nh
 
 Lấy phương án một làm ví dụ, logic triển khai đơn giản như sau:
 
-1. Implement interface `RejectedExecutionHandler` để custom reject policy; policy này chịu trách nhiệm lưu vào database task mà thread pool tạm thời không xử lý được (lúc này blocking queue đã đầy), tức lưu vào MySQL. Lưu ý: task thread pool tạm thời không xử lý được trước tiên được đặt vào blocking queue; chỉ khi queue đầy mới trigger reject policy.
+1. Implement interface `RejectedExecutionHandler` để custom reject policy; policy này chịu trách nhiệm lưu vào database các task mà thread pool tạm thời không xử lý được (lúc này blocking queue đã đầy), tức lưu vào MySQL. Lưu ý: task thread pool tạm thời không xử lý được trước tiên được đặt vào blocking queue; chỉ khi queue đầy mới trigger reject policy.
 2. Kế thừa `BlockingQueue` để implement hybrid blocking queue có chứa `ArrayBlockingQueue` do JDK cung cấp. Đồng thời hybrid blocking queue cần sửa logic lấy task: override method `take()`, ưu tiên đọc task sớm nhất từ database; khi database không có task mới lấy task từ `ArrayBlockingQueue`.
 
 ![Lưu một phần task vào MySQL](https://oss.javaguide.cn/github/javaguide/java/concurrent/threadpool-reject-2-threadpool-reject-02.png)
@@ -834,7 +834,7 @@ private static final class NewThreadRunsPolicy implements RejectedExecutionHandl
 }
 ```
 
-ActiveMQ thì cố gắng đưa task vào queue trong thời gian timeout được chỉ định để bảo đảm delivery tối đa:
+ActiveMQ thì cố gắng đưa task vào queue trong thời gian timeout được chỉ định để bảo đảm giao task tối đa:
 
 ```java
 new RejectedExecutionHandler() {
@@ -887,7 +887,7 @@ Kết luận trực tiếp, cần chia thành hai trường hợp:
 
 Nói ngắn gọn: khi dùng `execute()`, exception chưa được bắt khiến thread kết thúc và thread pool tạo thread mới thay thế; khi dùng `submit()`, exception được bọc trong `Future` và thread tiếp tục được reuse.
 
-Thiết kế này cho phép `submit()` cung cấp cơ chế xử lý lỗi linh hoạt hơn vì caller được quyết định cách xử lý exception; còn `execute()` phù hợp với scenario không cần quan tâm execution result.
+Thiết kế này cho phép `submit()` cung cấp cơ chế xử lý lỗi linh hoạt hơn vì caller tự quyết định cách xử lý exception; còn `execute()` phù hợp với scenario không cần quan tâm execution result.
 
 Có thể xem phân tích source code cụ thể trong bài viết này: [Thread trong thread pool sau exception: hủy hay reuse? - JD Technology](https://mp.weixin.qq.com/s/9ODjdUU-EwQFF5PrnzOGfw).
 
@@ -1034,7 +1034,7 @@ Tuy nhiên, cách này có một số rủi ro và vấn đề:
 
 - `PriorityBlockingQueue` là unbounded, có thể tích lũy rất nhiều request và gây OOM.
 - Có thể gây starvation, tức task priority thấp không được thực thi trong thời gian dài.
-- Vì cần sort element trong queue và bảo đảm thread safety (concurrent control dùng `ReentrantLock` reentrant lock), performance sẽ giảm.
+- Vì cần sort element trong queue và bảo đảm thread safety (concurrency control dùng `ReentrantLock`), performance sẽ giảm.
 
 Giải quyết OOM khá đơn giản và trực tiếp: kế thừa `PriorityBlockingQueue` rồi override logic của method `offer` (enqueue); khi số element được insert vượt giá trị chỉ định thì trả về `false`.
 
@@ -1046,7 +1046,7 @@ Vấn đề starvation có thể giải quyết bằng design optimization (hơi
 
 Trọng tâm là nắm vững cách dùng `CompletableFuture` và các câu hỏi phỏng vấn thường gặp.
 
-Ngoài các câu hỏi dưới đây, cũng khuyến nghị xem bài viết [Giải thích chi tiết CompletableFuture](https://javaguide.cn/java/concurrent/completablefuture-intro.html).
+Ngoài các câu hỏi dưới đây, cũng khuyến nghị xem bài viết tôi viết: [Giải thích chi tiết CompletableFuture](https://javaguide.cn/java/concurrent/completablefuture-intro.html).
 
 ### Interface Future dùng để làm gì?
 
@@ -1073,7 +1073,7 @@ public interface Future<V> {
     boolean isDone();
     // Lấy execution result của task
     V get() throws InterruptedException, ExecutionException;
-    // Nếu không trả về calculation result trong thời gian chỉ định thì ném exception TimeoutException
+    // Nếu không trả về calculation result trong thời gian chỉ định thì ném exception TimeOutException
     V get(long timeout, TimeUnit unit)
 
         throws InterruptedException, ExecutionException, TimeoutExceptio
@@ -1220,9 +1220,9 @@ Nói đơn giản, AQS là abstract class cung cấp **execution framework** chu
 
 > Lưu ý: `waitStatus`, `Unsafe.compareAndSwapInt()` và các cấu trúc nội bộ, source code fragment dưới đây dựa trên JDK 8. Implementation bên trong AQS tiếp tục tiến hóa: JDK 11 vẫn giữ các structure chính được đề cập trong bài, nhưng field của node và implementation enqueue, wait trong JDK 17 cũng như version hiện tại đã thay đổi lớn; các core idea như synchronization state, wait queue và template method vẫn còn phù hợp.
 
-Core idea của AQS là: nếu shared resource được request đang idle, đặt thread request resource hiện tại thành worker thread hợp lệ và đặt shared resource vào locked state. Nếu shared resource đang bị chiếm, cần có cơ chế block thread chờ và phân phối lock khi thread được đánh thức; cơ chế này được AQS triển khai bằng cách tối ưu hơn **CLH lock** (Craig, Landin, and Hagersten locks).
+Core idea của AQS là: nếu shared resource được yêu cầu đang idle, đặt thread đang request resource thành worker thread hợp lệ và đặt shared resource vào locked state. Nếu shared resource đang bị chiếm, cần có cơ chế block thread chờ và phân phối lock khi thread được đánh thức; cơ chế này được AQS triển khai bằng cách tối ưu hơn **CLH lock** (Craig, Landin, and Hagersten locks).
 
-**CLH lock** cải tiến spinlock và dựa trên single linked list. Trong bối cảnh nhiều thread, các thread request lock được tổ chức thành một queue đơn hướng; mỗi thread chờ sẽ spin để truy cập state của node trước đó, chỉ khi node trước release lock thì node hiện tại mới acquire lock. Cấu trúc queue của **CLH lock** như hình dưới.
+**CLH lock** cải tiến spinlock và dựa trên singly linked list. Trong bối cảnh nhiều thread, các thread request lock được tổ chức thành một queue đơn hướng; mỗi thread chờ sẽ spin để truy cập state của node trước đó, chỉ khi node trước release lock thì node hiện tại mới acquire lock. Cấu trúc queue của **CLH lock** như hình dưới.
 
 ![Cấu trúc queue của CLH lock](https://oss.javaguide.cn/github/javaguide/open-source-project/clh-lock-queue-structure.png)
 
@@ -1252,7 +1252,7 @@ Biến `state` được modifier `volatile`, dùng để thể hiện tình tr�
 private volatile int state;
 ```
 
-Ngoài ra, có thể thao tác state information `state` thông qua `getState()`, `setState()` và `compareAndSetState()` có type `protected`. Các method này đều được modifier `final`, nên không thể override trong subclass.
+Ngoài ra, có thể thao tác với state `state` thông qua các method `protected` `getState()`, `setState()` và `compareAndSetState()`. Các method này đều có modifier `final`, nên không thể override trong subclass.
 
 ```java
 // Trả về value hiện tại của synchronization state
@@ -1269,9 +1269,9 @@ protected final boolean compareAndSetState(int expect, int update) {
 }
 ```
 
-Lấy `ReentrantLock` làm ví dụ: `state` ban đầu là 0, biểu thị unlocked state. Khi thread A gọi `lock()`, nó gọi `tryAcquire()` để exclusive acquire lock và tăng `state` lên 1. Sau đó các thread khác gọi `tryAcquire()` sẽ thất bại cho đến khi thread A `unlock()` đưa `state` về 0 (tức release lock); lúc đó thread khác mới có cơ hội acquire lock. Tất nhiên, trước khi release lock, thread A có thể tiếp tục acquire lock này nhiều lần (`state` tăng dần), đây là khái niệm reentrant. Nhưng cần chú ý, acquire bao nhiêu lần thì phải release bấy nhiêu lần để bảo đảm `state` quay về 0.
+Lấy `ReentrantLock` làm ví dụ: `state` ban đầu là 0, biểu thị unlocked state. Khi thread A gọi `lock()`, nó gọi `tryAcquire()` để exclusive acquire lock và tăng `state` thêm 1. Sau đó các thread khác gọi `tryAcquire()` sẽ thất bại cho đến khi thread A `unlock()` đưa `state` về 0 (tức release lock); lúc đó thread khác mới có cơ hội acquire lock. Tất nhiên, trước khi release lock, thread A có thể tiếp tục acquire lock này nhiều lần (`state` tăng dần), đây là khái niệm reentrant. Nhưng cần chú ý, acquire bao nhiêu lần thì phải release bấy nhiêu lần để bảo đảm `state` quay về 0.
 
-Lấy `CountDownLatch` làm ví dụ khác: `state` được khởi tạo là N, biểu thị cần N lần gọi `countDown()`. N là số event hoặc số lần count, không bắt buộc bằng số thread; một thread có thể gọi nhiều lần, hoặc nhiều thread lần lượt gọi. Khi `state` trở thành 0, các thread bị block trong wait queue do gọi `await()` sẽ được đánh thức và tiếp tục thực thi.
+Lấy `CountDownLatch` làm ví dụ khác: `state` được khởi tạo là N, biểu thị cần N lần gọi `countDown()`. N là số event hoặc số lần count, không bắt buộc bằng số thread; một thread có thể gọi nhiều lần, hoặc nhiều thread cùng gọi. Khi `state` trở thành 0, các thread bị block trong wait queue do gọi `await()` sẽ được đánh thức và tiếp tục thực thi.
 
 ### Semaphore dùng để làm gì?
 
@@ -1469,7 +1469,7 @@ private int count;
 
 Hãy xem nhanh qua source code.
 
-1. Constructor mặc định của `CyclicBarrier` là `CyclicBarrier(int parties)`, parameter biểu thị số thread bị barrier chặn. Mỗi thread gọi method `await()` để báo với `CyclicBarrier rằng tôi đã đến barrier`, sau đó thread hiện tại bị block.
+1. Constructor mặc định của `CyclicBarrier` là `CyclicBarrier(int parties)`, parameter biểu thị số thread bị barrier chặn. Mỗi thread gọi method `await()` để báo với `CyclicBarrier` rằng mình đã đến barrier, sau đó thread hiện tại bị block.
 
 ```java
 public CyclicBarrier(int parties) {
@@ -1486,7 +1486,7 @@ public CyclicBarrier(int parties, Runnable barrierAction) {
 
 Trong đó, `parties` biểu thị số thread bị chặn; khi số thread bị chặn đạt value này thì mở barrier để mọi thread đi qua.
 
-2. Khi object `CyclicBarrier` gọi method `await()`, thực tế nó gọi method `dowait(false, 0L)`. Method `await()` giống như dựng barrier để chặn thread; chỉ khi số thread bị chặn đạt value `parties` thì barrier mới mở và thread mới có thể đi qua để thực thi.
+2. Khi gọi method `await()` trên object `CyclicBarrier`, thực tế nó gọi method `dowait(false, 0L)`. Method `await()` giống như dựng barrier để chặn thread; chỉ khi số thread bị chặn đạt value `parties` thì barrier mới mở và thread mới có thể đi qua để thực thi.
 
 ```java
 public int await() throws InterruptedException, BrokenBarrierException {
