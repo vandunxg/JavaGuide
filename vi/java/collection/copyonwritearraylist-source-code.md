@@ -45,7 +45,7 @@ Tuy nhiên, cơ chế Copy-On-Write không phải silver bullet, nó vẫn có m
 
 ## Phân tích source code CopyOnWriteArrayList
 
-Ở đây lấy JDK1.8 làm ví dụ để phân tích source code core bên dưới của `CopyOnWriteArrayList`.
+Ở đây lấy JDK1.8 làm ví dụ để phân tích source code cốt lõi bên trong của `CopyOnWriteArrayList`.
 
 Định nghĩa class `CopyOnWriteArrayList` như sau:
 
@@ -162,7 +162,7 @@ private E get(Object[] a, int index) {
 }
 ```
 
-Tuy nhiên, method `get` có consistency yếu, trong một số trường hợp có thể đọc được value cũ.
+Tuy nhiên, method `get` có tính nhất quán yếu (weakly consistent), trong một số trường hợp có thể đọc được value cũ.
 
 Method `get(int index)` thực hiện qua hai bước:
 
@@ -171,8 +171,8 @@ Method `get(int index)` thực hiện qua hai bước:
 
 Quá trình này không lock, nên trong concurrent environment có thể xảy ra tình huống sau:
 
-1. Thread 1 gọi method `get(int index)` để lấy value, bên trong lấy được value của thuộc tính `array` thông qua method `getArray()`;
-2. Thread 2 gọi các method sửa đổi như `add`, `set`, `remove` của `CopyOnWriteArrayList`, bên trong sửa value của thuộc tính `array` thông qua method `setArray`;
+1. Thread 1 gọi method `get(int index)` để lấy value, bên trong lấy được reference của thuộc tính `array` thông qua method `getArray()`;
+2. Thread 2 gọi các method sửa đổi như `add`, `set`, `remove` của `CopyOnWriteArrayList`, bên trong thay đổi giá trị của thuộc tính `array` thông qua method `setArray`;
 3. Thread 1 vẫn lấy value từ array `array` cũ.
 
 ### Lấy số lượng element trong list
