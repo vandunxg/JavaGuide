@@ -47,9 +47,9 @@ public ThreadPoolExecutor(int corePoolSize,
 
 Sau khi tìm hiểu sơ lược lịch sử của blocking queue, chúng ta bắt đầu thảo luận trọng tâm về container concurrency được giới thiệu trong bài viết này: `ArrayBlockingQueue`. Để hiểu sâu hơn về `ArrayBlockingQueue` ở các phần sau, trước hết hãy tìm hiểu cách sử dụng `ArrayBlockingQueue` qua một vài ví dụ dưới đây.
 
-Hãy xem ví dụ đầu tiên. Ở đây chúng ta dùng hai thread lần lượt mô phỏng producer và consumer. Sau khi khởi động, producer dùng method `put` để tạo 10 phần tử cho consumer tiêu thụ. Khi số phần tử trong queue đạt giới hạn 5 đã thiết lập, method `put` sẽ bị block.
+Hãy xem ví dụ đầu tiên. Ở đây chúng ta dùng hai thread lần lượt mô phỏng producer và consumer. Producer dùng method `put` để tạo 10 phần tử cho consumer tiêu thụ. Khi số phần tử trong queue đạt giới hạn 5 đã thiết lập, method `put` sẽ bị block.
 
-Tương tự, consumer dùng method `take` để tiêu thụ phần tử. Khi queue rỗng, method `take` sẽ block consumer thread. Để đảm bảo consumer thoát kịp thời sau khi tiêu thụ xong 10 phần tử, tác giả dùng `CountDownLatch` để điều khiển việc kết thúc consumer. Producer ở đây chỉ tạo 10 phần tử. Sau khi consumer tiêu thụ xong 10 phần tử, nó gọi `CountDownLatch`, tất cả thread sẽ dừng.
+Tương tự, consumer dùng method `take` để tiêu thụ phần tử. Khi queue rỗng, method `take` sẽ block consumer thread. Để đảm bảo consumer thoát kịp thời sau khi tiêu thụ xong 10 phần tử, tác giả dùng `CountDownLatch` để điều khiển việc kết thúc consumer. Producer ở đây chỉ tạo 10 phần tử. Sau khi consumer tiêu thụ xong 10 phần tử, nó giảm `CountDownLatch`, tất cả thread sẽ dừng.
 
 ```java
 public class ProducerConsumerExample {
@@ -477,7 +477,7 @@ public E take() throws InterruptedException {
 }
 ```
 
-Sau khi hiểu method `put`, việc xem method `take` trở nên rất đơn giản. Logic cốt lõi của chúng hoàn toàn ngược nhau. Ví dụ, method `put` chờ queue không đầy rồi chèn phần tử khi queue đầy (condition không đầy), còn method `take` chờ queue không rỗng rồi lấy và xóa phần tử (condition không rỗng).
+Sau khi hiểu method `put`, việc xem method `take` trở nên rất đơn giản. Logic cốt lõi của chúng hoàn toàn ngược nhau. Ví dụ, khi queue đầy, method `put` chờ queue không đầy rồi chèn phần tử (condition không đầy), còn khi queue rỗng, method `take` chờ queue không rỗng rồi lấy và xóa phần tử (condition không rỗng).
 
 Bên trong method `take` gọi method `dequeue` để thực hiện việc lấy phần tử khỏi queue. Logic cốt lõi của nó cũng ngược với method `enqueue`.
 
@@ -547,7 +547,7 @@ public boolean offer(E e) {
     }
 ```
 
-Method `poll` cũng tương tự: khi lấy phần tử thất bại, nó trả về rỗng ngay và không block thread đang lấy phần tử.
+Method `poll` cũng tương tự: khi lấy phần tử thất bại, nó trả về `null` ngay và không block thread đang lấy phần tử.
 
 ```java
 public E poll() {
@@ -568,7 +568,7 @@ Method `add` thực chất chỉ bọc thêm một lớp quanh `offer`, như cod
 ```java
 public boolean add(E e) {
         return super.add(e);
-}
+    }
 
 
 public boolean add(E e) {
@@ -577,7 +577,7 @@ public boolean add(E e) {
             return true;
         else
             throw new IllegalStateException("Queue full");
-}
+    }
 ```
 
 Method `remove` cũng tương tự, gọi `poll`; nếu trả về `null` thì nghĩa là queue không có phần tử và ném exception ngay.
@@ -589,7 +589,7 @@ public E remove() {
             return x;
         else
             throw new NoSuchElementException();
-}
+    }
 ```
 
 Logic của method `peek()` cũng rất đơn giản, bên trong gọi method `itemAt`.
@@ -744,7 +744,7 @@ Mặc dù tên là blocking queue, `ArrayBlockingQueue` cũng hỗ trợ lấy v
 
 - Triển khai bên dưới: `ArrayBlockingQueue` dựa trên array, còn `LinkedBlockingQueue` dựa trên linked list.
 - Có giới hạn hay không: `ArrayBlockingQueue` là bounded queue, phải chỉ định capacity khi tạo. Khi tạo `LinkedBlockingQueue` có thể không chỉ định capacity, mặc định là `Integer.MAX_VALUE`, tức unbounded. Tuy nhiên cũng có thể chỉ định kích thước queue để biến nó thành bounded queue.
-- Lock có tách biệt hay không: lock trong `ArrayBlockingQueue` không tách biệt, tức producer và consumer dùng cùng một lock; lock trong `LinkedBlockingQueue` tách biệt, producer dùng `putLock`, consumer dùng `takeLock`, nhờ đó giảm tranh chấp lock giữa producer thread và consumer thread.
+- Lock có tách biệt hay không: lock trong `ArrayBlockingQueue` không tách biệt, tức producer và consumer dùng cùng một lock; lock trong `LinkedBlockingQueue` tách biệt, producer dùng `putLock`, consumer dùng `takeLock`, nhờ đó tránh tranh chấp lock giữa producer thread và consumer thread.
 - Mức sử dụng memory: `ArrayBlockingQueue` cần cấp phát trước memory cho array, còn `LinkedBlockingQueue` cấp phát động memory cho node của linked list. Điều này có nghĩa là `ArrayBlockingQueue` chiếm một lượng memory nhất định ngay khi tạo, và memory được cấp phát thường lớn hơn memory thực tế sử dụng; còn `LinkedBlockingQueue` dần chiếm memory theo số phần tử tăng lên.
 
 ### Sự khác nhau giữa ArrayBlockingQueue và ConcurrentLinkedQueue là gì?
