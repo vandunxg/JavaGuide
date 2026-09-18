@@ -1,6 +1,6 @@
 ---
-title: Phân tích source code HashMap
-description: "Phân tích chuyên sâu source code HashMap: giải thích chi tiết khác biệt cấu trúc JDK1.7/1.8, hàm hash perturbation, load factor 0.75, cơ chế resize rehash, ngưỡng chuyển linked list thành red-black tree và các nguyên lý cốt lõi của HashMap."
+title: Phân tích source code của HashMap
+description: "Phân tích chuyên sâu source code của HashMap: giải thích chi tiết khác biệt cấu trúc JDK1.7/1.8, hàm perturbation của hash, load factor 0.75, cơ chế resize rehash, ngưỡng chuyển linked list thành red-black tree và các nguyên lý cốt lõi của HashMap."
 category: Java
 tag:
   - Java Collections
@@ -16,23 +16,23 @@ head:
 
 ## Giới thiệu về HashMap
 
-HashMap chủ yếu dùng để lưu trữ cặp key-value. Nó được triển khai dựa trên Map interface của hash table, là một trong các Java Collections thường dùng và không thread-safe.
+HashMap chủ yếu dùng để lưu trữ cặp key-value. Nó triển khai Map interface dựa trên hash table, là một trong các Java Collections thường dùng và không thread-safe.
 
 `HashMap` có thể lưu key và value là null, nhưng null chỉ có thể làm key một lần, còn làm value thì có thể nhiều lần.
 
-Trước JDK1.8, HashMap được tạo thành từ array + linked list. Array là thành phần chính của HashMap, còn linked list chủ yếu tồn tại để giải quyết hash collision (giải quyết collision bằng "separate chaining"). Từ JDK1.8, `HashMap` có thay đổi lớn trong cách giải quyết hash collision. Khi độ dài linked list lớn hơn hoặc bằng ngưỡng (mặc định là 8) (trước khi chuyển linked list thành red-black tree, nó sẽ kiểm tra độ dài array hiện tại; nếu nhỏ hơn 64 thì sẽ ưu tiên resize array thay vì chuyển thành red-black tree), linked list được chuyển thành red-black tree để giảm thời gian tìm kiếm.
+Trước JDK1.8, HashMap gồm array + linked list. Array là thành phần chính của HashMap, còn linked list chủ yếu tồn tại để giải quyết hash collision (giải quyết collision bằng "separate chaining"). Từ JDK1.8, `HashMap` có thay đổi lớn trong cách giải quyết hash collision. Khi độ dài linked list lớn hơn hoặc bằng ngưỡng (mặc định là 8) (trước khi chuyển linked list thành red-black tree, nó sẽ kiểm tra độ dài array hiện tại; nếu nhỏ hơn 64 thì sẽ ưu tiên resize array thay vì chuyển thành red-black tree), linked list được chuyển thành red-black tree để giảm thời gian tìm kiếm.
 
-Kích thước khởi tạo mặc định của `HashMap` là 16. Sau đó, mỗi lần mở rộng, capacity tăng thành gấp đôi. Ngoài ra, `HashMap` luôn sử dụng lũy thừa của 2 làm kích thước hash table.
+Kích thước khởi tạo mặc định của `HashMap` là 16. Sau đó, mỗi lần mở rộng, capacity tăng gấp đôi. Ngoài ra, `HashMap` luôn sử dụng lũy thừa của 2 làm kích thước hash table.
 
 ## Phân tích cấu trúc dữ liệu bên trong
 
 ### Trước JDK1.8
 
-Trước JDK1.8, cấu trúc bên trong của HashMap kết hợp **array và linked list**, còn gọi là **chaining hash**.
+Trước JDK1.8, cấu trúc bên trong của HashMap kết hợp **array và linked list**, còn gọi là **separate chaining**.
 
 HashMap lấy hashCode của key, xử lý qua hàm perturbation để nhận được hash value, sau đó dùng `(n - 1) & hash` để xác định vị trí lưu phần tử hiện tại (n ở đây là độ dài array). Nếu vị trí hiện tại đã có phần tử, nó sẽ kiểm tra hash value và key của phần tử đó có giống phần tử cần lưu hay không. Nếu giống thì ghi đè trực tiếp, nếu khác thì giải quyết collision bằng separate chaining.
 
-Hàm perturbation chính là phương thức hash của HashMap. Sử dụng phương thức hash, tức hàm perturbation, nhằm tránh một số hashCode() được triển khai kém; nói cách khác, dùng hàm perturbation có thể giảm collision.
+Hàm perturbation chính là phương thức hash của HashMap. Sử dụng phương thức hash, tức hàm perturbation, nhằm hạn chế ảnh hưởng của một số hashCode() được triển khai kém; nói cách khác, dùng hàm perturbation có thể giảm collision.
 
 **Source code phương thức hash của HashMap trong JDK 1.8:**
 
@@ -61,15 +61,15 @@ static int hash(int h) {
 }
 ```
 
-So với phương thức hash của JDK1.8, hiệu năng phương thức hash của JDK 1.7 kém hơn một chút, vì nó thực hiện perturbation đến 4 lần.
+So với phương thức hash của JDK1.8, hiệu năng phương thức hash của JDK 1.7 kém hơn một chút, vì nó thực hiện phép perturbation 4 lần.
 
-**Separate chaining** là: kết hợp linked list và array. Tức là tạo một array các linked list, mỗi ô trong array là một linked list. Khi gặp hash collision, chỉ cần thêm giá trị bị collision vào linked list.
+**Separate chaining** là cách kết hợp linked list và array. Tức là tạo một array các linked list, mỗi ô trong array là một linked list. Khi gặp hash collision, chỉ cần thêm phần tử gây collision vào linked list.
 
 ![Cấu trúc bên trong trước JDK1.8 - HashMap](https://oss.javaguide.cn/github/javaguide/java/collection/jdk1.7_hashmap.png)
 
 ### Từ JDK1.8
 
-So với các version trước, từ JDK1.8 HashMap có thay đổi lớn trong cách giải quyết hash collision.
+So với các phiên bản trước, từ JDK1.8 HashMap có thay đổi lớn trong cách giải quyết hash collision.
 
 Khi độ dài linked list lớn hơn ngưỡng (mặc định là 8), trước hết phương thức `treeifyBin()` sẽ được gọi. Phương thức này quyết định có chuyển thành red-black tree hay không dựa trên array của HashMap. Chỉ khi độ dài array lớn hơn hoặc bằng 64 thì thao tác chuyển thành red-black tree mới được thực hiện để giảm thời gian tìm kiếm. Nếu không, chỉ thực hiện phương thức `resize()` để mở rộng array. Source code liên quan không được đưa vào đây, trọng tâm là phương thức `treeifyBin()`!
 
@@ -112,9 +112,9 @@ public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>, Cloneabl
 
   loadFactor là tham số kiểm soát độ dày dữ liệu trong array. loadFactor càng gần 1 thì dữ liệu (entry) lưu trong array càng nhiều, càng dày, làm độ dài linked list tăng. loadFactor càng nhỏ, tức càng gần 0, thì dữ liệu (entry) lưu trong array càng ít và càng thưa.
 
-  **loadFactor quá lớn làm hiệu quả tìm kiếm phần tử thấp; quá nhỏ làm hiệu suất sử dụng array thấp và dữ liệu lưu trữ bị phân tán. Giá trị mặc định 0.75f của loadFactor là một giá trị tới hạn khá tốt do nhà phát triển cung cấp.**
+  **loadFactor quá lớn làm hiệu quả tìm kiếm phần tử thấp; quá nhỏ làm hiệu suất sử dụng array thấp và dữ liệu lưu trữ bị phân tán. Giá trị mặc định 0.75f của loadFactor là một giá trị tới hạn khá tốt do official đưa ra.**
 
-  Với capacity mặc định là 16 và load factor là 0.75, Map liên tục nhận dữ liệu trong quá trình sử dụng. Khi số lượng vượt quá 16 \* 0.75 = 12, capacity hiện tại là 16 cần được mở rộng. Quá trình mở rộng cần tạo array mới và di chuyển node, nên tiêu tốn rất nhiều performance.
+  Với capacity mặc định là 16 và load factor là 0.75, Map liên tục thêm dữ liệu trong quá trình sử dụng. Khi số lượng vượt quá 16 \* 0.75 = 12, capacity hiện tại là 16 cần được mở rộng. Quá trình mở rộng cần tạo array mới và di chuyển node, nên tiêu tốn rất nhiều performance.
 
 - **threshold**
 
@@ -125,7 +125,7 @@ public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>, Cloneabl
 ```java
 // kế thừa từ Map.Entry<K,V>
 static class Node<K,V> implements Map.Entry<K,V> {
-       final int hash;// hash value, dùng để so sánh hash của phần tử với các phần tử khác khi lưu vào hashmap
+       final int hash;// hash value, dùng để so sánh hash của phần tử với các phần tử khác khi lưu vào HashMap
        final K key;// key
        V value;// value
        // trỏ tới node tiếp theo
@@ -172,7 +172,7 @@ static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
         TreeNode<K,V> left;    // left
         TreeNode<K,V> right;   // right
         TreeNode<K,V> prev;    // needed to unlink next upon deletion
-        boolean red;           // kiểm tra màu
+        boolean red;           // xác định màu
         TreeNode(int hash, K key, V val, Node<K,V> next) {
             super(hash, key, val, next);
         }
@@ -192,12 +192,12 @@ static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
 HashMap có bốn constructor, lần lượt như sau:
 
 ```java
-    // default constructor.
+    // constructor mặc định.
     public HashMap() {
         this.loadFactor = DEFAULT_LOAD_FACTOR; // all   other fields defaulted
      }
 
-     // constructor chứa một “Map” khác
+     // constructor chứa một "Map" khác
      public HashMap(Map<? extends K, ? extends V> m) {
          this.loadFactor = DEFAULT_LOAD_FACTOR;
          putMapEntries(m, false);// phương thức này sẽ được phân tích bên dưới
@@ -217,12 +217,12 @@ HashMap có bốn constructor, lần lượt như sau:
          if (loadFactor <= 0 || Float.isNaN(loadFactor))
              throw new IllegalArgumentException("Illegal load factor: " + loadFactor);
          this.loadFactor = loadFactor;
-         // initial capacity tạm thời được lưu vào threshold, sau đó trong resize sẽ gán cho newCap để khởi tạo table
+         // initial capacity tạm thời được lưu vào threshold; sau đó resize sẽ gán nó cho newCap để khởi tạo table
          this.threshold = tableSizeFor(initialCapacity);
      }
 ```
 
-> Cần đặc biệt chú ý: `initialCapacity` truyền vào không phải là capacity cuối cùng của array. `HashMap` gọi `tableSizeFor()` để **làm tròn lên thành lũy thừa 2 nhỏ nhất lớn hơn hoặc bằng giá trị đó**, rồi tạm thời lưu vào field `threshold`. Array `table` thực sự chỉ được khởi tạo với kích thước này trong lần resize đầu tiên.
+> Cần đặc biệt chú ý: `initialCapacity` truyền vào không phải là capacity cuối cùng của array. `HashMap` gọi `tableSizeFor()` để **làm tròn lên thành lũy thừa 2 nhỏ nhất lớn hơn hoặc bằng giá trị đó**, rồi tạm thời lưu vào field `threshold`. `table` thực tế chỉ được khởi tạo với kích thước này trong lần resize đầu tiên.
 >
 > Ví dụ: `initialCapacity = 9` → `threshold = 16` → độ dài `table` cuối cùng là 16.
 
@@ -245,7 +245,7 @@ final void putMapEntries(Map<? extends K, ? extends V> m, boolean evict) {
             /*
              * Theo constructor, table chưa được khởi tạo, nên threshold thực tế đang lưu initial capacity.
              * Nếu capacity tối thiểu cần để thêm s phần tử lớn hơn initial capacity,
-             * mở rộng capacity tối thiểu thành kích thước lũy thừa 2 gần nhất để khởi tạo.
+             * làm tròn capacity tối thiểu lên lũy thừa 2 gần nhất để khởi tạo.
              * Chú ý đây không phải khởi tạo threshold.
              */
             if (t > threshold)
@@ -267,7 +267,7 @@ final void putMapEntries(Map<? extends K, ? extends V> m, boolean evict) {
 
 ### Phương thức put
 
-HashMap chỉ cung cấp put để thêm phần tử. Phương thức putVal chỉ được put gọi đến và không cung cấp cho người dùng sử dụng.
+HashMap chỉ cung cấp put để thêm phần tử. Phương thức putVal chỉ được gọi bởi put và không cung cấp cho người dùng sử dụng.
 
 **Phân tích việc thêm phần tử qua phương thức putVal:**
 
@@ -294,12 +294,12 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
     // bucket đã có phần tử (xử lý hash collision)
     else {
         Node<K,V> e; K k;
-        // nhanh chóng kiểm tra key của node đầu tiên table[i] có giống key chèn vào không;
-        // nếu giống thì dùng value chèn vào để thay thế value cũ của e
+        // nhanh chóng kiểm tra key của node đầu tiên tại table[i] có giống key chèn vào không;
+        // nếu giống thì dùng value mới để thay thế value cũ của e
         if (p.hash == hash &&
             ((k = p.key) == key || (key != null && key.equals(k))))
                 e = p;
-        // kiểm tra phần tử chèn vào có phải red-black tree node không
+        // kiểm tra phần tử chèn vào có phải tree node không
         else if (p instanceof TreeNode)
             // đặt vào tree
             e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
@@ -311,7 +311,7 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                 if ((e = p.next) == null) {
                     // chèn node mới vào cuối
                     p.next = newNode(hash, key, value, null);
-                    // số node đạt threshold (mặc định là 8), thực hiện phương thức treeifyBin
+                    // số node đạt ngưỡng (mặc định là 8), thực hiện phương thức treeifyBin
                     // phương thức này quyết định có chuyển thành red-black tree dựa trên array của HashMap hay không.
                     // Chỉ khi độ dài array lớn hơn hoặc bằng 64 mới chuyển thành red-black tree để giảm thời gian tìm kiếm.
                     // Nếu không thì chỉ resize array.
@@ -329,7 +329,7 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                 p = e;
             }
         }
-        // tìm thấy node trong bucket có key và hash bằng phần tử chèn vào
+        // tìm thấy node trong bucket có key và hash trùng với phần tử chèn vào
         if (e != null) {
             // ghi lại value của e
             V oldValue = e.value;
@@ -354,7 +354,7 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 }
 ```
 
-**Hãy so sánh thêm code phương thức put của JDK1.7.**
+**Hãy đối chiếu thêm code phương thức put của JDK1.7.**
 
 **Phân tích phương thức put:**
 
@@ -398,7 +398,7 @@ final Node<K,V> getNode(int hash, Object key) {
     Node<K,V>[] tab; Node<K,V> first, e; int n; K k;
     if ((tab = table) != null && (n = tab.length) > 0 &&
         (first = tab[(n - 1) & hash]) != null) {
-        // array element bằng nhau
+        // node đầu tiên trong array khớp
         if (first.hash == hash && // always check first node
             ((k = first.key) == key || (key != null && key.equals(k))))
             return first;
@@ -421,7 +421,7 @@ final Node<K,V> getNode(int hash, Object key) {
 
 ### Phương thức resize
 
-Khi resize, HashMap sẽ duyệt các phần tử trong hash table và sử dụng hash value có sẵn của node cùng old capacity để xác định vị trí của node trong array mới, đây là thao tác rất tốn thời gian. Khi viết chương trình, nên cố gắng tránh resize. Về bản chất, phương thức resize kết hợp việc khởi tạo table và mở rộng table; hành vi bên dưới đều là gán một array mới cho table.
+Khi resize, HashMap sẽ duyệt các phần tử trong hash table và sử dụng hash value có sẵn của node cùng old capacity để xác định vị trí của node trong array mới, đây là thao tác rất tốn thời gian. Khi viết chương trình, nên cố gắng tránh resize. Về bản chất, phương thức resize kết hợp việc khởi tạo table và mở rộng table; thao tác bên dưới đều là gán một array mới cho table.
 
 ```java
 final Node<K,V>[] resize() {
