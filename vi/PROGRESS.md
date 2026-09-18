@@ -3,7 +3,7 @@
 > **Nguồn sự thật duy nhất** về trạng thái dịch. Agent/người nào tiếp tục công việc: **đọc file này đầu tiên**.
 > Luật dịch: [`../CLAUDE.md`](../CLAUDE.md) · Thuật ngữ: [`GLOSSARY.md`](GLOSSARY.md)
 
-**Nội dung**: 248/444 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
+**Nội dung**: 278/444 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
 
 Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
@@ -11,7 +11,7 @@ Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
 ## 🚦 BẮT ĐẦU TỪ ĐÂY
 
-**File tiếp theo cần dịch**: `database/mysql/mysql-questions-01.md`
+**File tiếp theo cần dịch**: `high-performance/data-cold-hot-separation.md`
 
 Xem toàn bộ việc còn lại: `make sync`
 
@@ -286,16 +286,48 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 - [x] `database/sql/` — 7 file đã dịch
 - [x] `database/mongodb/` — 3 file đã dịch
 - [x] `database/elasticsearch/elasticsearch-questions-01.md`
-- [ ] `database/mysql/mysql-questions-01.md` — file tiếp theo
-- [ ] `database/redis/3-commonly-used-cache-read-and-write-strategies.md`
+- [x] `database/mysql/mysql-questions-01.md`
+- [x] `database/redis/3-commonly-used-cache-read-and-write-strategies.md`
 
 ## Giai đoạn 5 — System design · 36 file đã dịch
 
 - [x] `system-design/` — 36 file đã dịch
 
-## Giai đoạn 6 — Distributed system · 12 file đã dịch
+## Giai đoạn 6 — Distributed system · 28 file đã dịch
 
-- [x] `distributed-system/` — 12 file đã dịch
+- [x] `distributed-system/` — các file nền tảng và protocol đã dịch trước đó
+- [x] `distributed-system/microservices-interview-questions.md`
+- [x] `distributed-system/rpc/README.md`
+- [x] `distributed-system/rpc/rpc-intro.md`
+- [x] `distributed-system/rpc/dubbo.md`
+- [x] `distributed-system/api-gateway.md`
+- [x] `distributed-system/spring-cloud-gateway-questions.md`
+- [x] `distributed-system/distributed-id.md`
+- [x] `distributed-system/distributed-id-design.md`
+- [x] `distributed-system/distributed-lock.md`
+- [x] `distributed-system/distributed-lock-implementations.md`
+- [x] `distributed-system/distributed-transaction.md`
+- [x] `distributed-system/distributed-configuration-center.md`
+- [x] `distributed-system/distributed-process-coordination/zookeeper/README.md`
+- [x] `distributed-system/distributed-process-coordination/zookeeper/zookeeper-intro.md`
+- [x] `distributed-system/distributed-process-coordination/zookeeper/zookeeper-plus.md`
+- [x] `distributed-system/distributed-process-coordination/zookeeper/zookeeper-in-action.md`
+
+## Giai đoạn 6 — High-performance · 12 file đã dịch
+
+- [x] `high-performance/high-performance-system-interview-questions.md`
+- [x] `high-performance/cdn.md`
+- [x] `high-performance/load-balancing.md`
+- [x] `high-performance/read-and-write-separation-and-library-subtable.md`
+- [x] `high-performance/sql-optimization.md`
+- [x] `high-performance/deep-pagination-optimization.md`
+- [x] `high-performance/message-queue/message-queue-interview-questions.md`
+- [x] `high-performance/message-queue/message-queue.md`
+- [x] `high-performance/message-queue/kafka-questions-01.md`
+- [x] `high-performance/message-queue/rocketmq-questions.md`
+- [x] `high-performance/message-queue/rabbitmq-questions.md`
+- [x] `high-performance/message-queue/disruptor-questions.md`
+- [ ] `high-performance/data-cold-hot-separation.md` — file tiếp theo
 
 ### Kiểm định ngữ nghĩa
 
@@ -303,4 +335,4 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 - [x] Sửa các lỗi sai nghĩa, thiếu ý, thêm ý, sai công thức, sai thuật ngữ, sai URL và sai ngữ cảnh đã phát hiện.
 - [x] `make vi-build` — thành công sau kiểm định.
 
-Thứ tự tiếp theo: `cs-basics/` → `database/` → `system-design/` → `distributed-system/` + `high-performance/` + `high-availability/` → `ai/`, `ai-coding/`, `tools/`, còn lại.
+Thứ tự tiếp theo: hoàn tất `high-performance/` → `high-availability/` → `ai/`, `ai-coding/`, `tools/`, còn lại.
