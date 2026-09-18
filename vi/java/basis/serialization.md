@@ -1,5 +1,5 @@
 ---
-title: Java serialization giải thích chi tiết
+title: Giải thích chi tiết về Java serialization
 description: "Phân tích chuyên sâu cơ chế serialization và deserialization của Java: giải thích chi tiết interface Serializable, keyword transient, tác dụng của serialVersionUID, lựa chọn serialization protocol và các trường hợp sử dụng như RPC, cache."
 category: Java
 tag:
@@ -7,7 +7,7 @@ tag:
 head:
   - - meta
     - name: keywords
-      content: Java serialization,deserialization,interface Serializable,keyword transient,serialVersionUID,serialization protocol,persistence đối tượng
+      content: Java serialization,deserialization,interface Serializable,keyword transient,serialVersionUID,serialization protocol,object persistence
 ---
 
 ## Serialization và deserialization là gì?
@@ -19,14 +19,14 @@ Nói đơn giản:
 - **Serialization**: chuyển data structure hoặc object thành dạng có thể lưu trữ hoặc truyền tải, thường là binary byte stream, cũng có thể là định dạng text như JSON, XML
 - **Deserialization**: quá trình chuyển dữ liệu được tạo ra trong serialization thành data structure hoặc object ban đầu
 
-Với ngôn ngữ lập trình hướng đối tượng như Java, object được serialization đều là object (Object), tức class (Class) sau khi được khởi tạo. Tuy nhiên, trong C++ là ngôn ngữ nửa hướng đối tượng, struct (structure) định nghĩa kiểu data structure, còn class tương ứng với kiểu object.
+Với ngôn ngữ lập trình hướng đối tượng như Java, những gì được serialization đều là object (Object), tức class (Class) sau khi được instantiate. Tuy nhiên, C++ là ngôn ngữ nửa hướng đối tượng: struct (structure) định nghĩa kiểu data structure, còn class tương ứng với kiểu object.
 
 Dưới đây là các trường hợp sử dụng phổ biến của serialization và deserialization:
 
-- Object cần được serialization trước khi truyền qua network (chẳng hạn khi thực hiện remote method call RPC), sau khi nhận object đã serialization thì cần deserialization;
+- Object cần được serialization trước khi truyền qua network (chẳng hạn khi thực hiện remote method call RPC), sau khi nhận object đã được serialization thì cần deserialization;
 - Cần serialization trước khi lưu object vào file, và cần deserialization khi đọc object từ file;
 - Cần serialization trước khi lưu object vào database (như Redis), và cần deserialization khi đọc object từ cache database;
-- Khi chuyển object thành byte representation cần lưu giữ lâu dài hoặc truyền qua các component, thường cần serialization; Java object thông thường được sử dụng trong JVM memory thì không cần serialization.
+- Khi chuyển object thành byte representation để lưu giữ lâu dài hoặc truyền qua các component, thường cần serialization; Java object thông thường được sử dụng trong JVM memory thì không cần serialization.
 
 Wikipedia giới thiệu serialization như sau:
 
@@ -82,9 +82,9 @@ public class RpcRequest implements Serializable {
 
 **serialVersionUID có tác dụng gì?**
 
-Serial number `serialVersionUID` có tác dụng kiểm soát version. Khi deserialization, hệ thống sẽ kiểm tra `serialVersionUID` trong stream có nhất quán với `serialVersionUID` của class hiện tại hay không; nếu không nhất quán sẽ throw `InvalidClassException`. Khuyến nghị mạnh mẽ mỗi serialization class đều tự chỉ định `serialVersionUID`. Nếu không khai báo tường minh, serialization runtime sẽ tính giá trị mặc định dựa trên cấu trúc class, chứ không phải do compiler tạo field.
+Mã serialization `serialVersionUID` có tác dụng kiểm soát version. Khi deserialization, hệ thống sẽ kiểm tra `serialVersionUID` trong stream có nhất quán với `serialVersionUID` của class hiện tại hay không; nếu không nhất quán sẽ throw `InvalidClassException`. Khuyến nghị mạnh mẽ mỗi serialization class đều tự chỉ định `serialVersionUID`. Nếu không khai báo tường minh, serialization runtime sẽ tính giá trị mặc định dựa trên cấu trúc class, chứ không phải do compiler tạo field.
 
-**`serialVersionUID` được modifier bởi biến `static`; tại sao nó vẫn được “serialization”?**
+**`serialVersionUID` được khai báo là `static`; tại sao nó vẫn được “serialization”?**
 
 ~~Biến được modifier bởi `static` là static variable, nằm trong method area và bản thân nó không được serialization. `static` variable thuộc về class chứ không phải object. Sau khi deserialization, giá trị của `static` variable giống như được mặc định gán cho object, khiến ta có cảm giác `static` variable đã được serialization, nhưng thực tế chỉ là ảo giác.~~
 
@@ -92,7 +92,7 @@ Serial number `serialVersionUID` có tác dụng kiểm soát version. Khi deser
 
 Thông thường, `static` variable thuộc về class, không thuộc bất kỳ object instance riêng lẻ nào, nên bản thân chúng không được đưa vào data stream của object serialization. Serialization lưu trạng thái của object (tức giá trị của instance variable). Tuy nhiên, `serialVersionUID` là một trường hợp đặc biệt; serialization của `serialVersionUID` được xử lý đặc biệt. Điểm mấu chốt là `serialVersionUID` không được serialization như một phần của object state, mà được chính serialization mechanism sử dụng như một “fingerprint” hoặc “version number” đặc biệt.
 
-Khi một object được serialization, `serialVersionUID` sẽ được ghi vào binary stream của serialization (giống như lưu một version number, chứ không phải lưu trạng thái bản thân `static` variable); khi deserialization, nó cũng được phân tích và kiểm tra tính nhất quán, qua đó xác minh version consistency của object đã serialization. Nếu hai giá trị không khớp, quá trình deserialization sẽ throw `InvalidClassException`, vì điều này thường có nghĩa là định nghĩa của class đã serialization đã thay đổi và có thể không còn tương thích.
+Khi một object được serialization, `serialVersionUID` sẽ được ghi vào binary stream của serialization (giống như lưu một version number, chứ không phải lưu trạng thái bản thân `static` variable); khi deserialization, nó cũng được phân tích và kiểm tra tính nhất quán, qua đó xác minh version consistency của object đã được serialization. Nếu hai giá trị không khớp, quá trình deserialization sẽ throw `InvalidClassException`, vì điều này thường có nghĩa là định nghĩa của class được serialization đã thay đổi và có thể không còn tương thích.
 
 Giải thích chính thức như sau:
 
@@ -104,9 +104,9 @@ Nói cách khác, bản thân `serialVersionUID` (với vai trò static variable
 
 **Nếu có một số field không muốn serialization thì phải làm thế nào?**
 
-Với variable không muốn serialization, có thể dùng keyword `transient` để modifier.
+Với variable không muốn được serialization, có thể dùng keyword `transient` để modifier.
 
-Tác dụng của keyword `transient`: ngăn serialization các variable trong instance được modifier bằng keyword này; khi object được deserialization, giá trị của variable được modifier bởi `transient` sẽ không được persist và khôi phục.
+Tác dụng của keyword `transient`: ngăn không cho các variable trong instance được modifier bằng keyword này được serialization; khi object được deserialization, giá trị của variable được modifier bởi `transient` sẽ không được persist và khôi phục.
 
 Ngoài ra, cần lưu ý một số điểm về `transient`:
 
@@ -124,11 +124,11 @@ Chúng ta rất ít, hay gần như không bao giờ, sử dụng trực tiếp 
 
 ### Kryo
 
-Kryo là một tool serialization/deserialization hiệu năng cao. Nhờ đặc tính lưu trữ biến độ dài và sử dụng bytecode generation mechanism, Kryo có tốc độ chạy cao và bytecode size nhỏ.
+Kryo là một tool serialization/deserialization hiệu năng cao. Nhờ đặc tính lưu trữ có độ dài biến đổi và sử dụng bytecode generation mechanism, Kryo có tốc độ chạy cao và bytecode size nhỏ.
 
 Ngoài ra, Kryo đã là một serialization implementation rất mature, được sử dụng rộng rãi tại Twitter, Groupon, Yahoo cũng như nhiều open-source project nổi tiếng (như Hive, Storm).
 
-[guide-rpc-framework](https://github.com/Snailclimb/guide-rpc-framework) sử dụng kryo để serialization; code liên quan đến serialization và deserialization như sau:
+[guide-rpc-framework](https://github.com/Snailclimb/guide-rpc-framework) sử dụng kryo để thực hiện serialization; code liên quan đến serialization và deserialization như sau:
 
 ```java
 /**
@@ -207,7 +207,7 @@ GitHub address: [https://github.com/protocolbuffers/protobuf](https://github.com
 
 ### ProtoStuff
 
-Do Protobuf có khả năng sử dụng kém, “người anh” Protostuff đã ra đời.
+Do Protobuf khó sử dụng, “người anh” Protostuff đã ra đời.
 
 protostuff dựa trên Google protobuf nhưng cung cấp nhiều function hơn và cách sử dụng đơn giản hơn. Dễ sử dụng hơn không có nghĩa là performance của ProtoStuff kém hơn.
 
@@ -227,7 +227,7 @@ Kryo là serialization method chuyên biệt cho Java và có performance rất 
 
 ![](https://oss.javaguide.cn/github/javaguide/java/569e541a-22b2-4846-aa07-0ad479f07440-20230814090158124.png)
 
-Các method serialization như Protobuf, ProtoStuff, hessian đều hỗ trợ cross-language; nếu có nhu cầu cross-language thì có thể cân nhắc sử dụng.
+Các serialization method như Protobuf, ProtoStuff, hessian đều hỗ trợ cross-language; nếu có nhu cầu cross-language thì có thể cân nhắc sử dụng.
 
 Ngoài các method serialization đã giới thiệu ở trên, còn có Thrift, Avro và các method khác.
 
