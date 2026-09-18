@@ -77,7 +77,7 @@ Nói chung, programming language cũng có thể dùng trực tiếp memory mode
 
 Đó chỉ là một trong những lý do JMM tồn tại. Trên thực tế, với Java, bạn có thể xem JMM là một tập hợp đặc tả liên quan đến concurrent programming do Java định nghĩa. Ngoài việc trừu tượng hóa mối quan hệ giữa thread và main memory, nó còn quy định quá trình chuyển đổi từ Java source code thành instruction có thể thực thi trên CPU phải tuân thủ những nguyên tắc và đặc tả nào liên quan đến concurrency. Mục đích chính là đơn giản hóa việc lập trình đa thread và tăng tính portable của chương trình.
 
-**Tại sao phải tuân thủ những nguyên tắc và đặc tả liên quan đến concurrency này?** Bởi vì trong concurrent programming, những thiết kế như CPU multi-level cache và instruction reordering có thể khiến chương trình phát sinh vấn đề khi chạy. Ví dụ, instruction reordering được đề cập ở trên có thể khiến chương trình nhiều thread thực thi sai. Vì vậy, JMM trừu tượng hóa nguyên tắc happens-before, sẽ được giới thiệu chi tiết ở phần sau, để giải quyết vấn đề instruction reordering này.
+**Tại sao phải tuân thủ những nguyên tắc và đặc tả liên quan đến concurrency này?** Bởi vì trong concurrent programming, những thiết kế như CPU multi-level cache và instruction reordering có thể khiến chương trình phát sinh vấn đề khi chạy. Ví dụ, instruction reordering được đề cập ở trên có thể khiến chương trình nhiều thread thực thi sai. Vì vậy, JMM trừu tượng hóa nguyên tắc happens-before, sẽ được giới thiệu chi tiết ở phần sau, để xử lý các vấn đề do instruction reordering gây ra.
 
 Nói ngắn gọn, JMM định nghĩa một số đặc tả để giải quyết những vấn đề này, giúp developer thuận tiện hơn khi phát triển chương trình nhiều thread. Với Java developer, bạn không cần hiểu nguyên lý tầng dưới; chỉ cần sử dụng các keyword và class liên quan đến concurrency, chẳng hạn `volatile`, `synchronized` và các `Lock` khác nhau, là có thể phát triển chương trình an toàn trong môi trường concurrency.
 
@@ -103,7 +103,7 @@ Theo hình trên, nếu thread 1 và thread 2 muốn giao tiếp với nhau thì
 1. Thread 1 đồng bộ value của bản sao shared variable đã được sửa trong local memory vào main memory.
 2. Thread 2 đọc value của shared variable tương ứng từ main memory.
 
-Nói cách khác, shared data giữa các thread cần tuân thủ rule của JMM để giao tiếp; chỉ khi thiết lập được happens-before relation tương ứng thông qua `volatile`, lock, thread start và termination thì JMM mới cung cấp visibility guarantee cho các lần ghi liên quan.
+Nói cách khác, shared data giữa các thread cần tuân thủ rule của JMM để giao tiếp; chỉ khi thiết lập được happens-before relation tương ứng thông qua `volatile`, lock, việc khởi động và kết thúc thread thì JMM mới cung cấp visibility guarantee cho các lần ghi liên quan.
 
 Tuy nhiên, trong môi trường nhiều thread, thao tác với một shared variable trong main memory có thể gây ra thread-safety issue. Ví dụ:
 
@@ -139,7 +139,7 @@ Ngoài tám synchronization operation này, JMM còn quy định các synchroniz
 
 ### Nguyên tắc happens-before là gì?
 
-Khái niệm happens-before xuất hiện lần đầu trong paper [《Time, Clocks and the Ordering of Events in a Distributed System》](https://lamport.azurewebsites.net/pubs/time-clocks.pdf) do Leslie Lamport công bố năm 1978. Trong paper này, Leslie Lamport đề xuất khái niệm [logical clock](https://writings.sh/post/logical-clocks), trở thành algorithm logical clock đầu tiên. Trong distributed environment, sự thay đổi của logical clock được định nghĩa thông qua một loạt rule, từ đó có thể dùng logical clock để phán đoán thứ tự trước sau của các event trong distributed system. **Logical clock không đo bản thân thời gian, mà chỉ phân biệt thứ tự trước sau của event; về bản chất, nó định nghĩa một happens-before relation.**
+Khái niệm happens-before xuất hiện lần đầu trong paper [《Time, Clocks and the Ordering of Events in a Distributed System》](https://lamport.azurewebsites.net/pubs/time-clocks.pdf) do Leslie Lamport công bố năm 1978. Trong paper này, Leslie Lamport đề xuất khái niệm [logical clock](https://writings.sh/post/logical-clocks), trở thành thuật toán logical clock đầu tiên. Trong distributed environment, sự thay đổi của logical clock được định nghĩa thông qua một loạt rule, từ đó có thể dùng logical clock để phán đoán thứ tự trước sau của các event trong distributed system. **Logical clock không đo bản thân thời gian, mà chỉ phân biệt thứ tự trước sau của event; về bản chất, nó định nghĩa một happens-before relation.**
 
 Bối cảnh ra đời của khái niệm happens-before đã đề cập ở trên không phải trọng tâm, chỉ cần hiểu sơ lược.
 
@@ -171,7 +171,7 @@ int totalNum = userNum + teacherNum;  // 3
 - 2 happens-before 3
 - 1 happens-before 3
 
-Mặc dù 1 happens-before 2, nhưng reordering 1 và 2 không ảnh hưởng đến execution result của code, nên JMM cho phép compiler và processor thực hiện reordering này. Tuy nhiên, 1 và 2 phải được thực hiện trước 3, tức là 1, 2 happens-before 3.
+Mặc dù 1 happens-before 2, nhưng reordering 1 và 2 không ảnh hưởng đến execution result của code, nên JMM cho phép compiler và processor thực hiện reordering này. Tuy nhiên, 1 và 2 phải được thực hiện trước 3, tức là 1 và 2 đều happens-before 3.
 
 **Ý nghĩa mà nguyên tắc happens-before biểu đạt thực ra không phải là một operation xảy ra trước operation khác, dù hiểu như vậy từ góc nhìn programmer cũng không gây trở ngại. Chính xác hơn, nó muốn biểu đạt rằng result của operation trước visible đối với operation sau, bất kể hai operation có ở cùng một thread hay không.**
 
@@ -181,11 +181,11 @@ Ví dụ, operation 1 happens-before operation 2. Ngay cả khi operation 1 và 
 
 happens-before có nhiều rule. Dưới đây là năm rule thường dùng nhất:
 
-1. **Program order rule**: trong cùng một thread, theo thứ tự code, operation được viết trước happens-before operation được viết sau;
+1. **Program order rule**: trong cùng một thread, theo thứ tự code, operation xuất hiện trước happens-before operation xuất hiện sau;
 2. **Monitor lock rule**: unlock một monitor happens-before lock tiếp theo trên cùng monitor đó;
-3. **volatile variable rule**: thao tác ghi một `volatile` variable happens-before thao tác đọc tiếp theo trên cùng variable đó;
+3. **volatile variable rule**: thao tác ghi vào một `volatile` variable happens-before thao tác đọc tiếp theo đối với chính variable đó;
 4. **Transitivity rule**: nếu A happens-before B và B happens-before C thì A happens-before C;
-5. **Thread start rule**: method `start()` của object Thread happens-before mọi action của thread đó.
+5. **Thread start rule**: method `start()` của object `Thread` happens-before mọi action của thread đó.
 
 Danh sách này chưa đầy đủ, còn bao gồm rule về thread termination và thread interruption. Nếu không thể suy ra happens-before relation giữa hai conflicting access thông qua đầy đủ các rule, chúng có thể tạo thành data race; visibility và order của chúng không thể được bảo đảm theo trực giác của single-thread. Điều này không tương đương với việc JVM có thể vô điều kiện hoán đổi bất kỳ hai instruction nào; execution result vẫn chịu ràng buộc bởi consistency và causality rule của JMM.
 
@@ -217,7 +217,7 @@ Khi một thread sửa shared variable, các thread khác có thể lập tức 
 
 Trong Java, có thể dùng `synchronized`, `volatile` và các `Lock` để triển khai visibility.
 
-Nếu khai báo variable là `volatile`, happens-before relation sẽ được thiết lập giữa thao tác ghi variable đó và thao tác đọc sau đó. JVM phải bảo đảm semantics về visibility và order tương ứng, nhưng implementation cụ thể không bắt buộc phải truy cập physical main memory mỗi lần.
+Nếu khai báo variable là `volatile`, happens-before relation sẽ được thiết lập giữa thao tác ghi vào variable đó và thao tác đọc tiếp theo đối với chính variable đó. JVM phải bảo đảm semantics về visibility và order tương ứng, nhưng implementation cụ thể không bắt buộc phải truy cập physical main memory mỗi lần.
 
 ### Ordering
 
@@ -227,7 +227,7 @@ Khi nói về reordering ở trên, chúng ta cũng đã đề cập:
 
 > **Instruction reordering có thể bảo đảm tính nhất quán của single-thread semantics, nhưng không có nghĩa vụ bảo đảm semantics giữa nhiều thread cũng nhất quán**, vì vậy instruction reordering có thể gây ra một số vấn đề trong môi trường nhiều thread.
 
-Trong Java, `volatile` sẽ ràng buộc các reordering liên quan đến việc đọc ghi variable đó và có thể phá vỡ memory semantics của variable, nhưng không cấm mọi instruction reordering optimization.
+Trong Java, `volatile` sẽ ràng buộc các reordering liên quan đến việc đọc ghi variable đó nếu các reordering ấy có thể phá vỡ memory semantics của variable, nhưng không cấm mọi instruction reordering optimization.
 
 ## Tổng kết
 
