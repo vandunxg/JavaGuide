@@ -20,7 +20,7 @@ Bài viết trước đã giới thiệu source code HashMap và nhận được
 
 ![Cấu trúc lưu trữ ConcurrentHashMap Java 7](https://oss.javaguide.cn/github/javaguide/java/collection/java7_concurrenthashmap.png)
 
-Cấu trúc lưu trữ của `ConcurrentHashMap` trong Java 7 như hình trên. `ConcurrentHashMap` được ghép từ nhiều `Segment`, mỗi `Segment` là một cấu trúc tương tự `HashMap`, vì vậy mỗi `HashMap` bên trong có thể mở rộng capacity. Tuy nhiên, số lượng `Segment` không thể thay đổi sau khi **khởi tạo**. Mặc định có 16 `Segment`, do đó mặc định nhiều nhất 16 phân đoạn có thể đồng thời thực hiện thao tác update.
+Cấu trúc lưu trữ của `ConcurrentHashMap` trong Java 7 như hình trên. `ConcurrentHashMap` được ghép từ nhiều `Segment`, mỗi `Segment` là một cấu trúc tương tự `HashMap`, vì vậy bảng bên trong mỗi `Segment` có thể mở rộng capacity. Tuy nhiên, số lượng `Segment` không thể thay đổi sau khi **khởi tạo**. Mặc định có 16 `Segment`, do đó mặc định nhiều nhất 16 phân đoạn có thể đồng thời thực hiện thao tác update.
 
 ### 2. Khởi tạo
 
@@ -70,7 +70,7 @@ public ConcurrentHashMap(int initialCapacity,float loadFactor, int concurrencyLe
     // Số mũ của 2
     int sshift = 0;
     int ssize = 1;
-    // Vòng lặp này tìm giá trị lũy thừa của 2 gần nhất nhưng lớn hơn concurrencyLevel
+    // Vòng lặp này tìm giá trị lũy thừa của 2 gần nhất nhưng lớn hơn hoặc bằng concurrencyLevel
     while (ssize < concurrencyLevel) {
         ++sshift;
         ssize <<= 1;
@@ -87,7 +87,7 @@ public ConcurrentHashMap(int initialCapacity,float loadFactor, int concurrencyLe
     if (c * ssize < initialCapacity)
         ++c;
     int cap = MIN_SEGMENT_TABLE_CAPACITY;
-    // Capacity tương tự HashMap trong Segment ít nhất là 2 hoặc một lũy thừa của 2
+    // Capacity tương tự HashMap trong Segment ít nhất là 2 và tăng theo lũy thừa của 2
     while (cap < c)
         cap <<= 1;
     // create segments and segments[0]
@@ -104,7 +104,7 @@ Tóm tắt logic khởi tạo `ConcurrentHashMap` trong Java 7:
 
 1. Kiểm tra các tham số cần thiết.
 2. Kiểm tra kích thước `concurrencyLevel`; nếu lớn hơn giá trị tối đa thì đặt lại thành giá trị tối đa. Giá trị **mặc định của constructor không tham số là 16.**
-3. Tìm giá trị **lũy thừa của 2** gần nhất nhưng lớn hơn `concurrencyLevel`, dùng làm độ dài mảng `segments`, **mặc định là 16**.
+3. Tìm giá trị **lũy thừa của 2** gần nhất nhưng lớn hơn hoặc bằng `concurrencyLevel`, dùng làm độ dài mảng `segments`, **mặc định là 16**.
 4. Ghi lại `segmentShift`; giá trị này là **32 - sshift**, được sử dụng khi tính vị trí trong thao tác put về sau, mặc định là 28.
 5. Ghi lại `segmentMask`, mặc định là ssize - 1 = 16 - 1 = 15.
 6. **Khởi tạo `segments[0]`**, **kích thước mặc định là 2**, **load factor 0.75**, **ngưỡng mở rộng là 2 \* 0.75 = 1.5**, nên chỉ khi chèn giá trị thứ hai mới mở rộng capacity.
@@ -208,7 +208,7 @@ final V put(K key, int hash, V value, boolean onlyIfAbsent) {
         HashEntry<K,V>[] tab = table;
         // Tính vị trí của dữ liệu cần put
         int index = (tab.length - 1) & hash;
-        // CAS lấy giá trị tại tọa độ index
+        // Đọc giá trị tại vị trí index bằng thao tác volatile
         HashEntry<K,V> first = entryAt(tab, index);
         for (HashEntry<K,V> e = first;;) {
             if (e != null) {
@@ -226,7 +226,7 @@ final V put(K key, int hash, V value, boolean onlyIfAbsent) {
                 e = e.next;
             }
             else {
-                // first không null nghĩa là vị trí index đã có giá trị, xảy ra collision, chèn vào đầu linked list.
+                // first null nghĩa là vị trí index chưa có giá trị, tạo node mới tại vị trí này.
                 if (node != null)
                     node.setNext(first);
                 else
@@ -257,7 +257,7 @@ Vì `Segment` kế thừa `ReentrantLock`, việc lấy lock bên trong `Segment
 
 2. Tính vị trí index cần đặt dữ liệu put, sau đó lấy `HashEntry` tại vị trí này.
 
-3. Duyệt phần tử mới cần put. Tại sao phải duyệt? Vì `HashEntry` lấy được có thể là phần tử rỗng hoặc có thể đã tồn tại dưới dạng linked list, nên cần xử lý khác nhau.
+3. Duyệt các node tại vị trí để put phần tử mới. Tại sao phải duyệt? Vì `HashEntry` lấy được có thể là phần tử rỗng hoặc có thể đã tồn tại dưới dạng linked list, nên cần xử lý khác nhau.
 
    **Nếu `HashEntry` tại vị trí này không tồn tại:**
 
@@ -313,7 +313,7 @@ private HashEntry<K,V> scanAndLockForPut(K key, int hash, V value) {
 
 ### 4. Mở rộng rehash
 
-`ConcurrentHashMap` chỉ mở rộng capacity lên gấp đôi capacity ban đầu. Khi di chuyển dữ liệu từ mảng cũ sang mảng mới, vị trí hoặc không đổi, hoặc trở thành `index + oldSize`; node trong tham số sẽ được chèn vào vị trí chỉ định bằng **cách chèn vào đầu linked list** sau khi mở rộng.
+`ConcurrentHashMap` chỉ mở rộng capacity lên gấp đôi capacity hiện tại. Khi di chuyển dữ liệu từ mảng cũ sang mảng mới, vị trí hoặc không đổi, hoặc trở thành `index + oldSize`; node trong tham số sẽ được chèn vào vị trí chỉ định bằng **cách chèn vào đầu linked list** sau khi mở rộng.
 
 ```java
 private void rehash(HashEntry<K,V> node) {
@@ -381,7 +381,7 @@ Trong vòng `for` thứ hai bên trong, `new HashEntry<K,V>(h, p.key, v, n)` đ�
 >
 > The nodes they replace will be garbage collectable as soon as they are no longer referenced by any reader thread that may be in the midst of concurrently traversing table
 
-Tại sao cần thêm một vòng `for` để tìm `lastRun`? Thực chất là để giảm số lần tạo object, như annotation đã nói:
+Tại sao cần thêm một vòng `for` để tìm `lastRun`? Thực chất là để giảm số lần tạo object, như comment đã nói:
 
 > Theo thống kê, ở threshold mặc định, chỉ khoảng một phần sáu số node cần được clone khi table tăng gấp đôi.
 >
@@ -599,9 +599,9 @@ Tóm tắt flow get:
 
 ### 5. Đếm size
 
-Method `size()` của `ConcurrentHashMap` dùng để lấy tổng số phần tử hiện tại trong Map. Tuy nhiên, trong môi trường concurrency cao, làm thế nào để thống kê số lượng phần tử vừa chính xác vừa hiệu quả là một vấn đề kỹ thuật khó. Java 8 sử dụng một cơ chế đếm phân đoạn tinh tế để giải quyết vấn đề này.
+Method `size()` của `ConcurrentHashMap` dùng để lấy tổng số phần tử hiện tại trong Map. Tuy nhiên, trong môi trường concurrency cao, làm thế nào để thống kê số lượng phần tử vừa chính xác vừa hiệu quả là một vấn đề kỹ thuật khó. Java 8 sử dụng một cơ chế đếm phân tán tinh tế để giải quyết vấn đề này.
 
-#### 5.1 Tại sao cần đếm phân đoạn
+#### 5.1 Tại sao cần đếm phân tán
 
 Trong môi trường concurrency, nếu nhiều thread đồng thời thực hiện thao tác `put`, chúng đều cần update tổng số phần tử. Nếu sử dụng một biến counter dùng chung, cạnh tranh gay gắt sẽ xảy ra: tất cả thread đều tranh giành quyền sửa cùng một biến, làm performance giảm nghiêm trọng.
 
@@ -642,7 +642,7 @@ Logic thực thi của `addCount` có thể tóm tắt như sau:
      - Nếu `counterCells` chưa được khởi tạo thì khởi tạo array nhỏ (chẳng hạn độ dài 2);
      - Nếu đã tồn tại nhưng chưa đạt giới hạn (thường không vượt quá số core CPU), mở rộng gấp đôi, thêm nhiều counter slot hơn để tiếp tục phân tán thread.
 
-Thiết kế này bảo đảm: khi concurrency thấp, chỉ dùng `baseCount` đơn giản với path rất ngắn; khi concurrency cao, tự động chuyển sang đếm phân đoạn, làm mỏng cạnh tranh thông qua `counterCells` và cơ chế mở rộng, đồng thời cân bằng performance và độ chính xác.
+Thiết kế này bảo đảm: khi concurrency thấp, chỉ dùng `baseCount` đơn giản với path rất ngắn; khi concurrency cao, tự động chuyển sang đếm phân tán, giảm cạnh tranh thông qua `counterCells` và cơ chế mở rộng, đồng thời cân bằng performance và độ chính xác.
 
 #### 5.4 Cách sumCount tính tổng số phần tử
 
@@ -654,12 +654,12 @@ Khi gọi method `size()`, cuối cùng nó sẽ gọi method `sumCount()` để
 
 **Lưu ý**:
 
-- **Weak consistency**: `sumCount()` **không lock** trong toàn bộ quá trình. Nếu thread khác insert dữ liệu trong lúc tính toán, kết quả trả về chỉ là **giá trị gần đúng**. Tuy nhiên, trong môi trường concurrency cao, việc theo đuổi “tổng số chính xác tại một thời điểm tức thì” có cost quá lớn và không có ý nghĩa; giá trị gần đúng thường đã đủ.
+- **Weak consistency**: `sumCount()` **không lock** trong toàn bộ quá trình. Nếu thread khác insert dữ liệu trong lúc tính toán, kết quả trả về chỉ là **giá trị gần đúng**. Tuy nhiên, trong môi trường concurrency cao, việc theo đuổi “tổng số chính xác tại một thời điểm tức thì” có chi phí quá lớn và không có ý nghĩa; giá trị gần đúng thường đã đủ.
 - **Integer overflow**: Method `size()` trả về kiểu `int`. Nếu số lượng phần tử vượt quá `Integer.MAX_VALUE`, nó chỉ trả về `Integer.MAX_VALUE`. Java 8 bổ sung method **`mappingCount()`** trả về kiểu `long`, phù hợp để biểu thị counter lớn hơn, nhưng trong lúc update concurrent, giá trị trả về vẫn là một ước tính.
 
 ## 3. Tổng kết
 
-Trong Java 7, `ConcurrentHashMap` sử dụng segmented lock, nghĩa là tại mỗi `Segment` chỉ có một thread có thể thao tác đồng thời. Mỗi `Segment` là một cấu trúc tương tự array của `HashMap`, có thể mở rộng và collision của nó sẽ chuyển thành linked list. Tuy nhiên, số lượng `Segment` không thể thay đổi sau khi khởi tạo.
+Trong Java 7, `ConcurrentHashMap` sử dụng segmented lock, nghĩa là tại mỗi `Segment` chỉ có một thread có thể thao tác tại một thời điểm. Mỗi `Segment` là một cấu trúc tương tự `HashMap`, có thể mở rộng và collision của nó sẽ chuyển thành linked list. Tuy nhiên, số lượng `Segment` không thể thay đổi sau khi khởi tạo.
 
 Trong Java 8, `ConcurrentHashMap` sử dụng cơ chế lock `synchronized` kết hợp với CAS. Cấu trúc cũng tiến hoá từ **mảng `Segment` + mảng `HashEntry` + linked list** trong Java 7 thành **mảng Node + linked list / red-black tree**; Node là một cấu trúc tương tự `HashEntry`. Khi collision đạt đến kích thước nhất định, `TREEIFY_THRESHOLD = 8` sẽ chuyển linked list thành red-black tree; khi collision nhỏ hơn số lượng nhất định, `UNTREEIFY_THRESHOLD = 6` sẽ chuyển ngược lại thành linked list.
 
