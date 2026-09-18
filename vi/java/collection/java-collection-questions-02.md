@@ -168,7 +168,7 @@ Trong method `putVal()` của `HashMap` cũng có giải thích như sau:
 
 ```java
 // Returns : previous value, or null if none
-// Giá trị trả về: trả về null nếu vị trí chèn chưa có phần tử, nếu không trả về phần tử trước đó
+// Giá trị trả về: trả về null nếu vị trí chèn chưa có phần tử, nếu không trả về value trước đó
 final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                    boolean evict) {
 ...
@@ -214,7 +214,7 @@ static int hash(int h) {
 
 So với method hash của JDK1.8, method hash của JDK1.7 có hiệu suất kém hơn một chút, vì dù sao cũng đã làm nhiễu 4 lần.
 
-**Separate chaining** là: kết hợp linked list với array. Nghĩa là tạo một array các linked list, mỗi ô trong array là một linked list. Khi xảy ra hash collision, chỉ cần thêm giá trị bị collision vào linked list.
+**Separate chaining** là: kết hợp linked list với array. Nghĩa là tạo một array các linked list, mỗi ô trong array là một linked list. Khi xảy ra hash collision, chỉ cần thêm giá trị gây collision vào linked list.
 
 ![Cấu trúc bên trong trước JDK1.8 - HashMap](https://oss.javaguide.cn/github/javaguide/java/collection/jdk1.7_hashmap.png)
 
@@ -241,7 +241,7 @@ Red-black tree cần duy trì tự cân bằng nên chi phí bảo trì khá cao
 
 Hãy kết hợp với source code để phân tích việc chuyển linked list của `HashMap` thành red-black tree.
 
-**1. Logic phán đoán chuyển linked list thành red-black tree được thực hiện trong method `putVal`.**
+**1. Logic kiểm tra chuyển linked list thành red-black tree được thực hiện trong method `putVal`.**
 
 Khi độ dài linked list lớn hơn 8, logic `treeifyBin` (chuyển thành red-black tree) sẽ được thực hiện.
 
@@ -264,7 +264,7 @@ for (int binCount = 0; ; ++binCount) {
 }
 ```
 
-**2. Phán đoán có thực sự chuyển thành red-black tree hay không trong method `treeifyBin`.**
+**2. Kiểm tra có thực sự chuyển thành red-black tree hay không trong method `treeifyBin`.**
 
 ```java
 final void treeifyBin(Node<K,V>[] tab, int hash) {
@@ -472,7 +472,7 @@ Mỗi phần tử trong `Segment` array chứa một `HashEntry` array, mỗi `H
 
 ![Cấu trúc lưu trữ của Java8 ConcurrentHashMap](https://oss.javaguide.cn/github/javaguide/java/collection/java8_concurrenthashmap.png)
 
-`ConcurrentHashMap` JDK1.8 không còn là **Segment array + HashEntry array + linked list**, mà là **Node array + linked list/red-black tree**. Tuy nhiên, Node chỉ dùng được trong trường hợp linked list; trường hợp red-black tree cần dùng **`TreeNode`**. Khi linked list bị collision đạt đến độ dài nhất định, linked list sẽ được chuyển thành red-black tree.
+`ConcurrentHashMap` JDK1.8 không còn là **Segment array + HashEntry array + linked list**, mà là **Node array + linked list/red-black tree**. Tuy nhiên, Node chỉ dùng được trong trường hợp linked list; trường hợp red-black tree cần dùng **`TreeNode`**. Khi linked list xử lý collision đạt đến độ dài nhất định, linked list sẽ được chuyển thành red-black tree.
 
 `TreeNode` dùng để lưu node của red-black tree và được `TreeBin` bọc lại. `TreeBin` duy trì root của red-black tree thông qua thuộc tính `root`, vì khi red-black tree xoay, root có thể bị node con ban đầu thay thế. Tại thời điểm đó, nếu thread khác muốn ghi vào red-black tree này thì sẽ xảy ra vấn đề thread-safe. Vì vậy trong `ConcurrentHashMap`, `TreeBin` duy trì thread hiện đang sử dụng red-black tree này thông qua thuộc tính `waiter`, nhằm ngăn thread khác đi vào.
 
@@ -517,7 +517,7 @@ Cấu trúc `Segment` tương tự `HashMap`, là cấu trúc array và linked l
 
 Java 8 gần như viết lại hoàn toàn `ConcurrentHashMap`, số dòng code từ hơn 1000 dòng trong Java 7 tăng thành hơn 6000 dòng hiện tại.
 
-`ConcurrentHashMap` loại bỏ segmented lock `Segment`, dùng `Node + CAS + synchronized` để bảo đảm concurrent safety. Cấu trúc dữ liệu tương tự cấu trúc của `HashMap` 1.8, tức array + linked list/red-black tree. Trong Java 8, khi độ dài linked list vượt quá ngưỡng nhất định (8), linked list (time complexity tìm kiếm là O(N)) được chuyển thành red-black tree (time complexity tìm kiếm là O(log(N)).
+`ConcurrentHashMap` loại bỏ segmented lock `Segment`, dùng `Node + CAS + synchronized` để bảo đảm concurrent safety. Cấu trúc dữ liệu tương tự cấu trúc của `HashMap` 1.8, tức array + linked list/red-black tree. Trong Java 8, khi độ dài linked list vượt quá ngưỡng nhất định (8), linked list (time complexity tra cứu là O(N)) được chuyển thành red-black tree (time complexity tra cứu là O(log(N)).
 
 Trong Java 8, lock granularity nhỏ hơn. Khi cập nhật bucket không rỗng, thông thường dùng `synchronized` để lock node đầu của bucket; việc cập nhật trên các bucket khác nhau thường có thể thực thi song song, còn thao tác đọc không dùng các bucket lock này.
 
