@@ -69,12 +69,12 @@ Bài viết [Những công nghệ Java đã bị đào thải, đừng học n�
 
 **SOAP / JAX-WS**
 
-- **Lý do**: SOAP và JAX-WS quá phức tạp, định dạng dữ liệu dài dòng (XML), không thân thiện với hiệu suất phát triển và performance.
+- **Lý do**: SOAP và JAX-WS quá phức tạp, định dạng dữ liệu dài dòng (XML), không thuận lợi cho hiệu quả phát triển và performance.
 - **Giải pháp thay thế**: RESTful API và RPC nhẹ hơn, hiệu quả hơn, là lựa chọn hàng đầu của kiến trúc microservice hiện đại.
 
 **RMI (Remote Method Invocation)**
 
-- **Lý do**: RMI là công nghệ gọi từ xa đời đầu của Java, nhưng tính tương thích kém, cấu hình rườm rà và performance khá tệ.
+- **Lý do**: RMI là công nghệ gọi từ xa đời đầu của Java, nhưng tính tương thích kém, cấu hình rườm rà và performance khá kém.
 - **Giải pháp thay thế**: RESTful API và RPC cung cấp giải pháp gọi từ xa đơn giản, hiệu quả hơn, đã thay thế hoàn toàn RMI.
 
 **Swing / JavaFX**
@@ -90,13 +90,13 @@ Bài viết [Những công nghệ Java đã bị đào thải, đừng học n�
 
 ## Tự kiểm tra bằng câu hỏi phỏng vấn
 
-Học trên giấy rốt cuộc vẫn nông cạn, muốn hiểu thấu phải tự tay làm. Để giúp bạn nội hóa kiến thức tốt hơn, tôi đã chuẩn bị riêng một bộ câu hỏi phỏng vấn tần suất cao khớp hoàn toàn với lộ trình học này: [Bộ câu hỏi phỏng vấn tần suất cao đi kèm lộ trình học Java backend](https://t.zsxq.com/0eM78gbAr) (dành riêng cho [JavaGuide Knowledge Planet](https://javaguide.cn/about-the-author/zhishixingqiu-two-years.html)).
+Học trên giấy rốt cuộc vẫn nông cạn, muốn hiểu thấu phải tự tay làm. Để giúp bạn nội hóa kiến thức tốt hơn, tôi đã chuẩn bị riêng một bộ câu hỏi phỏng vấn thường gặp khớp hoàn toàn với lộ trình học này: [Bộ câu hỏi phỏng vấn thường gặp đi kèm lộ trình học Java backend](https://t.zsxq.com/0eM78gbAr) (dành riêng cho [JavaGuide Knowledge Planet](https://javaguide.cn/about-the-author/zhishixingqiu-two-years.html)).
 
 **Tài nguyên này giúp bạn:**
 
 - **Tự kiểm tra:** kiểm chứng có hệ thống mức độ nắm vững từng điểm kiến thức.
 - **Tìm và bù lỗ hổng:** kịp thời phát hiện điểm yếu của mình để củng cố có trọng tâm.
-- **Phỏng vấn mô phỏng:** làm quen trước với nhịp độ phỏng vấn và các điểm thi tần suất cao.
+- **Phỏng vấn mô phỏng:** làm quen trước với nhịp độ phỏng vấn và các điểm trọng tâm thường gặp.
 
 Rất khuyến khích mọi người đẩy việc học lên mức sâu hơn bằng cách tự kiểm tra.
 
@@ -140,7 +140,7 @@ Hai cuốn 《Java Core Technology tập 1 + tập 2》 nội dung rất nhiều
 
 Sau khi học xong Java Basics, bạn có thể dùng những gì đã học để viết một chương trình Java đơn giản, hoặc thử dùng Java giải một số bài toán lập trình, qua đó đưa kiến thức đã học vào thực hành.
 
-Không khuyến khích củng cố kiến thức bằng cách làm game sau khi học Java Basics. Tại sao các trung tâm đào tạo lại thích cách này? Nói thẳng ra là để đánh trúng điểm hưng phấn của bạn. Người mới học xong Java Basics mà làm game thì thường không thực tế lắm, chi bằng tìm vài bài toán lập trình đơn giản để giải, ví dụ các bài algorithm đơn giản.
+Không khuyến khích củng cố kiến thức bằng cách làm game sau khi học Java Basics. Tại sao các trung tâm đào tạo lại thích cách này? Nói thẳng ra là để đánh trúng điểm G của bạn. Người mới học xong Java Basics mà làm game thì thường không thực tế lắm, chi bằng tìm vài bài toán lập trình đơn giản để giải, ví dụ các bài algorithm đơn giản.
 
 Nhớ tổng kết nhiều! Xây nền cho chắc! Ghi lại những thứ quan trọng với mình. Để tài liệu API ở nơi mình nhìn thấy được để có thể tra cứu bất cứ lúc nào. Để viết được code tốt hơn, hai cuốn 《Effective Java》 và 《Refactoring》 rảnh cũng nên xem.
 
@@ -334,7 +334,7 @@ Nếu project backend có dùng distributed cache thì thường là dùng Redis
 
 Về video miễn phí, khuyến nghị [Giáo trình Redis một giờ](https://www.imooc.com/learn/839) của GeekHour (rất khuyến nghị, dễ hiểu, giới thiệu ngắn gọn phần lớn điểm kiến thức của Redis) và [《Series video Redis 7 mới nhất》](https://www.bilibili.com/video/BV13R4y1v7sP/) của Shang Silicon Valley (do thầy Dương làm, nội dung toàn diện hơn, phiên bản Redis mới hơn, rất khuyến nghị).
 
-Về sách, rất khuyến nghị hai cuốn [《Thiết kế và hiện thực Redis》](https://book.douban.com/subject/25900156/) và 《Nguyên lý cốt lõi và thực hành Redis》. Cuốn [《Nguyên lý cốt lõi và thực hành Redis》](https://book.douban.com/subject/26612779/) có ngày xuất bản tương đối gần đây hơn, chủ yếu kết hợp source code để phân tích các điểm kiến thức quan trọng của Redis như các cấu trúc dữ liệu và tính năng nâng cao.
+Về sách, rất khuyến nghị hai cuốn [《Thiết kế và hiện thực Redis》](https://book.douban.com/subject/25900156/) và 《Nguyên lý cốt lõi và thực hành Redis》. Cuốn [《Nguyên lý cốt lõi và thực hành Redis》](https://book.douban.com/subject/26612779/) được xuất bản gần đây hơn, chủ yếu kết hợp source code để phân tích các điểm kiến thức quan trọng của Redis như các cấu trúc dữ liệu và tính năng nâng cao.
 
 ![《Thiết kế và hiện thực Redis》 và 《Thiết kế và hiện thực Redis》](https://oss.javaguide.cn/github/javaguide/books/redis-books.png)
 
@@ -367,7 +367,7 @@ Ngoài các công cụ bên dưới, tôi rất khuyến khích bạn nhất đ�
 
 ### IDEA
 
-Người ta nói: "muốn làm tốt việc, trước hết phải mài sắc công cụ!". Chọn được công cụ phát triển tốt rất có ích cho việc code hiệu suất cao!
+Người ta nói: "muốn làm tốt việc, trước hết phải mài sắc công cụ!". Chọn được công cụ phát triển tốt rất có ích cho việc code hiệu quả hơn!
 
 Công cụ phát triển Java thường dùng chỉ có Eclipse và IDEA. Cá nhân tôi thấy IDEA là IDE phù hợp nhất cho Java developer, không có cái thứ hai (đừng cãi, cái bạn thích chính là cái tốt nhất).
 
@@ -395,7 +395,7 @@ Maven thực ra dùng khá đơn giản, một hai ngày là nhập môn đượ
 
 Nói thêm một câu: trước khi học các framework thường dùng, có thể bỏ thời gian học trước cách dùng Maven, tuyệt đối đừng đi tìm và tải Jar khắp nơi (nếu project bạn đang làm không dùng công cụ quản lý package thì hãy nhanh chóng đổi sang giáo trình mới hơn).
 
-Phần Maven này không cần giới thiệu video hay sách gì, xem trực tiếp mấy bài dưới đây là được:
+Phần Maven này không cần giới thiệu video hay sách gì, xem trực tiếp các bài dưới đây là được:
 
 - [Tổng hợp khái niệm cốt lõi của Maven](https://javaguide.cn/tools/maven/maven-core-concepts.html)
 - [Best practice cho Maven](https://javaguide.cn/tools/maven/maven-best-practices.html)
@@ -440,7 +440,7 @@ Nếu bạn thích xem video hướng dẫn hơn, có thể xem [《Làm chủ b
 
 Trong quy trình phát triển truyền thống, project của chúng ta thường cần các môi trường như MySQL, Redis, FastDFS, v.v., những môi trường này đều phải tự tay tải về và cấu hình, quy trình cài đặt cấu hình cực kỳ phức tạp, mà thao tác trên các hệ điều hành khác nhau cũng không giống nhau.
 
-Sự xuất hiện của Docker đã giải quyết hoàn hảo vấn đề này, chúng ta có thể cài các phần mềm như MySQL, Redis trong container, tách ứng dụng ra khỏi kiến trúc môi trường. Ưu thế của nó là:
+Sự xuất hiện của Docker đã giải quyết hoàn hảo vấn đề này, chúng ta có thể cài các phần mềm như MySQL, Redis trong container, tách ứng dụng khỏi môi trường. Ưu thế của nó là:
 
 1. Môi trường chạy nhất quán, dễ dàng di chuyển hơn
 2. Đóng gói và cô lập process, các container không ảnh hưởng lẫn nhau, tận dụng tài nguyên hệ thống hiệu quả hơn
@@ -575,9 +575,9 @@ Việc tích hợp SpringBoot với một số công nghệ thường gặp bạ
 
 Về sách, cá nhân tôi thực ra không có gợi ý nào đặc biệt hay, dù sao đây là kiến thức framework, thay đổi khá nhanh, nội dung nhiều cuốn sách đã lỗi thời.
 
-Cân nhắc nhiều bạn khá thích đọc sách, ở đây tôi vẫn giới thiệu sơ vài cuốn!
+Vì nhiều bạn khá thích đọc sách, ở đây tôi vẫn giới thiệu sơ vài cuốn!
 
-Với các bạn muốn thực chiến, tôi rất không khuyến khích xem sách, xem thẳng project thực chiến của Shang Silicon Valley là được. Bài này có thể lấy video mới nhất và đã giới thiệu về project thực chiến của Shang Silicon Valley: [【Tổng hợp mới nhất】Trọn bộ giáo trình Java backend & project thực chiến của Shang Silicon Valley](https://mp.weixin.qq.com/s/jkZthmOSDgTF1PrCeNus_A) (khuyến nghị).
+Với các bạn muốn thực chiến, tôi rất không khuyến khích xem sách, xem thẳng project thực chiến của Shang Silicon Valley là được. Bài viết này giúp bạn lấy được video mới nhất và giới thiệu về project thực chiến của Shang Silicon Valley: [【Tổng hợp mới nhất】Trọn bộ giáo trình Java backend & project thực chiến của Shang Silicon Valley](https://mp.weixin.qq.com/s/jkZthmOSDgTF1PrCeNus_A) (khuyến nghị).
 
 ![](https://oss.javaguide.cn/github/javaguide/books/88714e9becd0485aae247772b6ed9949.png)
 
@@ -630,12 +630,12 @@ Mockito và Spock đều là công cụ Mock rất tốt; tương đối mà nó
 
 ### Netty (tùy chọn)
 
-Netty là framework hot nhất trong lập trình network với Java, mọi người có thể tùy nhu cầu cá nhân mà quyết định có học hay không, trong phát triển doanh nghiệp thực tế dùng không nhiều.
+Netty là framework phổ biến nhất trong lập trình network với Java, mọi người có thể tùy nhu cầu cá nhân mà quyết định có học hay không, trong phát triển doanh nghiệp thực tế dùng không nhiều.
 
 Tuy nhiên, cá nhân tôi khuyên bạn nào còn dư sức thì vẫn nên dành thời gian học nghiêm túc, rất có ích cho việc nâng cao năng lực phát triển cá nhân.
 
 1. Netty dựa trên NIO (NIO là một I/O model đồng bộ non-blocking, được đưa vào Java 1.4). Dùng Netty có thể đơn giản hóa rất nhiều việc lập trình network như TCP và UDP socket server, đồng thời performance cũng như bảo mật và nhiều mặt khác đều rất xuất sắc.
-2. Các project mã nguồn mở hot mà chúng ta thường tiếp xúc như Dubbo, RocketMQ, Elasticsearch, gRPC, Spark, v.v. đều dùng đến Netty.
+2. Các project mã nguồn mở hot mà chúng ta thường tiếp xúc như Dubbo, RocketMQ, Elasticsearch, gRPC, Spark, Elasticsearch, v.v. đều dùng đến Netty.
 3. Phần lớn framework microservice ở tầng dưới, phần liên quan đến giao tiếp network, đều làm dựa trên Netty, ví dụ như gateway Spring Cloud Gateway trong hệ sinh thái Spring Cloud.
 
 Dưới đây là một số sách/chuyên mục khá đáng giới thiệu.
@@ -744,7 +744,7 @@ Các lý thuyết & thuật toán & giao thức distributed tương đối quan 
 Việc gọi giữa các service khác nhau thường có hai cách:
 
 - RPC: RPC (Remote Procedure Call) tức gọi thủ tục từ xa; qua RPC, chúng ta có thể gọi method của một service nào đó trên máy tính từ xa, quá trình này đơn giản như gọi method cục bộ. Dubbo là RPC framework do Trung Quốc phát triển, Alibaba mã nguồn mở, được dùng nhiều nhất trong nước.
-- HTTP client: gọi RESTful API của service khác thông qua giao thức HTTP. Feign và OpenFeign (do Spring Cloud chính thức phát triển dựa trên Feign, dùng để thay thế Feign vốn đã vào trạng thái ngừng cập nhật) là những HTTP client thường dùng nhất hiện nay.
+- HTTP client: gọi RESTful API của service khác thông qua giao thức HTTP. Feign và OpenFeign (do Spring Cloud chính thức phát triển dựa trên Feign, dùng để thay thế Feign vốn đã vào trạng thái ngừng cập nhật) là các HTTP client thường dùng nhất hiện nay.
 
 OpenFeign và Dubbo đều là framework gọi từ xa được ứng dụng rộng rãi trong kiến trúc microservice hiện nay, nhưng cách hiện thực khác nhau (OpenFeign dựa trên giao thức HTTP, Dubbo hỗ trợ nhiều giao thức và còn có thể tự định nghĩa giao thức), tình huống phù hợp cũng hơi khác. Project microservice Spring Cloud hiện dùng khá nhiều OpenFeign theo phong cách Rest, cá nhân tôi khuyên học cái này.
 
@@ -807,7 +807,7 @@ ID là định danh duy nhất của dữ liệu, distributed ID là ID trong di
 
 Giải pháp cho distributed ID có rất nhiều, ví dụ:
 
-- Thuật toán: UUID, Snowflake
+- Thuật toán: UUID, Snowflake (thuật toán Snowflake)
 - Framework mã nguồn mở: UidGenerator (Baidu), Leaf (Meituan), Tinyid (Didi), IdGenerator (cá nhân)
 
 Phần này tương đối đơn giản, khuyến nghị đọc hai bài sau để học:
@@ -844,7 +844,7 @@ Hiện các hệ thống distributed tracing về cơ bản đều phát triển
 
 Zipkin là công cụ distributed tracing mã nguồn mở của Twitter, Spring Cloud Sleuth thực chất dựa trên Zipkin.
 
-SkyWalking là công cụ tracing, phân tích, cảnh báo phân tán mã nguồn mở do Ngô Thịnh (Huawei) người Trung Quốc phát triển, hiện là project mã nguồn mở thuộc Apache.
+SkyWalking là công cụ distributed tracing, phân tích và cảnh báo do Ngô Thịnh (Huawei), người Trung Quốc, phát triển, hiện là project mã nguồn mở thuộc Apache.
 
 Hiện ở Trung Quốc dùng nhiều là SkyWalking, khuyên học cái này.
 
@@ -862,9 +862,9 @@ Message queue trong distributed system chủ yếu dùng để bất đồng b�
 
 Các message queue thường dùng như sau:
 
-1. [RocketMQ](https://github.com/apache/rocketmq "RocketMQ"): distributed message middleware hiệu năng cao, throughput cao do Alibaba mã nguồn mở.
+1. [RocketMQ](https://github.com/apache/rocketmq "RocketMQ"): distributed message middleware hiệu năng cao, throughput cao do Alibaba phát hành mã nguồn mở.
 2. [Kafka](https://github.com/apache/kafka "Kafaka"): Kafka là hệ thống message phân tán dựa trên mô hình publish/subscribe.
-3. [RabbitMQ](https://github.com/rabbitmq "RabbitMQ"): message queue phát triển bằng Erlang, hiện thực dựa trên giao thức AMQP (Advanced Message Queue).
+3. [RabbitMQ](https://github.com/rabbitmq "RabbitMQ"): message queue phát triển bằng Erlang, hiện thực dựa trên giao thức AMQP (Advanced Message Queue, tức giao thức message queue nâng cao).
 4. [Pulsar](https://github.com/apache/pulsar): nền tảng message streaming phân tán cloud native thế hệ mới.
 
 Khuyên chọn một trong RocketMQ và Kafka để học sâu, các message queue khác chỉ cần biết sơ.
@@ -933,7 +933,7 @@ Có nhiều cách hiện thực xếp hàng, ví dụ chúng ta có thể nhờ 
 
 ### Cluster
 
-Triển khai nhiều bản của cùng một service, tránh single point of failure.
+Triển khai nhiều bản sao của cùng một service, tránh single point of failure.
 
 ### Cơ chế timeout và retry
 
@@ -952,7 +952,7 @@ Ngày càng nhiều ngôn ngữ lập trình, framework bắt đầu đón nhậ
 Nếu bạn khá hứng thú với lĩnh vực cloud native, khuyên bạn tập trung vào các công nghệ sau:
 
 1. Microservice: SpringCloud hay SpringCloud Alibaba thực ra không cần học, trong cloud native thường xây dựng microservice dựa trên Kubernetes được nhắc phía sau.
-2. Gateway: gateway là cửa ngõ lưu lượng của toàn bộ kiến trúc microservice, chịu trách nhiệm authentication & authorization, phân phối request, rate limiting, quản lý API, load balancing, là một component rất quan trọng trong kiến trúc microservice. Do đó, tôi tách riêng gateway ra để nhắc đến ở đây.
+2. Gateway: gateway là cửa ngõ lưu lượng của toàn bộ kiến trúc microservice, chịu trách nhiệm authentication & authorization, phân phối request, authentication & authorization, rate limiting, quản lý API, load balancing, là một component rất quan trọng trong kiến trúc microservice. Do đó, tôi tách riêng gateway ra để nhắc đến ở đây.
 3. Log và monitoring cảnh báo: Metrics (nhờ nó chúng ta có thể vẽ ra các bảng điều khiển trực quan trong Grafana, hiểu toàn diện hơn trạng thái vận hành của hệ thống), Trace (nhờ nó chúng ta có thể dựng ra toàn cảnh việc gọi của hệ thống), Logs (một số log cần thiết).
 4. Container: công nghệ container là nền tảng phát triển của cloud native, các công cụ container đứng đầu là Docker đã đưa ra khẩu hiệu "build một lần, chạy mọi nơi".
 5. Kubernetes: K8s được gọi là hệ điều hành của thời đại cloud native, ưu thế của ứng dụng cloud native gắn liền với các chức năng mà nó cung cấp.
@@ -970,7 +970,7 @@ Ngoài ra, còn khuyến nghị xem bài này: [Kiến trúc cloud native năm 2
 
 AI đã trở thành một phần trong hệ thống năng lực của Java backend, nhưng không khuyến nghị ngay từ đầu nhét nó vào tuyến chính Java rồi học gồng. Nhịp độ chắc chắn hơn là: xây vững Java Basics, Spring, database, cache, distributed và thực chiến project trước, rồi theo lộ trình dưới đây bổ sung AI application development một cách có hệ thống.
 
-- [Lộ trình học AI application development và Agent cho developer Java/Go (bản mới nhất 2026)](./java-to-ai-roadmap.md): dành cho backend developer, chia nhỏ lộ trình học theo nền tảng LLM, LLM API, Prompt, RAG, Agent, kỹ thuật hóa và thực chiến project.
+- [Lộ trình học AI application development và Agent cho developer Java/Go (bản mới nhất 2026)](./java-to-ai-roadmap.md): dành cho backend developer, chia nhỏ lộ trình học theo nền tảng LLM, LLM API, Prompt, RAG, Agent, engineering và thực chiến project.
 - [Gợi ý học chuyển hướng từ backend sang AI Agent (bản mới nhất 2026)](./backend-to-ai-agent-roadmap.md): nếu bạn chưa chắc có nên chuyển sang AI không, chọn Java AI hay Python AI, có thể ứng tuyển vị trí nào, hãy xem bài này trước.
 - [Hệ thống kiến thức AI application development](../ai/): lối vào các bài viết hệ thống ngoài lộ trình học, bao phủ nền tảng LLM, Agent, RAG, MCP, Prompt engineering, đánh giá và AI system design.
 - [Hướng dẫn thực hành AI coding](../ai-coding/): lộ trình tăng hiệu suất code hằng ngày, tập trung vào Claude Code, Codex, AI IDE, CLI Agent, quản lý context và workflow phát triển có AI hỗ trợ.
