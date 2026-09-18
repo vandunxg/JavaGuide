@@ -46,7 +46,7 @@ Giai đoạn này không cần học model training. Trước tiên hãy làm r�
 
 - [Phân tích cơ chế hoạt động của LLM](https://javaguide.cn/ai/llm-basis/llm-operation-mechanism.html): đọc Token, context window và Temperature trước; đọc xong ít nhất phải biết tại sao model lại có thể “thất thường”.
 - [Giải thích chi tiết structured output của mô hình lớn](https://javaguide.cn/ai/llm-basis/structured-output-function-calling.html): xem JSON Schema, Function Calling, Tool Calling và ranh giới của MCP cùng nhau để tránh nhầm lẫn.
-- [Hướng dẫn thực hành Prompt Engineering cho mô hình lớn](https://javaguide.cn/ai/agent/prompt-engineering.html): phù hợp để đọc nhanh cách viết Prompt cơ bản, đến giai đoạn hai hãy quay lại đọc kỹ.
+- [Hướng dẫn thực hành Prompt Engineering cho mô hình lớn](https://javaguide.cn/ai/agent/prompt-engineering.html): phù hợp để đọc nhanh cách viết Prompt cơ bản, đến giai đoạn 2 hãy quay lại đọc kỹ.
 - [Hướng dẫn thực chiến Context Engineering](https://javaguide.cn/ai/agent/context-engineering.html): tập trung vào Token budget, gắn thông tin và chiến lược degradation; khi Agent phức tạp sẽ thường xuyên dùng đến.
 - [Giải thích chi tiết khái niệm nền tảng RAG](https://javaguide.cn/ai/rag/rag-basis.html): trước hết xây dựng hình dung tổng thể về RAG, đừng vội dùng vector database.
 
@@ -100,7 +100,7 @@ Few-Shot cũng rất hữu ích. Thay vì viết một đoạn dài các yêu c�
 
 ### Structured output: cầu nối engineering
 
-LLM output muốn đi vào business system thì sớm muộn cũng phải trở thành structured data. Trước hết hãy nhớ ba cách phổ biến, sang giai đoạn hai sẽ viết code cụ thể.
+LLM output muốn đi vào business system thì sớm muộn cũng phải trở thành structured data. Trước hết hãy nhớ ba cách phổ biến, sang giai đoạn 2 sẽ viết code cụ thể.
 
 | Giải pháp                   | Ưu điểm                                           | Nhược điểm                                                                                       | Scenario phù hợp                             |
 | --------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------- |
@@ -122,7 +122,7 @@ Generation đến từ model, parsing chịu trách nhiệm biến text thành s
 
 RAG (Retrieval-Augmented Generation) trước hết không cần nghĩ quá phức tạp. Nó giải quyết một vấn đề rất thực tế: model tổng quát không biết tài liệu nội bộ của công ty bạn.
 
-Ví dụ user hỏi “quy trình thanh toán chi phí là gì”. Model không biết quy định của công ty bạn, chỉ có thể dựa vào việc bạn tìm tài liệu liên quan ra. Quy trình cơ bản của RAG là: trước tiên xử lý tài liệu nội bộ thành knowledge base có thể truy vấn; khi user hỏi thì lấy ra các đoạn liên quan; sau đó đưa question và các đoạn này cùng cho model để model trả lời dựa trên tài liệu.
+Ví dụ user hỏi “quy trình hoàn ứng chi phí là gì”. Model không biết quy định của công ty bạn, chỉ có thể dựa vào việc bạn tìm tài liệu liên quan ra. Quy trình cơ bản của RAG là: trước tiên xử lý tài liệu nội bộ thành knowledge base có thể truy vấn; khi user hỏi thì lấy ra các đoạn liên quan; sau đó đưa question và các đoạn này cùng cho model để model trả lời dựa trên tài liệu.
 
 Ở đây sẽ dùng đến Embedding. Nó ánh xạ text vào high-dimensional vector space, chịu trách nhiệm biểu diễn ngữ nghĩa. Hai đoạn text có ý nghĩa gần nhau thường có khoảng cách vector gần nhau hơn. Có thể dùng Cosine Similarity, Dot Product hoặc L2 để đo khoảng cách; vector database và model khác nhau có thể có config được khuyến nghị khác nhau.
 
@@ -171,7 +171,7 @@ Khi request volume tăng, hãy cân nhắc AI Gateway. Nó nằm giữa business
 
 > **Một rủi ro rất dễ bị đánh giá thấp: gọi LLM đồng bộ và blocking.**
 >
-> Một response của LLM có thể mất 10 giây đến 1 phút. Nếu dùng cách gọi đồng bộ trong Spring MVC, khi concurrency cao, Tomcat thread pool sẽ nhanh chóng bị lấp đầy và toàn bộ service bị treo. Nên thiết kế theo hướng async ngay từ đầu. Giải pháp cụ thể đặt ở giai đoạn năm, nhưng nhận thức này phải được hình thành từ giai đoạn một.
+> Một response của LLM có thể mất 10 giây đến 1 phút. Nếu dùng cách gọi đồng bộ trong Spring MVC, khi concurrency cao, Tomcat thread pool sẽ nhanh chóng bị lấp đầy và toàn bộ service bị treo. Nên thiết kế theo hướng async ngay từ đầu. Giải pháp cụ thể đặt ở giai đoạn 5, nhưng nhận thức này phải được hình thành từ giai đoạn 1.
 
 ### Lựa chọn framework và architecture
 
@@ -267,7 +267,7 @@ User request → Assemble Prompt → LLM generation → Parse JSON → Validate 
                                                             Fallback degradation, return default answer
 ```
 
-Để verify accuracy của result, nếu business scenario cho phép, còn có thể thêm fact checking, dùng knowledge graph hoặc fact database để cross-check kết luận của LLM, giảm hallucination. Phần này sẽ được triển khai trong RAG ở giai đoạn ba.
+Để verify accuracy của result, nếu business scenario cho phép, còn có thể thêm fact checking, dùng knowledge graph hoặc fact database để cross-check kết luận của LLM, giảm hallucination. Phần này sẽ được triển khai trong RAG ở giai đoạn 3.
 
 ## Giai đoạn 3: RAG + Knowledge Graph (2~3 tuần)
 
@@ -305,7 +305,7 @@ Một blind spot thường gặp khác: retrieval vector trước rồi mới fi
 
 ### Vector retrieval: core engine của RAG
 
-Có thể hiểu vector retrieval trước hết là “tìm tài liệu theo ý nghĩa”. User hỏi “làm sao thanh toán chi phí”, hệ thống có thể tìm được nội dung liên quan đến “quy trình đề nghị chi phí”, dù bản gốc không có hai chữ “thanh toán chi phí”.
+Có thể hiểu vector retrieval trước hết là “tìm tài liệu theo ý nghĩa”. User hỏi “làm sao hoàn ứng chi phí”, hệ thống có thể tìm được nội dung liên quan đến “quy trình đề nghị chi phí”, dù bản gốc không có hai chữ “hoàn ứng chi phí”.
 
 Phía sau là Embedding: ánh xạ text vào high-dimensional vector space, text có semantic gần nhau sẽ có khoảng cách gần hơn. Model thường dùng gồm OpenAI Embedding, BGE và Qwen. Đừng trộn Embedding model với chat model; model trước chịu trách nhiệm semantic representation, model sau chịu trách nhiệm sinh câu trả lời.
 
@@ -315,11 +315,11 @@ Pure vector retrieval cũng có nhược điểm. Nó giỏi semantic matching, 
 
 Production thường thêm hybrid retrieval: vector retrieval đảm nhiệm semantic similarity, BM25 đảm nhiệm exact match, cuối cùng dùng RRF (Reciprocal Rank Fusion) để hợp nhất theo rank. Đừng cố so sánh điểm số của hai loại có scale khác nhau.
 
-Khi candidate result còn khá thô, thêm một lớp Rerank. Cross-Encoder sẽ đánh giá lại “question và candidate fragment liên quan đến mức nào”, đưa nội dung phù hợp hơn lên trước. Nhưng nó không cứu được recall thiếu: nếu answer đúng không có trong coarse recall pool thì Rerank chỉ sắp xếp lại các result sai. Production có thể đặt parameter theo tầng: coarse recall 30~100 dòng (`recall_top_k`), sau Rerank giữ 5~10 dòng (`rerank_top_n`), cuối cùng đưa 3~6 dòng vào context (`context_top_n`).
+Khi candidate result còn khá thô, thêm một lớp Rerank. Cross-Encoder sẽ đánh giá lại “question và candidate fragment liên quan đến mức nào”, đưa nội dung phù hợp hơn lên trước. Nhưng nó không cứu được recall thiếu: nếu answer đúng không có trong coarse recall pool thì Rerank chỉ sắp xếp lại các result sai. Production có thể đặt parameter theo tầng: coarse recall 30~100 kết quả (`recall_top_k`), sau Rerank giữ 5~10 kết quả (`rerank_top_n`), cuối cùng đưa 3~6 kết quả vào context (`context_top_n`).
 
 ### Semantic cache: mẹo nhỏ để tiết kiệm và tăng tốc
 
-Nếu business có nhiều câu hỏi tương tự, chẳng hạn knowledge base nội bộ mỗi ngày đều có người hỏi “quy trình thanh toán chi phí là gì”, “làm sao thanh toán chi phí”, thì semantic cache đáng để triển khai.
+Nếu business có nhiều câu hỏi tương tự, chẳng hạn knowledge base nội bộ mỗi ngày đều có người hỏi “quy trình hoàn ứng chi phí là gì”, “làm sao hoàn ứng chi phí”, thì semantic cache đáng để triển khai.
 
 Cách làm trực tiếp: trước tiên tạo Embedding cho user question, tìm câu hỏi tương tự trong Redis vector retrieval hoặc dedicated cache service. Nếu similarity vượt threshold thì trả về cached answer trực tiếp, bỏ qua LLM call.
 
@@ -367,7 +367,7 @@ Bản thân RAG cũng đang tiến hóa. Naive RAG chỉ có chunking, Top-K ret
 
 Agentic RAG tiến thêm một bước, giao quyết định retrieval cho Agent. Khi nào retrieval, retrieval gì, có cần retrieval lần hai hay đổi retrieval source không đều được quyết định động theo context hiện tại. Điểm thay đổi không nằm ở số lượng component, mà ở việc flow chuyển từ fixed pipeline thành decision-making flow.
 
-Khái niệm này sẽ tự nhiên chuyển tiếp sang năng lực cốt lõi của Agent ở giai đoạn bốn.
+Khái niệm này sẽ tự nhiên chuyển tiếp sang năng lực cốt lõi của Agent ở giai đoạn 4.
 
 ## Giai đoạn 4: Năng lực cốt lõi của Agent (2~3 tuần)
 
@@ -434,7 +434,7 @@ Short-term memory là thứ dễ nghĩ đến nhất: nhét toàn bộ hội tho
 
 Sau khi old conversation bị cắt, thông tin sẽ mất nên cần long-term memory. Có thể dùng Neo4j hoặc vector database để lưu user preference, historical knowledge và key fact. Flow thường gặp là: sau khi hội thoại kết thúc, async extract high-value fact; khi Session mới bắt đầu, retrieval memory liên quan theo User Query rồi inject vào context. Khi write phải có idempotent Key và confidence filter, tránh ghi assumption thành user preference.
 
-Memory compression cũng thường được dùng. Khi conversation history tích lũy đến threshold, dùng LLM nén thành summary rồi thay thế conversation gốc. Tiết kiệm Token nhưng chắc chắn mất thông tin. Long-term memory cũng phải biết quên: duy trì decay score cho từng memory (`relevance × importance × decay(t)`), định kỳ xóa nội dung giá trị thấp hoặc đã lỗi thời. Vector database đầy noise cũ, Agent sẽ ngày càng kém tin cậy.
+Memory compression cũng thường được dùng. Khi conversation history tích lũy đến threshold, dùng LLM nén thành summary rồi thay thế conversation gốc. Tiết kiệm Token nhưng chắc chắn mất thông tin. Long-term memory cũng phải biết quên: duy trì decay score cho từng memory (relevance × importance × decay(t)), định kỳ xóa nội dung giá trị thấp hoặc đã lỗi thời. Vector database đầy noise cũ, Agent sẽ ngày càng kém tin cậy.
 
 Multi-tenant scenario đặc biệt phải chú ý memory isolation. Redis và vector database đều phải cô lập qua `tenant_id` hoặc `user_id`. Việc để preference của user A lộ cho user B là data security incident. Long-term memory về mặt kỹ thuật khá giống RAG, đều dùng vector database và semantic retrieval; khác biệt nằm ở service object: RAG kết nối shared knowledge source, long-term memory lưu kinh nghiệm cá nhân tích lũy của một user cụ thể.
 
@@ -451,7 +451,7 @@ Khác biệt chủ yếu nằm ở time và cost. Interface thông thường ch�
 - [Thiết kế hệ thống ứng dụng AI](https://javaguide.cn/ai/system-design/ai-application-architecture.html): từ Prompt Demo đến production architecture, bổ sung gateway, RAG, Memory, Tool, evaluation, observability và security compliance.
 - [Giải thích chi tiết LLM Gateway](https://javaguide.cn/ai/system-design/llm-gateway.html): tập trung vào multi-model routing, fallback, rate limit quota, Token budget và cost attribution.
 - [Hệ thống evaluation cho ứng dụng AI](https://javaguide.cn/ai/llm-basis/llm-evaluation.html): Golden Set, LLM-as-Judge, Trace replay, online gray release và CI regression.
-- [Tổng hợp câu hỏi phỏng vấn thiết kế hệ thống AI](https://javaguide.cn/ai/interview-questions/ai-system-design-interview-questions.html): phù hợp để ôn lại cách trình bày system design sau khi học xong giai đoạn năm.
+- [Tổng hợp câu hỏi phỏng vấn thiết kế hệ thống AI](https://javaguide.cn/ai/interview-questions/ai-system-design-interview-questions.html): phù hợp để ôn lại cách trình bày system design sau khi học xong giai đoạn 5.
 
 ### 5.1 High concurrency và stream response
 
@@ -499,7 +499,7 @@ AI system không thể hoàn toàn bê nguyên traditional unit test sang. Tradi
 
 Tầng đầu tiên vẫn phải làm deterministic test. Dùng WireMock hoặc Mockito mock LLM HTTP request, trả về fixed JSON, chuyên test parser layer, tool orchestration và exception handling, những code không phụ thuộc model fluctuation. Tầng này chạy được trên CI và tốc độ cũng nhanh.
 
-Tầng thứ hai làm Prompt evaluation. Dùng Promptfoo hoặc LLM-as-a-Judge chạy batch một nhóm input, thu output rồi xem accuracy, relevance và hallucination rate. Tầng này chạy chậm hơn nhưng cho biết Prompt sau khi sửa có bị regression không. Điều quan trọng là duy trì một **Golden Set** (evaluation set chuẩn): có thể sampling log production theo tầng, tự tạo edge sample hoặc đưa failure case sau khi release trở lại. 50~200 dòng là có thể bắt đầu, trọng tâm là bao phủ distribution thực.
+Tầng thứ hai làm Prompt evaluation. Dùng Promptfoo hoặc LLM-as-a-Judge chạy batch một nhóm input, thu output rồi xem accuracy, relevance và hallucination rate. Tầng này chạy chậm hơn nhưng cho biết Prompt sau khi sửa có bị regression không. Điều quan trọng là duy trì một **Golden Set** (evaluation set chuẩn): có thể sampling log production theo tầng, tự tạo edge sample hoặc đưa failure case sau khi release trở lại. 50~200 mẫu là có thể bắt đầu, trọng tâm là bao phủ distribution thực.
 
 Agent scenario còn phải xem tool calling: tool selection accuracy, parameter accuracy, unnecessary call rate và error recovery rate. Final answer đúng vẫn chưa đủ; Agent có thể đi theo một path rất mong manh, tình cờ hoàn thành task nhưng gặp input tương tự là lỗi.
 
@@ -638,7 +638,7 @@ Một vài cái bẫy, chỉ cần gặp một lần là nhớ:
 | Hallucination                   | LLM output không phù hợp fact                           | Retrieval evidence bằng RAG, khi cần thêm knowledge graph để validate |
 | Structured output không ổn định | Tỷ lệ JSON parse fail cao                               | Low temperature + Strict Mode + Retry loop                            |
 
-Giai đoạn năm đã triển khai các vấn đề này; khi thực sự viết project có thể đối chiếu bảng này để kiểm tra từng mục.
+Giai đoạn 5 đã triển khai các vấn đề này; khi thực sự viết project có thể đối chiếu bảng này để kiểm tra từng mục.
 
 ### Không biết frontend thì làm sao?
 
