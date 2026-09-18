@@ -17,7 +17,7 @@ head:
 1. Dễ học (cú pháp đơn giản, dễ bắt đầu);
 2. Hướng đối tượng (encapsulation, inheritance, polymorphism);
 3. Không phụ thuộc nền tảng (JVM thực hiện tính không phụ thuộc nền tảng);
-4. Hỗ trợ đa thread (ngôn ngữ C++ không có cơ chế đa thread tích hợp, vì vậy phải gọi chức năng đa thread của hệ điều hành để lập trình đa thread, còn ngôn ngữ Java cung cấp hỗ trợ đa thread);
+4. Hỗ trợ nhiều thread (ngôn ngữ C++ không có cơ chế hỗ trợ nhiều thread tích hợp, vì vậy phải gọi chức năng nhiều thread của hệ điều hành để lập trình, còn ngôn ngữ Java cung cấp sẵn hỗ trợ nhiều thread);
 5. Đáng tin cậy (có cơ chế xử lý exception và quản lý bộ nhớ tự động);
 6. An toàn (bản thân thiết kế ngôn ngữ Java cung cấp nhiều cơ chế bảo vệ an toàn như access modifier, hạn chế chương trình truy cập trực tiếp tài nguyên hệ điều hành);
 7. Hiệu quả (nhờ tối ưu bằng các kỹ thuật như JIT compiler, hiệu năng chạy của ngôn ngữ Java vẫn rất tốt);
@@ -29,36 +29,36 @@ head:
 
 🌈 Mở rộng một chút:
 
-“Write Once, Run Anywhere (viết một lần, chạy mọi nơi)” là khẩu hiệu quảng bá thật sự kinh điển và đã được truyền đi nhiều năm! Vì vậy, đến hôm nay vẫn có nhiều người cho rằng khả năng cross-platform là ưu thế lớn nhất của ngôn ngữ Java. Trên thực tế, cross-platform không còn là điểm bán hàng lớn nhất của Java, các tính năng mới của JDK cũng vậy. Công nghệ virtualization trên thị trường hiện đã rất mature, chẳng hạn bạn có thể dễ dàng thực hiện cross-platform bằng Docker. Theo tôi, chính ecosystem mạnh mẽ của Java mới là điều quan trọng!
+“Write Once, Run Anywhere (viết một lần, chạy mọi nơi)” là khẩu hiệu quảng bá thật sự kinh điển và đã được truyền đi nhiều năm! Vì vậy, đến hôm nay vẫn có nhiều người cho rằng khả năng cross-platform là ưu thế lớn nhất của ngôn ngữ Java. Trên thực tế, cross-platform không còn là điểm bán hàng lớn nhất của Java, các tính năng mới của JDK cũng vậy. Công nghệ virtualization trên thị trường hiện đã rất hoàn thiện, chẳng hạn bạn có thể dễ dàng thực hiện cross-platform bằng Docker. Theo tôi, chính ecosystem mạnh mẽ của Java mới là điều quan trọng!
 
 ### Java SE vs Java EE
 
-- Java SE (Java Platform, Standard Edition): phiên bản standard của nền tảng Java, nền tảng của ngôn ngữ lập trình Java, bao gồm các class library cốt lõi và các thành phần cốt lõi như JVM hỗ trợ phát triển và chạy ứng dụng Java. Java SE có thể dùng để xây dựng desktop application hoặc server application đơn giản.
-- Java EE (Java Platform, Enterprise Edition): phiên bản enterprise của nền tảng Java, xây dựng trên nền tảng Java SE, bao gồm các standard và specification hỗ trợ phát triển, deploy enterprise application (chẳng hạn Servlet, JSP, EJB, JDBC, JPA, JTA, JavaMail, JMS). Java EE có thể dùng để xây dựng server-side Java application phân tán, portable, robust, scalable và an toàn, chẳng hạn Web application.
+- Java SE (Java Platform, Standard Edition): phiên bản tiêu chuẩn của nền tảng Java, nền tảng của ngôn ngữ lập trình Java, bao gồm các class library cốt lõi và các thành phần cốt lõi như JVM hỗ trợ phát triển và chạy ứng dụng Java. Java SE có thể dùng để xây dựng desktop application hoặc server application đơn giản.
+- Java EE (Java Platform, Enterprise Edition): phiên bản doanh nghiệp của nền tảng Java, xây dựng trên nền tảng Java SE, bao gồm các tiêu chuẩn và đặc tả hỗ trợ phát triển, deploy enterprise application (chẳng hạn Servlet, JSP, EJB, JDBC, JPA, JTA, JavaMail, JMS). Java EE có thể dùng để xây dựng server-side Java application phân tán, portable, robust, scalable và an toàn, chẳng hạn Web application.
 
 Nói đơn giản, Java SE là phiên bản nền tảng của Java, Java EE là phiên bản nâng cao của Java. Java SE phù hợp hơn để phát triển desktop application hoặc server application đơn giản, Java EE phù hợp hơn để phát triển enterprise application phức tạp hoặc Web application.
 
-Ngoài Java SE và Java EE, còn có Java ME (Java Platform, Micro Edition). Java ME là phiên bản micro của Java, chủ yếu dùng để phát triển application cho thiết bị điện tử tiêu dùng embedded, chẳng hạn điện thoại, PDA, set-top box, tủ lạnh, điều hòa. Không cần tập trung vào Java ME, chỉ cần biết có thứ này là được, hiện nay đã không còn dùng đến.
+Ngoài Java SE và Java EE, còn có Java ME (Java Platform, Micro Edition). Java ME là phiên bản thu gọn của Java, chủ yếu dùng để phát triển application cho thiết bị điện tử tiêu dùng embedded, chẳng hạn điện thoại, PDA, set-top box, tủ lạnh, điều hòa. Không cần tập trung vào Java ME, chỉ cần biết có thứ này là được, hiện nay đã không còn dùng đến.
 
 ### ⭐️ JVM vs JDK vs JRE
 
 #### JVM
 
-JVM (Java Virtual Machine) là virtual machine chạy Java bytecode. JVM có implementation riêng cho các hệ thống khác nhau (Windows, Linux, macOS), mục đích là với cùng một bytecode, chúng đều cho ra cùng một kết quả. Bytecode và implementation JVM của các hệ thống khác nhau là chìa khóa giúp ngôn ngữ Java “compile một lần, chạy mọi nơi”.
+JVM (Java Virtual Machine) là máy ảo chạy Java bytecode. JVM có implementation riêng cho các hệ thống khác nhau (Windows, Linux, macOS), mục đích là với cùng một bytecode, chúng đều cho ra cùng một kết quả. Bytecode và implementation JVM của các hệ thống khác nhau là chìa khóa giúp ngôn ngữ Java “compile một lần, chạy mọi nơi”.
 
 Như hình dưới đây, các ngôn ngữ lập trình khác nhau (Java, Groovy, Kotlin, JRuby, Clojure ...) được compiler tương ứng compile thành file `.class`, rồi cuối cùng chạy trên các platform khác nhau (Windows, Mac, Linux) thông qua JVM.
 
 ![Các ngôn ngữ lập trình chạy trên JVM](https://oss.javaguide.cn/github/javaguide/java/basis/java-virtual-machine-program-language-os.png)
 
-**JVM không chỉ có một loại! Chỉ cần đáp ứng JVM specification thì mọi công ty, tổ chức hoặc cá nhân đều có thể phát triển JVM riêng của mình.** Nói cách khác, HotSpot VM mà chúng ta thường tiếp xúc chỉ là một implementation của JVM specification.
+**JVM không chỉ có một loại! Chỉ cần đáp ứng đặc tả JVM thì mọi công ty, tổ chức hoặc cá nhân đều có thể phát triển JVM riêng của mình.** Nói cách khác, HotSpot VM mà chúng ta thường tiếp xúc chỉ là một implementation của đặc tả JVM.
 
-Ngoài HotSpot VM thường dùng nhất, còn có J9 VM, Zing VM, JRockit VM và các JVM khác. Wikipedia có phần so sánh các JVM phổ biến: [Comparison of Java virtual machines](https://en.wikipedia.org/wiki/Comparison_of_Java_virtual_machines), bạn có thể xem nếu quan tâm. Ngoài ra, bạn có thể tìm thấy JVM specification tương ứng với JDK của từng version trên [Java SE Specifications](https://docs.oracle.com/javase/specs/index.html).
+Ngoài HotSpot VM thường dùng nhất, còn có J9 VM, Zing VM, JRockit VM và các JVM khác. Wikipedia có phần so sánh các JVM phổ biến: [Comparison of Java virtual machines](https://en.wikipedia.org/wiki/Comparison_of_Java_virtual_machines), bạn có thể xem nếu quan tâm. Ngoài ra, bạn có thể tìm thấy đặc tả JVM tương ứng với JDK của từng phiên bản trên [Java SE Specifications](https://docs.oracle.com/javase/specs/index.html).
 
 ![](https://oss.javaguide.cn/github/javaguide/java/basis/JavaSeSpecifications.jpg)
 
 #### JDK và JRE
 
-JDK (Java Development Kit) là một bộ công cụ phát triển Java đầy đủ chức năng, dành cho developer sử dụng để tạo và compile chương trình Java. Nó bao gồm JRE (Java Runtime Environment), compiler javac và các tool khác như javadoc (document generator), jdb (debugger), jconsole (monitoring tool), javap (decompiler) v.v.
+JDK (Java Development Kit) là một bộ công cụ phát triển Java đầy đủ chức năng, dành cho developer sử dụng để tạo và compile chương trình Java. Nó bao gồm JRE (Java Runtime Environment), compiler javac và các tool khác như javadoc (trình tạo tài liệu), jdb (debugger), jconsole (monitoring tool), javap (decompiler) v.v.
 
 JRE là environment cần thiết để chạy chương trình Java đã compile, chủ yếu gồm hai phần sau:
 
@@ -73,7 +73,7 @@ Hình dưới đây thể hiện rõ quan hệ giữa JDK, JRE và JVM.
 
 ![jdk-include-jre](https://oss.javaguide.cn/github/javaguide/java/basis/jdk-include-jre.png)
 
-Tuy nhiên, từ JDK 9 trở đi không cần phân biệt quan hệ giữa JDK và JRE nữa, thay vào đó là module system (JDK được tổ chức lại thành 94 module) + tool [jlink](http://openjdk.java.net/jeps/282) (command-line tool mới được phát hành cùng Java 9, dùng để tạo custom Java runtime image chỉ chứa các module mà application nhất định cần). Ngoài ra, từ JDK 11, Oracle không còn cung cấp bản download JRE riêng.
+Tuy nhiên, từ JDK 9 trở đi không cần phân biệt quan hệ giữa JDK và JRE nữa, thay vào đó là module system (JDK được tổ chức lại thành 94 module) + tool [jlink](http://openjdk.java.net/jeps/282) (command-line tool mới được phát hành cùng Java 9, dùng để tạo Java runtime image tùy chỉnh chỉ chứa các module mà application nhất định cần). Ngoài ra, từ JDK 11, Oracle không còn cung cấp bản download JRE riêng.
 
 Trong bài viết [Tổng quan tính năng mới của Java 9](https://javaguide.cn/java/new-features/java9.html), khi giới thiệu module system, tôi đã đề cập:
 
@@ -81,17 +81,17 @@ Trong bài viết [Tổng quan tính năng mới của Java 9](https://javaguide
 
 Nói cách khác, có thể dùng jlink để tạo một runtime nhỏ hơn theo nhu cầu của mình, thay vì application nào cũng dùng cùng một JRE bất kể là application gì.
 
-Java runtime image custom, modular giúp đơn giản hóa việc deploy Java application, tiết kiệm memory và tăng security cũng như maintainability. Điều này rất quan trọng để đáp ứng nhu cầu của modern application architecture như virtualization, containerization, microservice và cloud-native development.
+Java runtime image tùy chỉnh, dạng module giúp đơn giản hóa việc deploy Java application, tiết kiệm memory, đồng thời tăng security và maintainability. Điều này rất quan trọng để đáp ứng nhu cầu của modern application architecture như virtualization, containerization, microservice và cloud-native development.
 
 ### ⭐️ Bytecode là gì? Lợi ích của việc dùng bytecode là gì?
 
-Trong Java, code mà JVM có thể hiểu được gọi là bytecode (tức file có extension `.class`). Nó không hướng đến processor cụ thể nào mà chỉ hướng đến virtual machine. Ngôn ngữ Java dùng bytecode để phần nào giải quyết vấn đề hiệu năng thực thi thấp của ngôn ngữ interpreted truyền thống, đồng thời vẫn giữ đặc điểm portable của ngôn ngữ interpreted. Vì vậy, chương trình Java khi chạy tương đối hiệu quả (tuy nhiên vẫn có khoảng cách nhất định so với C, C++, Rust, Go và các ngôn ngữ khác), hơn nữa vì bytecode không nhắm đến một machine cụ thể nên chương trình Java không cần compile lại mà vẫn có thể chạy trên máy tính của nhiều operating system khác nhau.
+Trong Java, code mà JVM có thể hiểu được gọi là bytecode (tức file có extension `.class`). Nó không hướng đến processor cụ thể nào mà chỉ hướng đến virtual machine. Ngôn ngữ Java dùng bytecode để phần nào giải quyết vấn đề hiệu năng thực thi thấp của ngôn ngữ interpreted truyền thống, đồng thời vẫn giữ đặc điểm portable của ngôn ngữ interpreted. Vì vậy, chương trình Java khi chạy tương đối hiệu quả (tuy nhiên vẫn có khoảng cách nhất định so với C, C++, Rust, Go và các ngôn ngữ khác), hơn nữa vì bytecode không nhắm đến một machine cụ thể nên chương trình Java không cần compile lại mà vẫn có thể chạy trên máy tính dùng nhiều operating system khác nhau.
 
 **Quy trình từ source code đến khi chương trình Java chạy như hình dưới đây**:
 
 ![Quá trình Java program chuyển thành machine code](https://oss.javaguide.cn/github/javaguide/java/basis/java-code-to-machine-code.png)
 
-Điều cần đặc biệt chú ý là bước `.class->machine code`. Lấy HotSpot làm ví dụ, sau khi JVM load bytecode, trước hết nó có thể interpret và nhận diện các method, code block thường xuyên được gọi (tức hot code), sau đó compiler **JIT (Just in Time Compilation)** compile hot bytecode thành machine code. Khi JVM process hiện tại thực thi các code này ở những lần sau, nó có thể dùng trực tiếp machine code đã compile. Điều này cũng giải thích vì sao chúng ta thường nói **Java là ngôn ngữ tồn tại đồng thời compilation và interpretation**. Tuy nhiên, JVM specification không yêu cầu implementation cụ thể nhất thiết phải có interpreter hoặc JIT compiler.
+Điều cần đặc biệt chú ý là bước `.class->machine code`. Lấy HotSpot làm ví dụ, sau khi JVM load bytecode, trước hết nó có thể interpret và nhận diện các method, code block thường xuyên được gọi (tức hot code), sau đó compiler **JIT (Just in Time Compilation)** compile hot bytecode thành machine code. Khi JVM process hiện tại thực thi các code này ở những lần sau, nó có thể dùng trực tiếp machine code đã compile. Điều này cũng giải thích vì sao chúng ta thường nói **Java là ngôn ngữ tồn tại đồng thời compilation và interpretation**. Tuy nhiên, đặc tả JVM không yêu cầu implementation cụ thể nhất thiết phải có interpreter hoặc JIT compiler.
 
 > 🌈 Đọc thêm:
 >
@@ -106,7 +106,7 @@ Quan hệ giữa JDK, JRE, JVM và JIT như hình dưới đây.
 
 ![Quan hệ giữa JDK, JRE, JVM và JIT](https://oss.javaguide.cn/github/javaguide/java/basis/jdk-jre-jvm-jit.png)
 
-Hình dưới đây là rough structure model của JVM.
+Hình dưới đây là mô hình cấu trúc khái quát của JVM.
 
 ![Rough structure model của JVM](https://oss.javaguide.cn/github/javaguide/java/basis/jvm-rough-structure-model.png)
 
@@ -114,7 +114,7 @@ Hình dưới đây là rough structure model của JVM.
 
 Thực ra vấn đề này đã được đề cập khi nói về bytecode, vì khá quan trọng nên ở đây nhắc lại.
 
-Chúng ta có thể chia high-level programming language thành hai loại theo cách chương trình được thực thi:
+Chúng ta có thể chia ngôn ngữ lập trình cấp cao thành hai loại theo cách chương trình được thực thi:
 
 - **Compiled**: [Compiled language](https://zh.wikipedia.org/wiki/%E7%B7%A8%E8%AD%AF%E8%AA%9E%E8%A8%80) dùng [compiler](https://zh.wikipedia.org/wiki/%E7%B7%A8%E8%AD%AF%E5%99%A8) để dịch source code một lần thành machine code có thể được platform đó thực thi. Thông thường, tốc độ thực thi của compiled language khá nhanh, nhưng hiệu suất phát triển thấp hơn. Các compiled language phổ biến có C, C++, Go, Rust v.v.
 - **Interpreted**: [Interpreted language](https://zh.wikipedia.org/wiki/%E7%9B%B4%E8%AD%AF%E8%AA%9E%E8%A8%80) dùng [interpreter](https://zh.wikipedia.org/wiki/直譯器) để diễn giải code từng câu thành machine code rồi thực thi. Hiệu suất phát triển của interpreted language khá nhanh, nhưng tốc độ thực thi chậm hơn. Các interpreted language phổ biến có Python, JavaScript, PHP v.v.
@@ -133,7 +133,7 @@ Theo giới thiệu của Wikipedia:
 
 ### AOT có ưu điểm gì? Vì sao không dùng hoàn toàn AOT?
 
-JDK 9 từng đưa vào tool AOT (Ahead of Time Compilation) mang tính thử nghiệm `jaotc` thông qua JEP 295, nhưng tool này đã bị loại bỏ trong JDK 17. Vì vậy, JDK standard từ JDK 17 trở đi không còn chứa AOT compiler tích hợp này; phần thảo luận dưới đây nói về AOT theo nghĩa chung và các toolchain độc lập như GraalVM Native Image (Native Image là một kỹ thuật AOT do GraalVM cung cấp, sẽ được giới thiệu thêm ở phần sau). Khác với JIT, AOT compile code thành machine code trước khi chương trình chạy, có thể giảm chi phí warm-up tại runtime và cải thiện tốc độ startup, nhưng memory usage cụ thể, peak performance và use case phụ thuộc vào AOT implementation được dùng và application workload.
+JDK 9 từng đưa vào tool AOT (Ahead of Time Compilation) mang tính thử nghiệm `jaotc` thông qua JEP 295, nhưng tool này đã bị loại bỏ trong JDK 17. Vì vậy, JDK tiêu chuẩn từ JDK 17 trở đi không còn chứa AOT compiler tích hợp này; phần thảo luận dưới đây nói về AOT theo nghĩa chung và các toolchain độc lập như GraalVM Native Image (Native Image là một kỹ thuật AOT do GraalVM cung cấp, sẽ được giới thiệu thêm ở phần sau). Khác với JIT, AOT compile code thành machine code trước khi chương trình chạy, có thể giảm chi phí warm-up tại runtime và cải thiện tốc độ startup, nhưng memory usage cụ thể, peak performance và use case phụ thuộc vào AOT implementation được dùng và application workload.
 
 So sánh dưới đây lấy HotSpot JIT phổ biến và GraalVM Native Image làm ví dụ. Cách implementation của các AOT tool khác nhau không hoàn toàn giống nhau, hiệu quả thực tế còn chịu ảnh hưởng bởi build parameter, application workload và việc có dùng PGO (Profile-Guided Optimization, tức dùng performance information thu thập trong quá trình chạy thực tế của chương trình để hỗ trợ optimization) hay không.
 
@@ -151,7 +151,7 @@ So sánh dưới đây lấy HotSpot JIT phổ biến và GraalVM Native Image l
 
 Ưu thế của AOT chủ yếu thể hiện ở startup speed và runtime memory usage, phù hợp hơn với application cold start thường xuyên, instance có lifecycle ngắn hoặc cần scale nhanh. JIT có thể tối ưu hot code theo thông tin thu thập tại runtime, vì vậy service chạy lâu thường dễ phát huy ưu thế này hơn. Không thể kết luận trực tiếp throughput và latency của hai bên chỉ dựa vào phương thức compile, mà cần kết hợp toolchain cụ thể và workload thực tế để test.
 
-Nhắc đến AOT thì không thể không nhắc đến [GraalVM](https://www.graalvm.org/)! GraalVM là một JDK hiệu năng cao (một bản phân phối JDK đầy đủ), có thể chạy Java và các ngôn ngữ JVM khác, cũng như các ngôn ngữ non-JVM như JavaScript, Python. GraalVM không chỉ cung cấp AOT compilation mà còn cung cấp JIT compilation. Nếu quan tâm, bạn có thể xem official document của GraalVM: <https://www.graalvm.org/latest/docs/>. Nếu thấy official document khó hiểu, bạn cũng có thể tìm một số bài viết, chẳng hạn:
+Nhắc đến AOT thì không thể không nhắc đến [GraalVM](https://www.graalvm.org/)! GraalVM là một JDK hiệu năng cao (một bản phân phối JDK đầy đủ), có thể chạy Java và các ngôn ngữ JVM khác, cũng như các ngôn ngữ non-JVM như JavaScript, Python. GraalVM không chỉ cung cấp AOT compilation mà còn cung cấp JIT compilation. Nếu quan tâm, bạn có thể xem tài liệu chính thức của GraalVM: <https://www.graalvm.org/latest/docs/>. Nếu thấy tài liệu chính thức khó hiểu, bạn cũng có thể tìm một số bài viết, chẳng hạn:
 
 - [Xây dựng microservice application bằng static compilation](https://mp.weixin.qq.com/s/4haTyXUmh8m-dBQaEzwDJw)
 - [Hướng đến Native: ví dụ và giải thích nguyên lý kỹ thuật Spring&Dubbo AOT](https://cn.dubbo.apache.org/zh-cn/blog/2023/06/28/%e8%b5%b0%e5%90%91-native-%e5%8c%96springdubbo-aot-%e6%8a%80%e6%9c%af%e7%a4%ba%e4%be%8b%e4%b8%8e%e5%8e%9f%e7%90%86%e8%ae%b2%e8%a7%a3/)
@@ -178,11 +178,11 @@ AOT chuyển một phần công việc và thông tin runtime sang build stage, 
 
 Có thể trước khi xem câu hỏi này, nhiều người cũng như tôi chưa từng tiếp xúc hoặc sử dụng OpenJDK. Vậy giữa Oracle JDK và OpenJDK có khác biệt lớn không? Dưới đây, tôi giải đáp câu hỏi thường bị nhiều người bỏ qua này thông qua một số tài liệu đã thu thập.
 
-Trước hết, năm 2006 SUN company open source Java, từ đó có OpenJDK. Năm 2009 Oracle mua lại Sun company, sau đó tự xây dựng một Oracle JDK trên nền tảng OpenJDK. Oracle JDK không open source, hơn nữa trong vài version đầu (Java 8 ~ Java 11) còn bổ sung một số feature và tool riêng so với OpenJDK.
+Trước hết, năm 2006 công ty SUN mở mã nguồn Java, từ đó có OpenJDK. Năm 2009 Oracle mua lại công ty Sun, sau đó tự xây dựng một Oracle JDK trên nền tảng OpenJDK. Oracle JDK không open source, hơn nữa trong vài phiên bản đầu (Java 8 ~ Java 11) còn bổ sung một số feature và tool riêng so với OpenJDK.
 
 Tiếp theo, với Java 7, OpenJDK và Oracle JDK rất gần nhau. Oracle JDK được build dựa trên OpenJDK 7, chỉ bổ sung một số feature nhỏ và do các engineer của Oracle tham gia maintain.
 
-Đoạn dưới đây trích từ một blog do Oracle official đăng năm 2012:
+Đoạn dưới đây trích từ một blog do Oracle đăng chính thức năm 2012:
 
 > Hỏi: Source code trong repository OpenJDK khác gì với code dùng để build Oracle JDK?
 >
@@ -191,9 +191,9 @@ Tiếp theo, với Java 7, OpenJDK và Oracle JDK rất gần nhau. Oracle JDK �
 Cuối cùng, tóm tắt đơn giản sự khác nhau giữa Oracle JDK và OpenJDK:
 
 1. **Có open source hay không**: OpenJDK là reference model và hoàn toàn open source, còn Oracle JDK được implementation dựa trên OpenJDK và không hoàn toàn open source (quan điểm cá nhân: như mọi người đều biết, JDK ban đầu do SUN company phát triển, sau đó SUN company bán cho Oracle company. Oracle company nổi tiếng với Oracle database, mà Oracle database lại closed source, nên lúc này Oracle company không muốn open source hoàn toàn. Tuy nhiên SUN company ban đầu đã open source JDK, nếu sau khi mua lại Oracle lại đóng source thì chắc chắn sẽ khiến nhiều Java developer không hài lòng và làm mọi người mất niềm tin vào Java. Vì vậy Oracle company đã chọn một cách xử lý: open source một phần core code để mọi người sử dụng, phân biệt với JDK do mọi người tự phát triển, gọi của các bạn là OpenJDK, còn tôi gọi là Oracle JDK. Tôi phát hành bản của tôi, các bạn tiếp tục phát triển bản của các bạn; nếu các bạn tạo ra điều gì thú vị, tôi sẽ dùng trong Oracle JDK phát hành sau này, đôi bên cùng có lợi!). Open source project OpenJDK: [https://github.com/openjdk/jdk](https://github.com/openjdk/jdk).
-2. **Có miễn phí hay không**: License của Oracle JDK phụ thuộc vào version cụ thể và version update. Oracle JDK 21 và các update cụ thể sau đó được phép sử dụng miễn phí, bao gồm production commercial, trong thời hạn NFTC; chẳng hạn Oracle dự kiến dùng NFTC cho update JDK 21 đến tháng 9 năm 2026 và cho update JDK 25 đến tháng 9 năm 2028. Sau khi thời hạn miễn phí kết thúc, license của các update tiếp theo sẽ thay đổi; version đã download vẫn dùng license tại thời điểm download. Oracle OpenJDK build dùng GPLv2 + Classpath Exception.
+2. **Có miễn phí hay không**: License của Oracle JDK phụ thuộc vào version cụ thể và version update. Oracle JDK 21 và các update cụ thể sau đó được phép sử dụng miễn phí, bao gồm sử dụng commercial trong production, trong thời hạn NFTC; chẳng hạn Oracle dự kiến dùng NFTC cho update JDK 21 đến tháng 9 năm 2026 và cho update JDK 25 đến tháng 9 năm 2028. Sau khi thời hạn miễn phí kết thúc, license của các update tiếp theo sẽ thay đổi; version đã download vẫn dùng license tại thời điểm download. Oracle OpenJDK build dùng GPLv2 + Classpath Exception.
 3. **Tính năng**: Oracle JDK bổ sung một số feature và tool riêng trên nền tảng OpenJDK, chẳng hạn Java Flight Recorder (JFR, một monitoring tool), Java Mission Control (JMC, một monitoring tool) và các tool khác. Tuy nhiên, sau Java 11, feature của OracleJDK và OpenJDK về cơ bản giống nhau; phần lớn private component trước đây trong OracleJDK cũng đã được đóng góp cho các tổ chức open source.
-4. **Long-term support**: Bản thân OpenJDK project không cam kết commercial LTS service; Oracle và nhiều nhà cung cấp OpenJDK distribution sẽ cung cấp long-term support cho các version cụ thể. Java 8, 11, 17, 21, 25 là các Oracle LTS version, Oracle dự kiến phát hành một LTS version mỗi hai năm trong tương lai.
+4. **Hỗ trợ dài hạn**: Bản thân dự án OpenJDK không cam kết cung cấp commercial LTS service; Oracle và nhiều nhà cung cấp OpenJDK distribution sẽ cung cấp long-term support cho các version cụ thể. Java 8, 11, 17, 21, 25 là các Oracle LTS version, Oracle dự kiến phát hành một LTS version mỗi hai năm trong tương lai.
 5. **License**: License của Oracle JDK thay đổi theo version và version update, có thể là NFTC hoặc OTN; BCL chỉ dùng cho các version phát hành trước ngày 16 tháng 4 năm 2019. Oracle OpenJDK dùng GPLv2 + Classpath Exception.
 
 > Oracle JDK đã tốt như vậy, tại sao vẫn cần OpenJDK?
@@ -201,8 +201,8 @@ Cuối cùng, tóm tắt đơn giản sự khác nhau giữa Oracle JDK và Open
 > Đáp:
 >
 > 1. OpenJDK là open source, open source có nghĩa là bạn có thể sửa đổi và tối ưu theo nhu cầu của mình, chẳng hạn Alibaba phát triển Dragonwell8 dựa trên OpenJDK: [https://github.com/alibaba/dragonwell8](https://github.com/alibaba/dragonwell8)
-> 2. OpenJDK miễn phí cho mục đích commercial (đây cũng là lý do JDK được cài mặc định qua yum package manager là OpenJDK chứ không phải Oracle JDK). Mặc dù Oracle JDK cũng miễn phí cho mục đích commercial (chẳng hạn JDK 8), nhưng không phải mọi version đều miễn phí.
-> 3. Feature version của OpenJDK và Oracle JDK đều tuân theo nhịp phát hành sáu tháng; chu kỳ update và support của mỗi distribution có thể khác nhau.
+> 2. OpenJDK miễn phí cho mục đích thương mại (đây cũng là lý do JDK được cài mặc định qua yum package manager là OpenJDK chứ không phải Oracle JDK). Mặc dù Oracle JDK cũng miễn phí cho mục đích thương mại (chẳng hạn JDK 8), nhưng không phải mọi version đều miễn phí.
+> 3. Các feature version của OpenJDK và Oracle JDK đều tuân theo nhịp phát hành sáu tháng; chu kỳ update và support của mỗi distribution có thể khác nhau.
 >
 > Dựa trên những lý do trên, OpenJDK vẫn cần tồn tại!
 
@@ -223,7 +223,7 @@ Tôi biết nhiều người chưa học C++, nhưng interviewer lại rất th�
 
 Mặc dù Java và C++ đều là ngôn ngữ hướng đối tượng, đều hỗ trợ encapsulation, inheritance và polymorphism, nhưng chúng vẫn có khá nhiều điểm khác nhau:
 
-- Java không cung cấp pointer để truy cập trực tiếp memory, memory của chương trình an toàn hơn.
+- Java không cung cấp pointer để truy cập trực tiếp memory, vì vậy memory của chương trình an toàn hơn.
 - Class của Java chỉ inheritance đơn, C++ hỗ trợ multiple inheritance; mặc dù class của Java không thể multiple inheritance, interface lại có thể multiple inheritance.
 - Java có cơ chế garbage collection (GC) để quản lý memory tự động, không cần programmer tự giải phóng memory không dùng.
 - C++ đồng thời hỗ trợ method overloading và operator overloading, nhưng Java chỉ hỗ trợ method overloading (operator overloading làm tăng độ phức tạp, không phù hợp với tư tưởng thiết kế ban đầu của Java).
