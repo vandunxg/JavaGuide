@@ -51,7 +51,7 @@ public final class Unsafe {
   @CallerSensitive
   public static Unsafe getUnsafe() {
     Class var0 = Reflection.getCallerClass();
-    // Chỉ hợp lệ khi được BootstrapClassLoader của bootstrap class loader tải
+    // Chỉ hợp lệ khi được `BootstrapClassLoader` tải
     if(!VM.isSystemDomainLoader(var0.getClassLoader())) {
       throw new SecurityException("Unsafe");
     } else {
@@ -71,7 +71,7 @@ Exception in thread "main" java.lang.SecurityException: Unsafe
 
 **Tại sao method `public static` không thể được gọi trực tiếp?**
 
-Đó là vì trong method `getUnsafe`, `classLoader` của caller sẽ được kiểm tra để xác định class hiện tại có do `Bootstrap classLoader` tải hay không. Nếu không phải thì một exception `SecurityException` sẽ được ném ra. Nói cách khác, chỉ class được bootstrap class loader tải mới có thể gọi các method trong lớp Unsafe, nhằm ngăn các method này bị gọi trong code không đáng tin cậy.
+Đó là vì trong method `getUnsafe`, `classLoader` của caller sẽ được kiểm tra để xác định class hiện tại có do `Bootstrap ClassLoader` tải hay không. Nếu không phải thì một exception `SecurityException` sẽ được ném ra. Nói cách khác, chỉ class được `Bootstrap ClassLoader` tải mới có thể gọi các method trong lớp `Unsafe`, nhằm ngăn các method này bị gọi trong code không đáng tin cậy.
 
 **Tại sao việc sử dụng lớp Unsafe lại bị giới hạn nghiêm ngặt như vậy?**
 
@@ -342,7 +342,7 @@ value after putInt: 42
 
 **Thuộc tính object**
 
-Việc lấy offset memory của member field trong object và sửa giá trị field đã được kiểm thử trong ví dụ trên. Ngoài các method `putInt`, `getInt` đã nêu, Unsafe cung cấp method `put` và `get` cho toàn bộ 8 kiểu dữ liệu primitive và `Object`. Mọi method `put` đều có thể vượt qua quyền truy cập để sửa trực tiếp dữ liệu trong memory. Đọc comment trong source code của OpenJDK cho thấy thao tác đọc/ghi kiểu dữ liệu primitive và `Object` hơi khác nhau: kiểu dữ liệu primitive thao tác trực tiếp trên giá trị thuộc tính (`value`), còn thao tác với `Object` dựa trên giá trị tham chiếu (`reference value`). Dưới đây là các method đọc/ghi `Object`:
+Việc lấy offset memory của member field trong object và sửa giá trị field đã được kiểm thử trong ví dụ trên. Ngoài các method `putInt`, `getInt` đã nêu, `Unsafe` cung cấp method `put` và `get` cho toàn bộ 8 kiểu dữ liệu primitive và `Object`. Mọi method `put` đều có thể vượt qua quyền truy cập để sửa trực tiếp dữ liệu trong memory. Đọc comment trong source code của OpenJDK cho thấy thao tác đọc/ghi kiểu dữ liệu primitive và `Object` hơi khác nhau: kiểu dữ liệu primitive thao tác trực tiếp trên giá trị thuộc tính (`value`), còn thao tác với `Object` dựa trên giá trị tham chiếu (`reference value`). Dưới đây là các method đọc/ghi `Object`:
 
 ```java
 // Lấy một object reference tại offset được chỉ định của object
@@ -458,7 +458,7 @@ public final native boolean compareAndSwapInt(Object o, long offset, int expecte
 public final native boolean compareAndSwapLong(Object o, long offset, long expected, long update);
 ```
 
-**CAS là gì?** CAS là viết tắt của Compare And Swap, nghĩa là so sánh và trao đổi. Đây là một kỹ thuật thường dùng khi triển khai concurrent algorithm. Thao tác CAS gồm ba toán hạng: memory location, giá trị gốc kỳ vọng và giá trị mới. Khi thực hiện CAS, nếu giá trị tại memory location giống giá trị kỳ vọng thì cập nhật nó thành giá trị mới theo cách atomic; nếu không thì không cập nhật. HotSpot ánh xạ các thao tác liên quan thành atomic primitive do platform đích cung cấp; trên x86 thường dùng `cmpxchg`, còn các kiến trúc processor khác có thể dùng instruction hoặc chuỗi instruction khác nhau.
+**CAS là gì?** CAS là viết tắt của Compare And Swap, nghĩa là so sánh và hoán đổi. Đây là một kỹ thuật thường dùng khi triển khai concurrent algorithm. Thao tác CAS gồm ba toán hạng: memory location, giá trị ban đầu kỳ vọng và giá trị mới. Khi thực hiện CAS, nếu giá trị tại memory location giống giá trị kỳ vọng thì cập nhật nó thành giá trị mới theo cách atomic; nếu không thì không cập nhật. HotSpot ánh xạ các thao tác liên quan thành atomic primitive do platform đích cung cấp; trên x86 thường dùng `cmpxchg`, còn các kiến trúc processor khác có thể dùng instruction hoặc chuỗi instruction khác nhau.
 
 #### Ứng dụng điển hình
 
@@ -531,7 +531,7 @@ private void incrementAndPrint(int targetValue) {
 }
 ```
 
-Trong ví dụ trên, ta tạo hai thread cùng thử sửa shared variable `a`. Khi mỗi thread gọi method `incrementAndPrint(targetValue)`:
+Trong ví dụ trên, hai thread cùng thử sửa shared variable `a`. Khi mỗi thread gọi method `incrementAndPrint(targetValue)`:
 
 1. Trước hết đọc giá trị hiện tại `currentValue` của `a`.
 2. Kiểm tra xem `currentValue` có bằng `targetValue - 1` (giá trị ngay trước đó theo kỳ vọng) hay không.
@@ -554,7 +554,7 @@ Cần lưu ý:
 
 #### Giới thiệu
 
-Hiện tại, các method chính trong `Unsafe` liên quan trực tiếp đến điều phối thread là `park` và `unpark`. Các method `monitorEnter`, `monitorExit`, `tryMonitorEnter` trong lịch sử đã bị xóa từ JDK 9.
+Hiện tại, các method chính trong `Unsafe` liên quan trực tiếp đến điều phối thread là `park` và `unpark`. Các method `monitorEnter`, `monitorExit`, `tryMonitorEnter` từng có trong lịch sử đã bị xóa từ JDK 9.
 
 ```java
 // Hủy block thread
@@ -569,7 +569,7 @@ Ba method liên quan đến `monitor` chỉ phù hợp để giới thiệu impl
 
 #### Ứng dụng điển hình
 
-Class cốt lõi của Java lock và synchronizer framework là `AbstractQueuedSynchronizer` (AQS), sử dụng `LockSupport.park()` và `LockSupport.unpark()` để block và wake up thread. Còn method `park`, `unpark` của `LockSupport` thực tế được triển khai bằng cách gọi method `park`, `unpark` của `Unsafe`.
+Class cốt lõi trong lock và synchronizer framework của Java là `AbstractQueuedSynchronizer` (AQS), sử dụng `LockSupport.park()` và `LockSupport.unpark()` để block và wake up thread. Còn method `park`, `unpark` của `LockSupport` thực tế được triển khai bằng cách gọi method `park`, `unpark` của `Unsafe`.
 
 ```java
 public static void park(Object blocker) {
@@ -584,7 +584,7 @@ public static void unpark(Thread thread) {
 }
 ```
 
-Method `park` của `LockSupport` sẽ gọi method `park` của `Unsafe` ở tầng dưới. `park` có thể return vì có permit khả dụng, thread khác gọi `unpark`, thread bị interrupt hoặc return không vì lý do cụ thể; biến thể có timeout cũng return sau khi timeout. Vì vậy, logic block phụ thuộc điều kiện cần kiểm tra lại điều kiện trong loop. Ví dụ dưới đây minh họa trường hợp thread khác gọi `unpark`:
+Method `park` của `LockSupport` sẽ gọi method `park` của `Unsafe` ở tầng dưới. `park` có thể return vì có permit khả dụng, thread khác gọi `unpark`, thread bị interrupt hoặc tự return; biến thể có timeout cũng return sau khi timeout. Vì vậy, logic block phụ thuộc điều kiện cần kiểm tra lại điều kiện trong loop. Ví dụ dưới đây minh họa trường hợp thread khác gọi `unpark`:
 
 ```java
 public static void main(String[] args) {
@@ -667,7 +667,7 @@ false
 Hydra
 ```
 
-Trong thao tác object của `Unsafe`, ta đã học cách dùng method `objectFieldOffset` để lấy offset của thuộc tính object và dựa trên đó đọc/ghi giá trị variable. Tuy nhiên, method này không áp dụng cho static field trong class. Khi đó cần dùng method `staticFieldOffset`. Trong code trên, chỉ khi lấy object `Field` mới cần đến `Class`; khi lấy thuộc tính static variable thì không còn phụ thuộc vào `Class` nữa.
+Ở phần thao tác object của `Unsafe`, đã thấy cách dùng method `objectFieldOffset` để lấy offset của thuộc tính object và dựa trên đó đọc/ghi giá trị variable. Tuy nhiên, method này không áp dụng cho static field trong class. Khi đó cần dùng method `staticFieldOffset`. Trong code trên, chỉ khi lấy object `Field` mới cần đến `Class`; khi lấy thuộc tính static variable thì không còn phụ thuộc vào `Class` nữa.
 
 Trong code trên, trước hết tạo một object `User`. Đó là vì nếu class chưa được khởi tạo thì static field của nó cũng chưa được khởi tạo, field lấy được cuối cùng sẽ là `null`. Vì vậy, trước khi lấy static field, cần gọi method `shouldBeInitialized` để xác định class có cần được khởi tạo trước khi lấy hay không. Nếu xóa câu lệnh tạo object `User`, kết quả chạy sẽ đổi thành:
 
@@ -713,7 +713,7 @@ Các version Unsafe cũ cũng từng cung cấp method `defineAnonymousClass`:
 public native Class<?> defineAnonymousClass(Class<?> hostClass, byte[] data, Object[] cpPatches);
 ```
 
-Method này có thể dùng để tạo động anonymous class, nhưng đã bị xóa từ JDK 17. `MethodHandles.Lookup.defineHiddenClass`, được giới thiệu trong JDK 15, là API thay thế được hỗ trợ. Implementation cụ thể của lambda thuộc về chi tiết triển khai của JDK; trong version hiện tại không thể còn mô tả rằng nó phụ thuộc vào `Unsafe.defineAnonymousClass` đã bị xóa.
+Method này có thể dùng để tạo động anonymous class, nhưng đã bị xóa từ JDK 17. `MethodHandles.Lookup.defineHiddenClass`, được giới thiệu trong JDK 15, là API thay thế được hỗ trợ. Implementation cụ thể của lambda thuộc về chi tiết triển khai của JDK; trong version hiện tại không còn thể mô tả rằng nó phụ thuộc vào `Unsafe.defineAnonymousClass` đã bị xóa.
 
 #### Ứng dụng điển hình
 
@@ -738,6 +738,6 @@ Hai method này có ít trường hợp sử dụng. Trong class `java.nio.Bits`
 
 ## Tổng kết
 
-Trong bài viết này, chúng ta đã giới thiệu khái niệm cơ bản, nguyên lý hoạt động và một phần API lịch sử của `Unsafe`. Cần lưu ý rằng `sun.misc.Unsafe` là internal API không được hỗ trợ, nhiều method đã bị xóa trong các version JDK khác nhau. JDK 23 đã đánh dấu các method truy cập memory của nó là sẽ bị xóa, từ JDK 24 sẽ mặc định đưa ra runtime warning ở lần gọi đầu tiên. Code mới nên ưu tiên API tiêu chuẩn: dùng `VarHandle` để truy cập field và array trong heap, dùng Foreign Function and Memory API (`MemorySegment` và các API khác) để truy cập memory off-heap, dùng `java.util.concurrent` để synchronization giữa các thread.
+Trong bài viết này, chúng ta đã giới thiệu khái niệm cơ bản, nguyên lý hoạt động và một phần API lịch sử của `Unsafe`. Cần lưu ý rằng `sun.misc.Unsafe` là internal API không được hỗ trợ, nhiều method đã bị xóa trong các version JDK khác nhau. JDK 23 đã đánh dấu các method truy cập memory của nó để loại bỏ, từ JDK 24 sẽ mặc định đưa ra runtime warning ở lần gọi đầu tiên. Code mới nên ưu tiên API tiêu chuẩn: dùng `VarHandle` để truy cập field và array trong heap, dùng Foreign Function and Memory API (`MemorySegment` và các API khác) để truy cập memory off-heap, dùng `java.util.concurrent` để synchronization giữa các thread.
 
 <!-- @include: @article-footer.snippet.md -->
