@@ -1,7 +1,7 @@
 ---
 icon: "mdi:head-lightbulb-outline"
-title: Hướng dẫn phỏng vấn Java (Tổng hợp câu hỏi phỏng vấn backend của JavaGuide)
-description: Hướng dẫn phỏng vấn Java của JavaGuide, tổng hợp có hệ thống lý thuyết và câu hỏi phỏng vấn backend, bao phủ Java Basics, Collection, Concurrency, JVM, Spring, MySQL, Redis, system design và distributed, phù hợp cho ôn tập tuyển dụng sinh viên và tuyển dụng có kinh nghiệm.
+title: Hướng dẫn phỏng vấn Java (Tổng hợp câu hỏi phỏng vấn backend tổng quát của JavaGuide)
+description: Hướng dẫn phỏng vấn Java của JavaGuide, tổng hợp có hệ thống lý thuyết và câu hỏi phỏng vấn backend, bao phủ Java Basics, Collection, Concurrency, JVM, Spring, MySQL, Redis, system design và distributed system, phù hợp cho ôn tập phỏng vấn tuyển dụng sinh viên và tuyển dụng người đã có kinh nghiệm.
 sitemap:
   changefreq: weekly
   priority: 1
@@ -21,24 +21,24 @@ Nếu bạn đang chuẩn bị phỏng vấn tuyển dụng sinh viên, tuyển 
 
 Toàn bộ nội dung website đã được mã nguồn mở miễn phí, hoan nghênh cùng [duy trì và hoàn thiện](http://localhost:8080/javaguide/contribution-guideline.html), nếu thấy hữu ích thì hoan nghênh Star!
 
-- **Địa chỉ project**: <https://github.com/Snailclimb/JavaGuide>
-- **Đọc online**: <https://javaguide.cn/>
+- **Địa chỉ dự án**: <https://github.com/Snailclimb/JavaGuide>
+- **Đọc trực tuyến**: <https://javaguide.cn/>
 
 ## Tài liệu mở rộng
 
-- [Project mã nguồn mở Java chất lượng](./open-source-project/): tuyển chọn các project Java mã nguồn mở trên Gitee/GitHub phù hợp để học, thực chiến và ghi vào CV.
+- [Dự án mã nguồn mở Java chất lượng](./open-source-project/): tuyển chọn các dự án Java mã nguồn mở trên Gitee/GitHub phù hợp để học, thực chiến và ghi vào CV.
 - [Gợi ý sách kỹ thuật chất lượng](./books/): bao phủ các hướng computer science cơ bản, database, search engine, distributed system, kiến trúc high availability.
 
 ## Chuẩn bị phỏng vấn
 
-- [⭐ Kế hoạch vượt qua phỏng vấn Java backend (bao phủ hệ thống backend chung)](./interview-preparation/backend-interview-plan.md) (nhất định phải xem :+1:)
+- [⭐ Kế hoạch vượt qua phỏng vấn Java backend (bao quát hệ thống backend chung)](./interview-preparation/backend-interview-plan.md) (nhất định phải xem :+1:)
 - [Chuẩn bị phỏng vấn Java hiệu quả thế nào?](./interview-preparation/teach-you-how-to-prepare-for-the-interview-hand-in-hand.md)
 - [Tổng hợp trọng điểm phỏng vấn Java backend](./interview-preparation/key-points-of-interview.md)
 - [Lộ trình học Java (bản mới nhất, hơn 40.000 chữ)](./interview-preparation/java-roadmap.md)
 - [Hướng dẫn viết CV cho lập trình viên](./interview-preparation/resume-guide.md)
-- [Hướng dẫn về kinh nghiệm project](./interview-preparation/project-experience-guide.md)
+- [Hướng dẫn về kinh nghiệm dự án](./interview-preparation/project-experience-guide.md)
 - [Phỏng vấn quá căng thẳng thì làm sao?](./interview-preparation/how-to-handle-interview-nerves.md)
-- [Tuyển dụng sinh viên mà không có kinh nghiệm thực tập thì sao? Viết kinh nghiệm thực tập thế nào?](./interview-preparation/internship-experience.md)
+- [Không có kinh nghiệm thực tập khi ứng tuyển sinh viên thì phải làm sao? Viết kinh nghiệm thực tập thế nào?](./interview-preparation/internship-experience.md)
 
 ## Java
 
@@ -52,13 +52,13 @@ Toàn bộ nội dung website đã được mã nguồn mở miễn phí, hoan n
 
 **Giải thích chi tiết các điểm kiến thức quan trọng**:
 
-- [Tại sao Java chỉ có pass by value?](./java/basis/why-there-only-value-passing-in-java.md)
+- [Tại sao Java chỉ có truyền giá trị?](./java/basis/why-there-only-value-passing-in-java.md)
 - [Giải thích chi tiết Java serialization](./java/basis/serialization.md)
 - [Giải thích chi tiết generic & wildcard](./java/basis/generics-and-wildcards.md)
 - [Giải thích chi tiết cơ chế reflection của Java](./java/basis/reflection.md)
 - [Giải thích chi tiết proxy pattern trong Java](./java/basis/proxy.md)
 - [Giải thích chi tiết BigDecimal](./java/basis/bigdecimal.md)
-- [Giải thích chi tiết class "ma thuật" Unsafe của Java](./java/basis/unsafe.md)
+- [Giải thích chi tiết class Unsafe đặc biệt của Java](./java/basis/unsafe.md)
 - [Giải thích chi tiết cơ chế Java SPI](./java/basis/spi.md)
 - [Giải thích chi tiết syntactic sugar trong Java](./java/basis/syntactic-sugar.md)
 
@@ -72,7 +72,7 @@ Toàn bộ nội dung website đã được mã nguồn mở miễn phí, hoan n
 
 **Phân tích source code**:
 
-- [Source code cốt lõi ArrayList + phân tích cơ chế resize](./java/collection/arraylist-source-code.md)
+- [Source code cốt lõi ArrayList + phân tích cơ chế mở rộng dung lượng](./java/collection/arraylist-source-code.md)
 - [Phân tích source code cốt lõi LinkedList](./java/collection/linkedlist-source-code.md)
 - [Source code cốt lõi HashMap + phân tích cấu trúc dữ liệu bên trong](./java/collection/hashmap-source-code.md)
 - [Source code cốt lõi ConcurrentHashMap + phân tích cấu trúc dữ liệu bên trong](./java/collection/concurrent-hash-map-source-code.md)
@@ -104,7 +104,7 @@ Toàn bộ nội dung website đã được mã nguồn mở miễn phí, hoan n
 - [Giải thích chi tiết JMM (Java Memory Model)](./java/concurrent/jmm.md)
 - **Thread pool**: [Giải thích chi tiết Java thread pool](./java/concurrent/java-thread-pool-summary.md), [Best practice cho Java thread pool](./java/concurrent/java-thread-pool-best-practices.md)
 - [Giải thích chi tiết ThreadLocal](./java/concurrent/threadlocal.md)
-- [Tổng hợp concurrent collection trong Java](./java/concurrent/java-concurrent-collections.md)
+- [Tổng hợp các concurrent collection trong Java](./java/concurrent/java-concurrent-collections.md)
 - [Tổng hợp các Atomic class](./java/concurrent/atomic-classes.md)
 - [Giải thích chi tiết AQS](./java/concurrent/aqs.md)
 - [Giải thích chi tiết CompletableFuture](./java/concurrent/completablefuture-intro.md)
@@ -163,13 +163,13 @@ Phần JVM này chủ yếu tham khảo [JVM Specification - Java 8](https://doc
 **Tổng hợp điểm kiến thức/câu hỏi phỏng vấn:**
 
 - **[Tổng hợp điểm kiến thức & câu hỏi phỏng vấn MySQL thường gặp](./database/mysql/mysql-questions-01.md)** (bắt buộc xem :+1:)
-- [Tổng hợp quy tắc tối ưu hiệu năng cao cho MySQL](./database/mysql/mysql-high-performance-optimization-specification-recommendations.md)
+- [Tổng hợp khuyến nghị quy chuẩn tối ưu hiệu năng MySQL](./database/mysql/mysql-high-performance-optimization-specification-recommendations.md)
 
 **Điểm kiến thức quan trọng:**
 
 - [Giải thích chi tiết index trong MySQL](./database/mysql/mysql-index.md)
-- [Tổng hợp các tình huống index MySQL mất tác dụng](./database/mysql/mysql-index-invalidation.md)
-- [Giải thích chi tiết isolation level của transaction MySQL kèm hình ảnh](./database/mysql/transaction-isolation-level.md)
+- [Tổng hợp các tình huống index MySQL bị vô hiệu](./database/mysql/mysql-index-invalidation.md)
+- [Giải thích chi tiết isolation level của transaction MySQL kèm hình minh họa](./database/mysql/transaction-isolation-level.md)
 - [Giải thích chi tiết ba loại log của MySQL (binlog, redo log và undo log)](./database/mysql/mysql-logs.md)
 - [Cách storage engine InnoDB hiện thực MVCC](./database/mysql/innodb-implementation-of-mvcc.md)
 - [Quá trình thực thi câu lệnh SQL trong MySQL](./database/mysql/how-sql-executed-in-mysql.md)
@@ -177,7 +177,7 @@ Phần JVM này chủ yếu tham khảo [JVM Specification - Java 8](https://doc
 - [Phân tích execution plan của MySQL](./database/mysql/mysql-query-execution-plan.md)
 - [Primary key tự tăng của MySQL có chắc chắn liên tục không](./database/mysql/mysql-auto-increment-primary-key-continuous.md)
 - [Gợi ý lưu trữ dữ liệu kiểu thời gian trong MySQL](./database/mysql/some-thoughts-on-database-storage-time.md)
-- [Implicit conversion trong MySQL gây mất tác dụng index](./database/mysql/index-invalidation-caused-by-implicit-conversion.md)
+- [Implicit conversion trong MySQL khiến index bị vô hiệu](./database/mysql/index-invalidation-caused-by-implicit-conversion.md)
 
 ### Redis
 
@@ -206,7 +206,7 @@ Phần JVM này chủ yếu tham khảo [JVM Specification - Java 8](https://doc
 
 [Tổng hợp câu hỏi phỏng vấn Elasticsearch thường gặp (trả phí)](./database/elasticsearch/elasticsearch-questions-01.md)
 
-![Tài khoản công khai JavaGuide](https://oss.javaguide.cn/github/javaguide/gongzhonghaoxuanchuan.png)
+![Tài khoản công khai chính thức của JavaGuide](https://oss.javaguide.cn/github/javaguide/gongzhonghaoxuanchuan.png)
 
 ## Công cụ phát triển
 
@@ -282,9 +282,9 @@ Phần JVM này chủ yếu tham khảo [JVM Specification - Java 8](https://doc
 - [Tại sao cả frontend và backend đều phải validate dữ liệu](./system-design/security/data-validation.md)
 - [Tại sao khi quên mật khẩu chỉ có thể reset chứ không cho biết mật khẩu cũ?](./system-design/security/why-password-reset-instead-of-retrieval.md)
 
-### Scheduled task
+### Tác vụ định kỳ
 
-[Giải thích chi tiết scheduled task trong Java](./system-design/schedule-task.md)
+[Giải thích chi tiết tác vụ định kỳ trong Java](./system-design/schedule-task.md)
 
 ### Đẩy tin nhắn real-time trên Web
 
@@ -292,7 +292,7 @@ Phần JVM này chủ yếu tham khảo [JVM Specification - Java 8](https://doc
 
 ## Distributed
 
-- [⭐ Câu hỏi phỏng vấn distributed tần suất cao](https://interview.javaguide.cn/distributed-system/distributed-system.html)
+- [⭐ Câu hỏi phỏng vấn distributed thường gặp](https://interview.javaguide.cn/distributed-system/distributed-system.html)
 - [Chuẩn bị phỏng vấn distributed system](./distributed-system/distributed-system-interview-questions.md)
 - [Chuẩn bị phỏng vấn microservice](./distributed-system/microservices-interview-questions.md)
 - [Nhập môn distributed system](./distributed-system/distributed-system-intro.md)
@@ -398,9 +398,9 @@ Triển khai nhiều bản của cùng một service, tránh single point of fai
 **Disaster recovery** = khắc phục thảm họa + backup.
 
 - **Backup**: sao lưu thêm nhiều bản cho toàn bộ dữ liệu quan trọng mà hệ thống sinh ra.
-- **Chống thảm họa**: xây dựng hai hệ thống hoàn toàn giống nhau ở hai vùng địa lý khác nhau. Khi hệ thống ở một nơi đột ngột chết, toàn bộ ứng dụng có thể chuyển sang nơi còn lại, nhờ đó hệ thống vẫn cung cấp dịch vụ bình thường.
+- **Khắc phục thảm họa**: xây dựng hai hệ thống hoàn toàn giống nhau ở hai vùng địa lý khác nhau. Khi hệ thống ở một nơi đột ngột dừng hoạt động, toàn bộ ứng dụng có thể chuyển sang nơi còn lại, nhờ đó hệ thống vẫn cung cấp dịch vụ bình thường.
 
-**Multi-active đa vùng** mô tả việc triển khai service ở nhiều vùng địa lý và tất cả đều đồng thời cung cấp dịch vụ ra bên ngoài. Khác biệt chính so với thiết kế disaster recovery truyền thống nằm ở chữ "multi-active", tức mọi site đều đang phục vụ cùng lúc. Multi-active đa vùng nhằm ứng phó với tình huống bất ngờ như hỏa hoạn, động đất và các thảm họa tự nhiên hoặc do con người gây ra.
+**Multi-active đa vùng** mô tả việc triển khai service ở nhiều vùng địa lý và tất cả đều đồng thời cung cấp dịch vụ cho bên ngoài. Khác biệt chính so với thiết kế disaster recovery truyền thống nằm ở chữ "multi-active", tức mọi site đều đang phục vụ cùng lúc. Multi-active đa vùng nhằm ứng phó với tình huống bất ngờ như hỏa hoạn, động đất và các thảm họa tự nhiên hoặc do con người gây ra.
 
 ## Xu hướng Star
 
