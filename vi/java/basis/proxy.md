@@ -297,7 +297,7 @@ Bạn có thể lấy class bị proxy một cách động thông qua class `Enh
 
 #### 3.2.3. Ví dụ code
 
-Khác với JDK dynamic proxy không cần dependency bổ sung, [CGLIB](https://github.com/cglib/cglib)(_Code Generation Library_) thực tế thuộc một open-source project. Nếu muốn sử dụng nó, bạn cần tự thêm dependency tương ứng.
+JDK dynamic proxy không cần dependency bổ sung, còn [CGLIB](https://github.com/cglib/cglib)(_Code Generation Library_) thực tế thuộc một open-source project. Nếu muốn sử dụng nó, bạn cần tự thêm dependency tương ứng.
 
 ```xml
 <dependency>
