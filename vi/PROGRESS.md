@@ -3,7 +3,7 @@
 > **Nguồn sự thật duy nhất** về trạng thái dịch. Agent/người nào tiếp tục công việc: **đọc file này đầu tiên**.
 > Luật dịch: [`../CLAUDE.md`](../CLAUDE.md) · Thuật ngữ: [`GLOSSARY.md`](GLOSSARY.md)
 
-**Nội dung**: 106/455 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
+**Nội dung**: 156/455 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
 
 Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
@@ -11,7 +11,7 @@ Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
 ## 🚦 BẮT ĐẦU TỪ ĐÂY
 
-**File tiếp theo cần dịch**: `cs-basics/network/other-network-questions.md`
+**File tiếp theo cần dịch**: `cs-basics/data-structure/heap.md`
 
 Xem toàn bộ việc còn lại: `make sync`
 
@@ -90,7 +90,7 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 - [x] `roadmap/full-stack-roadmap.md` — lộ trình full-stack
 - [x] `roadmap/test-development-roadmap.md` — lộ trình phát triển và kiểm thử
 
-## Giai đoạn 2 — Java core · 3/80
+## Giai đoạn 2 — Java core · 80/80 ✅
 
 ### 2.0 Mục lục
 
@@ -195,18 +195,78 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 
 ---
 
-## Giai đoạn 3 — CS basics · 10 file đã dịch
+## Giai đoạn 3 — CS basics · 60 file đã dịch
 
-- [x] `cs-basics/README.md`
+### Network
+
 - [x] `cs-basics/network/README.md`
 - [x] `cs-basics/network/osi-and-tcp-ip-model.md`
 - [x] `cs-basics/network/application-layer-protocol.md`
 - [x] `cs-basics/network/tcp-connection-and-disconnection.md`
 - [x] `cs-basics/network/tcp-byte-stream-udp-datagram.md`
 - [x] `cs-basics/network/http1.0-vs-http1.1.md`
+- [x] `cs-basics/network/other-network-questions.md`
+- [x] `cs-basics/network/other-network-questions2.md`
+- [x] `cs-basics/network/the-whole-process-of-accessing-web-pages.md`
+- [x] `cs-basics/network/http-vs-https.md`
+- [x] `cs-basics/network/https-rsa-vs-ecdhe.md`
+- [x] `cs-basics/network/http-status-codes.md`
+- [x] `cs-basics/network/tcp-reliability-guarantee.md`
+- [x] `cs-basics/network/tcp-time-wait.md`
+- [x] `cs-basics/network/tcp-keepalive-vs-http-keepalive.md`
+- [x] `cs-basics/network/dns.md`
+- [x] `cs-basics/network/http-vs-rpc.md`
+- [x] `cs-basics/network/arp.md`
+- [x] `cs-basics/network/nat.md`
+- [x] `cs-basics/network/network-attack-means.md`
+- [x] `cs-basics/network/computer-network-xiexiren-summary.md`
+- [x] `cs-basics/network/can-ping-but-tcp-may-not-connect.md`
+- [x] `cs-basics/network/can-tcp-and-udp-use-the-same-port.md`
+- [x] `cs-basics/network/maximum-number-of-tcp-connections-per-host.md`
+
+### Operating System
+
 - [x] `cs-basics/operating-system/README.md`
+- [x] `cs-basics/operating-system/operating-system-basic-questions-01.md`
+- [x] `cs-basics/operating-system/operating-system-basic-questions-02.md`
+- [x] `cs-basics/operating-system/process-and-thread.md`
+- [x] `cs-basics/operating-system/interrupt-exception-syscall.md`
+- [x] `cs-basics/operating-system/cpu-scheduling-and-load.md`
+- [x] `cs-basics/operating-system/ipc.md`
+- [x] `cs-basics/operating-system/os-lock-and-sync.md`
+- [x] `cs-basics/operating-system/dead-lock.md`
+- [x] `cs-basics/operating-system/memory-management.md`
+- [x] `cs-basics/operating-system/virtual-memory.md`
+- [x] `cs-basics/operating-system/file-system.md`
+- [x] `cs-basics/operating-system/io-multiplexing.md`
+- [x] `cs-basics/operating-system/zero-copy.md`
+- [x] `cs-basics/operating-system/linux-intro.md`
+- [x] `cs-basics/operating-system/shell-intro.md`
+
+### Algorithms
+
 - [x] `cs-basics/algorithms/README.md`
+- [x] `cs-basics/algorithms/complexity-analysis.md`
+- [x] `cs-basics/algorithms/binary-search.md`
+- [x] `cs-basics/algorithms/two-pointers-and-sliding-window.md`
+- [x] `cs-basics/algorithms/dfs-bfs.md`
+- [x] `cs-basics/algorithms/backtracking.md`
+- [x] `cs-basics/algorithms/dynamic-programming.md`
+- [x] `cs-basics/algorithms/greedy.md`
+- [x] `cs-basics/algorithms/top-k.md`
+- [x] `cs-basics/algorithms/string-algorithm-problems.md`
+- [x] `cs-basics/algorithms/linkedlist-algorithm-problems.md`
+- [x] `cs-basics/algorithms/10-classical-sorting-algorithms.md`
+- [x] `cs-basics/algorithms/classical-algorithm-problems-recommendations.md`
+- [x] `cs-basics/algorithms/common-data-structures-leetcode-recommendations.md`
+- [x] `cs-basics/algorithms/the-sword-refers-to-offer.md`
+
+### Data Structure
+
 - [x] `cs-basics/data-structure/README.md`
-- [ ] `cs-basics/network/other-network-questions.md` — file tiếp theo
+- [x] `cs-basics/data-structure/linear-data-structure.md`
+- [x] `cs-basics/data-structure/hash-table.md`
+- [x] `cs-basics/data-structure/tree.md`
+- [ ] `cs-basics/data-structure/heap.md` — file tiếp theo
 
 Thứ tự tiếp theo: `cs-basics/` → `database/` → `system-design/` → `distributed-system/` + `high-performance/` + `high-availability/` → `ai/`, `ai-coding/`, `tools/`, còn lại.
