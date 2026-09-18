@@ -155,7 +155,7 @@ Lấy `read(fd, buf, count)` trên Linux x86-64 làm ví dụ, process của sys
 
 #### System call nhất định có context switch không?
 
-System call sẽ khiến CPU đi vào kernel mode. Nếu kernel xử lý xong nhanh và trả về thread ban đầu, toàn bộ process chỉ có chuyển đổi user mode/kernel mode, không chuyển thread.
+System call sẽ khiến CPU đi vào kernel mode. Nếu kernel xử lý xong nhanh và trả về thread ban đầu, toàn bộ quá trình chỉ có chuyển đổi user mode/kernel mode, không chuyển thread.
 
 Khi system call cần chờ I/O, lock hoặc resource khác, thread hiện tại có thể bị block, lúc đó scheduler mới chọn task có thể chạy khác, và thread context switch sẽ xảy ra. Ngược lại, sau khi timer interrupt đi vào kernel, nếu scheduler vẫn để thread ban đầu tiếp tục chạy thì cũng không xảy ra thread switch.
 
@@ -212,7 +212,7 @@ Lý do cốt lõi là **để thực hiện concurrency với overhead thấp v�
 
 Nếu một server cần đồng thời xử lý network read/write, business computation và ghi log xuống disk, dùng nhiều process cũng có thể làm được, nhưng việc chia sẻ state giữa các process phức tạp, communication phải đi qua IPC, resource consumption cũng cao hơn. Chuyển sang nhiều thread, chúng có thể trực tiếp dùng chung heap memory và connection đã mở; chỉ cần viết synchronization đúng thì chi phí phối hợp sẽ thấp hơn nhiều.
 
-Thread cũng có thể nâng cao resource utilization. Trên single-core CPU, khi một thread bị block tại disk hoặc network I/O, các thread khác có thể tiếp tục chạy; trên multi-core CPU, nhiều thread có cơ hội thực thi song song trên các core khác nhau. Tuy nhiên, thread không phải càng nhiều càng tốt. Quá nhiều thread sẽ dẫn đến stack memory consumption, scheduling overhead, lock contention và cache invalidation; cách cấu hình số thread cho CPU-bound task và I/O-bound task cũng khác nhau.
+Thread cũng có thể nâng cao resource utilization. Trên single-core CPU, khi một thread bị block tại disk hoặc network I/O, các thread khác có thể tiếp tục chạy; trên multi-core CPU, nhiều thread có cơ hội thực thi song song trên các core khác nhau. Tuy nhiên, thread không phải càng nhiều càng tốt. Quá nhiều thread sẽ dẫn đến stack memory consumption, scheduling overhead, lock contention và suy giảm cache locality; cách cấu hình số thread cho CPU-bound task và I/O-bound task cũng khác nhau.
 
 ### Multi-thread nhất định có thể nâng cao performance không?
 

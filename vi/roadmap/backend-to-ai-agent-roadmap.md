@@ -62,7 +62,7 @@ Request từ frontend trước tiên đi vào Java hoặc Go backend. Backend x�
 
 Bạn cần bổ sung nửa năng lực còn lại: khi output của model không ổn định thì fallback thế nào, khi RAG không tìm được evidence thì thông báo ra sao, sau khi Agent gọi tool thất bại thì recovery thế nào, thống kê cost của Token ra sao.
 
-Nên học một chút Python. Ít nhất có thể đọc hiểu LangChain, LlamaIndex, evaluation script và một số dự án Agent open source, đồng thời có thể tham gia integration test. Nếu có quyền lựa chọn công nghệ cho dự án mới, bạn cũng có thể dùng Spring AI, LangChain4j, AgentScope Java để hoàn thiện closed loop ở phía Java.
+Nên học một chút Python. Ít nhất có thể đọc hiểu LangChain, LlamaIndex, evaluation script và một số dự án Agent open source, đồng thời có thể tham gia phối hợp tích hợp. Nếu có quyền lựa chọn công nghệ cho dự án mới, bạn cũng có thể dùng Spring AI, LangChain4j, AgentScope Java để hoàn thiện closed loop ở phía Java.
 
 Điểm quan trọng là đừng đánh mất engineering foundation.
 

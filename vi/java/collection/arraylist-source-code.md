@@ -730,7 +730,7 @@ private void grow(int minCapacity) {
 }
 ```
 
-**`int newCapacity = oldCapacity + (oldCapacity >> 1)`, vì vậy sau mỗi lần mở rộng capacity, capacity của ArrayList sẽ trở thành khoảng 1,5 lần capacity ban đầu (nếu oldCapacity là số chẵn thì đúng 1,5 lần, nếu là số lẻ thì xấp xỉ 1,5 lần)!** Số chẵn và số lẻ khác nhau, ví dụ: 10+10/2 = 15, 33+33/2=49. Nếu là số lẻ thì phần thập phân sẽ bị bỏ.
+**`int newCapacity = oldCapacity + (oldCapacity >> 1)`, vì vậy sau mỗi lần mở rộng capacity, capacity của ArrayList sẽ trở thành khoảng 1,5 lần capacity cũ (nếu oldCapacity là số chẵn thì đúng 1,5 lần, nếu là số lẻ thì xấp xỉ 1,5 lần)!** Số chẵn và số lẻ khác nhau, ví dụ: 10+10/2 = 15, 33+33/2=49. Nếu là số lẻ thì phần thập phân sẽ bị bỏ.
 
 > `>>` (shift operator): `>>1` dịch phải một bit tương đương với chia cho 2, dịch phải n bit tương đương với chia cho 2 lũy thừa n. Ở đây oldCapacity rõ ràng được dịch phải 1 bit nên tương đương với oldCapacity /2. Với phép tính nhị phân trên data lớn, shift operator nhanh hơn nhiều operator thông thường vì program chỉ cần dịch chuyển mà không cần tính toán, từ đó cải thiện efficiency và tiết kiệm resource.
 

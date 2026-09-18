@@ -10,7 +10,7 @@ head:
       content: hash table,HashMap,hash function,hash collision,chaining,open addressing,load factor,mở rộng dung lượng,Java collection,câu hỏi phỏng vấn về data structures
 ---
 
-Hash table (còn gọi là hash map) có giá trị cao trong phỏng vấn vì một đầu liên kết với việc tìm kiếm nhanh và đếm trong các bài toán thuật toán, đầu kia liên kết với Java `HashMap`, cache, loại bỏ trùng lặp và phân tuyến sharding trong distributed system.
+Hash table (còn gọi là bảng băm) có giá trị cao trong phỏng vấn vì một đầu liên kết với việc tìm kiếm nhanh và đếm trong các bài toán thuật toán, đầu kia liên kết với Java `HashMap`, cache, loại bỏ trùng lặp và phân tuyến sharding trong distributed system.
 
 Câu hỏi này xoay quanh việc: làm thế nào ánh xạ nhanh một key tới chỉ số array, đồng thời vẫn duy trì hiệu suất truy vấn chấp nhận được khi xảy ra collision, mở rộng dung lượng và xuất hiện dữ liệu cực đoan.
 

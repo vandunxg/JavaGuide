@@ -218,7 +218,7 @@ Các cách lấy phần tử trong `DelayQueue` gồm blocking và non-blocking.
 
 ![](https://oss.javaguide.cn/github/javaguide/java/collection/delayqueue-take-1.png)
 
-Lưu ý, sau khi gọi `await`, t1 sẽ release lock `lcok`. Nếu `DelayQueue` tiếp tục rỗng, t2 và t3 cũng sẽ thực hiện logic tương tự t1 và đi vào queue `conditionWaiter`.
+Lưu ý, sau khi gọi `await`, t1 sẽ release lock `lock`. Nếu `DelayQueue` tiếp tục rỗng, t2 và t3 cũng sẽ thực hiện logic tương tự t1 và đi vào queue `conditionWaiter`.
 
 ![](https://oss.javaguide.cn/github/javaguide/java/collection/delayqueue-take-2.png)
 

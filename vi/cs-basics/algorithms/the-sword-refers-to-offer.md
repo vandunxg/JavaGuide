@@ -122,7 +122,7 @@ Nhảy n bậc, còn 0 bậc, số cách nhảy còn lại là f(0).
 Vì vậy khi n>=2:
 f(n)=f(n-1)+f(n-2)+...+f(1)
 Vì f(n-1)=f(n-2)+f(n-3)+...+f(1)
-Nên f(n)=2\*f(n-1). Lại có f(1)=1, suy ra **f(n)=2^(number-1)**.
+Nên f(n)=2\*f(n-1). Lại có f(1)=1, suy ra **f(n)=2^(n-1)**.
 
 **Code ví dụ:**
 

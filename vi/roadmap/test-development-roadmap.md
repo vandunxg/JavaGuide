@@ -90,7 +90,7 @@ Phỏng vấn Test Development cũng sẽ hỏi computer science fundamentals, �
 
 Không cần học toàn bộ với độ sâu của kỳ thi cao học 408, nhưng phải giải thích rõ các nội dung sau:
 
-- Computer network: HTTP/HTTPS, TCP/UDP, three-way handshake và four-way wavehand, DNS, Cookie / Session / Token, các status code thường gặp, điều gì xảy ra sau khi nhập URL vào browser.
+- Computer network: HTTP/HTTPS, TCP/UDP, three-way handshake và four-way handshake, DNS, Cookie / Session / Token, các status code thường gặp, điều gì xảy ra sau khi nhập URL vào browser.
 - Operating system: process và thread, context switch, deadlock, memory management, I/O, Linux file permission và các command thường dùng.
 - Data structure và algorithm: array, linked list, stack, Queue, hash table, tree, heap, sorting, binary search, two pointers, DFS / BFS, nền tảng dynamic programming.
 - Basic system design awareness: cache, rate limiting, timeout, retry, log, monitoring, degradation.

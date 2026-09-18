@@ -325,7 +325,7 @@ Tìm `Entry` có giá trị `key` bằng nhau về phía sau từ node hiện t�
 
 Tìm `Entry` có giá trị `key` bằng nhau về phía sau từ node hiện tại `staleSlot`, dừng tìm khi `Entry` là `null`. Qua hình trên có thể thấy lúc này trong `table` không có `Entry` nào có cùng giá trị `key`.
 
-Tạo `Entry` mới và thay thế vị trí `table[stableSlot]`:
+Tạo `Entry` mới và thay thế vị trí `table[staleSlot]`:
 
 ![](./images/thread-local/16.png)
 
@@ -456,7 +456,7 @@ private void replaceStaleEntry(ThreadLocal<?> key, Object value,
 }
 ```
 
-`slotToExpunge` biểu thị index bắt đầu dọn dẹp thăm dò dữ liệu hết hạn, mặc định bắt đầu từ `staleSlot` hiện tại. Bắt đầu từ `staleSlot`, lặp về phía trước để tìm dữ liệu chưa hết hạn. Vòng lặp `for` chỉ kết thúc khi gặp `Entry` là `null`. Nếu tìm thấy dữ liệu hết hạn khi lặp về phía trước, cập nhật index bắt đầu dọn dẹp thăm dò thành i, tức `slotToExpunge=i`.
+`slotToExpunge` biểu thị index bắt đầu dọn dẹp thăm dò dữ liệu hết hạn, mặc định bắt đầu từ `staleSlot` hiện tại. Bắt đầu từ `staleSlot`, lặp về phía trước để tìm dữ liệu hết hạn khác. Vòng lặp `for` chỉ kết thúc khi gặp `Entry` là `null`. Nếu tìm thấy dữ liệu hết hạn khi lặp về phía trước, cập nhật index bắt đầu dọn dẹp thăm dò thành i, tức `slotToExpunge=i`.
 
 ```java
 for (int i = prevIndex(staleSlot, len);

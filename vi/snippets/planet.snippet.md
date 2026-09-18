@@ -1,6 +1,6 @@
 Cuốn [《Java Interview Guide》](../zhuanlan/java-mian-shi-zhi-bei.md) (dùng chung cho phỏng vấn backend) đã được mài giũa nhiều lần, chất lượng rất cao, nhằm giúp mọi ứng viên Java/backend tự tin đối mặt với thử thách phỏng vấn.
 
-**Nói bằng số liệu:** Tính đến hiện tại, chuyên mục đã đạt **477.1W** lượt đọc, **5,118** lượt thích, **1,657** bình luận tương tác. Đáng nói là khu bình luận không chỉ là nơi để lại lời nhắn mà còn là khu hỏi đáp — gần như mọi câu hỏi tôi đều trả lời tận tâm, đảm bảo không bỏ sót thắc mắc nào.
+**Nói bằng số liệu:** Tính đến hiện tại, chuyên mục đã đạt **4.771.000** lượt đọc, **5.118** lượt thích, **1.657** bình luận tương tác. Đáng nói là khu bình luận không chỉ là nơi để lại lời nhắn mà còn là khu hỏi đáp — gần như mọi câu hỏi tôi đều trả lời tận tâm, đảm bảo không bỏ sót thắc mắc nào.
 
 ![](https://oss.javaguide.cn/xingqiu/java-interview-guide-statistics-2025.png)
 
@@ -12,13 +12,13 @@ Dưới đây là một phần phản hồi thực tế của các thành viên 
 
 ![Phản hồi thực tế của một số thành viên về 《Java Interview Guide》](https://oss.javaguide.cn/xingqiu/praise-that-the-mianshizhibei-received.png)
 
-Nếu bạn cần hỗ trợ phỏng vấn (ví dụ tối ưu CV, hỏi đáp mô phỏng 1-1, tài liệu tủ các điểm thi tần suất cao), hoan nghênh tìm hiểu [Knowledge Planet](../about-the-author/zhishixingqiu-two-years.md) của tôi. Đã duy trì liên tục sáu năm, nội dung cập nhật thường xuyên, giá rẻ (0.4 tệ/ngày) nhưng chất lượng cao, dịch vụ cũng toàn diện.
+Nếu bạn cần hỗ trợ phỏng vấn (ví dụ tối ưu CV, hỏi đáp mô phỏng 1-1, tài liệu tủ các điểm thi tần suất cao), hoan nghênh tìm hiểu [Knowledge Planet](../about-the-author/zhishixingqiu-two-years.md) của tôi. Đã duy trì liên tục sáu năm, nội dung cập nhật thường xuyên, giá rẻ (0.4 tệ/ngày) nhưng chất lượng rất cao, dịch vụ cũng toàn diện và rất có tâm.
 
 Dưới đây là một phần dịch vụ mà Knowledge Planet cung cấp (nhấn vào ảnh bên dưới để xem giới thiệu chi tiết):
 
 [![Dịch vụ của Knowledge Planet](https://oss.javaguide.cn/xingqiu/xingqiufuwu.png)](../about-the-author/zhishixingqiu-two-years.md)
 
-Dưới đây là một phần đánh giá tốt nhận được trong năm nay, mỗi dòng đều là thật. Tôi thấy nhiều lớp đào tạo hoặc trung tâm bịa ra những đánh giá không tồn tại để lừa người khác mua dịch vụ giá cao (rất phổ biến trong ngành), thật khó hiểu.
+Dưới đây là một phần đánh giá tốt nhận được trong năm nay, mỗi đánh giá đều là thật. Tôi thấy nhiều lớp đào tạo hoặc trung tâm bịa ra những đánh giá không tồn tại để lừa người khác mua dịch vụ giá cao (rất phổ biến trong ngành), thật khó hiểu.
 
 ![Đánh giá thực tế của thành viên về Knowledge Planet](https://oss.javaguide.cn/xingqiu/praise-that-the-planet-received.png)
 

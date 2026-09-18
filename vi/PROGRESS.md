@@ -3,7 +3,7 @@
 > **Nguồn sự thật duy nhất** về trạng thái dịch. Agent/người nào tiếp tục công việc: **đọc file này đầu tiên**.
 > Luật dịch: [`../CLAUDE.md`](../CLAUDE.md) · Thuật ngữ: [`GLOSSARY.md`](GLOSSARY.md)
 
-**Nội dung**: 156/455 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
+**Nội dung**: 248/444 file · **Hạ tầng site**: xong · **Cập nhật**: 2026-09-18
 
 Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
@@ -11,7 +11,7 @@ Ký hiệu: `[ ]` chưa dịch · `[x]` xong · `[~]` đang dịch
 
 ## 🚦 BẮT ĐẦU TỪ ĐÂY
 
-**File tiếp theo cần dịch**: `cs-basics/data-structure/heap.md`
+**File tiếp theo cần dịch**: `database/mysql/mysql-questions-01.md`
 
 Xem toàn bộ việc còn lại: `make sync`
 
@@ -54,7 +54,7 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 - [x] `.vuepress/public/` — copy nguyên (logo, favicon, icon)
 - [x] `package.json` — **đã revert về nguyên bản** (zero-conflict, xem CLAUDE.md §9)
 - [x] `Makefile` — toàn bộ lệnh, thay cho npm scripts
-- [x] `i18n/lang-switch/` — nút chuyển ngôn ngữ 中文 | VI trên **cả hai** site
+- [x] `i18n/lang-switch/` — nút chuyển ngôn ngữ CN | VI trên **cả hai** site
 - [x] `i18n/cn.config.ts` — wrapper config, chèn nút vào site CN mà không sửa `docs/`
 - [x] `i18n/sync-check.mjs` — báo cáo file chưa dịch / gốc đã đổi sau khi pull
 
@@ -195,7 +195,7 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 
 ---
 
-## Giai đoạn 3 — CS basics · 60 file đã dịch
+## Giai đoạn 3 — CS basics · 68 file đã dịch
 
 ### Network
 
@@ -267,6 +267,40 @@ Chi tiết: [`../CLAUDE.md`](../CLAUDE.md) §8.
 - [x] `cs-basics/data-structure/linear-data-structure.md`
 - [x] `cs-basics/data-structure/hash-table.md`
 - [x] `cs-basics/data-structure/tree.md`
-- [ ] `cs-basics/data-structure/heap.md` — file tiếp theo
+- [x] `cs-basics/data-structure/heap.md`
+- [x] `cs-basics/data-structure/red-black-tree.md`
+- [x] `cs-basics/data-structure/skip-list.md`
+- [x] `cs-basics/data-structure/trie.md`
+- [x] `cs-basics/data-structure/union-find.md`
+- [x] `cs-basics/data-structure/bloom-filter.md`
+- [x] `cs-basics/data-structure/graph.md`
+- [x] `cs-basics/data-structure/lru-cache.md`
+
+---
+
+## Giai đoạn 4 — Database · 44 file đã dịch
+
+- [x] `database/README.md`, `database/basis.md`, `database/nosql.md`, `database/character-set.md`
+- [x] `database/mysql/` — 16 file đã dịch
+- [x] `database/redis/` — 13 file đã dịch
+- [x] `database/sql/` — 7 file đã dịch
+- [x] `database/mongodb/` — 3 file đã dịch
+- [x] `database/elasticsearch/elasticsearch-questions-01.md`
+- [ ] `database/mysql/mysql-questions-01.md` — file tiếp theo
+- [ ] `database/redis/3-commonly-used-cache-read-and-write-strategies.md`
+
+## Giai đoạn 5 — System design · 36 file đã dịch
+
+- [x] `system-design/` — 36 file đã dịch
+
+## Giai đoạn 6 — Distributed system · 12 file đã dịch
+
+- [x] `distributed-system/` — 12 file đã dịch
+
+### Kiểm định ngữ nghĩa
+
+- [x] Đối chiếu toàn bộ các file đã dịch trong roadmap, Java core, CS basics, Database, System design và Distributed system với file gốc.
+- [x] Sửa các lỗi sai nghĩa, thiếu ý, thêm ý, sai công thức, sai thuật ngữ, sai URL và sai ngữ cảnh đã phát hiện.
+- [x] `make vi-build` — thành công sau kiểm định.
 
 Thứ tự tiếp theo: `cs-basics/` → `database/` → `system-design/` → `distributed-system/` + `high-performance/` + `high-availability/` → `ai/`, `ai-coding/`, `tools/`, còn lại.

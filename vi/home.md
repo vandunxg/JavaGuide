@@ -34,7 +34,7 @@ Toàn bộ nội dung website đã được mã nguồn mở miễn phí, hoan n
 - [⭐ Kế hoạch vượt qua phỏng vấn Java backend (bao phủ hệ thống backend chung)](./interview-preparation/backend-interview-plan.md) (nhất định phải xem :+1:)
 - [Chuẩn bị phỏng vấn Java hiệu quả thế nào?](./interview-preparation/teach-you-how-to-prepare-for-the-interview-hand-in-hand.md)
 - [Tổng hợp trọng điểm phỏng vấn Java backend](./interview-preparation/key-points-of-interview.md)
-- [Lộ trình học Java (bản mới nhất, 4w+ chữ)](./interview-preparation/java-roadmap.md)
+- [Lộ trình học Java (bản mới nhất, hơn 40.000 chữ)](./interview-preparation/java-roadmap.md)
 - [Hướng dẫn viết CV cho lập trình viên](./interview-preparation/resume-guide.md)
 - [Hướng dẫn về kinh nghiệm project](./interview-preparation/project-experience-guide.md)
 - [Phỏng vấn quá căng thẳng thì làm sao?](./interview-preparation/how-to-handle-interview-nerves.md)
@@ -395,7 +395,7 @@ Triển khai nhiều bản của cùng một service, tránh single point of fai
 
 ### Thiết kế disaster recovery và multi-active đa vùng
 
-**Disaster recovery** = chống thảm họa + backup.
+**Disaster recovery** = khắc phục thảm họa + backup.
 
 - **Backup**: sao lưu thêm nhiều bản cho toàn bộ dữ liệu quan trọng mà hệ thống sinh ra.
 - **Chống thảm họa**: xây dựng hai hệ thống hoàn toàn giống nhau ở hai vùng địa lý khác nhau. Khi hệ thống ở một nơi đột ngột chết, toàn bộ ứng dụng có thể chuyển sang nơi còn lại, nhờ đó hệ thống vẫn cung cấp dịch vụ bình thường.

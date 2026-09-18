@@ -427,7 +427,7 @@ public final boolean hasQueuedPredecessors() {
 
 Đến đây, hãy hiểu vì sao h != t && ((s = h.next) == null || s.thread != Thread.currentThread()); phải kiểm tra node sau head. Data được lưu trong node đầu tiên là gì?
 
-> Trong doubly linked list, node đầu tiên là virtual node, thực ra không lưu thông tin nào mà chỉ dùng để giữ chỗ. Node đầu tiên thực sự có data bắt đầu từ node thứ hai. Khi h != t: nếu (s = h.next) == null, wait queue đang được thread initialize nhưng mới chỉ thực hiện đến bước Tail trỏ đến Head, chưa cho Head trỏ đến Tail; lúc này queue có element nên cần trả về True (chi tiết xem phần phân tích code bên dưới). Nếu (s = h.next) != null, cho biết lúc này queue có ít nhất một valid node. Nếu s.thread == Thread.currentThread(), cho biết thread trong valid node đầu tiên của wait queue giống thread hiện tại, nên thread hiện tại có thể acquire resource; nếu s.thread != Thread.currentThread(), cho biết thread trong valid node đầu tiên của wait queue khác thread hiện tại, thread hiện tại phải tham gia wait queue.
+> Trong doubly linked list, node đầu tiên là virtual node, thực ra không lưu thông tin nào mà chỉ dùng để giữ chỗ. Node đầu tiên thực sự có data bắt đầu từ node thứ hai. Khi h != t: nếu (s = h.next) == null, wait queue đang được thread initialize nhưng mới chỉ thực hiện đến bước Tail trỏ đến node cuối, còn Head chưa trỏ đến Tail; lúc này queue có element nên cần trả về True (chi tiết xem phần phân tích code bên dưới). Nếu (s = h.next) != null, cho biết lúc này queue có ít nhất một valid node. Nếu s.thread == Thread.currentThread(), cho biết thread trong valid node đầu tiên của wait queue giống thread hiện tại, nên thread hiện tại có thể acquire resource; nếu s.thread != Thread.currentThread(), cho biết thread trong valid node đầu tiên của wait queue khác thread hiện tại, thread hiện tại phải tham gia wait queue.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer#enq
@@ -444,7 +444,7 @@ if (t == null) { // Must initialize
 }
 ```
 
-Node enqueue không phải atomic operation nên có thể xuất hiện trạng thái head != tail trong thời gian ngắn; lúc này Tail trỏ đến node cuối cùng, còn Tail trỏ đến Head. Nếu Head chưa trỏ đến Tail (có thể thấy ở dòng 5, 6, 7), thì trong trường hợp này cũng cần thêm thread tương ứng vào queue. Vì vậy đoạn code này dùng để giải quyết vấn đề concurrency trong trường hợp cực đoan.
+Node enqueue không phải atomic operation nên có thể xuất hiện trạng thái head != tail trong thời gian ngắn; lúc này Tail trỏ đến node cuối cùng, còn Head chưa trỏ đến Tail. Nếu Head chưa trỏ đến Tail (có thể thấy ở dòng 5, 6, 7), thì trong trường hợp này cũng cần thêm thread tương ứng vào queue. Vì vậy đoạn code này dùng để giải quyết vấn đề concurrency trong trường hợp cực đoan.
 
 #### 3.1.3 Thời điểm thread trong wait queue dequeue
 
@@ -844,7 +844,7 @@ Method này thực ra dùng để interrupt thread. Nhưng vì sao sau khi lấy
 1. Khi thread bị interrupt được wakeup, không biết nguyên nhân wakeup là gì: có thể thread hiện tại bị interrupt trong lúc waiting, cũng có thể được wakeup sau khi lock được release. Vì vậy dùng method Thread.interrupted() để kiểm tra interrupt flag (method này trả về interrupt status của thread hiện tại và set interrupt flag của thread hiện tại thành False), ghi nhận lại; nếu phát hiện thread đã từng bị interrupt thì interrupt thêm một lần nữa.
 2. Thread được wakeup trong quá trình waiting resource vẫn sẽ liên tục thử lấy lock sau khi wakeup, cho đến khi tranh được lock. Nói cách khác, trong toàn bộ flow, thread không phản hồi interrupt mà chỉ ghi nhận interrupt. Cuối cùng khi lấy lock thành công và return, nếu thread từng bị interrupt thì cần bổ sung thêm một lần interrupt.
 
-Cách xử lý này chủ yếu sử dụng `runWorker` trong Worder, đơn vị vận hành cơ bản trong thread pool, để kiểm tra và xử lý bổ sung thông qua `Thread.interrupted()`. Nếu quan tâm, bạn có thể xem source code của ThreadPoolExecutor.
+Cách xử lý này chủ yếu sử dụng `runWorker` trong `Worker`, đơn vị vận hành cơ bản trong thread pool, để kiểm tra và xử lý bổ sung thông qua `Thread.interrupted()`. Nếu quan tâm, bạn có thể xem source code của ThreadPoolExecutor.
 
 ### 3.5 Tóm tắt
 

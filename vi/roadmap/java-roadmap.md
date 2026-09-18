@@ -10,7 +10,7 @@ head:
 
 Đây là bản mới nhất 2026 của lộ trình học Java, mỗi năm đều được tối ưu và cải tiến toàn diện theo yêu cầu tuyển dụng Java backend mới nhất.
 
-Bài viết này có thể là lộ trình học Java backend tâm huyết và đầy đủ nhất bạn từng thấy, tổng cộng hơn 4w chữ. Tuy nhiên đừng lo nội dung quá nhiều không học nổi, tôi sẽ chia theo độ khó: phần bắt buộc phải học để tìm được việc ở công ty nhỏ, và lộ trình nâng dần năng lực Java backend một cách tuần tự.
+Bài viết này có thể là lộ trình học Java backend tâm huyết và đầy đủ nhất bạn từng thấy, tổng cộng hơn 40.000 chữ. Tuy nhiên đừng lo nội dung quá nhiều không học nổi, tôi sẽ chia theo độ khó: phần bắt buộc phải học để tìm được việc ở công ty nhỏ, và lộ trình nâng dần năng lực Java backend một cách tuần tự.
 
 Với người mới, bạn có thể học có hệ thống theo lộ trình và tài liệu mà bài viết này gợi ý; với developer đã có kinh nghiệm, bạn có thể dựa vào bài viết này để đào sâu hơn về Java backend, nâng cao năng lực cạnh tranh cá nhân.
 

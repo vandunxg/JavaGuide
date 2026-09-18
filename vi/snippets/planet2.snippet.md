@@ -10,7 +10,7 @@ Dưới đây là một phần dịch vụ mà Knowledge Planet cung cấp (nh�
 
 [![Dịch vụ của Knowledge Planet](https://oss.javaguide.cn/xingqiu/xingqiufuwu.png)](../about-the-author/zhishixingqiu-two-years.md)
 
-Dưới đây là một phần đánh giá tốt nhận được trong năm nay, mỗi dòng đều là thật. Tôi thấy nhiều lớp đào tạo hoặc trung tâm bịa ra những đánh giá không tồn tại để lừa người khác mua dịch vụ giá cao (rất phổ biến trong ngành), thật khó hiểu.
+Dưới đây là một phần đánh giá tốt nhận được trong năm nay, mỗi đánh giá đều là thật. Tôi thấy nhiều lớp đào tạo hoặc trung tâm bịa ra những đánh giá không tồn tại để lừa người khác mua dịch vụ giá cao (rất phổ biến trong ngành), thật khó hiểu.
 
 ![Đánh giá thực tế của thành viên về Knowledge Planet](https://oss.javaguide.cn/xingqiu/praise-that-the-planet-received.png)
 

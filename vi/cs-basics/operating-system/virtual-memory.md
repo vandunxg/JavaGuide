@@ -148,7 +148,7 @@ Khi cần address space lớn hơn, x86-64 cung cấp five-level paging (LA57), 
 
 Multi-level page table tiết kiệm không gian nhưng tốn thêm thời gian: trước đây chỉ cần tra một table, còn trên 64-bit có thể phải tra bốn cấp. Nếu phía sau một lần memory access còn ẩn năm lần hoặc bốn lần tra table và truy cập memory, chi phí sẽ quá cao.
 
-Một lần nữa, nguyên lý locality giúp giải quyết vấn đề. Các page mà chương trình lặp đi lặp lại truy cập trong một khoảng thời gian thường chỉ là vài nhóm. Vậy hãy cache những page table entry thường dùng nhất vào hardware nhanh hơn memory rất nhiều. Cache này là TLB (Translation Lookaside Buffer), tiếng Việt thường gọi là fast table hoặc translation bypass cache, được đóng gói trong MMU của CPU.
+Một lần nữa, nguyên lý locality giúp giải quyết vấn đề. Các page mà chương trình lặp đi lặp lại truy cập trong một khoảng thời gian thường chỉ là vài nhóm. Vậy hãy cache những page table entry thường dùng nhất vào hardware nhanh hơn memory rất nhiều. Cache này là TLB (Translation Lookaside Buffer), trong tiếng Trung thường gọi là “bảng nhanh” hoặc “bộ đệm chuyển đổi địa chỉ”, được đóng gói trong MMU của CPU.
 
 Có TLB, khi CPU address trước tiên sẽ tra TLB:
 

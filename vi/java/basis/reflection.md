@@ -154,10 +154,10 @@ public class Main {
         publicMethod.invoke(targetObject, "JavaGuide");
 
         /**
-         * Lấy parameter được chỉ định và sửa parameter
+         * Lấy field được chỉ định và sửa field
          */
         Field field = targetClass.getDeclaredField("value");
-        // Hủy kiểm tra an toàn để sửa parameter trong class
+        // Hủy kiểm tra an toàn để sửa field trong class
         field.setAccessible(true);
         field.set(targetObject, "JavaGuide");
 

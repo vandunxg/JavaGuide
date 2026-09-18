@@ -516,7 +516,7 @@ Logic kiểm tra trong method `shouldParkAfterFailedAcquire()`:
 - Nếu phát hiện trạng thái predecessor là `CANCELLED`, cần bỏ qua node ở trạng thái `CANCELLED`.
 - Nếu phát hiện trạng thái predecessor không phải `SIGNAL` và cũng không phải `CANCELLED`, chứng tỏ predecessor đang ở trạng thái waiting resource bình thường, nên đặt trạng thái predecessor thành `SIGNAL`, biểu thị predecessor cần wake-up successor.
 
-Sau khi xác định thread hiện tại có thể block, gọi method `parkAndCheckInterrupt()` để block thread hiện tại. Bên trong sử dụng `LockSupport` để triển khai blocking. Tầng dưới của `LockSupoprt` dựa trên class `Unsafe` để block thread, code như sau:
+Sau khi xác định thread hiện tại có thể block, gọi method `parkAndCheckInterrupt()` để block thread hiện tại. Bên trong sử dụng `LockSupport` để triển khai blocking. Tầng dưới của `LockSupport` dựa trên class `Unsafe` để block thread, code như sau:
 
 ```JAVA
 // AQS
@@ -1462,7 +1462,7 @@ protected final boolean tryReleaseShared(int releases) {
 }
 ```
 
-Có thể thấy các method đã đề cập ở trên về cơ bản đều được triển khai thông qua synchronizer `sync`. `Sync` là inner class của `CountDownLatch`, kế thừa `AbstractQueuedSynchronizer` và override một số method trong đó. Ngoài ra, `Sync` còn có hai subclass là `NonfairSync` (tương ứng non-fair mode) và `FairSync` (tương ứng fair mode).
+Có thể thấy các method đã đề cập ở trên về cơ bản đều được triển khai thông qua synchronizer `sync`. `Sync` là inner class của `Semaphore`, kế thừa `AbstractQueuedSynchronizer` và override một số method trong đó. Ngoài ra, `Sync` còn có hai subclass là `NonfairSync` (tương ứng non-fair mode) và `FairSync` (tương ứng fair mode).
 
 ```java
 private static final class Sync extends AbstractQueuedSynchronizer {

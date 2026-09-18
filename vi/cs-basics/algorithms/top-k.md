@@ -169,7 +169,7 @@ PriorityQueue<Integer> heap = new PriorityQueue<>((a, b) -> Integer.compare(b, a
 
 ## Bài tập đề xuất
 
-- [215. Phần tử lớn nhất thứ K trong array](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
+- [215. Phần tử lớn thứ K trong array](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
 - [347. K phần tử có tần suất cao nhất](https://leetcode.cn/problems/top-k-frequent-elements/)
 - [692. K từ có tần suất cao nhất](https://leetcode.cn/problems/top-k-frequent-words/)
 - [703. Phần tử lớn thứ K trong data stream](https://leetcode.cn/problems/kth-largest-element-in-a-stream/)

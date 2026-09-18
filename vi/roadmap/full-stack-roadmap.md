@@ -8,7 +8,7 @@ head:
       content: lộ trình học full-stack,lộ trình học full-stack 2026,backend chuyển sang full-stack,full-stack thời đại AI,gợi ý học frontend,frontend cho backend developer,AI coding,Java full-stack,Vue3,React,tách frontend và backend
 ---
 
-Đây là phiên bản mới nhất 2026 của lộ trình học full-stack dành cho backend developer. Trên trang thường có người hỏi tôi:
+Đây là phiên bản mới nhất 2026 của lộ trình học full-stack dành cho backend developer. Trong phần tin nhắn của tài khoản công khai thường có người hỏi tôi:
 
 > Backend có nên học frontend không?
 >
@@ -190,7 +190,7 @@ Bài luyện tập tối thiểu có thể làm như sau:
 - Deploy backend bằng Docker hoặc systemd.
 - Deploy database riêng và chuẩn bị initialization SQL.
 - Cấu hình HTTPS.
-- Viết một GitHub Actions hoặc cloud pipeline đơn giản nhất để hoàn tất bundling và deployment.
+- Viết một GitHub Actions hoặc pipeline Yunxiao đơn giản nhất để hoàn tất bundling và deployment.
 
 Test cũng không cần ngay từ đầu theo đuổi độ bao phủ quá đầy đủ. Trước hết hãy viết unit test cho API quan trọng của backend; frontend ít nhất bổ sung checklist manual test cho một số page quan trọng: query, phân trang, thêm mới, edit, xóa, không có permission, API thất bại.
 

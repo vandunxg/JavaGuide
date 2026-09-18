@@ -109,7 +109,7 @@ Nhìn chung, các chức năng do lớp `Unsafe` triển khai có thể được
 1. Thao tác memory
 2. Memory barrier
 3. Thao tác object
-4. Thao tác array
+4. Thao tác data
 5. Thao tác CAS
 6. Điều phối thread
 7. Thao tác Class

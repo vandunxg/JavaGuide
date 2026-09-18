@@ -114,7 +114,7 @@ public class ProducerConsumerExample {
 }
 ```
 
-Kết quả output của code như sau. Có thể thấy chỉ sau khi producer đưa phần tử vào queue thì consumer mới có thể tiêu thụ. Điều đó có nghĩa là khi queue không có dữ liệu, consumer sẽ bị block và chờ queue khác rỗng rồi mới tiếp tục tiêu thụ.
+Kết quả output của code như sau. Có thể thấy chỉ sau khi producer đưa phần tử vào queue thì consumer mới có thể tiêu thụ. Điều đó có nghĩa là khi queue không có dữ liệu, consumer sẽ bị block và chờ queue không rỗng rồi mới tiếp tục tiêu thụ.
 
 ```cpp
 Producer thêm phần tử: 1
@@ -372,7 +372,7 @@ public ArrayBlockingQueue(int capacity, boolean fair,
       } catch (ArrayIndexOutOfBoundsException ex) {
           throw new IllegalArgumentException();
       }
-      // Ghi lại capacity hiện tại của queue
+      // Ghi lại số phần tử hiện tại của queue
       count = i;
                       // Cập nhật vị trí tiếp theo mà method put, offer hoặc add sẽ thêm vào array bên dưới của queue
       putIndex = (i == capacity) ? 0 : i;

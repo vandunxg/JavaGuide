@@ -189,7 +189,7 @@ Go developer có thể quan tâm [LangChainGo](https://github.com/tmc/langchaing
 
 Khi thực hành có thể theo thứ tự: trước hết làm non-streaming call, sau đó làm stream output, rồi kết nối Function Calling, cuối cùng bổ sung exception injection test.
 
-Bước cuối cùng đừng bỏ qua. Chủ động mô phỏng API timeout, JSON truncation và network blocking để xem retry, degradation và user prompt có hoạt động bình thường không. Củng cố phần này càng sớm, về sau khi thêm RAG và Agent càng tiết kiệm công sức điều tra vấn đề.
+Bước cuối cùng đừng bỏ qua. Chủ động mô phỏng API timeout, JSON truncation và network blocking để xem retry, degradation và thông báo cho người dùng có hoạt động bình thường không. Củng cố phần này càng sớm, về sau khi thêm RAG và Agent càng tiết kiệm công sức điều tra vấn đề.
 
 ## Giai đoạn 2: Prompt Engineering (1~2 tuần)
 
@@ -301,7 +301,7 @@ Chunking cũng đừng chỉ dùng fixed character count. Fixed length tiện nh
 
 Nếu data volume lớn, có thể dùng Spring Batch để orchestration toàn bộ document cleaning và vectorization workflow, tạo một offline pipeline throughput cao.
 
-Một blind spot thường gặp khác: retrieval vector trước rồi mới filter permission. Giả sử vector database trả về Top-10, trong đó 8 dòng user không có quyền, sau filtering chỉ còn 2 dòng, hệ thống sẽ lầm tưởng “chỉ recall được 2 nội dung liên quan”. Có thể pre-filter thì hãy pre-filter, trước tiên dùng Metadata (như `tenant_id`, document type, version range, update time) để thu hẹp phạm vi, sau đó mới vector hoặc hybrid retrieval.
+Một blind spot thường gặp khác: retrieval vector trước rồi mới filter permission. Giả sử vector database trả về Top-10, trong đó 8 mục user không có quyền, sau filtering chỉ còn 2 mục, hệ thống sẽ lầm tưởng “chỉ recall được 2 nội dung liên quan”. Có thể pre-filter thì hãy pre-filter, trước tiên dùng Metadata (như `tenant_id`, document type, version range, update time) để thu hẹp phạm vi, sau đó mới vector hoặc hybrid retrieval.
 
 ### Vector retrieval: core engine của RAG
 
@@ -632,7 +632,7 @@ Một vài cái bẫy, chỉ cần gặp một lần là nhớ:
 
 | Bẫy                             | Biểu hiện                                               | Giải pháp                                                             |
 | ------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------- |
-| Thread pool avalanche           | LLM response chậm, làm Tomcat treo                      | SseEmitter / WebFlux + async thread pool                              |
+| Thread pool cạn kiệt            | LLM response chậm, làm Tomcat treo                      | SseEmitter / WebFlux + async thread pool                              |
 | Transaction anti-pattern        | Gọi LLM trong `@Transactional`, làm cạn connection pool | Đặt LLM call bên ngoài transaction                                    |
 | Cost mất kiểm soát              | Agent loop khiến billing bùng nổ                        | Token consumption monitoring + threshold alert                        |
 | Hallucination                   | LLM output không phù hợp fact                           | Retrieval evidence bằng RAG, khi cần thêm knowledge graph để validate |

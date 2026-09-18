@@ -187,7 +187,7 @@ Trong binary search trên đáp án, hàm `check` thường quan trọng hơn b�
 | ---------------------------------- | ------------------------- | ----------------------------------------------------- |
 | Tìm index bằng `target`            | Binary search cơ bản      | Tìm thấy thì trả về index, không tìm thấy trả về `-1` |
 | Tìm vị trí đầu tiên thỏa điều kiện | Biên trái                 | Trả về `left`, có thể bằng độ dài array               |
-| Tìm đáp án khả thi nhỏ nhất        | Binary search trên đáp án | Trả về `left` cuối cùng                               |
+| Tìm đáp án khả thi nhỏ nhất        | Binary search trên đáp án | Trả về giá trị `left` sau cùng                        |
 
 Nếu đề bài có các từ “đầu tiên”, “cuối cùng”, “khả thi nhỏ nhất”, “khả thi lớn nhất”, đừng vội viết binary search cơ bản; trước tiên hãy xác định xem đó có phải bài toán biên hay không.
 

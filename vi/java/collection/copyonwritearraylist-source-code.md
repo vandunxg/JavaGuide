@@ -12,9 +12,9 @@ head:
 
 ## Giới thiệu về CopyOnWriteArrayList
 
-Trước JDK1.5, nếu muốn sử dụng `List` an toàn trong môi trường concurrent, bạn có thể chọn `Vector` hoặc synchronized wrapper được trả về bởi `Collections.synchronizedList()`. `Vector` là một collection cũ và đã bị loại bỏ. Hầu hết các method như thêm, xóa, sửa và tìm kiếm của `Vector` đều được thêm `synchronized`. Cách này tuy có thể đảm bảo synchronization, nhưng tương đương với việc đặt một big lock lên toàn bộ `Vector`, khiến mỗi method khi thực thi đều phải lấy lock và dẫn đến performance rất thấp.
+Trước JDK1.5, nếu muốn sử dụng `List` an toàn trong môi trường concurrent, bạn có thể chọn `Vector` hoặc synchronized wrapper được trả về bởi `Collections.synchronizedList()`. `Vector` là một collection cũ và đã lỗi thời. Hầu hết các method như thêm, xóa, sửa và tìm kiếm của `Vector` đều được thêm `synchronized`. Cách này tuy có thể đảm bảo synchronization, nhưng tương đương với việc đặt một big lock lên toàn bộ `Vector`, khiến mỗi method khi thực thi đều phải lấy lock và dẫn đến performance rất thấp.
 
-JDK1.5 giới thiệu package `Java.util.concurrent` (JUC), cung cấp nhiều container thread-safe có performance concurrent tốt. Trong đó, implementation `List` thread-safe duy nhất là `CopyOnWriteArrayList`. Về phần tổng hợp các concurrent container thường gặp trong package `java.util.concurrent`, bạn có thể xem bài viết này: [Tổng hợp các concurrent container thường gặp trong Java](https://javaguide.cn/java/concurrent/java-concurrent-collections.html).
+JDK1.5 giới thiệu package `java.util.concurrent` (JUC), cung cấp nhiều container thread-safe có performance concurrent tốt. Trong đó, implementation `List` thread-safe duy nhất là `CopyOnWriteArrayList`. Về phần tổng hợp các concurrent container thường gặp trong package `java.util.concurrent`, bạn có thể xem bài viết này: [Tổng hợp các concurrent container thường gặp trong Java](https://javaguide.cn/java/concurrent/java-concurrent-collections.html).
 
 ### CopyOnWriteArrayList có gì đặc biệt?
 

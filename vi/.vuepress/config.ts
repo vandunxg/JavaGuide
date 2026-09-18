@@ -87,7 +87,7 @@ export default defineUserConfig({
     "!node_modules",
   ],
 
-  // Nút chuyển ngôn ngữ 中文 | VI (dùng chung với site gốc, xem i18n/)
+  // Nút chuyển ngôn ngữ CN | VI (dùng chung với site gốc, xem i18n/)
   plugins: [langSwitchPlugin({ site: "vi", viRoutes: [] })],
 
   shouldPrefetch: false,

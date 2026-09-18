@@ -351,6 +351,7 @@ Khi troubleshooting có thể xem các metric sau:
 ```bash
 free -h
 vmstat 1
+grep -E 'pgfault|pgmajfault|pswpin|pswpout|pgscan|pgsteal' /proc/vmstat
 cat /proc/pressure/memory
 ```
 
@@ -681,7 +682,7 @@ SSD và NVMe device không có mechanical seek, không thể trực tiếp áp d
 ## References
 
 - 《Operating System》 — Tang Xiaodan, edition 4
-- 《Understanding the Linux Kernel》
+- 《Hiểu sâu về hệ thống máy tính》
 - 《Relearning Operating System》
 - 《Principles and Implementation of Modern Operating Systems》
 - Tổng hợp kiến thức Operating System cho kỳ thi nghiên cứu sinh Wangdao: <https://wizardforcel.gitbooks.io/wangdaokaoyan-os/content/13.html>

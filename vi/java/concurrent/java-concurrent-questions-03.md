@@ -82,7 +82,7 @@ ThreadLocalMap getMap(Thread t) {
 }
 ```
 
-Từ những nội dung trên, có thể suy ra: **cuối cùng, value được đặt trong `ThreadLocalMap` của thread hiện tại, không được lưu trên `ThreadLocal`; có thể hiểu `ThreadLocal` chỉ là lớp bọc của `ThreadLocalMap`, truyền value vào đó.** Class `ThrealLocal` có thể lấy object thread hiện tại bằng `Thread.currentThread()`, sau đó truy cập trực tiếp object `ThreadLocalMap` của thread đó thông qua `getMap(Thread t)`.
+Từ những nội dung trên, có thể suy ra: **cuối cùng, value được đặt trong `ThreadLocalMap` của thread hiện tại, không được lưu trên `ThreadLocal`; có thể hiểu `ThreadLocal` chỉ là lớp bọc của `ThreadLocalMap`, truyền value vào đó.** Class `ThreadLocal` có thể lấy object thread hiện tại bằng `Thread.currentThread()`, sau đó truy cập trực tiếp object `ThreadLocalMap` của thread đó thông qua `getMap(Thread t)`.
 
 **Mỗi `Thread` đều có một `ThreadLocalMap`, còn `ThreadLocalMap` có thể lưu cặp key-value với `ThreadLocal` làm key và object `Object` làm value.**
 
