@@ -12,7 +12,7 @@ head:
 
 ## Giới thiệu về ArrayList
 
-Bên trong `ArrayList` là một array queue, tương đương với dynamic array. So với array trong Java, capacity của nó có thể tăng động. Trước khi thêm nhiều phần tử, application có thể dùng thao tác `ensureCapacity` để tăng capacity của instance `ArrayList`. Điều này có thể giảm số lần reallocation tăng dần.
+Bên trong `ArrayList` là một array, tương đương với dynamic array. So với array thông thường trong Java, capacity của nó có thể tăng động. Trước khi thêm nhiều phần tử, application có thể dùng `ensureCapacity` để tăng capacity của instance `ArrayList`. Điều này giúp giảm số lần reallocation khi tăng dần.
 
 `ArrayList` kế thừa `AbstractList`, đồng thời implement các interface `List`, `RandomAccess`, `Cloneable`, `java.io.Serializable`.
 
@@ -25,7 +25,7 @@ public class ArrayList<E> extends AbstractList<E>
 ```
 
 - `List`: cho biết đây là một list, hỗ trợ các thao tác thêm, xóa, tìm kiếm... và có thể truy cập bằng index.
-- `RandomAccess`: đây là một marker interface, cho biết `List` collection implement interface này hỗ trợ **truy cập ngẫu nhiên nhanh**. Trong `ArrayList`, ta có thể nhanh chóng lấy object phần tử thông qua số thứ tự của phần tử, đây chính là truy cập ngẫu nhiên nhanh.
+- `RandomAccess`: đây là một marker interface, cho biết các `List` implement interface này hỗ trợ **truy cập ngẫu nhiên nhanh**. Trong `ArrayList`, ta có thể nhanh chóng lấy object tương ứng thông qua index phần tử, đây chính là truy cập ngẫu nhiên nhanh.
 - `Cloneable`: cho biết nó hỗ trợ copy thông qua method `clone()`, `ArrayList#clone()` trả về shallow copy.
 - `Serializable`: cho biết nó có thể thực hiện serialization, tức là chuyển object thành byte stream để lưu trữ lâu dài hoặc truyền qua network, rất thuận tiện.
 
@@ -58,12 +58,12 @@ Output:
 ### Khác biệt giữa ArrayList và LinkedList?
 
 - **Có đảm bảo thread-safe hay không:** `ArrayList` và `LinkedList` đều không synchronized, tức là không đảm bảo thread-safe;
-- **Data structure bên trong:** bên trong `ArrayList` dùng **array `Object`**; bên trong `LinkedList` dùng data structure **doubly linked list** (trước JDK1.6 là circular linked list, JDK1.7 đã bỏ tính circular. Hãy chú ý sự khác biệt giữa doubly linked list và doubly circular linked list, phần dưới sẽ giới thiệu cụ thể!);
+- **Data structure bên trong:** bên trong `ArrayList` dùng **array `Object[]`**; bên trong `LinkedList` dùng data structure **doubly linked list** (trước JDK1.6 là circular linked list, JDK1.7 đã bỏ tính circular. Hãy chú ý sự khác biệt giữa doubly linked list và doubly circular linked list, phần dưới sẽ giới thiệu cụ thể!);
 - **Việc insert và delete có bị ảnh hưởng bởi vị trí phần tử hay không:**
-  - `ArrayList` dùng array để lưu trữ, nên time complexity của việc insert và delete phần tử phụ thuộc vào vị trí phần tử. Ví dụ: khi thực thi method `add(E e)`, `ArrayList` mặc định append phần tử được chỉ định vào cuối list, trường hợp này có time complexity là O(1). Nhưng nếu insert và delete phần tử tại vị trí `i` đã chỉ định (`add(int index, E element)`), time complexity là O(n). Vì khi thực hiện các thao tác trên, phần tử thứ `i` và `(n-i)` phần tử sau phần tử thứ `i` trong collection đều phải dịch về sau hoặc về trước một vị trí.
+  - `ArrayList` dùng array để lưu trữ, nên time complexity của việc insert và delete phần tử phụ thuộc vào vị trí phần tử. Ví dụ: khi thực thi method `add(E e)`, `ArrayList` mặc định append phần tử được chỉ định vào cuối list, trường hợp này có time complexity là O(1). Nhưng nếu insert và delete phần tử tại vị trí `i` đã chỉ định (`add(int index, E element)`), time complexity là O(n). Vì khi thực hiện các thao tác trên, phần tử tại `i` cùng `(n-i)` phần tử đứng sau nó trong collection đều phải dịch về sau hoặc về trước một vị trí.
   - `LinkedList` dùng linked list để lưu trữ, nên việc insert hoặc delete phần tử ở đầu hay cuối không bị ảnh hưởng bởi vị trí phần tử (`add(E e)`, `addFirst(E e)`, `addLast(E e)`, `removeFirst()`, `removeLast()`), time complexity là O(1). Nếu insert và delete phần tử tại vị trí `i` đã chỉ định (`add(int index, E element)`, `remove(Object o)`, `remove(int index)`), time complexity là O(n), vì cần di chuyển đến vị trí đã chỉ định trước rồi mới insert và delete.
 - **Có hỗ trợ truy cập ngẫu nhiên nhanh hay không:** `LinkedList` không hỗ trợ truy cập phần tử ngẫu nhiên hiệu quả, còn `ArrayList` (implement interface `RandomAccess`) thì có. Truy cập ngẫu nhiên nhanh là nhanh chóng lấy object phần tử thông qua số thứ tự của phần tử (tương ứng với method `get(int index)`).
-- **Mức sử dụng memory:** phần memory bị lãng phí của `ArrayList` chủ yếu nằm ở việc cuối list sẽ dự phòng một phần capacity nhất định, còn chi phí memory của `LinkedList` nằm ở việc mỗi phần tử cần nhiều memory hơn `ArrayList` (vì phải lưu direct successor, direct predecessor và data).
+- **Mức sử dụng memory:** phần memory bị lãng phí của `ArrayList` chủ yếu nằm ở việc cuối list dự phòng một phần capacity nhất định, còn chi phí memory của `LinkedList` nằm ở việc mỗi phần tử cần nhiều memory hơn `ArrayList` (vì phải lưu direct successor, direct predecessor và data).
 
 ## Đọc source code cốt lõi của ArrayList
 
@@ -75,16 +75,16 @@ public class ArrayList<E> extends AbstractList<E>
     private static final long serialVersionUID = 8683452581122892189L;
 
     /**
-     * Kích thước capacity mặc định ban đầu
+     * Capacity mặc định ban đầu
      */
     private static final int DEFAULT_CAPACITY = 10;
 
     /**
-     * Empty array (dùng cho empty instance).
+     * Array rỗng (dùng cho empty instance).
      */
     private static final Object[] EMPTY_ELEMENTDATA = {};
 
-    // Shared empty array instance dùng cho empty instance có kích thước mặc định.
+    // Shared empty array instance dùng cho empty instance có capacity mặc định.
     // Tách nó khỏi array EMPTY_ELEMENTDATA để biết cần tăng capacity bao nhiêu khi thêm phần tử đầu tiên.
     private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
 
@@ -99,7 +99,7 @@ public class ArrayList<E> extends AbstractList<E>
     private int size;
 
     /**
-     * Constructor có tham số capacity ban đầu (user có thể tự chỉ định kích thước ban đầu của collection khi tạo object ArrayList)
+     * Constructor có tham số capacity ban đầu (cho phép tự chỉ định kích thước ban đầu của collection khi tạo object ArrayList)
      */
     public ArrayList(int initialCapacity) {
         if (initialCapacity > 0) {
@@ -117,7 +117,7 @@ public class ArrayList<E> extends AbstractList<E>
 
     /**
      * Constructor không tham số mặc định
-     * DEFAULTCAPACITY_EMPTY_ELEMENTDATA được khởi tạo là 0, capacity ban đầu thực tế là empty array; khi thêm phần tử đầu tiên thì array mới trở thành 10
+      * DEFAULTCAPACITY_EMPTY_ELEMENTDATA có length bằng 0; capacity ban đầu thực tế là empty array, khi thêm phần tử đầu tiên thì array mới có capacity 10
      */
     public ArrayList() {
         this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
@@ -153,7 +153,7 @@ public class ArrayList<E> extends AbstractList<E>
         }
     }
 // Dưới đây là cơ chế mở rộng của ArrayList
-// Cơ chế mở rộng của ArrayList cải thiện performance; nếu mỗi lần chỉ mở rộng một phần tử,
+// Cơ chế mở rộng của ArrayList cải thiện performance; nếu mỗi lần chỉ tăng một phần tử,
 // việc insert thường xuyên sẽ dẫn đến copy thường xuyên, làm giảm performance, còn cơ chế mở rộng của ArrayList tránh được tình huống này.
 
     /**
@@ -170,7 +170,7 @@ public class ArrayList<E> extends AbstractList<E>
                 // Nếu là empty array mặc định thì nó phải đã có kích thước mặc định
                 : DEFAULT_CAPACITY;
 
-        // Nếu capacity tối thiểu lớn hơn capacity tối đa hiện có
+        // Nếu capacity tối thiểu lớn hơn capacity hiện có
         if (minCapacity > minExpand) {
             // Đảm bảo capacity đủ theo capacity tối thiểu cần thiết
             ensureExplicitCapacity(minCapacity);
@@ -178,9 +178,9 @@ public class ArrayList<E> extends AbstractList<E>
     }
 
 
-    // Tính capacity cần thiết theo minCapacity đã cho và các phần tử hiện tại của array.
+    // Tính capacity cần thiết theo array hiện tại và minCapacity đã cho.
     private static int calculateCapacity(Object[] elementData, int minCapacity) {
-        // Nếu phần tử hiện tại của array là empty array (trạng thái ban đầu), trả về giá trị lớn hơn giữa capacity mặc định và capacity tối thiểu làm capacity cần thiết
+        // Nếu array hiện tại là empty array (trạng thái ban đầu), trả về giá trị lớn hơn giữa capacity mặc định và capacity tối thiểu làm capacity cần thiết
         if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
             return Math.max(DEFAULT_CAPACITY, minCapacity);
         }
@@ -382,7 +382,7 @@ public class ArrayList<E> extends AbstractList<E>
     /**
      * Insert phần tử đã chỉ định tại vị trí đã chỉ định trong list này.
      * Trước tiên gọi rangeCheckForAdd để kiểm tra giới hạn của index; sau đó gọi method ensureCapacityInternal để đảm bảo capacity đủ lớn;
-     * tiếp theo dịch tất cả member bắt đầu từ index về sau một vị trí; insert element vào vị trí index; cuối cùng tăng size lên 1.
+     * tiếp theo dịch mọi phần tử từ index trở đi về sau một vị trí; insert element vào vị trí index; cuối cùng tăng size lên 1.
      */
     public void add(int index, E element) {
         rangeCheckForAdd(index);
@@ -396,7 +396,7 @@ public class ArrayList<E> extends AbstractList<E>
     }
 
     /**
-     * Xóa phần tử tại vị trí đã chỉ định trong list. Dịch mọi phần tử phía sau sang trái (trừ một phần tử khỏi index của chúng).
+     * Xóa phần tử tại vị trí đã chỉ định trong list. Dịch mọi phần tử phía sau sang trái (giảm index của chúng đi một).
      */
     public E remove(int index) {
         rangeCheck(index);
@@ -435,7 +435,7 @@ public class ArrayList<E> extends AbstractList<E>
     }
 
     /*
-     * Đây là method remove private, bỏ qua việc kiểm tra giới hạn và không trả về giá trị bị xóa.
+     * Đây là private method remove, bỏ qua việc kiểm tra giới hạn và không trả về giá trị bị xóa.
      */
     private void fastRemove(int index) {
         modCount++;
@@ -492,7 +492,7 @@ public class ArrayList<E> extends AbstractList<E>
     }
 
     /**
-     * Xóa khỏi list này tất cả phần tử có index từ fromIndex (bao gồm fromIndex) đến toIndex.
+     * Xóa khỏi list này tất cả phần tử có index từ fromIndex (bao gồm fromIndex) đến trước toIndex.
      * Dịch mọi phần tử phía sau sang trái (giảm index của chúng).
      */
     protected void removeRange(int fromIndex, int toIndex) {
@@ -594,7 +594,7 @@ private static final int DEFAULT_CAPACITY = 10;
 private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
 
 /**
- * Constructor mặc định, dùng capacity ban đầu 10 để tạo một empty list (constructor không tham số)
+ * Constructor mặc định, tạo một empty list; capacity sẽ là 10 khi thêm phần tử đầu tiên (constructor không tham số)
  */
 public ArrayList() {
     this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
@@ -617,7 +617,7 @@ public ArrayList(int initialCapacity) {
 
 
 /**
- * Tạo list chứa các phần tử của collection đã chỉ định, các phần tử này được iterator của collection trả về theo thứ tự
+ * Tạo list chứa các phần tử của collection đã chỉ định theo thứ tự iterator của collection trả về
  * Nếu collection đã chỉ định là null, throws NullPointerException.
  */
 public ArrayList(Collection<? extends E> c) {
@@ -633,7 +633,7 @@ public ArrayList(Collection<? extends E> c) {
 }
 ```
 
-Người đọc tinh ý chắc chắn sẽ nhận ra: **khi tạo `ArrayList` bằng constructor không tham số, thực tế giá trị được khởi tạo là một empty array. Chỉ khi thực sự thực hiện thao tác thêm phần tử vào array thì capacity mới được allocate. Tức là khi thêm phần tử đầu tiên vào array, capacity của array mới được mở rộng thành 10.** Phần này sẽ được đề cập khi phân tích cơ chế mở rộng của `ArrayList` bên dưới!
+Người đọc tinh ý chắc chắn sẽ nhận ra: **khi tạo `ArrayList` bằng constructor không tham số, thực tế giá trị được khởi tạo là một empty array. Chỉ khi thực sự thêm phần tử vào array thì capacity mới được cấp phát. Tức là khi thêm phần tử đầu tiên vào array, capacity của array mới được mở rộng thành 10.** Phần này sẽ được đề cập khi phân tích cơ chế mở rộng của `ArrayList` bên dưới!
 
 > Bổ sung: khi `new` object `ArrayList` bằng constructor không tham số trong JDK6, array `Object[]` có length 10 được tạo trực tiếp trong `elementData`.
 
@@ -663,7 +663,7 @@ Source code của method `ensureCapacityInternal` như sau:
 ```java
 // Tính capacity cần thiết theo minCapacity đã cho và các phần tử hiện tại của array.
 private static int calculateCapacity(Object[] elementData, int minCapacity) {
-    // Nếu phần tử hiện tại của array là empty array (trạng thái ban đầu), trả về giá trị lớn hơn giữa capacity mặc định và capacity tối thiểu làm capacity cần thiết
+    // Nếu array hiện tại là empty array (trạng thái ban đầu), trả về giá trị lớn hơn giữa capacity mặc định và capacity tối thiểu làm capacity cần thiết
     if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
         return Math.max(DEFAULT_CAPACITY, minCapacity);
     }
@@ -692,7 +692,7 @@ private void ensureExplicitCapacity(int minCapacity) {
 
 Hãy cùng phân tích kỹ:
 
-- Khi `add` phần tử thứ 1 vào `ArrayList`, `elementData.length` bằng 0 (vì vẫn là một empty list). Do thực thi method `ensureCapacityInternal()`, lúc này `minCapacity` bằng 10. Khi đó điều kiện `minCapacity - elementData.length > 0` đúng, nên sẽ đi vào method `grow(minCapacity)`.
+- Khi `add` phần tử thứ 1 vào `ArrayList`, `elementData.length` bằng 0 (vì list vẫn rỗng). Do thực thi method `ensureCapacityInternal()`, lúc này `minCapacity` bằng 10. Khi đó điều kiện `minCapacity - elementData.length > 0` đúng, nên sẽ đi vào method `grow(minCapacity)`.
 - Khi `add` phần tử thứ 2, `minCapacity` bằng 2, lúc này `elementData.length` (capacity) sau khi thêm phần tử đầu tiên đã được mở rộng thành `10`. Khi đó điều kiện `minCapacity - elementData.length > 0` không đúng, nên không đi vào (thực thi) method `grow(minCapacity)`.
 - Khi thêm phần tử thứ 3, 4... đến phần tử thứ 10, method grow vẫn không được thực thi, capacity của array đều là 10.
 
@@ -730,25 +730,25 @@ private void grow(int minCapacity) {
 }
 ```
 
-**`int newCapacity = oldCapacity + (oldCapacity >> 1)`, vì vậy sau mỗi lần mở rộng capacity, capacity của ArrayList sẽ trở thành khoảng 1,5 lần capacity cũ (nếu oldCapacity là số chẵn thì đúng 1,5 lần, nếu là số lẻ thì xấp xỉ 1,5 lần)!** Số chẵn và số lẻ khác nhau, ví dụ: 10+10/2 = 15, 33+33/2=49. Nếu là số lẻ thì phần thập phân sẽ bị bỏ.
+**`int newCapacity = oldCapacity + (oldCapacity >> 1)`, vì vậy sau mỗi lần mở rộng capacity, capacity của ArrayList sẽ trở thành khoảng 1,5 lần capacity cũ (nếu oldCapacity là số chẵn thì đúng 1,5 lần, nếu là số lẻ thì xấp xỉ 1,5 lần)!** Kết quả khác nhau tùy oldCapacity là số chẵn hay lẻ, ví dụ: 10+10/2 = 15, 33+33/2=49. Nếu là số lẻ thì phần thập phân sẽ bị bỏ.
 
-> `>>` (shift operator): `>>1` dịch phải một bit tương đương với chia cho 2, dịch phải n bit tương đương với chia cho 2 lũy thừa n. Ở đây oldCapacity rõ ràng được dịch phải 1 bit nên tương đương với oldCapacity /2. Với phép tính nhị phân trên data lớn, shift operator nhanh hơn nhiều operator thông thường vì program chỉ cần dịch chuyển mà không cần tính toán, từ đó cải thiện efficiency và tiết kiệm resource.
+> `>>` (shift operator): `>>1` dịch phải một bit tương đương với chia cho 2, dịch phải n bit tương đương với chia cho 2 lũy thừa n. Ở đây oldCapacity rõ ràng được dịch phải 1 bit nên tương đương với oldCapacity /2. Với phép tính nhị phân trên data lớn, shift operator nhanh hơn nhiều toán tử thông thường vì chương trình chỉ cần dịch chuyển mà không cần thực hiện phép chia, từ đó cải thiện performance và tiết kiệm resource.
 
 **Hãy tiếp tục tìm hiểu method `grow()` thông qua ví dụ:**
 
 - Khi `add` phần tử thứ 1, `oldCapacity` bằng 0. Sau khi so sánh, điều kiện if thứ nhất đúng, `newCapacity = minCapacity` (bằng 10). Tuy nhiên, điều kiện if thứ hai không đúng, tức `newCapacity` không lớn hơn `MAX_ARRAY_SIZE`, nên không đi vào method `hugeCapacity`. Capacity của array là 10, method `add` return true, size tăng lên 1.
-- Khi `add` phần tử thứ 11 và đi vào method `grow`, `newCapacity` bằng 15, lớn hơn `minCapacity` (bằng 11), nên điều kiện if thứ nhất không đúng. Capacity mới không lớn hơn size tối đa của array, nên không đi vào method `hugeCapacity`. Capacity của array mở rộng thành 15, method add return true, size tăng lên 11.
+- Khi `add` phần tử thứ 11 và đi vào method `grow`, `newCapacity` bằng 15, lớn hơn `minCapacity` (bằng 11), nên điều kiện if thứ nhất không đúng. Capacity mới không vượt quá giới hạn tối đa của array, nên không đi vào method `hugeCapacity`. Capacity của array mở rộng thành 15, method add return true, size tăng lên 11.
 - Tương tự...
 
 **Bổ sung một điểm khá quan trọng nhưng dễ bị bỏ qua:**
 
 - Trong Java, thuộc tính `length` dùng cho array. Ví dụ, khi khai báo một array và muốn biết length của array, ta dùng thuộc tính length.
 - Method `length()` dùng cho string. Khi muốn biết length của string, ta dùng method `length()`.
-- Method `size()` dùng cho generic collection. Khi muốn biết generic collection có bao nhiêu phần tử, hãy gọi method này để kiểm tra!
+- Method `size()` dùng cho generic collection. Khi muốn biết collection có bao nhiêu phần tử, hãy gọi method này để kiểm tra!
 
 #### Method hugeCapacity()
 
-Từ source code method `grow()` ở trên, ta biết: nếu capacity mới lớn hơn `MAX_ARRAY_SIZE`, method `hugeCapacity()` được gọi (thực thi) để so sánh `minCapacity` với `MAX_ARRAY_SIZE`. Nếu `minCapacity` lớn hơn capacity tối đa thì capacity mới là `Integer.MAX_VALUE`, nếu không thì capacity mới là `MAX_ARRAY_SIZE`, tức `Integer.MAX_VALUE - 8`.
+Từ source code method `grow()` ở trên, ta biết: nếu capacity mới lớn hơn `MAX_ARRAY_SIZE`, method `hugeCapacity()` được gọi để so sánh `minCapacity` với `MAX_ARRAY_SIZE`. Nếu `minCapacity` lớn hơn giới hạn capacity tối đa thì capacity mới là `Integer.MAX_VALUE`, nếu không thì capacity mới là `MAX_ARRAY_SIZE`, tức `Integer.MAX_VALUE - 8`.
 
 ```java
 private static int hugeCapacity(int minCapacity) {
@@ -766,7 +766,7 @@ private static int hugeCapacity(int minCapacity) {
 
 ### Method `System.arraycopy()` và `Arrays.copyOf()`
 
-Khi đọc source code, ta sẽ phát hiện `ArrayList` gọi hai method này rất nhiều lần. Ví dụ: thao tác mở rộng capacity được đề cập ở trên, cùng các method `add(int index, E element)`, `toArray()`... đều dùng method này!
+Khi đọc source code, ta sẽ phát hiện `ArrayList` gọi hai method này rất nhiều lần. Ví dụ: thao tác mở rộng capacity được đề cập ở trên, cùng các method `add(int index, E element)`, `toArray()`... đều dùng chúng!
 
 #### Method `System.arraycopy()`
 
@@ -787,13 +787,13 @@ Source code:
                                         int length);
 ```
 
-Scenario:
+Ví dụ sử dụng:
 
 ```java
     /**
      * Insert phần tử đã chỉ định tại vị trí đã chỉ định trong list này.
      * Trước tiên gọi rangeCheckForAdd để kiểm tra giới hạn của index; sau đó gọi method ensureCapacityInternal để đảm bảo capacity đủ lớn;
-     * tiếp theo dịch tất cả member bắt đầu từ index về sau một vị trí; insert element vào vị trí index; cuối cùng tăng size lên 1.
+     * tiếp theo dịch mọi phần tử từ index trở đi về sau một vị trí; insert element vào vị trí index; cuối cùng tăng size lên 1.
      */
     public void add(int index, E element) {
         rangeCheckForAdd(index);
@@ -829,7 +829,7 @@ public class ArraycopyTest {
 }
 ```
 
-Result:
+Kết quả:
 
 ```plain
 0 1 99 2 3 0 0 0 0 0
@@ -841,7 +841,7 @@ Source code:
 
 ```java
     public static int[] copyOf(int[] original, int newLength) {
-      // Allocate một array mới
+      // Cấp phát một array mới
         int[] copy = new int[newLength];
   // Gọi System.arraycopy để copy data trong array nguồn và trả về array mới
         System.arraycopy(original, 0, copy, 0,
@@ -850,7 +850,7 @@ Source code:
     }
 ```
 
-Scenario:
+Ví dụ sử dụng:
 
 ```java
    /**
@@ -862,7 +862,7 @@ Scenario:
     }
 ```
 
-Theo tôi, `Arrays.copyOf()` chủ yếu được dùng để mở rộng array ban đầu. Code test như sau:
+Theo tôi, `Arrays.copyOf()` chủ yếu được dùng để mở rộng array hiện có. Code test như sau:
 
 ```java
 public class ArrayscopyOfTest {
@@ -878,7 +878,7 @@ public class ArrayscopyOfTest {
 }
 ```
 
-Result:
+Kết quả:
 
 ```plain
 10
@@ -888,7 +888,7 @@ Result:
 
 **Mối liên hệ:**
 
-Quan sát source code của hai method, ta có thể thấy bên trong `copyOf()` thực tế gọi method `System.arraycopy()`.
+Quan sát source code của hai method, ta có thể thấy bên trong `copyOf()` thực tế gọi `System.arraycopy()`.
 
 **Khác biệt:**
 
@@ -896,7 +896,7 @@ Quan sát source code của hai method, ta có thể thấy bên trong `copyOf()
 
 ### Method `ensureCapacity`
 
-Trong source code `ArrayList` có một method `ensureCapacity`, không biết mọi người có chú ý đến không. Method này chưa từng được gọi bên trong `ArrayList`, nên rõ ràng nó được cung cấp để user gọi. Vậy method này có tác dụng gì?
+Trong source code `ArrayList` có một method `ensureCapacity`, có lẽ bạn đã để ý đến nó. Method này chưa từng được gọi bên trong `ArrayList`, nên rõ ràng nó được cung cấp để user gọi. Vậy method này có tác dụng gì?
 
 ```java
     /**
@@ -967,6 +967,6 @@ Kết quả chạy:
 Sau khi dùng method ensureCapacity: 1773
 ```
 
-Từ kết quả chạy, có thể thấy dùng method `ensureCapacity` trước khi thêm nhiều phần tử vào `ArrayList` có thể cải thiện performance. Tuy nhiên, chênh lệch performance này gần như không đáng kể. Hơn nữa, trong project thực tế hầu như không thể thêm nhiều phần tử như vậy vào `ArrayList`.
+Từ kết quả chạy, có thể thấy dùng method `ensureCapacity` trước khi thêm nhiều phần tử vào `ArrayList` có thể cải thiện performance. Tuy nhiên, chênh lệch performance này gần như không đáng kể. Hơn nữa, trong project thực tế hầu như không cần thêm nhiều phần tử như vậy vào `ArrayList`.
 
 <!-- @include: @article-footer.snippet.md -->
