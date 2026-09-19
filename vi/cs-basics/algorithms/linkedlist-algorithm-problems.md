@@ -1,6 +1,6 @@
 ---
-title: Một số bài toán thuật toán về linked list thường gặp
-description: Tuyển chọn các bài toán linked list thường gặp và cách triển khai, bao phủ các tình huống như cộng hai số, đảo ngược, phát hiện cycle, nhấn mạnh xử lý biên và phân tích complexity.
+title: Một số bài toán thuật toán trên linked list thường gặp
+description: Tuyển chọn các bài toán linked list phổ biến, kèm hướng giải và cách triển khai, gồm cộng hai số, đảo ngược, phát hiện cycle, nhấn mạnh xử lý trường hợp biên và phân tích complexity.
 category: Computer Fundamentals
 tag:
   - Algorithms
@@ -16,7 +16,7 @@ head:
 
 ### Mô tả bài toán
 
-> LeetCode: Cho hai linked list không rỗng biểu diễn hai số nguyên không âm. Các chữ số được lưu theo thứ tự ngược, mỗi node chỉ lưu một chữ số. Hãy cộng hai số và trả về một linked list mới.
+> LeetCode: Cho hai linked list không rỗng biểu diễn hai số nguyên không âm. Các chữ số được lưu theo thứ tự ngược; mỗi node chỉ lưu một chữ số. Hãy cộng hai số và trả về một linked list mới.
 >
 > Bạn có thể giả định rằng ngoài số 0, hai số này đều không bắt đầu bằng 0.
 
@@ -34,15 +34,15 @@ Reason: 342 + 465 = 807
 
 <https://leetcode-cn.com/problems/add-two-numbers/solution/>
 
-> Khi cần thao tác với head node, hãy cân nhắc tạo một dummy node, dùng dummy->next để biểu thị head node thực sự. Cách này giúp tránh phải xử lý trường hợp biên head node rỗng.
+> Khi cần thao tác với head node, hãy cân nhắc tạo một dummy node và dùng dummy->next để biểu thị head node thực sự. Cách này giúp tránh xử lý trường hợp biên head node rỗng.
 
-Chúng ta dùng một biến để theo dõi carry và bắt đầu mô phỏng quá trình cộng từng chữ số từ đầu danh sách, nơi chứa chữ số có trọng số thấp nhất.
+Chúng ta dùng một biến để theo dõi carry, rồi mô phỏng việc cộng lần lượt từng chữ số, bắt đầu từ đầu danh sách, nơi chứa chữ số có trọng số thấp nhất.
 
 ![Hình 1, trực quan hóa phương pháp cộng hai số: 342 + 465 = 807, mỗi node chứa một chữ số và các chữ số được lưu theo thứ tự ngược.](https://oss.javaguide.cn/github/javaguide/cs-basics/algorithms/34910956.jpg)
 
 ### Solution
 
-**Trước hết, chúng ta cộng từ chữ số có trọng số thấp nhất, tức head của list l1 và l2. Hãy nhớ xử lý trường hợp có carry!**
+**Trước hết, chúng ta cộng từ chữ số có trọng số thấp nhất, tức head của list l1 và l2. Hãy nhớ xử lý carry!**
 
 ```java
 /**
@@ -84,13 +84,13 @@ public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
 
 ### Mô tả bài toán
 
-> Jianzhi Offer: Nhập một linked list, sau khi đảo ngược linked list, hãy xuất toàn bộ phần tử của linked list.
+> Jianzhi Offer: Nhập một linked list, đảo ngược linked list rồi xuất toàn bộ phần tử.
 
 ![Đảo ngược linked list](https://oss.javaguide.cn/github/javaguide/cs-basics/algorithms/81431871.jpg)
 
 ### Phân tích bài toán
 
-Nói đơn giản, bài toán này là: làm thế nào để node phía sau trỏ đến node phía trước! Trong code bên dưới, một node next được định nghĩa. Node này chủ yếu dùng để lưu node cần được đưa lên đầu sau khi đảo ngược, tránh làm linked list bị “đứt”.
+Nói đơn giản, bài toán này là: làm thế nào để node phía sau trỏ đến node phía trước! Trong code bên dưới, một node next được định nghĩa để lưu node tiếp theo cần đảo ngược, tránh làm linked list bị “đứt”.
 
 ### Solution
 
@@ -120,11 +120,11 @@ public class Solution {
     ListNode pre = null;
 
     while (head != null) {
-      // Lưu node cần được đưa lên đầu sau khi đảo ngược
+      // Lưu node tiếp theo cần đảo ngược
       next = head.next;
       // Node cần đảo ngược trỏ đến node trước đó đã được đảo ngược (lần đảo ngược đầu tiên sẽ trỏ đến null)
       head.next = pre;
-      // Node trước đó đã được đảo ngược lên đầu
+      // Đưa node hiện tại lên đầu phần đã đảo ngược
       pre = head;
       // Tiếp tục đi về phía đuôi linked list
       head = next;
@@ -135,7 +135,7 @@ public class Solution {
 }
 ```
 
-Phương thức test:
+Cách kiểm thử:
 
 ```java
   public static void main(String[] args) {
@@ -175,9 +175,9 @@ Output:
 
 ### Phân tích bài toán
 
-> **Node thứ k tính từ cuối trong linked list cũng chính là node thứ (L-K+1) tính từ đầu. Chỉ cần biết điều này là về cơ bản bài toán đã được giải quyết!**
+> **Node thứ k tính từ cuối trong linked list cũng chính là node thứ (L - k + 1) tính từ đầu. Chỉ cần nắm được điều này là cơ bản giải quyết được bài toán!**
 
-Trước hết dùng hai node/pointer. Một node node1 bắt đầu chạy trước; sau khi pointer node1 chạy qua k-1 node thì node2 bắt đầu chạy. Khi node1 chạy đến cuối, node mà node2 trỏ tới chính là node thứ k tính từ cuối, cũng là node thứ (L-K+1) tính từ đầu.
+Trước hết dùng hai node/pointer. node1 chạy trước; sau khi node1 đi qua k - 1 node, node2 bắt đầu chạy. Khi node1 chạy đến cuối, node mà node2 trỏ tới chính là node thứ k tính từ cuối, cũng là node thứ (L - k + 1) tính từ đầu.
 
 ### Solution
 
@@ -192,7 +192,7 @@ public class ListNode {
     }
 }*/
 
-// Complexity O(n), chỉ cần duyệt một lần
+// Time complexity O(n), chỉ cần duyệt một lần
 // https://www.nowcoder.com/practice/529d3ae5a407492994ad2a246518148a?tpId=13&tqId=11167&tPage=1&rp=1&ru=/ta/coding-interviews&qru=/ta/coding-interviews/question-ranking
 public class Solution {
   public ListNode FindKthToTail(ListNode head, int k) {
@@ -206,7 +206,7 @@ public class Solution {
     int count = 0;
     // Ghi lại giá trị k để sử dụng về sau
     int index = k;
-    // Pointer p chạy trước và ghi lại số node. Khi node1 chạy qua k-1 node thì node2 bắt đầu chạy,
+    // Pointer node1 chạy trước và ghi lại số node. Khi node1 chạy qua k - 1 node thì node2 bắt đầu chạy,
     // khi node1 chạy đến cuối, node mà node2 trỏ tới chính là node thứ k tính từ cuối
     while (node1 != null) {
       node1 = node1.next;
@@ -227,7 +227,7 @@ public class Solution {
 
 ## 4. Xóa node thứ N tính từ cuối trong linked list
 
-> LeetCode: Cho một linked list, xóa node thứ n tính từ cuối linked list và trả về head node của linked list.
+> LeetCode: Cho một linked list, xóa node thứ n tính từ cuối và trả về head node của linked list.
 
 **Ví dụ:**
 
@@ -258,7 +258,7 @@ Chúng ta nhận thấy bài toán này có thể dễ dàng rút gọn thành m
 
 **Phương pháp duyệt hai lần**
 
-Trước hết, chúng ta thêm một **dummy node** làm node hỗ trợ ở đầu danh sách. Dummy node giúp đơn giản hóa một số trường hợp đặc biệt, chẳng hạn danh sách chỉ có một node hoặc cần xóa head của danh sách. Trong lần duyệt đầu tiên, chúng ta tìm độ dài L của danh sách. Sau đó đặt một pointer trỏ đến dummy node và di chuyển nó qua danh sách cho đến khi đến node thứ (L - n). **Chúng ta nối lại pointer next của node thứ (L - n) đến node thứ (L - n + 2) để hoàn tất thuật toán.**
+Trước hết, chúng ta thêm một **dummy node** ở đầu danh sách để hỗ trợ. Dummy node giúp đơn giản hóa một số trường hợp đặc biệt, chẳng hạn danh sách chỉ có một node hoặc cần xóa head của danh sách. Trong lần duyệt đầu tiên, chúng ta tìm độ dài L của danh sách. Sau đó đặt một pointer trỏ đến dummy node và di chuyển nó qua danh sách cho đến khi đến node thứ (L - n). **Chúng ta nối lại pointer next của node thứ (L - n) đến node thứ (L - n + 2) để hoàn tất thuật toán.**
 
 ```java
 /**
@@ -285,7 +285,7 @@ public class Solution {
     }
     length = length - n;
     ListNode target = dummy;
-    // Tìm node ở vị trí L-n
+    // Tìm node ở vị trí L - n
     while (length > 0) {
       target = target.next;
       length--;
@@ -299,9 +299,9 @@ public class Solution {
 
 **Nâng cao - phương pháp duyệt một lần:**
 
-> Node thứ N tính từ cuối trong linked list cũng chính là node thứ (L - n + 1) tính từ đầu.
+> Node thứ n tính từ cuối trong linked list cũng chính là node thứ (L - n + 1) tính từ đầu.
 
-Thực ra phương pháp này có cùng ý tưởng với cách tìm “node thứ k tính từ cuối trong linked list” ở bài thứ tư bên trên. **Ý tưởng cơ bản là:** định nghĩa hai node node1 và node2; node1 chạy trước, khi node1 chạy đến node thứ n+1 thì node2 bắt đầu chạy. Khi node1 chạy đến node cuối cùng, vị trí của node2 chính là node thứ (L - n), trong đó L là tổng độ dài linked list, cũng là node thứ n + 1 tính từ cuối.
+Thực ra phương pháp này dùng cùng ý tưởng với cách tìm “node thứ k tính từ cuối trong linked list” ở bài thứ tư bên trên. **Ý tưởng cơ bản là:** định nghĩa hai node node1 và node2; node1 chạy trước, khi node1 chạy đến node thứ n + 1 thì node2 bắt đầu chạy. Khi node1 chạy đến node cuối cùng, vị trí của node2 chính là node thứ (L - n), trong đó L là tổng độ dài linked list, cũng là node thứ n + 1 tính từ cuối.
 
 ```java
 /**
@@ -317,7 +317,7 @@ public class Solution {
 
     ListNode dummy = new ListNode(0);
     dummy.next = head;
-    // Khai báo hai node cùng trỏ đến head node
+    // Khai báo hai node cùng trỏ đến dummy node
     ListNode node1 = dummy, node2 = dummy;
 
     // node1 chạy trước; khi node1 chạy đến node thứ n thì node2 bắt đầu chạy
@@ -342,7 +342,7 @@ public class Solution {
 
 ### Mô tả bài toán
 
-> Jianzhi Offer: Nhập hai linked list tăng dần, hãy xuất linked list sau khi hợp nhất hai linked list. Linked list sau khi hợp nhất phải thỏa mãn quy tắc không giảm.
+> Jianzhi Offer: Nhập hai linked list tăng dần, hãy xuất linked list sau khi hợp nhất. Linked list sau khi hợp nhất phải thỏa mãn quy tắc không giảm.
 
 ### Phân tích bài toán
 
@@ -354,7 +354,7 @@ Chúng ta có thể phân tích như sau:
 4. So sánh A2 với B2;
 5. Cứ lặp lại như vậy là được, cách này khá dễ hiểu.
 
-Hãy cân nhắc triển khai bằng recursion!
+Hãy thử triển khai bằng recursion!
 
 ### Solution
 
@@ -392,11 +392,11 @@ public class Solution {
 
 ## Trọng tâm ôn tập phỏng vấn
 
-Code của các bài toán linked list thường không dài, nhưng thứ tự cập nhật pointer rất dễ viết sai. Trước khi phỏng vấn, ít nhất cần nắm vững 4 template: head node ảo, đảo ngược linked list, fast/slow pointer và hợp nhất linked list.
+Code của các bài toán linked list thường không dài, nhưng thứ tự cập nhật pointer rất dễ viết sai. Trước khi phỏng vấn, ít nhất cần nắm vững 4 template: dummy head node, đảo ngược linked list, fast/slow pointer và hợp nhất linked list.
 
 | Template              | Dạng bài phù hợp                                             | Điểm mấu chốt                                                              |
 | --------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| Head node ảo          | Xóa node, hợp nhất linked list, head node có thể thay đổi    | Trả về `dummy.next`                                                        |
+| Dummy head node       | Xóa node, hợp nhất linked list, head node có thể thay đổi    | Trả về `dummy.next`                                                        |
 | Đảo ngược linked list | Đảo ngược toàn bộ, đảo ngược một đoạn, đảo ngược từng nhóm K | Lưu `next`, sau đó sửa `cur.next`                                          |
 | Fast/slow pointer     | Phát hiện cycle, node thứ K tính từ cuối, node giữa          | Kiểm tra `fast` và `fast.next` trước                                       |
 | Hợp nhất linked list  | Hai linked list có thứ tự, K linked list có thứ tự           | Dùng recursion hoặc iteration, chú ý nối phần linked list còn lại vào đuôi |
@@ -417,9 +417,9 @@ ListNode reverseList(ListNode head) {
 }
 ```
 
-## Minh họa quy trình và các ví dụ biên
+## Minh họa quá trình và ví dụ về trường hợp biên
 
-Khi đảo ngược linked list, điều cốt lõi là lưu `next` trước, sau đó sửa `cur.next`. Có thể ghi nhớ theo thay đổi của pointer như sau:
+Khi đảo ngược linked list, điều cốt lõi là lưu `next` trước rồi sửa `cur.next`. Có thể ghi nhớ qua thay đổi của pointer như sau:
 
 ```text
 Ban đầu: prev = null, cur = head
@@ -433,21 +433,21 @@ cur = next
 Kết thúc: cur == null, prev trỏ đến head node mới
 ```
 
-Với các bài toán như xóa node và hợp nhất linked list, hãy ưu tiên cân nhắc head node ảo:
+Với các bài toán như xóa node và hợp nhất linked list, hãy ưu tiên cân nhắc dummy head node:
 
 ```java
 ListNode dummy = new ListNode(0);
 dummy.next = head;
-// Thao tác thống nhất trên linked list phía sau dummy
+// Thực hiện thao tác thống nhất trên phần linked list sau dummy
 return dummy.next;
 ```
 
 Một số điểm dễ sai:
 
-- Khi xóa node thứ N tính từ cuối, head node ảo giúp xử lý thống nhất trường hợp xóa head node.
+- Khi xóa node thứ N tính từ cuối, dummy head node giúp xử lý thống nhất trường hợp xóa head node.
 - Khi đảo ngược một đoạn, trước hết phải lưu node trước đoạn và node sau đoạn.
 - Khi kiểm tra linked list có cycle, điều kiện vòng lặp là `fast != null && fast.next != null`.
-- Code recursion để hợp nhất linked list ngắn, nhưng khi linked list rất dài có thể có rủi ro tràn recursion stack.
+- Code hợp nhất linked list bằng recursion ngắn, nhưng khi linked list rất dài có thể có rủi ro tràn recursion stack.
 - Cần kiểm tra riêng linked list rỗng, linked list chỉ có một node, xóa head node và xóa node cuối.
 
 <!-- @include: @article-footer.snippet.md -->

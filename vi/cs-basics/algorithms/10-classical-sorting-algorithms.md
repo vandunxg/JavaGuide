@@ -14,7 +14,7 @@ head:
 
 ## Giới thiệu
 
-Sắp xếp là thao tác sắp xếp một chuỗi bản ghi theo thứ tự tăng dần hoặc giảm dần dựa trên kích thước của một hoặc một số khóa trong đó. Thuật toán sắp xếp là phương pháp sắp xếp các bản ghi theo yêu cầu. Thuật toán sắp xếp được coi trọng trong nhiều lĩnh vực, đặc biệt là xử lý lượng dữ liệu lớn. Một thuật toán ưu tú có thể tiết kiệm rất nhiều tài nguyên. Để có được một thuật toán ưu tú phù hợp với thực tế, cần xem xét các giới hạn và quy chuẩn khác nhau của dữ liệu trong từng lĩnh vực, đồng thời phải trải qua nhiều suy luận và phân tích.
+Sắp xếp là thao tác sắp xếp một chuỗi bản ghi theo thứ tự tăng dần hoặc giảm dần dựa trên giá trị của một hoặc một số key trong đó. Thuật toán sắp xếp là phương pháp sắp xếp các bản ghi theo yêu cầu. Thuật toán sắp xếp được coi trọng trong nhiều lĩnh vực, đặc biệt là xử lý lượng dữ liệu lớn. Một thuật toán tốt có thể tiết kiệm rất nhiều tài nguyên. Để có được một thuật toán tốt và phù hợp với thực tế, cần xem xét các ràng buộc và quy tắc khác nhau của dữ liệu trong từng lĩnh vực, đồng thời phải trải qua nhiều suy luận và phân tích.
 
 ## Giới thiệu tổng quan
 
@@ -40,7 +40,7 @@ Các thuật toán sắp xếp nội bộ thường gặp gồm: **sắp xếp c
 - **n**: quy mô dữ liệu, biểu thị kích thước lượng dữ liệu cần sắp xếp.
 - **k**: kích thước phạm vi đếm hoặc số lượng bucket, ý nghĩa cụ thể cần kết hợp với phần giải thích thuật toán.
 - **d**: số chữ số lớn nhất mà sắp xếp radix xử lý.
-- **r**: radix được sắp xếp radix sử dụng, ví dụ radix thập phân có `r=10`.
+- **r**: radix mà radix sort sử dụng, ví dụ radix thập phân có `r=10`.
 - **Sắp xếp nội bộ**: dữ liệu cần sắp xếp có thể được nạp toàn bộ vào memory, thao tác sorting chủ yếu hoàn thành trong memory. Code trong bài viết đều là triển khai sắp xếp nội bộ.
 - **Sắp xếp bên ngoài**: khi lượng dữ liệu lớn đến mức không thể nạp toàn bộ vào memory, dữ liệu được xử lý theo từng phần nhờ disk và các external storage khác. Cùng một algorithm có thể có triển khai trong memory, cũng có thể được cải tạo thành một phương án sắp xếp bên ngoài, vì vậy đây không phải nhãn phân loại vốn có của algorithm.
 - **Ổn định**: nếu A vốn ở trước B và $A=B$, sau khi sorting A vẫn ở trước B.
@@ -54,9 +54,9 @@ Mười thuật toán sắp xếp thường gặp có thể được chia thành
 
 ![Phân loại thuật toán sắp xếp](https://oss.javaguide.cn/github/javaguide/cs-basics/sorting-algorithms/sort2.png)
 
-Các thuật toán như **sắp xếp nhanh**, **sắp xếp trộn**, **sắp xếp heap** và **sắp xếp nổi bọt** thường gặp đều thuộc **thuật toán sắp xếp dựa trên so sánh**. Sắp xếp dựa trên so sánh quyết định thứ tự tương đối giữa các phần tử bằng cách so sánh. Trong mô hình so sánh, sorting tổng quát cần tối thiểu `Ω(nlogn)` lần so sánh trong trường hợp tệ nhất. Sắp xếp nổi bọt cần quét nhiều vòng, độ phức tạp thời gian trung bình là `O(n²)`; sắp xếp trộn và sắp xếp nhanh sử dụng chia để trị để tách bài toán thành các bài toán con nhỏ hơn, độ phức tạp thời gian trung bình là `O(nlogn)`.
+Các thuật toán như **sắp xếp nhanh**, **sắp xếp trộn**, **sắp xếp heap** và **sắp xếp nổi bọt** thường gặp đều thuộc **thuật toán sắp xếp dựa trên so sánh**. Sắp xếp dựa trên so sánh quyết định thứ tự tương đối giữa các phần tử bằng cách so sánh. Trong mô hình so sánh, thuật toán sorting tổng quát cần tối thiểu `Ω(nlogn)` lần so sánh trong trường hợp tệ nhất. Sắp xếp nổi bọt cần quét nhiều vòng, độ phức tạp thời gian trung bình là `O(n²)`; sắp xếp trộn và sắp xếp nhanh sử dụng chia để trị để tách bài toán thành các bài toán con nhỏ hơn, độ phức tạp thời gian trung bình là `O(nlogn)`.
 
-Ưu điểm của sắp xếp dựa trên so sánh là phù hợp với dữ liệu có mọi quy mô và không phụ thuộc vào phân bố dữ liệu, đều có thể thực hiện sorting. Có thể nói sắp xếp dựa trên so sánh phù hợp với mọi trường hợp cần sorting.
+Ưu điểm của sắp xếp dựa trên so sánh là phù hợp với dữ liệu ở mọi quy mô và không phụ thuộc vào phân bố dữ liệu, nên có thể thực hiện sorting trên mọi dữ liệu. Có thể nói sắp xếp dựa trên so sánh phù hợp với mọi trường hợp cần sorting.
 
 Còn **sắp xếp đếm**, **sắp xếp radix**, **sắp xếp bucket** thuộc **thuật toán sắp xếp không dựa trên so sánh**. Chúng tận dụng thông tin bổ sung như phạm vi key, phân bố dữ liệu hoặc số chữ số để tránh cận dưới của sắp xếp dựa trên so sánh, nhưng không phải thuật toán nào cũng có thể hoàn thành với `O(n)` chỉ bằng một lần duyệt. Sắp xếp đếm thường có độ phức tạp `O(n+k)`, hiệu quả của sắp xếp bucket phụ thuộc vào phân bố dữ liệu và sorting trong bucket, sắp xếp radix thường có độ phức tạp `O(d(n+r))`.
 
@@ -165,9 +165,9 @@ public static int[] selectionSort(int[] arr) {
 
 ## Sắp xếp chèn (Insertion Sort)
 
-Sắp xếp chèn là một thuật toán sắp xếp đơn giản, trực quan. Nguyên lý hoạt động là xây dựng một chuỗi có thứ tự; với dữ liệu chưa sắp xếp, quét từ sau về trước trong chuỗi đã sắp xếp, tìm vị trí tương ứng rồi chèn vào. Khi triển khai, sắp xếp chèn thường dùng cách sorting in-place (tức chỉ cần thêm $O(1)$ không gian), vì vậy trong quá trình quét từ sau về trước, cần liên tục dịch dần các phần tử đã sắp xếp về sau để tạo không gian chèn cho phần tử mới nhất.
+Sắp xếp chèn là một thuật toán sắp xếp đơn giản, trực quan. Nguyên lý hoạt động là xây dựng một chuỗi có thứ tự; với dữ liệu chưa sắp xếp, quét từ sau về trước trong chuỗi đã sắp xếp, tìm vị trí tương ứng rồi chèn vào. Khi triển khai, sắp xếp chèn thường dùng cách sorting in-place (tức chỉ cần thêm $O(1)$ không gian), vì vậy trong quá trình quét từ sau về trước, cần liên tục dịch dần các phần tử đã sắp xếp về sau để tạo không gian chèn cho phần tử mới.
 
-Mặc dù code triển khai sắp xếp chèn không đơn giản và trực tiếp bằng sắp xếp nổi bọt và sắp xếp chọn, nhưng nguyên lý của nó có lẽ dễ hiểu nhất; người từng chơi bài poker đều có thể hiểu ngay. Sắp xếp chèn là một thuật toán sắp xếp đơn giản, trực quan; nguyên lý hoạt động là xây dựng một chuỗi có thứ tự, với dữ liệu chưa sắp xếp thì quét từ sau về trước trong chuỗi đã sắp xếp, tìm vị trí tương ứng rồi chèn vào.
+Mặc dù code triển khai sắp xếp chèn không đơn giản và trực tiếp như sắp xếp nổi bọt và sắp xếp chọn, nhưng nguyên lý của nó có lẽ dễ hiểu nhất; người từng chơi bài poker đều có thể hiểu ngay. Sắp xếp chèn là một thuật toán sắp xếp đơn giản, trực quan; nguyên lý hoạt động là xây dựng một chuỗi có thứ tự, với dữ liệu chưa sắp xếp thì quét từ sau về trước trong chuỗi đã sắp xếp, tìm vị trí tương ứng rồi chèn vào.
 
 Giống sắp xếp nổi bọt, sắp xếp chèn cũng có một algorithm tối ưu gọi là sắp xếp chèn nhị phân.
 
@@ -221,7 +221,7 @@ Sắp xếp Shell là một thuật toán sắp xếp do Shell (Donald Shell) đ
 
 ### Các bước thuật toán
 
-Hãy xem các bước cơ bản của sắp xếp Shell. Ở đây chọn increment $gap=length/2$, tiếp tục thu nhỏ increment theo cách $gap = gap/2$. Cách chọn increment này có thể biểu diễn bằng chuỗi $\lbrace \frac{n}{2}, \frac{(n/2)}{2}, \dots, 1 \rbrace$, gọi là **chuỗi increment**. Việc lựa chọn và chứng minh chuỗi increment của sắp xếp Shell là một bài toán khó về mặt toán học. Chuỗi increment được chọn ở đây khá phổ biến và cũng là increment Shell đề xuất, gọi là increment Shell, nhưng thực tế chuỗi increment này không tối ưu. Ví dụ dưới đây sử dụng increment Shell.
+Hãy xem các bước cơ bản của sắp xếp Shell. Ở đây chọn increment $gap=length/2$, tiếp tục thu nhỏ increment theo cách $gap = gap/2$. Cách chọn increment này có thể biểu diễn bằng chuỗi $\lbrace \frac{n}{2}, \frac{(n/2)}{2}, \dots, 1 \rbrace$, gọi là **chuỗi increment**. Việc lựa chọn và chứng minh chuỗi increment của sắp xếp Shell là một bài toán khó về mặt toán học. Chuỗi increment được chọn ở đây khá phổ biến, đồng thời là chuỗi increment Shell đề xuất, nhưng thực tế chuỗi increment này không tối ưu. Ví dụ dưới đây sử dụng increment Shell.
 
 Trước tiên chia toàn bộ chuỗi bản ghi cần sắp xếp thành một số chuỗi con để lần lượt thực hiện sắp xếp chèn trực tiếp. Mô tả cụ thể:
 
@@ -271,7 +271,7 @@ public static int[] shellSort(int[] arr) {
 
 ## Sắp xếp trộn (Merge Sort)
 
-Sắp xếp trộn là một thuật toán sắp xếp hiệu quả dựa trên thao tác trộn. Algorithm này là một ứng dụng rất điển hình của phương pháp chia để trị (Divide and Conquer). Sắp xếp trộn là một phương pháp sorting ổn định. Trộn các chuỗi con đã có thứ tự để thu được chuỗi hoàn toàn có thứ tự; tức là trước tiên làm cho từng chuỗi con có thứ tự, sau đó làm cho các đoạn chuỗi con có thứ tự với nhau. Nếu trộn hai bảng đã có thứ tự thành một bảng có thứ tự thì gọi là trộn 2 đường.
+Sắp xếp trộn là một thuật toán sắp xếp hiệu quả dựa trên thao tác trộn. Algorithm này là một ứng dụng rất điển hình của phương pháp chia để trị (Divide and Conquer). Sắp xếp trộn là một phương pháp sorting ổn định. Trộn các chuỗi con đã có thứ tự để thu được chuỗi hoàn toàn có thứ tự; tức là trước tiên làm cho từng chuỗi con có thứ tự, sau đó trộn các chuỗi con đã có thứ tự thành một chuỗi hoàn chỉnh. Nếu trộn hai bảng đã có thứ tự thành một bảng có thứ tự thì gọi là trộn 2 đường.
 
 Giống sắp xếp chọn, hiệu năng của sắp xếp trộn không bị ảnh hưởng bởi dữ liệu đầu vào, nhưng tốt hơn nhiều so với sắp xếp chọn vì luôn có độ phức tạp thời gian $O(nlogn)$. Đổi lại, nó cần thêm không gian memory.
 
@@ -354,13 +354,13 @@ public static int[] merge(int[] arr_1, int[] arr_2) {
 
 ## Sắp xếp nhanh (Quick Sort)
 
-Sắp xếp nhanh sử dụng tư tưởng chia để trị, sắp xếp trộn cũng vậy. Thoạt nhìn, sắp xếp nhanh và sắp xếp trộn rất giống nhau: đều làm nhỏ bài toán, trước tiên sắp xếp chuỗi con rồi cuối cùng hợp nhất. Điểm khác là khi chia bài toán con, sắp xếp nhanh thực hiện thêm một bước xử lý để chia hai nhóm dữ liệu thành một nhóm lớn và một nhóm nhỏ, nhờ đó khi hợp nhất cuối cùng không cần so sánh như sắp xếp trộn. Tuy nhiên chính vì việc chia không cố định nên độ phức tạp thời gian của sắp xếp nhanh không ổn định.
+Sắp xếp nhanh sử dụng tư tưởng chia để trị, sắp xếp trộn cũng vậy. Thoạt nhìn, sắp xếp nhanh và sắp xếp trộn rất giống nhau: đều làm nhỏ bài toán, trước tiên sắp xếp chuỗi con rồi cuối cùng hợp nhất. Điểm khác là khi chia bài toán con, sắp xếp nhanh thực hiện thêm một bước xử lý để chia hai nhóm dữ liệu thành một nhóm lớn và một nhóm nhỏ, nhờ đó khi hợp nhất cuối cùng không cần so sánh như sắp xếp trộn. Tuy nhiên chính vì việc phân chia không cố định nên độ phức tạp thời gian của sắp xếp nhanh không ổn định.
 
 Ý tưởng cơ bản của sắp xếp nhanh: thông qua một lượt sorting, tách chuỗi cần sắp xếp thành hai phần độc lập, trong đó mọi phần tử của một phần đều nhỏ hơn phần tử của phần kia; sau đó tiếp tục sorting hai chuỗi con này để toàn bộ chuỗi có thứ tự.
 
 ### Các bước thuật toán
 
-Sắp xếp nhanh sử dụng chiến lược [chia để trị](https://zh.wikipedia.org/wiki/分治法) (Divide and conquer) để chia một chuỗi thành hai chuỗi con nhỏ hơn và lớn hơn, sau đó đệ quy sorting hai chuỗi con. Mô tả cụ thể:
+Sắp xếp nhanh sử dụng chiến lược [chia để trị](https://zh.wikipedia.org/wiki/分治法) (Divide and conquer) để chia một chuỗi thành một chuỗi con nhỏ hơn và một chuỗi con lớn hơn, sau đó đệ quy sorting hai chuỗi con. Mô tả cụ thể:
 
 1. **Chọn pivot (Pivot)**: chọn một phần tử trong array làm pivot. Để tránh trường hợp tệ nhất, thường chọn ngẫu nhiên.
 2. **Phân vùng (Partition)**: sắp xếp lại chuỗi, đặt mọi phần tử nhỏ hơn giá trị pivot ở trước pivot và mọi phần tử lớn hơn pivot ở sau pivot (các số bằng nhau có thể ở một trong hai phía). Sau thao tác này, pivot nằm ở vị trí giữa dãy.
@@ -388,7 +388,7 @@ class Solution {
 
     // Hàm đệ quy cốt lõi của sắp xếp nhanh
     void quick(int[] a, int left, int right) {
-        if (left >= right) { // Điều kiện kết thúc đệ quy: interval chỉ có một hoặc không có phần tử
+        if (left >= right) { // Điều kiện kết thúc đệ quy: khoảng chỉ có một hoặc không có phần tử
             return;
         }
         int p = partition(a, left, right); // Thao tác phân vùng, trả về index phân vùng
@@ -439,7 +439,7 @@ class Solution {
 
 - **Tính ổn định**: không ổn định
 - **Độ phức tạp thời gian**: tốt nhất: $O(nlogn)$, tệ nhất: $O(n^2)$, trung bình: $O(nlogn)$
-- **Độ phức tạp không gian**: trung bình $O(logn)$, tệ nhất $O(n)$ (recursive call stack)
+- **Độ phức tạp không gian**: trung bình $O(logn)$, tệ nhất $O(n)$ (stack của các lời gọi đệ quy)
 
 ## Sắp xếp heap (Heap Sort)
 
@@ -448,7 +448,7 @@ Sắp xếp heap là một thuật toán sorting được thiết kế dựa tr�
 ### Các bước thuật toán
 
 1. Xây dựng chuỗi ban đầu cần sắp xếp $(R_1, R_2, \dots, R_n)$ thành max heap, heap này là vùng chưa có thứ tự ban đầu;
-2. Hoán đổi phần tử đầu heap $R_1$ với phần tử cuối $R_n$, khi đó thu được vùng chưa có thứ tự mới $(R_1, R_2, \dots, R_{n-1})$ và vùng có thứ tự mới $R_n$, đồng thời thỏa mãn $R_i \leqslant R_n (i \in 1, 2,\dots, n-1)$;
+2. Hoán đổi đỉnh heap $R_1$ với phần tử cuối $R_n$, khi đó thu được vùng chưa có thứ tự mới $(R_1, R_2, \dots, R_{n-1})$ và vùng có thứ tự mới $R_n$, đồng thời thỏa mãn $R_i \leqslant R_n (i \in 1, 2,\dots, n-1)$;
 3. Sau khi hoán đổi, phần tử đầu heap mới $R_1$ có thể vi phạm tính chất heap, vì vậy cần điều chỉnh vùng chưa có thứ tự hiện tại $(R_1, R_2, \dots, R_{n-1})$ thành heap mới, rồi lại hoán đổi $R_1$ với phần tử cuối vùng chưa có thứ tự. Khi đó thu được vùng chưa có thứ tự mới $(R_1, R_2, \dots, R_{n-2})$ và vùng có thứ tự mới $(R_{n-1}, R_n)$. Lặp lại quá trình này cho đến khi vùng có thứ tự có $n-1$ phần tử, khi đó toàn bộ quá trình sorting hoàn tất.
 
 ### Minh họa thuật toán
@@ -532,18 +532,18 @@ public static int[] heapSort(int[] arr) {
 
 ## Sắp xếp đếm (Counting Sort)
 
-Cốt lõi của sắp xếp đếm là chuyển giá trị dữ liệu đầu vào thành key và lưu trong một array được cấp phát thêm. Là một sorting có độ phức tạp thời gian tuyến tính, **sắp xếp đếm yêu cầu dữ liệu đầu vào phải là các số nguyên có phạm vi xác định**.
+Cốt lõi của sắp xếp đếm là chuyển giá trị dữ liệu đầu vào thành key và lưu trong một array được cấp phát thêm. Là một thuật toán có độ phức tạp thời gian tuyến tính, **sắp xếp đếm yêu cầu dữ liệu đầu vào phải là các số nguyên có phạm vi xác định**.
 
-Sắp xếp đếm (Counting sort) là một thuật toán sorting ổn định. Sắp xếp đếm sử dụng một array bổ sung `C`, trong đó phần tử thứ `i` là số lượng phần tử có giá trị bằng `i` trong array `A` cần sắp xếp. Sau đó dựa vào array `C` để đưa các phần tử trong `A` vào đúng vị trí. **Nó chỉ có thể sorting số nguyên**.
+Sắp xếp đếm (Counting sort) là một thuật toán sorting ổn định. Sắp xếp đếm sử dụng một array bổ sung `C`, trong đó phần tử thứ `i` là số lượng phần tử trong array `A` có giá trị bằng `i`. Sau đó dựa vào array `C` để đưa các phần tử trong `A` vào đúng vị trí. **Nó chỉ có thể sorting số nguyên**.
 
 ### Các bước thuật toán
 
 1. Tìm giá trị lớn nhất `max` và nhỏ nhất `min` trong array;
 2. Tạo một array mới `C` có độ dài `max-min+1`, giá trị mặc định của mọi phần tử là 0;
-3. Duyệt các phần tử `A[i]` trong array gốc `A`, dùng `A[i] - min` làm index của array `C`, dùng số lần xuất hiện của giá trị `A[i]` trong `A` làm giá trị của `C[A[i] - min]`;
+3. Duyệt array gốc `A`, với từng phần tử `A[i]`, dùng `A[i] - min` làm index của array `C`, dùng số lần xuất hiện của giá trị `A[i]` trong `A` làm giá trị của `C[A[i] - min]`;
 4. Biến đổi array `C`, **giá trị phần tử mới là tổng của giá trị phần tử đó với phần tử trước**, tức khi `i>1` thì `C[i] = C[i] + C[i-1]`;
 5. Tạo array kết quả `R` có độ dài bằng array gốc.
-6. **Duyệt các phần tử `A[i]` của array gốc `A` từ sau về trước**, dùng `A[i]` trừ giá trị nhỏ nhất `min` làm index, tìm giá trị tương ứng `C[A[i] - min]` trong array đếm `C`, `C[A[i] - min] - 1` chính là vị trí của `A[i]` trong array kết quả `R`; sau khi thực hiện xong các thao tác trên, giảm `count[A[i] - min]` đi 1.
+6. **Duyệt array gốc `A` từ sau về trước, với từng phần tử `A[i]`**, dùng `A[i]` trừ giá trị nhỏ nhất `min` làm index, tìm trong array đếm `C` giá trị tương ứng `C[A[i] - min]`, `C[A[i] - min] - 1` chính là vị trí của `A[i]` trong array kết quả `R`; sau khi thực hiện xong các thao tác trên, giảm `count[A[i] - min]` đi 1.
 
 ### Minh họa thuật toán
 
@@ -604,7 +604,7 @@ public static int[] countingSort(int[] arr) {
 
 ### Phân tích thuật toán
 
-Khi các phần tử đầu vào là `n` số nguyên trong khoảng từ `0` đến `k`, thời gian chạy là $O(n+k)$. Sắp xếp đếm không phải sắp xếp dựa trên so sánh, tốc độ sorting nhanh hơn mọi thuật toán sắp xếp dựa trên so sánh. Vì độ dài của array `C` dùng để đếm phụ thuộc vào phạm vi dữ liệu trong array cần sắp xếp (bằng **hiệu giữa giá trị lớn nhất và nhỏ nhất cộng 1**), sắp xếp đếm cần rất nhiều không gian memory bổ sung với array có phạm vi dữ liệu lớn.
+Khi các phần tử đầu vào là `n` số nguyên trong khoảng từ `0` đến `k`, thời gian chạy là $O(n+k)$. Sắp xếp đếm không phải sắp xếp dựa trên so sánh, nên sorting nhanh hơn mọi thuật toán sắp xếp dựa trên so sánh. Vì độ dài của array `C` dùng để đếm phụ thuộc vào phạm vi dữ liệu trong array cần sắp xếp (bằng **hiệu giữa giá trị lớn nhất và nhỏ nhất cộng 1**), sắp xếp đếm cần rất nhiều không gian memory bổ sung với array có phạm vi dữ liệu lớn.
 
 - **Tính ổn định**: ổn định
 - **Độ phức tạp thời gian**: tốt nhất: $O(n+k)$, tệ nhất: $O(n+k)$, trung bình: $O(n+k)$
@@ -612,7 +612,7 @@ Khi các phần tử đầu vào là `n` số nguyên trong khoảng từ `0` đ
 
 ## Sắp xếp bucket (Bucket Sort)
 
-Sắp xếp bucket là phiên bản nâng cấp của sắp xếp đếm. Nó tận dụng quan hệ ánh xạ của hàm, trong đó việc xác định hàm ánh xạ là yếu tố then chốt quyết định hiệu quả. Để sắp xếp bucket hiệu quả hơn, cần làm hai việc:
+Sắp xếp bucket là phiên bản nâng cấp của sắp xếp đếm. Nó tận dụng quan hệ ánh xạ giữa dữ liệu và bucket, trong đó việc xác định hàm ánh xạ là yếu tố then chốt quyết định hiệu quả. Để sắp xếp bucket hiệu quả hơn, cần làm hai việc:
 
 1. Khi không gian bổ sung đủ, cố gắng tăng số lượng bucket
 2. Sử dụng hàm ánh xạ có thể phân phối đều N dữ liệu đầu vào vào K bucket
@@ -692,15 +692,15 @@ public static List<Integer> bucketSort(List<Integer> arr, int bucket_size) {
 
 ### Phân tích thuật toán
 
-- **Tính ổn định**: phụ thuộc vào sorting trong bucket. Triển khai hiện tại đưa phần tử vào bucket theo thứ tự ban đầu và dùng `List.sort` ổn định, vì vậy là stable
+- **Tính ổn định**: phụ thuộc vào sorting trong bucket. Triển khai hiện tại đưa phần tử vào bucket theo thứ tự ban đầu và dùng `List.sort` ổn định, vì vậy là ổn định
 - **Độ phức tạp thời gian**: với triển khai hiện tại, tốt nhất là $O(n+k)$; khi dữ liệu phân bố đều, kỳ vọng gần $O(n+k)$; tệ nhất là $O(nlogn+k)$. Nếu đổi sang insertion sort trong bucket, trường hợp tệ nhất sẽ suy biến thành $O(n^2)$
 - **Độ phức tạp không gian**: $O(n+k)$
 
 ## Sắp xếp radix (Radix Sort)
 
-Sắp xếp radix cũng là một thuật toán sắp xếp không dựa trên so sánh, sorting từng chữ số của phần tử, bắt đầu từ chữ số thấp nhất. Gọi độ dài array là $n$, số chữ số lớn nhất là $d$, radix là $r$, độ phức tạp là $O(d(n+r))$. Triển khai LSD hệ thập phân dưới đây chỉ hỗ trợ số nguyên không âm.
+Sắp xếp radix cũng là một thuật toán sắp xếp không dựa trên so sánh, sorting từng chữ số của phần tử, bắt đầu từ chữ số thấp nhất. Gọi độ dài array là $n$, số chữ số lớn nhất là $d$, radix là $r$, độ phức tạp là $O(d(n+r))$. Triển khai LSD trong hệ thập phân dưới đây chỉ hỗ trợ số nguyên không âm.
 
-Sắp xếp radix sorting từ chữ số thấp trước rồi thu thập; sau đó sorting từ chữ số cao rồi thu thập; cứ tiếp tục như vậy cho đến chữ số cao nhất. Đôi khi một số thuộc tính có thứ tự ưu tiên: sorting trước theo ưu tiên thấp, sau đó theo ưu tiên cao. Thứ tự cuối cùng là thuộc tính có ưu tiên cao hơn nằm trước; nếu ưu tiên cao bằng nhau thì thuộc tính có ưu tiên thấp hơn nằm trước. Sắp xếp radix dựa trên việc sorting và thu thập riêng nên là sorting ổn định.
+Sắp xếp radix bắt đầu bằng việc sorting từ chữ số thấp rồi thu thập; sau đó sorting từ chữ số cao rồi thu thập; cứ tiếp tục như vậy cho đến chữ số cao nhất. Đôi khi một số thuộc tính có thứ tự ưu tiên: sorting trước theo ưu tiên thấp, sau đó theo ưu tiên cao. Thứ tự cuối cùng là thuộc tính có ưu tiên cao hơn nằm trước; nếu ưu tiên cao bằng nhau thì thuộc tính có ưu tiên thấp hơn nằm trước. Sắp xếp radix dựa trên việc sorting và thu thập riêng nên là sorting ổn định.
 
 ### Các bước thuật toán
 
@@ -809,7 +809,7 @@ Một số câu hỏi đào sâu thường gặp:
 
 ## Java code template
 
-Trong phỏng vấn sorting, thường tự viết nhất là quick sort và merge sort. Với quick sort cần đặc biệt chú ý đến biên phân vùng. Dưới đây là một cách viết thường gặp:
+Trong phỏng vấn sorting, quick sort và merge sort là hai thuật toán thường phải tự viết nhất. Với quick sort cần đặc biệt chú ý đến biên phân vùng. Dưới đây là một cách viết thường gặp:
 
 ```java
 void quickSort(int[] nums, int left, int right) {
@@ -841,7 +841,7 @@ void swap(int[] nums, int i, int j) {
 }
 ```
 
-Nếu lo array có thứ tự khiến quick sort suy biến, có thể chọn pivot ngẫu nhiên trước khi phân vùng và hoán đổi nó đến vị trí `right`.
+Nếu lo array đã có thứ tự khiến quick sort suy biến, có thể chọn pivot ngẫu nhiên trước khi phân vùng và hoán đổi nó đến vị trí `right`.
 
 ```java
 int randomIndex = left + new Random().nextInt(right - left + 1);
@@ -861,14 +861,14 @@ i: quét từ left đến right - 1
 Sau khi quét xong:
 [left ... less - 1] <= pivot
 [less ... right - 1] > pivot
-Hoán đổi pivot đến less, rồi đệ quy riêng hai phía trái và phải của pivot
+Hoán đổi pivot đến less, rồi đệ quy sắp xếp riêng hai phía trái và phải của pivot
 ```
 
-Một số ví dụ biên nên tự đi qua trước khi viết code:
+Một số ví dụ biên nên tự kiểm tra trước khi viết code:
 
 - Array rỗng hoặc chỉ có một phần tử: trả về trực tiếp.
 - Đã có thứ tự hoặc ngược thứ tự: cố định chọn phần tử đầu/cuối làm pivot dễ bị suy biến.
-- Nhiều phần tử trùng lặp: phân vùng hai chiều thông thường có thể chưa tối ưu, có thể tìm hiểu quick sort ba chiều.
-- Khi interviewer hỏi về tính ổn định, không được nói quick sort ổn định; quick sort thông thường sẽ làm xáo trộn thứ tự các phần tử bằng nhau khi hoán đổi.
+- Nhiều phần tử trùng lặp: phân vùng hai ngả thông thường có thể chưa tối ưu, có thể tìm hiểu quick sort ba ngả.
+- Khi người phỏng vấn hỏi về tính ổn định, không được nói quick sort ổn định; quick sort thông thường sẽ làm xáo trộn thứ tự các phần tử bằng nhau khi hoán đổi.
 
 <!-- @include: @article-footer.snippet.md -->

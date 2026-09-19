@@ -1,5 +1,5 @@
 ---
-title: "Tổng hợp câu hỏi phỏng vấn về DFS và BFS: template tìm kiếm cây, đồ thị, ma trận và đường đi ngắn nhất"
+title: "Tổng hợp câu hỏi phỏng vấn về DFS và BFS: template tìm kiếm trên cây, đồ thị, ma trận và đường đi ngắn nhất"
 description: Tổng hợp câu hỏi phỏng vấn về DFS và BFS, giải thích tìm kiếm theo chiều sâu, tìm kiếm theo chiều rộng, duyệt cây, duyệt đồ thị, tìm kiếm ma trận, duyệt theo tầng, đường đi ngắn nhất và template Java.
 category: Computer Science Basics
 tag:
@@ -10,7 +10,7 @@ head:
       content: DFS,BFS,depth-first search,breadth-first search,tree traversal,graph traversal,matrix search,level-order traversal,shortest path,Java DFS,Java BFS,LeetCode
 ---
 
-DFS và BFS là nền tảng của các bài toán về cây, đồ thị và ma trận. Trong phỏng vấn, người phỏng vấn sẽ không chỉ hỏi “DFS là gì”, mà thường đưa cho bạn một bài toán về đảo, phụ thuộc khóa học, số bước ngắn nhất hoặc duyệt cây nhị phân theo tầng, rồi yêu cầu bạn chọn cách tìm kiếm và xử lý biên.
+DFS và BFS là nền tảng của các bài toán về cây, đồ thị và ma trận. Trong phỏng vấn, người phỏng vấn sẽ không chỉ hỏi “DFS là gì”, mà thường đưa cho bạn một bài toán đảo, bài toán phụ thuộc khóa học, số bước ngắn nhất hoặc duyệt cây nhị phân theo tầng, rồi yêu cầu bạn chọn cách tìm kiếm và xử lý biên.
 
 Một cách phán đoán đơn giản: khi cần đi đến tận cùng, liệt kê các đường đi hoặc xử lý các thành phần liên thông, hãy ưu tiên nghĩ đến DFS; khi cần tiến hành theo tầng hoặc tìm số bước ngắn nhất, hãy ưu tiên nghĩ đến BFS.
 
@@ -26,13 +26,13 @@ Một cách phán đoán đơn giản: khi cần đi đến tận cùng, liệt 
 
 DFS và BFS đều có thể duyệt node, nhưng mỗi cách có ưu thế tự nhiên khác nhau.
 
-| Mục tiêu                                        | Cách thường dùng      | Lý do                                             |
-| ----------------------------------------------- | --------------------- | ------------------------------------------------- |
-| Duyệt tất cả node                               | DFS hoặc BFS đều được | Chỉ cần không truy cập lặp                        |
-| Tìm diện tích thành phần liên thông             | DFS thuận tiện hơn    | Đệ quy mở rộng liên tục, code ngắn                |
-| Tìm số bước ngắn nhất của đồ thị không trọng số | BFS                   | Tiến hành theo tầng, lần đầu đến nơi là ngắn nhất |
-| Liệt kê tất cả đường đi                         | DFS                   | Đường đi tự nhiên nằm trong stack đệ quy          |
-| Duyệt cây nhị phân theo tầng                    | BFS                   | Queue vừa khớp để xử lý theo tầng                 |
+| Mục tiêu                                          | Cách thường dùng      | Lý do                                              |
+| ------------------------------------------------- | --------------------- | -------------------------------------------------- |
+| Duyệt tất cả node                                 | DFS hoặc BFS đều được | Chỉ cần không truy cập lặp                         |
+| Tìm diện tích thành phần liên thông               | DFS thuận tiện hơn    | Mở rộng bằng đệ quy, code ngắn                     |
+| Tìm số bước ngắn nhất trong đồ thị không trọng số | BFS                   | Tiến hành theo tầng, lần đầu đến đích là ngắn nhất |
+| Liệt kê tất cả đường đi                           | DFS                   | Đường đi tự nhiên nằm trong stack đệ quy           |
+| Duyệt cây nhị phân theo tầng                      | BFS                   | Queue vừa khớp để xử lý theo tầng                  |
 
 Nếu trong đề xuất hiện “ít nhất bao nhiêu bước”, “đường đi ngắn nhất”, “lan rộng đến mọi vị trí”, trước tiên hãy nghĩ đến BFS. Nếu xuất hiện “tất cả phương án”, “có tồn tại một đường đi hay không”, “kích thước thành phần liên thông”, trước tiên hãy nghĩ đến DFS.
 
@@ -115,9 +115,9 @@ int bfs(int[][] grid, int startX, int startY, int targetX, int targetY) {
 }
 ```
 
-Đoạn code này trả về số tầng hiện tại khi node đích lần đầu được lấy ra khỏi queue, thay vì chờ queue rỗng. Điều kiện có thể đi qua trong từng bài cụ thể có thể không phải là `0` và `1`, cần điều chỉnh theo đề bài.
+Đoạn code này trả về số tầng hiện tại khi node đích lần đầu được lấy ra khỏi queue, thay vì chờ queue rỗng. Điều kiện để đi qua trong từng bài cụ thể có thể không phải là `0` và `1`, cần điều chỉnh theo đề bài.
 
-Điểm mấu chốt của BFS là “xử lý theo tầng”. Ban đầu queue chứa các node tầng 0, mỗi vòng lấy kích thước queue hiện tại là `size` và chỉ xử lý các node của tầng này; các node mới được mở rộng từ chúng thuộc tầng tiếp theo.
+Điểm mấu chốt của BFS là “xử lý theo tầng”. Ban đầu queue chứa các node tầng 0, mỗi vòng lấy kích thước queue hiện tại làm `size` và chỉ xử lý các node của tầng này; các node mới được mở rộng từ chúng thuộc tầng tiếp theo.
 
 Vì sao BFS trên đồ thị không trọng số có thể tìm đường đi ngắn nhất? Vì chi phí của mỗi cạnh bằng nhau. Khi BFS lần đầu đến một node, chắc chắn nó đã dùng số cạnh ít nhất. Về sau, dù vẫn có thể đến node đó lần nữa, đường đi cũng không ngắn hơn, nên có thể đánh dấu đã truy cập ngay.
 
@@ -127,12 +127,12 @@ BFS đa nguồn cũng rất phổ biến. Ví dụ trong bài “Cam bị thối
 
 Cây không có vòng, nên nhiều trường hợp không cần `visited`. Đồ thị có thể có vòng, vì vậy phải tính đến việc truy cập lặp.
 
-| Bối cảnh                  | Có thường dùng `visited` không? | Giải thích                                                |
-| ------------------------- | ------------------------------- | --------------------------------------------------------- |
-| Duyệt đệ quy cây nhị phân | Thường không                    | Node không có cạnh quay về node cha                       |
-| Duyệt đồ thị vô hướng     | Cần                             | Nếu không, hai node sẽ truy cập lẫn nhau                  |
-| Duyệt đồ thị có hướng     | Thường cần                      | Có thể tồn tại vòng                                       |
-| Tìm kiếm ma trận          | Cần                             | Có thể đi từ trên, dưới, trái, phải quay lại điểm ban đầu |
+| Bối cảnh                  | Có thường dùng `visited` không? | Giải thích                                                          |
+| ------------------------- | ------------------------------- | ------------------------------------------------------------------- |
+| Duyệt đệ quy cây nhị phân | Thường không                    | Node không có cạnh quay về node cha                                 |
+| Duyệt đồ thị vô hướng     | Cần                             | Nếu không, hai node sẽ truy cập lẫn nhau                            |
+| Duyệt đồ thị có hướng     | Thường cần                      | Có thể tồn tại vòng                                                 |
+| Tìm kiếm ma trận          | Cần                             | Có thể đi từ các hướng trên, dưới, trái, phải quay lại điểm ban đầu |
 
 ## Độ phức tạp
 
@@ -156,20 +156,20 @@ Khi duyệt các node lân cận, chỉ cần làm 3 việc:
 2. Kiểm tra có vượt biên hay không.
 3. Kiểm tra đã truy cập hay chưa, hoặc có phù hợp với yêu cầu đề bài hay không.
 
-Nếu đề bài cho phép di chuyển theo đường chéo, chỉ cần mở rộng mảng hướng thành 8 hướng. Không nên viết thủ công 4 đoạn lời gọi đệ quy gần như giống nhau trong code, vì mảng hướng khó bỏ sót điều kiện hơn.
+Nếu đề bài cho phép di chuyển theo đường chéo, chỉ cần mở rộng mảng hướng thành 8 hướng. Không nên viết thủ công 4 đoạn lời gọi đệ quy gần như giống nhau trong code, vì dùng mảng hướng sẽ ít bỏ sót điều kiện hơn.
 
-## Minh họa quá trình và các mẫu biên
+## Minh họa quá trình và các trường hợp biên
 
 Lấy số lượng đảo làm ví dụ: khi gặp một ô đất chưa được truy cập, bắt đầu DFS/BFS từ ô đó để đánh dấu toàn bộ hòn đảo.
 
-| Bước | Thao tác                     | Mục đích                              |
-| ---- | ---------------------------- | ------------------------------------- |
-| 1    | Quét ma trận, tìm một `1`    | Phát hiện một hòn đảo mới             |
-| 2    | Tăng số lượng đảo lên 1      | Ghi nhận thành phần liên thông        |
-| 3    | DFS/BFS từ ô hiện tại        | Đánh dấu toàn bộ phần đất của đảo này |
-| 4    | Tiếp tục quét các ô phía sau | Tránh đếm lặp cùng một hòn đảo        |
+| Bước | Thao tác                      | Mục đích                              |
+| ---- | ----------------------------- | ------------------------------------- |
+| 1    | Quét ma trận, tìm một `1`     | Phát hiện một hòn đảo mới             |
+| 2    | Tăng số lượng đảo lên 1       | Ghi nhận thành phần liên thông        |
+| 3    | DFS/BFS từ ô hiện tại         | Đánh dấu toàn bộ phần đất của đảo này |
+| 4    | Tiếp tục quét các ô tiếp theo | Tránh đếm lặp cùng một hòn đảo        |
 
-Khi kiểm tra tìm kiếm ma trận, nên chú ý các biên sau:
+Khi kiểm tra tìm kiếm ma trận, nên chú ý các trường hợp biên sau:
 
 | Input                       | Trọng tâm                                                                        |
 | --------------------------- | -------------------------------------------------------------------------------- |

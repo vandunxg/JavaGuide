@@ -12,12 +12,14 @@
 
 ## Trạng thái
 
-- Batch hiện tại: 2
+- Batch hiện tại: 3
 - Mục tiêu batch: 50 file
 - Cách chọn: theo thứ tự lộ trình trong `vi/PROGRESS.md`
-- Trạng thái: hoàn tất batch 2
-- Kết quả: 50 file đã tối ưu; không có file unchanged
+- Trạng thái: hoàn tất batch 3
+- Kết quả batch 2: 50 file đã tối ưu; không có file unchanged
 - Kiểm tra batch 2: `git diff --check` đạt; `make check` exit 0; `make vi-build` thành công, 721 pages
+- Kết quả batch 3: 50 file đã tối ưu; không có file unchanged
+- Kiểm tra batch 3: `git diff --check` đạt; `make check` exit 0; `make vi-build` thành công, 721 pages
 
 |   # | File                                                     | Agent       | Trạng thái | Ghi chú                     |
 | --: | -------------------------------------------------------- | ----------- | ---------- | --------------------------- |
@@ -126,3 +128,58 @@
 |  98 | `cs-basics/network/application-layer-protocol.md`         | reviewer-98  | verified   | Đã đối chiếu và tối ưu |
 |  99 | `cs-basics/network/tcp-connection-and-disconnection.md`   | reviewer-99  | verified   | Đã đối chiếu và tối ưu |
 | 100 | `cs-basics/network/tcp-byte-stream-udp-datagram.md`       | reviewer-100 | verified   | Đã đối chiếu và tối ưu |
+
+## Batch 3 — 50 file tiếp theo
+
+|   # | File                                                                      | Agent        | Trạng thái | Ghi chú                |
+| --: | ------------------------------------------------------------------------- | ------------ | ---------- | ---------------------- |
+| 101 | `cs-basics/network/http1.0-vs-http1.1.md`                                 | reviewer-101 | verified   | Đã đối chiếu và tối ưu |
+| 102 | `cs-basics/network/other-network-questions.md`                            | reviewer-102 | verified   | Đã đối chiếu và tối ưu |
+| 103 | `cs-basics/network/other-network-questions2.md`                           | reviewer-103 | verified   | Đã đối chiếu và tối ưu |
+| 104 | `cs-basics/network/the-whole-process-of-accessing-web-pages.md`           | reviewer-104 | verified   | Đã đối chiếu và tối ưu |
+| 105 | `cs-basics/network/http-vs-https.md`                                      | reviewer-105 | verified   | Đã đối chiếu và tối ưu |
+| 106 | `cs-basics/network/https-rsa-vs-ecdhe.md`                                 | reviewer-106 | verified   | Đã đối chiếu và tối ưu |
+| 107 | `cs-basics/network/http-status-codes.md`                                  | reviewer-107 | verified   | Đã đối chiếu và tối ưu |
+| 108 | `cs-basics/network/tcp-reliability-guarantee.md`                          | reviewer-108 | verified   | Đã đối chiếu và tối ưu |
+| 109 | `cs-basics/network/tcp-time-wait.md`                                      | reviewer-109 | verified   | Đã đối chiếu và tối ưu |
+| 110 | `cs-basics/network/tcp-keepalive-vs-http-keepalive.md`                    | reviewer-110 | verified   | Đã đối chiếu và tối ưu |
+| 111 | `cs-basics/network/dns.md`                                                | reviewer-111 | verified   | Đã đối chiếu và tối ưu |
+| 112 | `cs-basics/network/http-vs-rpc.md`                                        | reviewer-112 | verified   | Đã đối chiếu và tối ưu |
+| 113 | `cs-basics/network/arp.md`                                                | reviewer-113 | verified   | Đã đối chiếu và tối ưu |
+| 114 | `cs-basics/network/nat.md`                                                | reviewer-114 | verified   | Đã đối chiếu và tối ưu |
+| 115 | `cs-basics/network/network-attack-means.md`                               | reviewer-115 | verified   | Đã đối chiếu và tối ưu |
+| 116 | `cs-basics/network/computer-network-xiexiren-summary.md`                  | reviewer-116 | verified   | Đã đối chiếu và tối ưu |
+| 117 | `cs-basics/network/can-ping-but-tcp-may-not-connect.md`                   | reviewer-117 | verified   | Đã đối chiếu và tối ưu |
+| 118 | `cs-basics/network/can-tcp-and-udp-use-the-same-port.md`                  | reviewer-118 | verified   | Đã đối chiếu và tối ưu |
+| 119 | `cs-basics/network/maximum-number-of-tcp-connections-per-host.md`         | reviewer-119 | verified   | Đã đối chiếu và tối ưu |
+| 120 | `cs-basics/operating-system/README.md`                                    | reviewer-120 | verified   | Đã đối chiếu và tối ưu |
+| 121 | `cs-basics/operating-system/operating-system-basic-questions-01.md`       | reviewer-121 | verified   | Đã đối chiếu và tối ưu |
+| 122 | `cs-basics/operating-system/operating-system-basic-questions-02.md`       | reviewer-122 | verified   | Đã đối chiếu và tối ưu |
+| 123 | `cs-basics/operating-system/process-and-thread.md`                        | reviewer-123 | verified   | Đã đối chiếu và tối ưu |
+| 124 | `cs-basics/operating-system/interrupt-exception-syscall.md`               | reviewer-124 | verified   | Đã đối chiếu và tối ưu |
+| 125 | `cs-basics/operating-system/cpu-scheduling-and-load.md`                   | reviewer-125 | verified   | Đã đối chiếu và tối ưu |
+| 126 | `cs-basics/operating-system/ipc.md`                                       | reviewer-126 | verified   | Đã đối chiếu và tối ưu |
+| 127 | `cs-basics/operating-system/os-lock-and-sync.md`                          | reviewer-127 | verified   | Đã đối chiếu và tối ưu |
+| 128 | `cs-basics/operating-system/dead-lock.md`                                 | reviewer-128 | verified   | Đã đối chiếu và tối ưu |
+| 129 | `cs-basics/operating-system/memory-management.md`                         | reviewer-129 | verified   | Đã đối chiếu và tối ưu |
+| 130 | `cs-basics/operating-system/virtual-memory.md`                            | reviewer-130 | verified   | Đã đối chiếu và tối ưu |
+| 131 | `cs-basics/operating-system/file-system.md`                               | reviewer-131 | verified   | Đã đối chiếu và tối ưu |
+| 132 | `cs-basics/operating-system/io-multiplexing.md`                           | reviewer-132 | verified   | Đã đối chiếu và tối ưu |
+| 133 | `cs-basics/operating-system/zero-copy.md`                                 | reviewer-133 | verified   | Đã đối chiếu và tối ưu |
+| 134 | `cs-basics/operating-system/linux-intro.md`                               | reviewer-134 | verified   | Đã đối chiếu và tối ưu |
+| 135 | `cs-basics/operating-system/shell-intro.md`                               | reviewer-135 | verified   | Đã đối chiếu và tối ưu |
+| 136 | `cs-basics/algorithms/README.md`                                          | reviewer-136 | verified   | Đã đối chiếu và tối ưu |
+| 137 | `cs-basics/algorithms/complexity-analysis.md`                             | reviewer-137 | verified   | Đã đối chiếu và tối ưu |
+| 138 | `cs-basics/algorithms/binary-search.md`                                   | reviewer-138 | verified   | Đã đối chiếu và tối ưu |
+| 139 | `cs-basics/algorithms/two-pointers-and-sliding-window.md`                 | reviewer-139 | verified   | Đã đối chiếu và tối ưu |
+| 140 | `cs-basics/algorithms/dfs-bfs.md`                                         | reviewer-140 | verified   | Đã đối chiếu và tối ưu |
+| 141 | `cs-basics/algorithms/backtracking.md`                                    | reviewer-141 | verified   | Đã đối chiếu và tối ưu |
+| 142 | `cs-basics/algorithms/dynamic-programming.md`                             | reviewer-142 | verified   | Đã đối chiếu và tối ưu |
+| 143 | `cs-basics/algorithms/greedy.md`                                          | reviewer-143 | verified   | Đã đối chiếu và tối ưu |
+| 144 | `cs-basics/algorithms/top-k.md`                                           | reviewer-144 | verified   | Đã đối chiếu và tối ưu |
+| 145 | `cs-basics/algorithms/string-algorithm-problems.md`                       | reviewer-145 | verified   | Đã đối chiếu và tối ưu |
+| 146 | `cs-basics/algorithms/linkedlist-algorithm-problems.md`                   | reviewer-146 | verified   | Đã đối chiếu và tối ưu |
+| 147 | `cs-basics/algorithms/10-classical-sorting-algorithms.md`                 | reviewer-147 | verified   | Đã đối chiếu và tối ưu |
+| 148 | `cs-basics/algorithms/classical-algorithm-problems-recommendations.md`    | reviewer-148 | verified   | Đã đối chiếu và tối ưu |
+| 149 | `cs-basics/algorithms/common-data-structures-leetcode-recommendations.md` | reviewer-149 | verified   | Đã đối chiếu và tối ưu |
+| 150 | `cs-basics/algorithms/the-sword-refers-to-offer.md`                       | reviewer-150 | verified   | Đã đối chiếu và tối ưu |

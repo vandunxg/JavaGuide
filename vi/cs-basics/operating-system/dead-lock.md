@@ -1,6 +1,6 @@
 ---
-title: "Giải thích chi tiết về deadlock: bốn điều kiện cần, xử lý deadlock trong Java và xử lý deadlock database"
-description: "Tổng hợp câu hỏi phỏng vấn thường gặp về deadlock, bắt đầu từ định nghĩa và bốn điều kiện cần, kết hợp thực hành xử lý sự cố và retry transaction với Java synchronized, ReentrantLock, ThreadMXBean, jstack, jcmd, JConsole cùng deadlock database PostgreSQL, MySQL."
+title: "Giải thích chi tiết về deadlock: bốn điều kiện cần, xử lý deadlock trong Java và database"
+description: "Tổng hợp câu hỏi phỏng vấn thường gặp về deadlock, từ định nghĩa và bốn điều kiện cần đến thực hành với Java synchronized, ReentrantLock, ThreadMXBean, jstack, jcmd, JConsole, cùng xử lý sự cố deadlock trong database PostgreSQL và MySQL, cũng như retry transaction."
 category: Computer Science Basics
 tag:
   - Operating System
@@ -18,23 +18,23 @@ Hai thread đều không ném exception, cũng không phải CPU bị chạy h�
 
 Điểm phiền phức của loại vấn đề này nằm ở đây: chương trình không “tính sai”, mà bị kẹt trên một chuỗi chờ không thể tự tháo gỡ.
 
-Deadlock của thread chính là tình huống này: một nhóm thread chờ nhau giải phóng resource, quan hệ chờ tạo thành vòng kín, các thread tham gia đều không thể tự tiếp tục thực thi.
+Thread deadlock chính là tình huống này: một nhóm thread chờ nhau giải phóng resource, quan hệ chờ tạo thành vòng kín, các thread tham gia đều không thể tự tiếp tục thực thi.
 
 Nếu các thread này vừa hay đang xử lý những luồng quan trọng như order, payment, inventory, thứ bên ngoài nhìn thấy không chỉ là một thread `BLOCKED`, mà còn có thể là API timeout, queue dồn ứ, thậm chí process mãi không thể shutdown sạch.
 
 ![Sơ đồ tình huống deadlock: thread A giữ resource1 và chờ resource2, thread B giữ resource2 và chờ resource1, chuỗi chờ tạo thành vòng kín](https://oss.javaguide.cn/github/javaguide/cs-basics/operating-system/dead-lock-deadlock-scenario.png)
 
-Mở rộng phạm vi một chút, deadlock không chỉ thuộc về Java thread. Process, database transaction, distributed task, chỉ cần cùng giữ resource rồi tiếp tục chờ nhau đều có thể mắc kẹt theo cùng một dạng. Resource ở đây cũng không nhất thiết là printer hay tape drive trong giáo trình Operating System; nó có thể là Java object monitor, `ReentrantLock`, database row lock, distributed lock, connection trong connection pool, worker thread trong thread pool, thậm chí là pipe buffer.
+Mở rộng phạm vi một chút, deadlock không chỉ thuộc về thread Java. Process, database transaction, distributed task, chỉ cần cùng giữ resource rồi tiếp tục chờ nhau đều có thể mắc kẹt theo cùng một dạng. Resource ở đây cũng không nhất thiết là printer hay tape drive trong giáo trình Operating System; nó có thể là Java object monitor, `ReentrantLock`, database row lock, distributed lock, connection trong connection pool, worker thread trong thread pool, thậm chí là pipe buffer.
 
 Phần sau sẽ dùng code Java để minh họa vì loại ví dụ này dễ tái hiện nhất. Nhưng hãy nhớ, deadlock không phải vấn đề riêng của Java. Chỉ cần trong system đồng thời xuất hiện resource độc quyền, giữ resource rồi tiếp tục chờ, resource không thể bị cưỡng chế thu hồi, và quan hệ chờ tạo thành vòng, thread, process và transaction đều có thể mắc vào.
 
 Nếu bạn muốn trước hết làm rõ ranh giới trách nhiệm của các synchronization primitive như mutex, semaphore, condition variable, futex, có thể đọc trước bài [Giải thích chi tiết về lock và cơ chế đồng bộ của Operating System: mutex, semaphore, condition variable, spinlock và futex](./os-lock-and-sync.md). Chuyên đề deadlock này sẽ tập trung vào cách quan hệ chờ tạo thành vòng và cách xử lý sự cố, khôi phục trên production.
 
-Bài viết này trình bày theo thứ tự thường dùng hơn khi xử lý sự cố: trước tiên xem vòng chờ hình thành thế nào, sau đó xem bốn điều kiện cần, code tái hiện trong Java, resource allocation graph, strategy xử lý, cuối cùng đi vào cách dump thread stack và xem database lock trên production.
+Bài viết này trình bày theo thứ tự thường dùng hơn khi xử lý sự cố: trước tiên xem vòng chờ hình thành thế nào, sau đó xem bốn điều kiện cần, code tái hiện trong Java, resource allocation graph, chiến lược xử lý, cuối cùng đi vào cách dump thread stack và xem database lock trên production.
 
-## Deadlock bị kẹt như thế nào?
+## Deadlock hình thành như thế nào?
 
-Trước tiên hãy xem tình huống thường gặp nhất trong concurrent programming. System có hai thread và hai resource:
+Trước tiên hãy xem tình huống thường gặp nhất trong concurrent programming. Hệ thống có hai thread và hai resource:
 
 - Thread A lấy resource 1 trước, sau đó request resource 2.
 - Thread B lấy resource 2 trước, sau đó request resource 1.
@@ -54,16 +54,16 @@ Còn một điểm rất dễ phán đoán sai khi xử lý sự cố: **deadloc
 
 Giáo trình Operating System thường trình bày các điều kiện Coffman. Để deadlock xảy ra, 4 điều kiện sau phải đồng thời đúng:
 
-| Điều kiện                        | Ý nghĩa                                                                         | Tương ứng với Java hoặc database                                    |
-| -------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Mutual exclusion                 | Một resource tại cùng một thời điểm chỉ có thể bị một execution unit chiếm dụng | `synchronized` lock object, exclusive row lock, exclusive file lock |
-| Request and hold (hold and wait) | Đã giữ một phần resource, đồng thời tiếp tục chờ resource khác                  | Thread giữ `resource1` rồi tiếp tục request `resource2`             |
-| No preemption                    | Resource không thể bị bên ngoài cưỡng chế lấy đi, chỉ holder mới có thể release | Java built-in lock không thể bị thread khác trực tiếp thu hồi       |
-| Circular wait                    | Quan hệ chờ tạo thành vòng kín                                                  | Thread 1 chờ thread 2, thread 2 lại chờ thread 1                    |
+| Điều kiện                        | Ý nghĩa                                                                           | Tương ứng với Java hoặc database                                    |
+| -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Mutual exclusion                 | Một resource tại cùng một thời điểm chỉ có thể được một execution unit chiếm dụng | `synchronized` lock object, exclusive row lock, exclusive file lock |
+| Request and hold (hold and wait) | Đã giữ một phần resource, đồng thời tiếp tục chờ resource khác                    | Thread giữ `resource1` rồi tiếp tục request `resource2`             |
+| No preemption                    | Resource không thể bị bên ngoài cưỡng chế lấy đi, chỉ holder mới có thể release   | Java built-in lock không thể bị thread khác trực tiếp thu hồi       |
+| Circular wait                    | Quan hệ chờ tạo thành vòng kín                                                    | Thread 1 chờ thread 2, thread 2 lại chờ thread 1                    |
 
 ![Sơ đồ bốn điều kiện cần của deadlock: mutual exclusion, request and hold, no preemption, circular wait phải đồng thời đúng mới tạo thành deadlock](https://oss.javaguide.cn/github/javaguide/cs-basics/operating-system/dead-lock-four-conditions.png)
 
-Đừng xem bảng này như checklist “chỉ cần thỏa một điều kiện là deadlock”. Ý nghĩa thực sự là: cả bốn điều kiện cùng xuất hiện thì deadlock mới có điều kiện xảy ra; thiếu bất kỳ điều kiện nào, vòng chờ sẽ rất khó khép kín.
+Đừng xem bảng này như checklist “chỉ cần thỏa một điều kiện là deadlock”. Ý nghĩa thực sự là: cả bốn điều kiện cùng xuất hiện thì deadlock mới có thể xảy ra; thiếu bất kỳ điều kiện nào, vòng chờ sẽ rất khó khép kín.
 
 Khi viết business code, điều dễ can thiệp nhất thường là điều kiện thứ 2 và thứ 4.
 
@@ -71,9 +71,9 @@ Mutual exclusion thường khó tránh. Inventory của cùng một row, balance
 
 ## Tái hiện một deadlock bằng Java
 
-Đoạn code dưới đây chuyển hình 1 thành Java. Hai `Object` lần lượt đóng vai trò resource 1 và resource 2, hai thread vào `synchronized` theo thứ tự ngược nhau.
+Đoạn code dưới đây chuyển sơ đồ 1 thành Java. Hai `Object` lần lượt đóng vai trò resource 1 và resource 2, hai thread vào `synchronized` theo thứ tự ngược nhau.
 
-`Thread.sleep(1000)` không phải nguyên nhân của deadlock; nó chỉ kéo dài window để hai thread thực thi xen kẽ, giúp vấn đề dễ tái hiện hơn.
+`Thread.sleep(1000)` không phải nguyên nhân của deadlock; nó chỉ mở rộng khoảng thời gian để hai thread thực thi xen kẽ, giúp vấn đề dễ tái hiện hơn.
 
 ```java
 public class DeadLockDemo {
@@ -123,9 +123,9 @@ Thread[Thread 1,5,main]waiting get resource2
 Thread[Thread 2,5,main]waiting get resource1
 ```
 
-Chương trình dừng ở đây. `sleep()` sớm muộn cũng kết thúc; thứ thực sự bị kẹt là `synchronized` ở tầng thứ hai: thread 1 không vào được `resource2`, thread 2 không vào được `resource1`.
+Chương trình dừng ở đây. `sleep()` sớm muộn cũng kết thúc; thứ thực sự bị kẹt là `synchronized` bên trong: thread 1 không vào được `resource2`, thread 2 không vào được `resource1`.
 
-Đối chiếu hiện trường với bốn điều kiện ở trên:
+Đối chiếu trạng thái thực tế với bốn điều kiện ở trên:
 
 - Mutual exclusion: `resource1` và `resource2` tại cùng một thời điểm chỉ có thể được một thread giữ.
 - Request and hold: thread 1 giữ `resource1` và chờ `resource2`, thread 2 giữ `resource2` và chờ `resource1`.
@@ -208,22 +208,22 @@ Graph chỉ giữ lại “ai chờ ai” này gọi là wait-for graph, có th�
 
 Khi nói về xử lý deadlock, thường thấy 4 từ: prevention, avoidance, detection, recovery. Tên gọi khá giống nhau, nhưng thời điểm can thiệp khác nhau.
 
-Trong business code, phổ biến nhất là prevention, chẳng hạn thống nhất thứ tự lấy lock và rút ngắn thời gian giữ lock; database thường quen với detection và recovery vì transaction có thể rollback; Banker’s algorithm thuộc avoidance, rất phù hợp để hiểu safe state, nhưng backend service thông thường hiếm khi thực sự triển khai một bộ hoàn chỉnh theo cách này.
+Trong business code, phổ biến nhất là prevention, chẳng hạn thống nhất thứ tự lấy lock và rút ngắn thời gian giữ lock; database thường dùng detection và recovery vì transaction có thể rollback; Banker’s algorithm thuộc avoidance, rất phù hợp để hiểu safe state, nhưng backend service thông thường hiếm khi thực sự triển khai một bộ hoàn chỉnh theo cách này.
 
-| Phương pháp | Cách làm                                                                                       | Cái giá                                                 | Mức độ phổ biến trong engineering                           |
-| ----------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------- |
-| Prevention  | Phá vỡ một trong bốn điều kiện deadlock để cấu trúc deadlock không hình thành                  | Có thể giảm concurrency hoặc tăng constraint khi coding | Rất phổ biến                                                |
-| Avoidance   | Trước khi phân bổ resource, phán đoán việc phân bổ này có đẩy system vào dangerous state không | Cần biết trước resource demand, chi phí kiểm tra cao    | Thường được dạy trong giáo trình, ít gặp ở system phổ thông |
-| Detection   | Cho phép deadlock xảy ra, định kỳ hoặc theo nhu cầu kiểm tra vòng chờ                          | Bản thân việc detection có chi phí                      | Thường gặp ở database, JVM tool, kernel debugging           |
-| Recovery    | Sau khi phát hiện deadlock, terminate, rollback hoặc preempt resource                          | Có thể loại bỏ work đã hoàn tất                         | Khá tự nhiên trong database transaction                     |
+| Phương pháp | Cách làm                                                                                       | Chi phí                                                 | Mức độ phổ biến trong thực tế                                  |
+| ----------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------- |
+| Prevention  | Phá vỡ một trong bốn điều kiện deadlock để cấu trúc deadlock không hình thành                  | Có thể giảm concurrency hoặc tăng constraint trong code | Rất phổ biến                                                   |
+| Avoidance   | Trước khi phân bổ resource, phán đoán việc phân bổ này có đẩy system vào dangerous state không | Cần biết trước resource demand, chi phí kiểm tra cao    | Thường được dạy trong giáo trình, ít gặp ở system thông thường |
+| Detection   | Cho phép deadlock xảy ra, định kỳ hoặc theo nhu cầu kiểm tra vòng chờ                          | Bản thân việc detection có chi phí                      | Thường gặp ở database, tool JVM, kernel debugging              |
+| Recovery    | Sau khi phát hiện deadlock, terminate, rollback hoặc preempt resource                          | Có thể làm mất phần việc đã hoàn tất                    | Khá tự nhiên trong database transaction                        |
 
-![Sơ đồ strategy xử lý deadlock: vị trí tác động và mức độ phổ biến trong engineering của bốn loại prevention, avoidance, detection, recovery](https://oss.javaguide.cn/github/javaguide/cs-basics/operating-system/dead-lock-strategies.png)
+![Sơ đồ chiến lược xử lý deadlock: vị trí tác động và mức độ phổ biến trong thực tế của bốn loại prevention, avoidance, detection, recovery](https://oss.javaguide.cn/github/javaguide/cs-basics/operating-system/dead-lock-strategies.png)
 
 ### Deadlock prevention
 
-Prevention làm một việc rất trực tiếp: không để cả bốn điều kiện cần cùng đạt được.
+Prevention làm một việc rất trực tiếp: không để cả bốn điều kiện cần đồng thời được thỏa mãn.
 
-**Phá vỡ mutual exclusion**: biến resource thành dạng có thể share. Read-only data, immutable object, lock-free data structure, append-only log đều có thể giảm nhu cầu mutual exclusion. Nhưng con đường này thường không đi được, chẳng hạn việc giảm inventory trên cùng một row, ghi vào cùng một vị trí trong file, hay cập nhật balance của cùng một user vốn không thể để nhiều execution unit tùy ý sửa đồng thời.
+**Phá vỡ mutual exclusion**: biến resource thành dạng có thể dùng chung. Read-only data, immutable object, lock-free data structure, append-only log đều có thể giảm nhu cầu mutual exclusion. Nhưng con đường này thường không đi được, chẳng hạn việc giảm inventory trên cùng một row, ghi vào cùng một vị trí trong file, hay cập nhật balance của cùng một user vốn không thể để nhiều execution unit tùy ý sửa đồng thời.
 
 **Phá vỡ hold and wait**: hoặc lấy đủ resource một lần, hoặc không lấy resource nào. Như vậy sẽ không xuất hiện trạng thái “đang nắm A nhưng cứ chờ B”. Cái giá cũng rõ ràng: resource utilization có thể giảm, caller còn phải biết trước chính xác mình cần những resource nào.
 
@@ -259,7 +259,7 @@ try {
 }
 ```
 
-Ưu điểm của đoạn code này là không chờ vô hạn. Nhược điểm cũng cần nhìn rõ: nó chỉ biến việc chờ thành failure return; retry thế nào, có cho phép retry hay không, có idempotency key hay không đều phải do business tự xử lý. Nếu không, deadlock biến mất nhưng frequent failure hoặc livelock lại xuất hiện.
+Ưu điểm của đoạn code này là không chờ vô hạn. Nhược điểm cũng cần nhìn rõ: nó chỉ biến việc chờ thành kết quả thất bại; retry thế nào, có cho phép retry hay không, có idempotency key hay không đều phải do business tự xử lý. Nếu không, deadlock biến mất nhưng failure thường xuyên hoặc livelock lại xuất hiện.
 
 **Phá vỡ circular wait**: sắp xếp resource theo một thứ tự ổn định, mọi thread chỉ được request theo thứ tự này. Ví dụ phổ biến nhất trong backend business là khi batch update database row, sort theo primary key trước rồi update từng row.
 
@@ -307,7 +307,7 @@ public class DeadlockDetector {
 }
 ```
 
-`findDeadlockedThreads()` có thể kiểm tra object monitor, đồng thời bao phủ ownable synchronizer trong `java.util.concurrent`. Nó phù hợp hơn khi đặt trong diagnostic tool hoặc temporary troubleshooting script, không phù hợp để nhét thường xuyên vào business main flow; bản thân việc kiểm tra cũng có overhead.
+`findDeadlockedThreads()` có thể kiểm tra object monitor, đồng thời bao phủ ownable synchronizer trong `java.util.concurrent`. Nó phù hợp hơn khi đặt trong diagnostic tool hoặc script xử lý sự cố tạm thời, không phù hợp để nhét thường xuyên vào business main flow; bản thân việc kiểm tra cũng có overhead.
 
 Giới hạn của nó cũng cần nói rõ: nó chỉ nhìn thấy monitor và ownable synchronizer có thể quan sát bên trong JVM. Thread A giữ Java lock rồi chờ database row lock, thread B giữ database row lock rồi lại bị kẹt ở một application action khác; loại cross-system wait chain này không thể xem đầy đủ chỉ bằng `ThreadMXBean`, mà còn phải đối chiếu thread stack, database lock view và business log.
 
@@ -341,7 +341,7 @@ jcmd <pid> Thread.dump_to_file -format=text thread-dump.txt
 jcmd <pid> Thread.dump_to_file -format=json thread-dump.json
 ```
 
-Các field trong virtual thread dump và traditional thread dump không hoàn toàn giống nhau; object address, lock, JNI statistic, heap statistic và những thông tin thường có trong traditional thread dump có thể không được chứa. Khi xử lý sự cố đừng chỉ xem một dump, cần xem cùng business log, JFR, database và state của external dependency.
+Các field trong virtual thread dump và traditional thread dump không hoàn toàn giống nhau; object address, lock, JNI statistic, heap statistic và những thông tin thường có trong traditional thread dump có thể không xuất hiện. Khi xử lý sự cố đừng chỉ xem một dump, cần xem cùng business log, JFR, database và state của external dependency.
 
 ### Deadlock recovery
 
@@ -390,13 +390,13 @@ COMMIT;
 
 Nếu T1 lock `id=1` trước, T2 lock `id=2` trước, sau đó chúng sẽ chờ lẫn nhau.
 
-Database thường không để hai transaction này treo mãi. PostgreSQL có parameter `deadlock_timeout`, mặc định là `1s`; sau khi transaction chờ lock quá thời gian này, database mới bắt đầu kiểm tra deadlock vì việc dựng và scan wait-for graph cũng tốn chi phí. MySQL InnoDB mặc định bật deadlock detection; sau khi phát hiện vòng chờ, nó sẽ rollback một transaction để tháo gỡ tình hình, thường có xu hướng chọn transaction sửa ít row hơn.
+Database thường không để hai transaction này treo mãi. PostgreSQL có parameter `deadlock_timeout`, mặc định là `1s`; sau khi transaction chờ lock quá thời gian này, database mới bắt đầu kiểm tra deadlock vì việc dựng và scan wait-for graph cũng tốn chi phí. MySQL InnoDB mặc định bật deadlock detection; sau khi phát hiện vòng chờ, nó sẽ rollback một transaction để giải quyết tình trạng này, thường có xu hướng chọn transaction sửa ít row hơn.
 
 Application layer cần phối hợp hai việc.
 
-Thứ nhất, sau khi transaction thất bại phải có thể chạy lại. Deadlock error code của PostgreSQL là SQLSTATE `40P01`; khi MySQL InnoDB gặp deadlock, nó sẽ rollback toàn bộ transaction. Sau khi nhận loại lỗi này, application nên thực thi lại toàn bộ transaction, thay vì chỉ bổ sung SQL cuối cùng.
+Thứ nhất, sau khi transaction thất bại phải có thể chạy lại. Deadlock error code của PostgreSQL là SQLSTATE `40P01`; khi MySQL InnoDB gặp deadlock, nó sẽ rollback toàn bộ transaction. Sau khi nhận loại lỗi này, application nên thực thi lại toàn bộ transaction, thay vì chỉ thực thi lại câu SQL cuối cùng.
 
-Thứ hai, thứ tự lock phải ổn định. Khi batch update nhiều row, sort theo primary key hoặc unique business key trước, mọi entry point đều update theo cùng một thứ tự. Thói quen này rất bình thường nhưng có thể giảm đáng kể cross-wait.
+Thứ hai, thứ tự lock phải ổn định. Khi batch update nhiều row, sort theo primary key hoặc unique business key trước, mọi entry point đều update theo cùng một thứ tự. Thói quen này rất đơn giản nhưng có thể giảm đáng kể các quan hệ chờ chéo.
 
 Trước khi retry cũng phải xác nhận business có idempotency hay không. Cách thường gặp là dùng unique request number, business serial number hoặc state machine check. Nếu không, database đã xử lý deadlock xong nhưng application layer lại có thể tạo duplicate charge, duplicate shipment do retry.
 
@@ -408,7 +408,7 @@ Trước khi retry cũng phải xác nhận business có idempotency hay không.
 - MySQL có thể dùng `SHOW ENGINE INNODB STATUS` để xem thông tin InnoDB deadlock gần nhất; nếu deadlock xảy ra thường xuyên, có thể cân nhắc bật `innodb_print_all_deadlocks` để ghi toàn bộ thông tin deadlock vào error log.
 - PostgreSQL có thể kết hợp error log, `pg_locks`, `pg_stat_activity` để kiểm tra quan hệ blocking.
 
-Trong PostgreSQL, trước tiên có thể dùng query dưới đây để xem session nào hiện đang chờ lock và bị pid nào block:
+Trong PostgreSQL, trước tiên có thể dùng query dưới đây để xem session nào hiện đang chờ lock và bị pid nào chặn:
 
 ```sql
 SELECT
@@ -423,9 +423,9 @@ FROM pg_stat_activity a
 WHERE a.wait_event_type = 'Lock';
 ```
 
-SQL này chỉ xem được quan hệ chờ hiện tại. Để phân tích một deadlock đã xảy ra, còn phải quay lại chi tiết deadlock trong database error log, tìm traceId/requestId trong application log, rồi khôi phục thứ tự SQL mà hai transaction lần lượt thực thi.
+SQL này chỉ xem được quan hệ chờ hiện tại. Để phân tích một deadlock đã xảy ra, còn phải quay lại chi tiết deadlock trong database error log, tìm traceId/requestId trong application log, rồi dựng lại thứ tự SQL mà hai transaction lần lượt thực thi.
 
-Database deadlock không có nghĩa là “database bị hỏng”. Phần lớn thời gian, nó đang nhắc bạn rằng thứ tự application layer truy cập cùng một nhóm resource chưa đủ ổn định.
+Database deadlock không có nghĩa là “database bị hỏng”. Thông thường, nó đang nhắc bạn rằng thứ tự application layer truy cập cùng một nhóm resource chưa đủ ổn định.
 
 ## Deadlock, starvation và livelock khác nhau thế nào?
 
@@ -434,14 +434,14 @@ Các khái niệm này đều biểu hiện thành “chương trình không ti�
 | Vấn đề     | Biểu hiện                                                                                        | Nguyên nhân điển hình                                |
 | ---------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
 | Deadlock   | Nhiều execution unit chờ lẫn nhau, tạo thành vòng kín                                            | Lấy lock ngược thứ tự, transaction update chéo       |
-| Starvation | Một execution unit không lấy được resource trong thời gian dài, nhưng toàn system vẫn tiến triển | Priority quá thấp, cạnh tranh unfair lock            |
+| Starvation | Một execution unit không lấy được resource trong thời gian dài, nhưng toàn system vẫn tiến triển | Priority quá thấp, cạnh tranh trên unfair lock       |
 | Livelock   | Execution unit liên tục hoạt động nhưng luôn nhường nhau, không ai hoàn tất                      | Cùng retry sau failure, strategy backoff quá đồng bộ |
 
 ![Sơ đồ so sánh deadlock, starvation và livelock: deadlock biểu hiện bằng vòng chờ, starvation biểu hiện bằng việc không lấy được resource trong thời gian dài, livelock biểu hiện bằng hoạt động liên tục nhưng không tiến triển](https://oss.javaguide.cn/github/javaguide/cs-basics/operating-system/dead-lock-deadlock-vs-starvation-livelock.png)
 
 Có thể ghi nhớ bằng ba hình ảnh: deadlock giống hai chiếc xe chắn nhau giữa cầu hẹp, không ai chịu lùi; starvation giống việc luôn có người chen hàng, người ở cuối hàng mãi không đến lượt; livelock giống hai người đi ngược chiều, lần nào cũng đồng thời tránh về cùng một phía nên mãi không đi qua được.
 
-Khi xử lý sự cố đừng chỉ nhìn hiện tượng “bị kẹt”. Deadlock cần tìm vòng chờ, starvation cần xem scheduling hoặc lock contention có thiên lệch trong thời gian dài hay không, livelock cần xem retry logic có trói mọi participant vào cùng một nhịp hay không.
+Khi xử lý sự cố đừng chỉ nhìn hiện tượng “bị kẹt”. Deadlock cần tìm vòng chờ, starvation cần xem scheduling hoặc lock contention có thiên lệch trong thời gian dài hay không, livelock cần xem retry logic có khiến mọi participant cùng nhịp hay không.
 
 ## Những gì bị kẹt nhưng chưa chắc là deadlock?
 
@@ -458,7 +458,7 @@ Bằng chứng mấu chốt để nhận định deadlock không phải “chậ
 
 ## Xử lý sự cố Java deadlock trên production thế nào?
 
-Nếu API trên production bị kẹt, trước hết đừng vội restart. Chỉ cần process còn sống, hãy cố gắng lưu lại thread stack và các metric hiện trường trước.
+Nếu API trên production bị kẹt, trước hết đừng vội restart. Chỉ cần process còn sống, hãy cố gắng lưu lại thread stack và các metric tại thời điểm đó trước.
 
 ### 1. Trước tiên xác nhận có phải “treo toàn bộ” không
 
@@ -466,8 +466,8 @@ Trước tiên xem hiện tượng có tập trung vào việc “thread không 
 
 - Một số API liên tục timeout nhưng process vẫn còn sống.
 - CPU không cao, số thread, số connection và request queue liên tục dồn lại.
-- Active thread trong thread pool bị chiếm đầy trong thời gian dài, queue không giảm.
-- Connection trong database connection pool bị chiếm mà không release.
+- Số active thread trong thread pool luôn đầy trong thời gian dài, queue không giảm.
+- Connection trong database connection pool bị chiếm mà không được release.
 
 Những hiện tượng này chỉ cho thấy service đang chờ, chưa đủ chứng minh là deadlock. Slow SQL, external dependency bị kẹt, hay thread pool config không hợp lý cũng tạo ra hiện trường tương tự.
 
@@ -483,9 +483,9 @@ sleep 10
 jcmd <pid> Thread.print -l > thread-3.log
 ```
 
-Giá trị của nhiều stack nằm ở việc so sánh. Nếu cả ba lần đều dừng ở cùng một lock, cùng một connection pool, cùng một đoạn business code, phán đoán sẽ đáng tin hơn nhiều so với một stack đơn lẻ.
+Giá trị của nhiều stack nằm ở việc so sánh. Nếu cả ba lần đều dừng ở cùng một lock, cùng một connection pool, cùng một đoạn business code, phán đoán sẽ đáng tin hơn nhiều so với chỉ một stack.
 
-Thread deadlock mà Java có thể nhận diện thường sẽ in trực tiếp thông tin deadlock trong thread stack. Nếu không có output trực tiếp, cũng có thể quan sát xem nhiều thread có dừng lâu ở cùng một nhóm lock, cùng logic lấy connection pool hoặc cùng một business method hay không.
+Thread deadlock mà Java có thể nhận diện thường sẽ in trực tiếp thông tin deadlock trong thread stack. Nếu không có output trực tiếp, cũng có thể quan sát xem nhiều thread có dừng lâu ở cùng một nhóm lock, cùng logic lấy connection từ connection pool hoặc cùng một business method hay không.
 
 ### 3. Lần theo `waiting to lock` để tìm holder
 
@@ -549,7 +549,7 @@ public void transfer(Account from, Account to, long amount) {
 }
 ```
 
-Trong ví dụ này, dù A chuyển tiền cho B hay B chuyển tiền cho A, đều lock account có ID nhỏ trước, sau đó lock account có ID lớn. Sau khi cố định thứ tự, circular wait đã bớt đi một edge.
+Trong ví dụ này, dù A chuyển tiền cho B hay B chuyển tiền cho A, đều lock account có ID nhỏ trước, sau đó lock account có ID lớn. Sau khi cố định thứ tự, một cạnh trong circular wait không còn xuất hiện.
 
 ### Tránh thực hiện slow operation khi đang giữ lock
 
@@ -588,18 +588,18 @@ Timeout chỉ giới hạn thời gian chờ, không tự động bảo đảm b
 
 ### Hạn chế trộn nhiều lock system
 
-Khó xử lý sự cố hơn là cross-layer deadlock, chẳng hạn:
+Khó xử lý sự cố nhất là cross-layer deadlock, chẳng hạn:
 
 - Java thread giữ JVM lock, đồng thời chờ database row lock.
 - Request khác giữ database row lock, callback vào application logic rồi chờ JVM lock.
 
-Wait chain này đồng thời xuất hiện trong JVM thread stack và database log, chỉ xem một phía sẽ không đầy đủ. Có thể kiểm soát lock trong cùng một layer thì đừng để quan hệ chờ xuyên qua quá nhiều component; khi bắt buộc cross-layer, ít nhất phải có timeout, log và thứ tự thống nhất.
+Wait chain này đồng thời xuất hiện trong JVM thread stack và database log, chỉ xem một phía sẽ không đầy đủ. Nếu có thể kiểm soát lock trong cùng một layer thì đừng để quan hệ chờ xuyên qua quá nhiều component; khi bắt buộc cross-layer, ít nhất phải có timeout, log và thứ tự thống nhất.
 
 ### Đặt tên cho lock, đặt tên cho thread
 
-Khi xử lý sự cố trên production, điều đáng sợ nhất là thấy thông tin kiểu “Thread-17 chờ Object@4afcd809”. Thread pool dùng custom thread name, lock object gắn với business ID, log in ra thứ tự resource quan trọng; bình thường viết thêm vài dòng có thể tiết kiệm rất nhiều thời gian khi có sự cố.
+Khi xử lý sự cố trên production, điều đáng sợ nhất là thấy thông tin kiểu “Thread-17 chờ Object@4afcd809”. Hãy đặt custom thread name cho thread pool, gắn lock object với business ID và log thứ tự resource quan trọng; bình thường viết thêm vài dòng có thể tiết kiệm rất nhiều thời gian khi có sự cố.
 
-Ví dụ thêm business pool vào thread name:
+Ví dụ thêm tên business pool vào thread name:
 
 ```java
 private static final AtomicInteger THREAD_INDEX = new AtomicInteger();
@@ -617,7 +617,7 @@ Bản thân việc đặt tên không thể ngăn deadlock, nhưng giúp bạn n
 
 ## Trả lời câu hỏi phỏng vấn về deadlock thế nào?
 
-Trong interview về deadlock, không cần vừa bắt đầu đã đọc thuộc một định nghĩa dài. Có thể dùng ví dụ hai lock chờ lẫn nhau để giải thích rõ tình huống trước:
+Khi phỏng vấn về deadlock, không cần vừa bắt đầu đã đọc thuộc một định nghĩa dài. Có thể dùng ví dụ hai lock chờ lẫn nhau để giải thích rõ tình huống trước:
 
 > Deadlock là trạng thái nhiều thread hoặc process chờ nhau release resource, khiến mọi participant không thể tiếp tục thực thi. Ví dụ điển hình là thread A giữ lock 1 và chờ lock 2, thread B giữ lock 2 và chờ lock 1.
 
@@ -627,19 +627,19 @@ Sau đó bổ sung bốn điều kiện cần:
 
 Tiếp theo nói về cách xử lý:
 
-> Trong engineering, cách dùng phổ biến nhất là prevention, chẳng hạn thống nhất thứ tự lấy lock, thu nhỏ phạm vi lock, request toàn bộ resource một lần, sử dụng timed lock. Giáo trình Operating System còn trình bày Banker’s algorithm, thuộc deadlock avoidance và cần biết trước maximum resource demand. Database thường dùng detection và recovery: sau khi phát hiện vòng chờ thì rollback một transaction, sau đó application layer retry.
+> Trong thực tế, cách dùng phổ biến nhất là prevention, chẳng hạn thống nhất thứ tự lấy lock, thu nhỏ phạm vi lock, request toàn bộ resource một lần, sử dụng timed lock. Giáo trình Operating System còn trình bày Banker’s algorithm, thuộc deadlock avoidance và cần biết trước maximum resource demand. Database thường dùng detection và recovery: sau khi phát hiện vòng chờ thì rollback một transaction, sau đó application layer retry.
 
 Nếu được hỏi tiếp về cách xử lý sự cố trong Java:
 
 > Java có thể dùng `jcmd <pid> Thread.print -l` hoặc `jstack -l <pid>` để dump thread stack, cũng có thể dùng `ThreadMXBean.findDeadlockedThreads()` để chẩn đoán trong chương trình. Khi xử lý sự cố, hãy xem thread state, lock đang chờ, lock đã giữ, rồi quay lại code để xác nhận có lấy lock ngược thứ tự hoặc thực hiện slow operation trong thời gian giữ lock hay không.
 
-Cách trả lời này bao quát concept, condition, solution và cách xử lý sự cố, đầy đủ hơn so với chỉ học thuộc bốn điều kiện.
+Cách trả lời này bao quát khái niệm, điều kiện, phương án và cách xử lý sự cố, đầy đủ hơn so với chỉ học thuộc bốn điều kiện.
 
 ## Tổng kết
 
 Điều đáng nhớ nhất về deadlock không phải thuật ngữ, mà là quan hệ chờ.
 
-Chỉ cần trong code tồn tại path “đã giữ một phần resource nhưng tiếp tục chờ phần khác”, hãy hỏi thêm: các quan hệ chờ này có khả năng tạo thành vòng hay không? Nếu có, hãy cố định thứ tự, rút ngắn thời gian giữ, cho phép timeout để rút lui, hoặc giao cho hệ thống như database transaction, nơi có thể detection và rollback.
+Chỉ cần trong code tồn tại path “đã giữ một phần resource nhưng tiếp tục chờ phần khác”, hãy hỏi thêm: các quan hệ chờ này có khả năng tạo thành vòng hay không? Nếu có, hãy cố định thứ tự, rút ngắn thời gian giữ, cho phép timeout để rút lui, hoặc giao việc xử lý cho hệ thống như database, vốn có thể detection và rollback transaction.
 
 Một số nơi không thể bảo đảm vĩnh viễn không có deadlock, chẳng hạn database transaction phức tạp, batch update có concurrency cao, resource orchestration xuyên service. Mục tiêu thực tế hơn là giảm xác suất, giữ lại hiện trường, biến failure thành thứ có thể retry an toàn, thay vì kéo dài đến mức chỉ còn cách restart process.
 

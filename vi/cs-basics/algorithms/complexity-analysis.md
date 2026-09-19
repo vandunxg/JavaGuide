@@ -1,6 +1,6 @@
 ---
 title: "Hướng dẫn phỏng vấn về time complexity và space complexity: Big O, recursion complexity và các ngộ nhận thường gặp"
-description: Hướng dẫn phỏng vấn về time complexity và space complexity, giải thích có hệ thống về Big O, loop complexity, recursion complexity, space complexity, cách đánh giá input scale và các ngộ nhận thường gặp về complexity trong phỏng vấn thuật toán.
+description: Hướng dẫn phỏng vấn về time complexity và space complexity, giải thích có hệ thống về Big O, loop complexity, recursion complexity, space complexity, cách đánh giá quy mô input và các ngộ nhận thường gặp về complexity trong phỏng vấn thuật toán.
 category: Computer Basics
 tag:
   - Algorithms
@@ -10,15 +10,15 @@ head:
       content: time complexity,space complexity,Big O,recursion complexity,loop complexity,algorithm complexity,complexity analysis,algorithm interview questions,LeetCode complexity
 ---
 
-Complexity analysis là cánh cửa đầu tiên của phỏng vấn thuật toán. Interviewer không nhất thiết yêu cầu bạn viết proof thật chặt chẽ, nhưng sẽ muốn bạn nói rõ: đoạn code này chạy bao nhiêu lượt, dùng thêm bao nhiêu space, input scale tăng lên thì điều gì xảy ra.
+Complexity analysis là bước đầu tiên trong phỏng vấn thuật toán. Interviewer không nhất thiết yêu cầu bạn trình bày phần chứng minh thật chặt chẽ, nhưng sẽ muốn bạn nói rõ: đoạn code này thực thi bao nhiêu lần, dùng thêm bao nhiêu space, quy mô input tăng thì điều gì xảy ra.
 
-Trước hết cần làm rõ một ranh giới: complexity analysis thường xét xu hướng tăng trưởng khi input scale rất lớn, không phải runtime chính xác. `O(n)` không có nghĩa chắc chắn nhanh hơn `O(nlogn)`, vì constant, data scale, cache hit và chi tiết implementation đều ảnh hưởng đến thời gian thực tế. Tuy nhiên, trong phỏng vấn, trước tiên chỉ cần nói rõ growth order theo Big O, sau đó bổ sung một câu về giới hạn của scenario thực tế là đủ.
+Trước hết cần làm rõ một điểm: complexity analysis thường xét xu hướng tăng trưởng khi quy mô input rất lớn, không phải runtime chính xác. `O(n)` không có nghĩa chắc chắn nhanh hơn `O(nlogn)`, vì constant, quy mô dữ liệu, cache hit và chi tiết implementation đều ảnh hưởng đến thời gian thực tế. Tuy nhiên, trong phỏng vấn, trước tiên chỉ cần nói rõ growth order theo Big O, sau đó bổ sung một câu về giới hạn trong thực tế là đủ.
 
 ## Trọng tâm phỏng vấn
 
 - Có thể dựa vào loop, recursion và thao tác trên data structure để xác định time complexity.
 - Có thể phân biệt extra space với space do input tự chiếm dụng.
-- Có thể nói rõ best-case, worst-case và average complexity lần lượt phù hợp với những algorithm nào.
+- Có thể nói rõ từng loại best-case, worst-case và average complexity phù hợp với algorithm nào.
 - Khi gặp code recursion, có thể dùng recursion tree hoặc phân tích input size của subproblem.
 - Không mặc định xem `HashMap`, sorting và thao tác trên heap đều là `O(1)`.
 
@@ -29,34 +29,34 @@ Khi trả lời về complexity, đừng chỉ đưa ra một kết luận. Các
 Ví dụ với Two Sum:
 
 ```text
-Duyệt array một lần, thực hiện một lần query và một lần insert cho mỗi element trong HashMap, thao tác trên hash table có average là O(1), vì vậy time complexity là O(n). Sử dụng thêm một HashMap để lưu mapping từ element đến index, worst-case sẽ lưu n element, vì vậy space complexity là O(n).
+Duyệt array một lần, thực hiện một query và một insert cho mỗi element trong HashMap. Thao tác trên hash table trung bình là O(1), nên time complexity là O(n). Dùng thêm một HashMap để lưu mapping từ element đến index; worst-case có thể lưu n element, nên space complexity là O(n).
 ```
 
 Câu trả lời này chắc chắn hơn việc chỉ nói `O(n)`, vì đã trình bày cả quá trình suy luận. Nếu interviewer hỏi tiếp về worst-case của hash table, bạn cũng có cơ sở để trả lời.
 
 ## Các mức complexity thường gặp
 
-| Complexity | Scenario thường gặp                                                                   | Ghi chú phỏng vấn                                   |
+| Complexity | Trường hợp thường gặp                                                                 | Ghi chú phỏng vấn                                   |
 | ---------- | ------------------------------------------------------------------------------------- | --------------------------------------------------- |
 | `O(1)`     | Truy cập array theo index, thao tác trên đỉnh stack, query trung bình trên hash table | Worst-case của hash table có thể bị suy biến        |
-| `O(logn)`  | Binary search, heapify up/down, query trên balanced tree                              | Mỗi lượt thu nhỏ một phần input scale               |
+| `O(logn)`  | Binary search, heap sift up/down, query trên balanced tree                            | Mỗi lượt thu nhỏ một phần quy mô input              |
 | `O(n)`     | Duyệt array, linked list hoặc string một lần                                          | Xem có thật sự chỉ quét một lần hay không           |
 | `O(nlogn)` | Quicksort average, merge sort, heap sort                                              | Mức thường gặp nhất trong bài sorting               |
 | `O(n^2)`   | Nested loop, liệt kê từng cặp                                                         | Cần cảnh giác xem có thể optimize hay không         |
 | `O(2^n)`   | Liệt kê subset, một số bài backtracking                                               | Search space của việc liệt kê subset là exponential |
-| `O(n!)`    | Permutation đầy đủ, brute force cho traveling salesman                                | Chỉ phù hợp với input scale nhỏ                     |
+| `O(n!)`    | Permutation đầy đủ, brute force cho traveling salesman                                | Chỉ phù hợp với quy mô input nhỏ                    |
 
-Thông thường, input scale của bài thuật toán sẽ gợi ý complexity có thể chấp nhận:
+Thông thường, quy mô input của bài thuật toán sẽ gợi ý complexity có thể chấp nhận:
 
-| Input scale | Complexity thường có thể chấp nhận           |
-| ----------- | -------------------------------------------- |
-| `n <= 20`   | Exponential, backtracking, state compression |
-| `n <= 100`  | Đôi khi có thể dùng `O(n^3)`                 |
-| `n <= 1000` | Thường dùng `O(n^2)`                         |
-| `n <= 10^5` | `O(nlogn)` hoặc `O(n)`                       |
-| `n >= 10^6` | Thông thường cần gần với `O(n)`              |
+| Quy mô input | Complexity thường có thể chấp nhận           |
+| ------------ | -------------------------------------------- |
+| `n <= 20`    | Exponential, backtracking, state compression |
+| `n <= 100`   | Đôi khi có thể dùng `O(n^3)`                 |
+| `n <= 1000`  | Thường dùng `O(n^2)`                         |
+| `n <= 10^5`  | `O(nlogn)` hoặc `O(n)`                       |
+| `n >= 10^6`  | Thông thường cần gần với `O(n)`              |
 
-Đây không phải quy tắc cứng, nhưng có thể giúp bạn phán đoán trong phỏng vấn xem brute-force solution có thể bị timeout hay không.
+Đây không phải quy tắc cứng, nhưng có thể giúp bạn phán đoán trong phỏng vấn xem brute-force solution có thể timeout hay không.
 
 ## Xác định loop complexity như thế nào?
 
@@ -82,7 +82,7 @@ for (int i = 0; i < n; i++) {
 
 Số lần chạy của inner loop là `n + (n - 1) + ... + 1`, tức `n(n + 1) / 2`, nên complexity được ghi là `O(n^2)`.
 
-Nếu loop variable tăng gấp đôi sau mỗi lần, thông thường đó là `O(logn)`:
+Nếu loop variable tăng gấp đôi sau mỗi lần, thông thường complexity là `O(logn)`:
 
 ```java
 for (int i = 1; i < n; i *= 2) {
@@ -111,7 +111,7 @@ Khi phân tích recursion complexity, trước tiên có thể xem hai câu hỏ
 1. Mỗi recursion level có bao nhiêu subproblem?
 2. Ngoài recursive call, mỗi level còn thực hiện bao nhiêu công việc bổ sung?
 
-Binary search mỗi lần chỉ đi vào một subproblem và scale giảm một nửa:
+Binary search mỗi lần chỉ đi vào một subproblem và quy mô giảm một nửa:
 
 ```java
 int binarySearch(int[] nums, int target, int left, int right) {
@@ -133,7 +133,7 @@ Recursion depth là `logn`, mỗi level chỉ thực hiện công việc `O(1)`,
 
 Merge sort tách thành hai subproblem ở mỗi level, tổng work của việc merge ở mỗi level là `O(n)`, số level là `logn`, vì vậy time complexity là `O(nlogn)`, còn space của array phụ là `O(n)`.
 
-Hãy xem thêm một counterexample: Fibonacci dùng recursion thông thường.
+Xét một phản ví dụ: Fibonacci dùng recursion thông thường.
 
 ```java
 int fib(int n) {
@@ -144,11 +144,11 @@ int fib(int n) {
 }
 ```
 
-Nó không phải `O(n)`, vì mỗi lần lại tiếp tục tách thành hai recursive call, nhiều subproblem bị tính lặp lại, nên time complexity gần với `O(2^n)`. Nếu thêm array memoization, mỗi state chỉ được tính một lần, time complexity sẽ trở thành `O(n)`, space complexity cũng là `O(n)`.
+Nó không phải `O(n)`, vì mỗi lần lại tiếp tục tách thành hai recursive call, nhiều subproblem bị tính lặp lại, nên time complexity gần với `O(2^n)`. Nếu thêm một array dùng cho memoization, mỗi state chỉ được tính một lần, time complexity sẽ trở thành `O(n)`, space complexity cũng là `O(n)`.
 
 ## Xem xét space complexity như thế nào?
 
-Space complexity xét phần space được sử dụng thêm trong quá trình algorithm chạy, các nguồn thường gặp gồm:
+Space complexity xét phần space được sử dụng thêm trong quá trình algorithm thực thi, các nguồn thường gặp gồm:
 
 - Tạo array, hash table, queue hoặc stack mới.
 - Recursion call stack.
@@ -161,16 +161,16 @@ Ví dụ, cách viết reverse linked list bằng iteration chỉ dùng vài poi
 
 - Sorting không miễn phí. Sorting trước rồi dùng two pointers thì time complexity thường ít nhất là `O(nlogn)`.
 - Query trên `HashMap` trung bình là `O(1)`, nhưng worst-case thì không phải vậy.
-- Recursion dù không tạo collection một cách rõ ràng vẫn có thể sử dụng space cho recursion stack.
+- Recursion dù không tạo collection một cách tường minh vẫn có thể sử dụng space cho recursion stack.
 - Duyệt matrix hai chiều thường là `O(mn)`, đừng tiện tay viết thành `O(n)`.
-- Space của queue trong BFS không phải constant, worst-case có thể lưu rất nhiều node của level tiếp theo.
+- Space của queue trong BFS không phải là constant, worst-case có thể lưu rất nhiều node của level tiếp theo.
 - Complexity của bài backtracking thường liên quan đến số lượng result, không thể chỉ nhìn vào recursion depth.
 
 ## Tự kiểm tra các câu hỏi thường gặp
 
 - Vì sao complexity analysis thường bỏ qua constant?
 - `O(n)` chắc chắn nhanh hơn `O(nlogn)` sao?
-- Time complexity average và worst-case của quicksort lần lượt là bao nhiêu?
+- Time complexity trung bình và worst-case của quicksort lần lượt là bao nhiêu?
 - Tính space complexity của recursive algorithm như thế nào?
 - Vì sao time complexity của DFS và BFS thường là `O(V + E)`?
 - Vì sao query trên hash table có average là `O(1)`?

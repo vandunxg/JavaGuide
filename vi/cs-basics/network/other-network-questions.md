@@ -12,9 +12,9 @@ head:
 
 <!-- markdownlint-disable MD033 -->
 
-Computer Networks là một chủ đề phỏng vấn thường xuyên xuất hiện trong phỏng vấn backend và tuyển dụng sinh viên mới tốt nghiệp. Đặc biệt, các vấn đề như **network layering TCP/IP, HTTP, HTTPS, DNS, WebSocket, TCP three-way handshake** gần như xuyên suốt những tình huống phát triển thực tế như “từ lúc nhập URL đến khi trang được hiển thị”, “vì sao API chậm hơn” và “vì sao kết nối thất bại”.
+Computer Networks là chủ đề thường xuyên xuất hiện trong phỏng vấn backend và phỏng vấn tuyển dụng sinh viên mới tốt nghiệp. Đặc biệt, các vấn đề như **network layering của TCP/IP, HTTP, HTTPS, DNS, WebSocket và TCP three-way handshake** gần như xuyên suốt những tình huống phát triển thực tế như “từ lúc nhập URL đến khi trang được hiển thị”, “vì sao API chậm” và “vì sao kết nối thất bại”.
 
-Bài 《Tổng hợp câu hỏi phỏng vấn Computer Networks thường gặp (Phần 1)》 bắt đầu từ network layer model, sau đó hệ thống hóa các kiến thức cốt lõi liên quan đến application layer và HTTP. Bài phù hợp để ôn tập có hệ thống kiến thức cơ bản về Computer Networks, đồng thời cũng có thể dùng làm checklist tra cứu nhanh trước khi phỏng vấn Java backend, backend development và Computer Basics.
+Bài viết "Tổng hợp câu hỏi phỏng vấn Computer Networks thường gặp (Phần 1)" bắt đầu từ network layering model, sau đó hệ thống hóa các kiến thức cốt lõi liên quan đến application layer và HTTP. Bài phù hợp để ôn tập có hệ thống kiến thức cơ bản về Computer Networks, đồng thời cũng có thể dùng làm checklist tra cứu nhanh trước khi phỏng vấn Java backend, backend development và Computer Basics.
 
 ## Kiến thức cơ bản về Computer Networks
 
@@ -22,15 +22,15 @@ Bài 《Tổng hợp câu hỏi phỏng vấn Computer Networks thường gặp 
 
 #### Mô hình OSI 7 layer là gì? Vai trò của từng layer là gì?
 
-**OSI 7-layer model** là một network layering model do International Organization for Standardization đề xuất. Cấu trúc tổng thể và chức năng mà mỗi layer cung cấp được thể hiện trong hình sau:
+**OSI 7-layer model** là một network layering model do International Organization for Standardization đề xuất. Cấu trúc tổng thể và chức năng của từng layer được thể hiện trong hình sau:
 
 ![Phân chia chức năng của từng layer trong OSI 7-layer model](https://oss.javaguide.cn/github/javaguide/cs-basics/network/osi-7-model.png)
 
-Mỗi layer tập trung làm một việc, đồng thời mỗi layer đều cần sử dụng chức năng do layer bên dưới cung cấp. Ví dụ, transport layer cần sử dụng chức năng routing và addressing do network layer cung cấp, khi đó transport layer mới biết phải truyền dữ liệu đến đâu.
+Mỗi layer tập trung làm một việc, đồng thời đều cần sử dụng chức năng do layer bên dưới cung cấp. Ví dụ, transport layer cần sử dụng chức năng routing và addressing do network layer cung cấp thì mới biết phải truyền dữ liệu đến đâu.
 
 **Kiến trúc 7 layer của OSI có khái niệm rõ ràng và lý thuyết hoàn chỉnh, nhưng khá phức tạp, thiếu tính thực tiễn, hơn nữa một số chức năng bị lặp lại ở nhiều layer.**
 
-Hình trên có thể hơi trừu tượng, hãy xem thêm một hình ảnh sinh động hơn. Tôi nhìn thấy hình này trên một website nước ngoài, rất ấn tượng!
+Hình trên có thể hơi trừu tượng, hãy xem thêm một hình ảnh sinh động hơn. Tôi thấy hình này trên một website nước ngoài, rất ấn tượng!
 
 ![OSI 7-layer model 2](https://oss.javaguide.cn/github/javaguide/osi七层模型2.png)
 
@@ -61,13 +61,13 @@ Nói về layering, trước tiên hãy xét một chương trình backend đư�
 
 Quay lại câu hỏi: “Vì sao network cần được chia layer?”. Theo tôi, chủ yếu có 3 lý do:
 
-1. **Các layer độc lập với nhau**: Các layer độc lập với nhau, không cần quan tâm layer khác được triển khai như thế nào, chỉ cần biết cách gọi các chức năng mà layer bên dưới cung cấp (có thể hiểu đơn giản là gọi interface)**. Điều này cũng giống nguyên tắc chia layer hệ thống khi phát triển.**
+1. **Các layer độc lập với nhau**: Các layer độc lập với nhau, không cần quan tâm layer khác được triển khai như thế nào, chỉ cần biết cách gọi các chức năng mà layer bên dưới cung cấp (có thể hiểu đơn giản là gọi interface). **Điều này cũng giống nguyên tắc chia layer hệ thống khi phát triển.**
 2. **Tăng tính linh hoạt và khả năng thay thế**: Mỗi layer có thể sử dụng công nghệ phù hợp nhất để triển khai, chỉ cần đảm bảo chức năng cung cấp và quy tắc của interface được expose không thay đổi. Đồng thời, mỗi layer có thể được sửa đổi hoặc thay thế theo nhu cầu mà không ảnh hưởng đến cấu trúc của toàn bộ network. **Điều này tương ứng với nguyên tắc high cohesion và low coupling thường được yêu cầu khi phát triển hệ thống.**
-3. **Chia vấn đề lớn thành vấn đề nhỏ**: Layering có thể phân rã các vấn đề network phức tạp thành nhiều vấn đề nhỏ hơn, có ranh giới rõ ràng và đơn giản để xử lý, giải quyết. Nhờ đó, hệ thống Computer Networks phức tạp trở nên dễ thiết kế, triển khai và standardize hơn. **Điều này tương ứng với việc khi phát triển, chúng ta thường phân rã chức năng hệ thống, rồi phân rã vấn đề phức tạp thành các vấn đề nhỏ hơn, dễ hiểu hơn; các vấn đề nhỏ này có định nghĩa boundary (mục tiêu và interface) tốt hơn.**
+3. **Chia vấn đề lớn thành vấn đề nhỏ**: Layering có thể phân rã các vấn đề network phức tạp thành nhiều vấn đề nhỏ hơn, có ranh giới rõ ràng và đơn giản để xử lý. Nhờ đó, hệ thống Computer Networks phức tạp trở nên dễ thiết kế, triển khai và chuẩn hóa hơn. **Điều này tương ứng với việc khi phát triển, chúng ta thường phân rã chức năng hệ thống, rồi phân rã vấn đề phức tạp thành các vấn đề nhỏ hơn, dễ hiểu hơn; các vấn đề nhỏ này có boundary (mục tiêu và interface) được định nghĩa rõ hơn.**
 
 Tôi nhớ đến một câu nói rất nổi tiếng trong thế giới máy tính và muốn chia sẻ ở đây:
 
-> Mọi vấn đề trong lĩnh vực computer science đều có thể được giải quyết bằng cách thêm một intermediate layer gián tiếp; toàn bộ hệ thống máy tính được thiết kế theo cấu trúc layer nghiêm ngặt từ trên xuống dưới.
+> Mọi vấn đề trong lĩnh vực computer science đều có thể được giải quyết bằng cách thêm một intermediate layer; toàn bộ hệ thống máy tính được thiết kế theo cấu trúc layer nghiêm ngặt từ trên xuống dưới.
 
 ### Các network protocol thường gặp
 
@@ -77,10 +77,10 @@ Tôi nhớ đến một câu nói rất nổi tiếng trong thế giới máy t�
 
 - **HTTP (Hypertext Transfer Protocol)**: Là một application-layer protocol dùng để truyền hypertext và nội dung multimedia, chủ yếu được thiết kế cho giao tiếp giữa Web client và server. HTTP/1.x và HTTP/2 thường dựa trên TCP, còn HTTP/3 chạy trên QUIC dựa trên UDP.
 - **SMTP (Simple Mail Transfer Protocol)**: Dựa trên TCP, là protocol dùng để gửi email. Lưu ý ⚠️: SMTP chỉ phụ trách gửi mail, không phải nhận mail. Muốn nhận mail từ mail server, cần sử dụng POP3 hoặc IMAP.
-- **POP3/IMAP (mail receiving protocols)**: Dựa trên TCP, cả hai đều phụ trách nhận mail. IMAP là protocol mới hơn POP3, có chức năng và performance mạnh hơn. IMAP hỗ trợ các chức năng nâng cao như tìm kiếm, đánh dấu, phân loại, archive mail, đồng thời có thể đồng bộ trạng thái mail trên nhiều thiết bị. Gần như mọi email client và server hiện đại đều hỗ trợ IMAP.
-- **FTP (File Transfer Protocol)**: Dựa trên TCP, là protocol dùng để truyền file giữa các máy tính, có thể che giấu operating system và cách lưu trữ file. Lưu ý ⚠️: FTP là protocol không an toàn vì không mã hóa dữ liệu trong quá trình truyền. Khi truyền dữ liệu nhạy cảm, nên sử dụng protocol an toàn hơn như SFTP.
-- **Telnet (remote login protocol)**: Dựa trên TCP, dùng để login vào server khác thông qua một terminal. Một trong những nhược điểm lớn nhất của Telnet là mọi dữ liệu, bao gồm username và password, đều được gửi dưới dạng plaintext, tiềm ẩn rủi ro bảo mật. Đây là lý do chính khiến Telnet ngày nay ít được sử dụng, thay vào đó là network transmission protocol rất an toàn có tên SSH.
-- **SSH (Secure Shell Protocol)**: Dựa trên TCP, thực hiện các nghiệp vụ như truy cập và truyền file an toàn thông qua cơ chế encryption và authentication.
+- **POP3/IMAP (mail receiving protocols)**: Dựa trên TCP, cả hai đều phụ trách nhận mail. IMAP mới hơn POP3, có chức năng và performance mạnh hơn. IMAP hỗ trợ các chức năng nâng cao như tìm kiếm, đánh dấu, phân loại và archive mail, đồng thời có thể đồng bộ trạng thái mail trên nhiều thiết bị. Gần như mọi email client và server hiện đại đều hỗ trợ IMAP.
+- **FTP (File Transfer Protocol)**: Dựa trên TCP, là protocol dùng để truyền file giữa các máy tính và che giấu sự khác biệt về operating system cũng như cách lưu trữ file. Lưu ý ⚠️: FTP là protocol không an toàn vì không mã hóa dữ liệu trong quá trình truyền. Khi truyền dữ liệu nhạy cảm, nên sử dụng protocol an toàn hơn như SFTP.
+- **Telnet (remote login protocol)**: Dựa trên TCP, dùng để login vào server khác thông qua một terminal. Một trong những nhược điểm lớn nhất của Telnet là mọi dữ liệu, bao gồm username và password, đều được gửi dưới dạng plaintext, tiềm ẩn rủi ro bảo mật. Đây là lý do chính khiến Telnet ngày nay ít được sử dụng, thay vào đó là một network protocol rất an toàn có tên SSH.
+- **SSH (Secure Shell Protocol)**: Dựa trên TCP, thực hiện các hoạt động như truy cập và truyền file an toàn thông qua cơ chế encryption và authentication.
 - **RTP (Real-time Transport Protocol)**: Thường dựa trên UDP nhưng cũng hỗ trợ TCP. RTP cung cấp chức năng truyền dữ liệu real-time end-to-end, nhưng không bao gồm resource reservation và không đảm bảo chất lượng truyền real-time; các chức năng này do WebRTC thực hiện.
 - **DNS (Domain Name System)**: Thường dựa trên UDP (port 53), dùng để giải quyết vấn đề mapping giữa domain name và IP address. Khi response quá lớn hoặc thực hiện zone transfer, DNS sẽ chuyển sang TCP.
 
@@ -111,7 +111,7 @@ Tôi nhớ đến một câu nói rất nổi tiếng trong thế giới máy t�
 
 > Câu hỏi tương tự: Khi mở một trang web, toàn bộ quá trình sẽ sử dụng những protocol nào?
 
-Hãy xem một hình trước (nguồn từ 《HTTP được minh họa》):
+Hãy xem một hình trước (nguồn từ "Minh họa HTTP"):
 
 <img src="https://oss.javaguide.cn/github/javaguide/url%E8%BE%93%E5%85%A5%E5%88%B0%E5%B1%95%E7%A4%BA%E5%87%BA%E6%9D%A5%E7%9A%84%E8%BF%87%E7%A8%8B.jpg" alt="Toàn bộ quy trình từ lúc nhập URL đến khi trang được hiển thị" style="zoom:50%" />
 
@@ -125,9 +125,9 @@ Nhìn chung, quá trình gồm các bước sau:
 4. Browser gửi HTTP request message đến server trên TCP connection để yêu cầu nội dung trang web.
 5. Sau khi nhận HTTP request message, server xử lý request và trả HTTP response message về browser.
 6. Sau khi nhận HTTP response message, browser parse HTML code trong response body, render structure và style của trang; đồng thời dựa trên URL của các resource khác trong HTML (như image, CSS, JS...) để gửi HTTP request tiếp theo lấy nội dung các resource này cho đến khi trang được load và hiển thị hoàn chỉnh.
-7. Khi không cần giao tiếp với server, browser có thể chủ động đóng TCP connection hoặc chờ request đóng từ server.
+7. Khi không cần giao tiếp với server, browser có thể chủ động đóng TCP connection hoặc chờ server đóng connection.
 
-Có thể xem phần giới thiệu chi tiết trong bài [Toàn bộ quá trình truy cập trang web (Liên kết kiến thức)](https://javaguide.cn/cs-basics/network/the-whole-process-of-accessing-web-pages.html) (rất khuyến nghị).
+Có thể xem phần giới thiệu chi tiết trong bài [Toàn bộ quá trình truy cập trang web (Liên kết kiến thức)](https://javaguide.cn/cs-basics/network/the-whole-process-of-accessing-web-pages.html) (rất nên đọc).
 
 ### ⭐️ HTTP status code gồm những loại nào?
 
@@ -142,25 +142,25 @@ HTTP status code dùng để mô tả kết quả của HTTP request, ví dụ 2
 | Tên field trong request header | Mô tả                                                                                                                                                                                                                                        | Ví dụ                                                                            |
 | :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
 | Accept                         | Loại nội dung response có thể chấp nhận (Content-Types).                                                                                                                                                                                     | Accept: text/plain                                                               |
-| Accept-Charset                 | Character set có thể chấp nhận                                                                                                                                                                                                               | Accept-Charset: utf-8                                                            |
-| Accept-Datetime                | Version có thể chấp nhận được biểu diễn theo thời gian                                                                                                                                                                                       | Accept-Datetime: Thu, 31 May 2007 20:35:00 GMT                                   |
+| Accept-Charset                 | Character set được chấp nhận                                                                                                                                                                                                                 | Accept-Charset: utf-8                                                            |
+| Accept-Datetime                | Version được biểu diễn theo thời gian mà client có thể chấp nhận                                                                                                                                                                             | Accept-Datetime: Thu, 31 May 2007 20:35:00 GMT                                   |
 | Accept-Encoding                | Danh sách encoding có thể chấp nhận. Tham khảo HTTP compression.                                                                                                                                                                             | Accept-Encoding: gzip, deflate                                                   |
 | Accept-Language                | Danh sách ngôn ngữ tự nhiên của nội dung response có thể chấp nhận.                                                                                                                                                                          | Accept-Language: en-US                                                           |
-| Authorization                  | Thông tin authentication dùng cho authentication của HTTP                                                                                                                                                                                    | Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==                                |
+| Authorization                  | Thông tin authentication dùng cho HTTP                                                                                                                                                                                                       | Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==                                |
 | Cache-Control                  | Dùng để chỉ định instruction mà mọi cơ chế cache trong request/response chain này phải tuân thủ                                                                                                                                              | Cache-Control: no-cache                                                          |
 | Connection                     | Loại connection mà browser muốn ưu tiên sử dụng                                                                                                                                                                                              | Connection: keep-alive                                                           |
 | Content-Length                 | Độ dài request body được biểu diễn bằng octet array (byte 8 bit)                                                                                                                                                                             | Content-Length: 348                                                              |
 | Content-MD5                    | Giá trị binary MD5 hash của request body, được encode bằng Base64                                                                                                                                                                            | Content-MD5: Q2hlY2sgSW50ZWdyaXR5IQ==                                            |
-| Content-Type                   | Multimedia type của request body (dùng trong POST và PUT request)                                                                                                                                                                            | Content-Type: application/x-www-form-urlencoded                                  |
+| Content-Type                   | Loại multimedia của request body (dùng trong POST và PUT request)                                                                                                                                                                            | Content-Type: application/x-www-form-urlencoded                                  |
 | Cookie                         | HTTP Cookie trước đó được server gửi thông qua Set-Cookie (mô tả bên dưới)                                                                                                                                                                   | Cookie: $Version=1; Skin=new;                                                    |
-| Date                           | Date và time gửi message (gửi theo format “HTTP date” được định nghĩa trong RFC 7231)                                                                                                                                                        | Date: Tue, 15 Nov 1994 08:12:31 GMT                                              |
+| Date                           | Date và time gửi message (theo format “HTTP date” được định nghĩa trong RFC 7231)                                                                                                                                                            | Date: Tue, 15 Nov 1994 08:12:31 GMT                                              |
 | Expect                         | Cho biết client yêu cầu server thực hiện hành vi cụ thể                                                                                                                                                                                      | Expect: 100-continue                                                             |
 | From                           | Email address của user gửi request này                                                                                                                                                                                                       | From: `user@example.com`                                                         |
 | Host                           | Domain của server (dùng cho virtual host) và port của TCP mà server đang listen. Nếu port được yêu cầu là standard port của service tương ứng, có thể bỏ port number.                                                                        | Host: en.wikipedia.org                                                           |
 | If-Match                       | Chỉ thực hiện operation tương ứng khi entity do client cung cấp khớp với entity tương ứng trên server. Chủ yếu được dùng trong các method như PUT: chỉ update resource khi resource chưa bị sửa kể từ lần user update resource đó trước đây. | If-Match: "737060cd8c284d8af7ad3082f209582d"                                     |
 | If-Modified-Since              | Cho phép server trả status code `304 Not Modified` khi resource được yêu cầu chưa bị sửa kể từ date chỉ định                                                                                                                                 | If-Modified-Since: Sat, 29 Oct 1994 19:43:31 GMT                                 |
 | If-None-Match                  | Cho phép server trả status code `304 Not Modified` khi ETag của resource được yêu cầu chưa thay đổi                                                                                                                                          | If-None-Match: "737060cd8c284d8af7ad3082f209582d"                                |
-| If-Range                       | Nếu entity chưa bị sửa, gửi phần còn thiếu cho tôi; nếu không, gửi toàn bộ entity mới                                                                                                                                                        | If-Range: "737060cd8c284d8af7ad3082f209582d"                                     |
+| If-Range                       | Nếu entity chưa bị sửa, gửi phần còn thiếu; nếu không, gửi toàn bộ entity mới                                                                                                                                                                | If-Range: "737060cd8c284d8af7ad3082f209582d"                                     |
 | If-Unmodified-Since            | Chỉ gửi response khi entity chưa bị sửa kể từ một thời điểm cụ thể                                                                                                                                                                           | If-Unmodified-Since: Sat, 29 Oct 1994 19:43:31 GMT                               |
 | Max-Forwards                   | Giới hạn số lần message có thể được proxy và gateway forward.                                                                                                                                                                                | Max-Forwards: 10                                                                 |
 | Origin                         | Gửi request cho cross-origin resource sharing.                                                                                                                                                                                               | `Origin: http://www.example-social-network.com`                                  |
@@ -170,7 +170,7 @@ HTTP status code dùng để mô tả kết quả của HTTP request, ví dụ 2
 | Referer                        | Cho biết page trước đó browser đã truy cập; chính một link trên page đó đã đưa browser đến page đang được yêu cầu.                                                                                                                           | `Referer: http://en.wikipedia.org/wiki/Main_Page`                                |
 | TE                             | Encoding mà browser dự kiến chấp nhận: có thể sử dụng giá trị trong field Transfer-Encoding của response header;                                                                                                                             | TE: trailers, deflate                                                            |
 | Upgrade                        | Yêu cầu server upgrade lên protocol khác.                                                                                                                                                                                                    | Upgrade: HTTP/2.0, SHTTP/1.3, IRC/6.9, RTA/x11                                   |
-| User-Agent                     | Browser identity string của browser                                                                                                                                                                                                          | User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0 |
+| User-Agent                     | Chuỗi nhận diện browser                                                                                                                                                                                                                      | User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0 |
 | Via                            | Cho server biết request này được gửi qua những proxy nào.                                                                                                                                                                                    | Via: 1.0 fred, 1.1 example.com (Apache/1.1)                                      |
 | Warning                        | Warning chung, cho biết entity content body có thể tồn tại lỗi.                                                                                                                                                                              | Warning: 199 Miscellaneous warning                                               |
 
@@ -180,7 +180,7 @@ HTTP status code dùng để mô tả kết quả của HTTP request, ví dụ 2
 
 - **Port number**: HTTP mặc định là 80, HTTPS mặc định là 443.
 - **URL prefix**: URL prefix của HTTP là `http://`, URL prefix của HTTPS là `https://`.
-- **Security và phương thức truyền**: HTTP chưa sử dụng TLS mặc định không cung cấp confidentiality, integrity và peer authentication. HTTPS sử dụng TLS để bảo vệ HTTP; HTTP/1.1 và HTTP/2 thường sử dụng TLS over TCP, HTTP/3 sử dụng QUIC tích hợp TLS 1.3. TLS handshake phụ trách authentication peer và thiết lập traffic key, dữ liệu tiếp theo được bảo vệ bởi symmetric AEAD algorithm. Certificate chủ yếu dùng cho authentication identity, không thể nói một cách khái quát rằng “certificate encrypt symmetric key”.
+- **Security và phương thức truyền**: Nếu không sử dụng TLS, HTTP mặc định không cung cấp confidentiality, integrity và peer authentication. HTTPS sử dụng TLS để bảo vệ HTTP; HTTP/1.1 và HTTP/2 thường sử dụng TLS over TCP, HTTP/3 sử dụng QUIC tích hợp TLS 1.3. TLS handshake phụ trách authentication peer và thiết lập traffic key, dữ liệu tiếp theo được bảo vệ bởi symmetric AEAD algorithm. Certificate chủ yếu dùng để authentication identity, không thể nói một cách khái quát rằng “certificate encrypt symmetric key”.
 - **SEO (Search Engine Optimization)**: Search engine thường ưu tiên website sử dụng HTTPS vì HTTPS cung cấp security và bảo vệ privacy người dùng tốt hơn. Website sử dụng HTTPS có thể được hiển thị ưu tiên trong search result, từ đó ảnh hưởng đến SEO.
 
 Để xem phần so sánh chi tiết hơn giữa HTTP và HTTPS, hãy đọc bài [HTTP vs HTTPS (Application layer)](https://javaguide.cn/cs-basics/network/http-vs-https.html).
@@ -191,7 +191,7 @@ HTTP status code dùng để mô tả kết quả của HTTP request, ví dụ 2
 
 Trong static RSA handshake của TLS 1.2, client tạo `PreMasterSecret`, dùng RSA public key trong certificate của server để encrypt rồi gửi cho server; server dùng RSA private key để decrypt. Vấn đề là nếu attacker lưu lại handshake traffic lúc đó, sau này private key của server bị lộ thì có thể giải mã ngược session key trong lịch sử, vì vậy nó không có forward secrecy.
 
-ECDHE không truyền shared secret trực tiếp. Client và server mỗi bên tạo một key pair tạm thời, sau khi exchange temporary public key, hai bên tính ra cùng một shared secret ở local. Private key của server certificate chủ yếu dùng để ký authentication, chứng minh temporary parameter chưa bị man-in-the-middle thay thế, chứ không dùng để decrypt session key.
+ECDHE không truyền shared secret trực tiếp. Client và server mỗi bên tạo một key pair tạm thời, sau khi exchange temporary public key, hai bên tính ra cùng một shared secret ở local. Private key của server certificate chủ yếu dùng để tạo chữ ký phục vụ authentication, chứng minh temporary parameter chưa bị man-in-the-middle thay thế, chứ không dùng để decrypt session key.
 
 Tóm lại trong một câu: **RSA là client encrypt secret rồi gửi sang; ECDHE là hai bên dùng temporary key để negotiate secret. ECDHE hỗ trợ forward secrecy, vì vậy trở thành hướng chủ đạo của HTTPS hiện đại.**
 
@@ -208,7 +208,7 @@ Nếu là internal service call, đặc biệt khi có nhiều service, call cha
 
 Vì vậy, đừng tiếp tục ghi nhớ đơn giản rằng “HTTP dùng bên ngoài, RPC dùng bên trong”.
 
-Câu này có thể giúp người mới bắt đầu, nhưng khi thực sự làm project, vẫn cần xem xét call target, team infrastructure, chi phí troubleshooting, yêu cầu performance và chi phí maintenance sau này.
+Câu này có thể giúp người mới bắt đầu, nhưng khi thực sự làm project, vẫn cần xem xét đối tượng được gọi, team infrastructure, chi phí troubleshooting, yêu cầu performance và chi phí maintenance sau này.
 
 Project không lớn, dùng HTTP đã chạy ổn định thì đừng cố dùng RPC chỉ vì “trông có vẻ microservice hơn”.
 
@@ -224,7 +224,7 @@ Giới thiệu chi tiết: [⭐️Có HTTP rồi, vì sao vẫn cần RPC?](./ht
 
 - **Phương thức connection**: HTTP/1.0 là short connection, HTTP/1.1 hỗ trợ persistent connection. Persistent connection và short connection của HTTP thực chất là persistent connection và short connection của TCP.
 - **Response status code**: HTTP/1.1 bổ sung rất nhiều status code; riêng error response status code đã thêm 24 loại. Ví dụ, `100 (Continue)` cho phép client xác nhận server sẵn sàng tiếp tục nhận request body lớn trước khi gửi; `206 (Partial Content)` là status code của range request; `409 (Conflict)` là khi request xung đột với quy định của resource hiện tại; `410 (Gone)` là khi target resource không còn khả dụng, trạng thái này nhiều khả năng là vĩnh viễn và server không biết forwarding address nào còn dùng được.
-- **Cơ chế cache**: HTTP/1.0 chủ yếu dùng If-Modified-Since,Expires trong Header làm tiêu chuẩn xác định cache; HTTP/1.1 bổ sung nhiều cache-control strategy hơn, chẳng hạn Entity tag, If-Unmodified-Since, If-Match, If-None-Match và nhiều cache header khác để kiểm soát cache strategy.
+- **Cơ chế cache**: HTTP/1.0 chủ yếu dùng If-Modified-Since,Expires trong Header làm tiêu chí xác định cache; HTTP/1.1 bổ sung nhiều cache-control strategy hơn, chẳng hạn Entity tag, If-Unmodified-Since, If-Match, If-None-Match và nhiều cache header khác để kiểm soát cache strategy.
 - **Bandwidth**: HTTP/1.0 có một số trường hợp lãng phí bandwidth, ví dụ client chỉ cần một phần object nhưng server lại gửi toàn bộ object, đồng thời không hỗ trợ resume download. HTTP/1.1 bổ sung range header trong request header, cho phép chỉ request một phần resource, response code là 206 (Partial Content), giúp developer chủ động sử dụng bandwidth và connection hiệu quả hơn.
 - **Xử lý Host header (Host Header)**: HTTP/1.1 bổ sung Host header field, cho phép host nhiều domain trên cùng một IP address, từ đó hỗ trợ virtual host. HTTP/1.0 không có Host header field nên không thể thực hiện virtual host.
 
@@ -268,7 +268,7 @@ Dưới đây là hình so sánh chi tiết hơn giữa HTTP/2.0 và HTTP/3.0:
 
 Có thể thấy từ hình trên:
 
-- **HTTP/2.0**: Sử dụng TCP làm transport protocol, sử dụng HPACK để header compression, dựa vào TLS để encryption.
+- **HTTP/2.0**: Sử dụng TCP làm transport protocol, sử dụng HPACK để header compression, dựa vào TLS để thực hiện encryption.
 - **HTTP/3.0**: Sử dụng QUIC dựa trên UDP, sử dụng QPACK hiệu quả hơn để header compression, tích hợp trực tiếp TLS trong QUIC. QUIC có các đặc tính như connection migration, congestion control và congestion avoidance, flow control.
 
 Để xem phần giới thiệu chi tiết hơn về quá trình tiến hóa từ HTTP/1.0 -> HTTP/3.0, khuyến nghị đọc [Tối ưu engineering từ HTTP1 đến HTTP3](https://dbwu.tech/posts/http_evolution/).
@@ -311,7 +311,7 @@ Nhưng trong Web application thực tế, chẳng hạn các scenario mua sắm 
 1. User gửi username, password và verification code đến server để login vào system.
 2. Sau khi xác thực thành công, server tạo và lưu một Session object riêng cho user này (có thể hiểu là một vùng memory trên server, lưu state data của user như shopping cart và thông tin login), đồng thời cấp một `SessionID` duy nhất cho Session.
 3. Server gửi `SessionID` đến browser của user thông qua instruction `Set-Cookie` trong HTTP response header.
-4. Sau khi nhận `SessionID`, browser lưu nó ở local dưới dạng Cookie. Khi user duy trì trạng thái login, mỗi lần gửi request đến server đó, browser tự động đính kèm Cookie chứa `SessionID`.
+4. Sau khi nhận `SessionID`, browser lưu nó local dưới dạng Cookie. Khi user duy trì trạng thái login, mỗi lần gửi request đến server đó, browser tự động đính kèm Cookie chứa `SessionID`.
 5. Sau khi nhận request, server lấy `SessionID` từ Cookie để tìm Session object đã lưu trước đó, từ đó biết user nào và state trước đó của user.
 
 Khi sử dụng Session, cần chú ý các điểm sau:
@@ -323,8 +323,8 @@ Khi sử dụng Session, cần chú ý các điểm sau:
 Session data bản thân được lưu ở server-side. Các cách lưu trữ thường gặp gồm:
 
 - **Server memory**: Dễ triển khai, tốc độ truy cập nhanh, nhưng data bị mất khi server restart và không thuận lợi cho load balancing giữa nhiều server. Cách này phù hợp với scenario nghiệp vụ đơn giản, số lượng user không lớn.
-- **Database (như MySQL, PostgreSQL)**: Data được persist, nhưng performance read/write tương đối thấp, thường không sử dụng cách này.
-- **Distributed cache (như Redis)**: Performance cao, hỗ trợ distributed deployment, hiện là solution rất phổ biến trong application quy mô lớn.
+- **Database (như MySQL, PostgreSQL)**: Data được lưu bền vững, nhưng performance read/write tương đối thấp, thường không sử dụng cách này.
+- **Distributed cache (như Redis)**: Performance cao, hỗ trợ distributed deployment, hiện là giải pháp rất phổ biến trong application quy mô lớn.
 
 **Phương án 2: Khi Cookie bị disable: URL rewriting (URL Rewriting)**
 
@@ -340,12 +340,12 @@ Phương pháp này thường không được sử dụng vì có các nhược 
 
 Đây là phương thức stateless authentication ngày càng phổ biến, đặc biệt phù hợp với kiến trúc frontend và backend tách rời và microservice.
 
-![Sơ đồ authentication identity bằng JWT](https://oss.javaguide.cn/github/javaguide/system-design/jwt/jwt-authentication%20process.png)
+![Sơ đồ authentication bằng JWT](https://oss.javaguide.cn/github/javaguide/system-design/jwt/jwt-authentication%20process.png)
 
 Lấy JWT làm ví dụ (Token thông thường cũng tương tự), các bước rút gọn như sau:
 
 1. User gửi username, password và verification code đến server để login vào system.
-2. Nếu username, password và verification code được kiểm tra chính xác, server sẽ trả về Token đã được sign, chính là JWT.
+2. Nếu username, password và verification code được kiểm tra chính xác, server sẽ trả về Token đã được ký, chính là JWT.
 3. Client tự lưu Token sau khi nhận (ví dụ trong `localStorage` của browser).
 4. Sau này, mỗi lần gửi request đến backend, user đính kèm JWT này trong Header.
 5. Server kiểm tra JWT và lấy thông tin liên quan đến user từ đó.
@@ -359,8 +359,8 @@ Tóm lại, dù bản thân HTTP là stateless, chúng ta vẫn có thể theo d
 
 ### URI và URL khác nhau như thế nào?
 
-- URI (Uniform Resource Identifier) là uniform resource identifier, có thể định danh duy nhất một resource.
-- URL (Uniform Resource Locator) là uniform resource locator, có thể cung cấp path của resource đó. Đây là một URI cụ thể, tức URL vừa có thể dùng để định danh resource vừa chỉ ra cách locate resource.
+- URI (Uniform Resource Identifier) là một identifier thống nhất, có thể định danh duy nhất một resource.
+- URL (Uniform Resource Locator) là một locator thống nhất, có thể cung cấp path của resource đó. Đây là một URI cụ thể, tức URL vừa có thể dùng để định danh resource vừa chỉ ra cách locate resource.
 
 URI có vai trò giống số căn cước, còn URL giống địa chỉ nhà hơn. URL là một URI cụ thể, không chỉ định danh duy nhất resource mà còn cung cấp thông tin để locate resource.
 
@@ -380,7 +380,7 @@ GET và POST là hai request method thường dùng trong HTTP protocol, có đ�
 - Cache: Vì GET request là idempotent, nó có thể được browser hoặc intermediate node khác (như proxy và gateway) cache để cải thiện performance và efficiency. POST request không phù hợp để cache vì có thể có side effect, mỗi lần thực hiện có thể cần response real-time.
 - Security: Nếu sử dụng HTTP protocol, cả GET request và POST request đều không an toàn vì bản thân HTTP truyền data dưới dạng plaintext; bắt buộc phải dùng HTTPS để encrypt data. So với POST request, GET request dễ làm lộ sensitive data hơn vì parameter thường đặt trong URL.
 
-Nhắc lại, chỉ cần nắm rõ sự khác biệt về semantics của hai method là trọng tâm; trong quá trình sử dụng thực tế, cũng phân biệt dùng GET hay POST dựa trên semantics. Tuy nhiên, một số project dùng POST cho mọi request; điều này không cố định, miễn team thống nhất là được.
+Nhắc lại, điểm chính là nắm rõ sự khác biệt về semantics của hai method; trong quá trình sử dụng thực tế, cũng phân biệt dùng GET hay POST dựa trên semantics. Tuy nhiên, một số project dùng POST cho mọi request; điều này không cố định, miễn team thống nhất là được.
 
 ## WebSocket
 
@@ -423,7 +423,7 @@ Quá trình hoạt động của WebSocket gồm các bước sau:
 3. Client và server thiết lập WebSocket connection để thực hiện bidirectional data transfer. Data được truyền dưới dạng frame. Mỗi message của WebSocket có thể được chia thành nhiều data frame (đơn vị nhỏ nhất). Sender chia message thành nhiều frame gửi đến receiver, receiver nhận message frame rồi lắp ráp các frame liên quan thành message hoàn chỉnh.
 4. Client hoặc server có thể chủ động gửi close frame để biểu thị muốn đóng connection. Bên còn lại sau khi nhận sẽ trả về một close frame, sau đó hai bên đóng TCP connection.
 
-Ngoài ra, sau khi thiết lập WebSocket connection, heartbeat mechanism được sử dụng để duy trì stability và activity của WebSocket connection.
+Ngoài ra, sau khi thiết lập WebSocket connection, heartbeat mechanism được sử dụng để duy trì tính ổn định và trạng thái hoạt động của connection.
 
 ### ⭐️ WebSocket khác short polling và long polling như thế nào?
 
@@ -494,7 +494,7 @@ Có thể thấy response header chứa `text/event-stream`, cho biết thực s
 
 ### PING command có tác dụng gì?
 
-PING command là một network diagnosis tool thường dùng, thường được sử dụng để kiểm tra connectivity và network latency giữa các host trong network.
+PING command là một network diagnosis tool thường dùng để kiểm tra connectivity và network latency giữa các host trong network.
 
 Hãy xem một ví dụ đơn giản, chúng ta PING Baidu.
 
@@ -513,20 +513,20 @@ PING www.a.shifen.com (14.119.104.189): 56 data bytes
 round-trip min/avg/max/stddev = 27.571/27.938/28.732/0.474 ms
 ```
 
-Output result của PING command thường gồm các phần thông tin sau:
+Output của PING command thường gồm các phần thông tin sau:
 
 1. **ICMP Echo Request (request message) information**: Sequence number, TTL (Time to Live) value.
 2. **Domain name hoặc IP address của target host**: Dòng đầu tiên của output result.
 3. **Round-trip time (RTT, Round-Trip Time)**: Tổng thời gian từ lúc gửi ICMP Echo Request (request message) đến khi nhận ICMP Echo Reply (response message), dùng để đo latency của network connection.
 4. **Statistics**: Bao gồm số lượng ICMP request packet đã gửi, số lượng ICMP response packet đã nhận, packet loss rate, minimum, average, maximum và standard deviation của round-trip time (RTT).
 
-Nếu target host tương ứng với PING không thể trả response chính xác, điều đó cho thấy connectivity giữa hai host có vấn đề (một số host hoặc network administrator có thể disable reply cho ICMP request, điều này cũng khiến không nhận được response chính xác). Nếu round-trip time (RTT) quá cao, điều đó cho thấy network latency quá cao.
+Nếu target host không thể trả response chính xác cho PING, điều đó cho thấy connectivity giữa hai host có vấn đề (một số host hoặc network administrator có thể disable reply cho ICMP request, điều này cũng khiến không nhận được response chính xác). Nếu round-trip time (RTT) quá cao, điều đó cho thấy network latency quá cao.
 
 ### PING command hoạt động theo nguyên lý nào?
 
 PING dựa trên **ICMP (Internet Control Message Protocol)** ở network layer, nguyên lý chính là gửi và nhận ICMP message trên network.
 
-ICMP message chứa type field để định danh ICMP message type. Có nhiều loại ICMP message, nhưng nhìn chung có thể chia thành hai nhóm:
+ICMP message chứa type field để xác định loại message. Có nhiều loại ICMP message, nhưng nhìn chung có thể chia thành hai nhóm:
 
 - **Query message type**: Gửi request đến target host và chờ nhận response.
 - **Error message type**: Gửi error message đến source host để báo cáo tình trạng lỗi trong network.
@@ -540,20 +540,20 @@ ICMP Echo Request (type 8) và ICMP Echo Reply (type 0) mà PING sử dụng đ�
 
 Kết luận trước: **Không.**
 
-Ping sử dụng ICMP (network layer), TCP connection sử dụng TCP (transport layer). Hai bên có thể đi qua cùng một network path, nhưng intermediate device sẽ xử lý riêng theo protocol type, port, connection state và security policy. Ping được chỉ có thể chứng minh path của ICMP Echo có thể round-trip, không có nghĩa TCP port của target chắc chắn reachable.
+Ping sử dụng ICMP (network layer), TCP connection sử dụng TCP (transport layer). Hai loại traffic có thể đi qua cùng một network path, nhưng intermediate device sẽ xử lý riêng theo protocol type, port, connection state và security policy. Ping được chỉ có thể chứng minh path của ICMP Echo có thể round-trip, không có nghĩa TCP port của target chắc chắn reachable.
 
 ![Khác biệt path giữa ICMP và TCP](https://oss.javaguide.cn/github/javaguide/cs-basics/network/can-ping-but-tcp-may-not-connect-icmp-and-tcp-path-differences.png)
 
 Một số nguyên nhân thường gặp:
 
-- **Security policy của firewall khác nhau**: Nhiều network device cho phép ICMP (thuận tiện cho operation và maintenance probe), nhưng rule cho TCP port chặt chẽ hơn, có thể chỉ mở `22`, `80`, `443` và chặn mọi port khác.
+- **Security policy của firewall khác nhau**: Nhiều network device cho phép ICMP (thuận tiện cho vận hành và giám sát), nhưng rule cho TCP port chặt chẽ hơn, có thể chỉ mở `22`, `80`, `443` và chặn mọi port khác.
 - **Service chưa start hoặc port chưa listen**: Host có thể reply ICMP, nhưng Nginx chưa start hoặc MySQL chưa listen, nên Ping được nhưng TCP không kết nối được.
 - **Có NAT / load balancing / security device ở giữa**: Đằng sau public IP có thể không phải một real server; ICMP response có thể đến từ intermediate device, không thể đồng nhất trực tiếp với việc backend service khả dụng.
 - **HTTPS còn có thể bị kẹt ở SNI của TLS handshake**: TCP three-way handshake có thể thành công, nhưng SNI trong `ClientHello` bị intermediate device nhận diện và block, khiến connection reset hoặc bị treo.
 
 Ngược lại cũng đúng: **Ping không được không có nghĩa TCP chắc chắn không kết nối được**. Một số server hoặc cloud security group disable ICMP trực tiếp, nhưng business port vẫn hoạt động bình thường.
 
-Đề xuất troubleshooting: kiểm tra DNS trước (trong scenario dùng domain), sau đó dùng `ping` kiểm tra ICMP, tiếp đến dùng `nc` test port, cuối cùng dùng `curl` hoặc `openssl s_client` kiểm tra HTTPS / TLS. Đừng kết luận quá sớm chỉ dựa trên một command.
+Đề xuất troubleshooting: kiểm tra DNS trước (nếu dùng domain), sau đó dùng `ping` kiểm tra ICMP, tiếp đến dùng `nc` test port, cuối cùng dùng `curl` hoặc `openssl s_client` kiểm tra HTTPS / TLS. Đừng kết luận quá sớm chỉ dựa trên một command.
 
 ![Các layer troubleshooting HTTPS connection](https://oss.javaguide.cn/github/javaguide/cs-basics/network/can-ping-but-tcp-may-not-connect-https-connection-troubleshooting-layers.png)
 
@@ -563,17 +563,17 @@ Giới thiệu chi tiết: [Ping được thì TCP chắc chắn kết nối đ�
 
 ### DNS có tác dụng gì?
 
-DNS (Domain Name System) là domain management system, protocol quan trọng đầu tiên được sử dụng sau khi user truy cập URL bằng browser. DNS cần giải quyết **vấn đề mapping giữa domain name và IP address**.
+DNS (Domain Name System) là hệ thống tên miền, protocol quan trọng đầu tiên được sử dụng sau khi user truy cập URL bằng browser. DNS cần giải quyết **vấn đề mapping giữa domain name và IP address**.
 
 ![Tổng quan hệ thống DNS resolve domain name thành IP address](https://oss.javaguide.cn/github/javaguide/cs-basics/network/dns-overview.png)
 
-Trên một máy tính, có thể tồn tại browser DNS cache, operating system DNS cache và router DNS cache. Nếu không tìm thấy trong tất cả cache trên, DNS sẽ xuất hiện.
+Trên một máy tính, có thể tồn tại browser DNS cache, operating system DNS cache và router DNS cache. Nếu không tìm thấy trong tất cả cache trên, DNS mới được sử dụng.
 
 Thiết kế DNS hiện nay sử dụng distributed, hierarchical database structure. **DNS là application-layer protocol, có thể chạy trên UDP hoặc TCP, port là 53.**
 
 ### Có những DNS server nào? Có bao nhiêu root server?
 
-DNS có thể được mô tả từ hai góc độ. Hierarchical authority gồm root, top-level domain và authoritative server của zone cụ thể; phía query gồm các role như stub resolver, recursive resolver và forwarder. Cùng một phần mềm hoặc cùng một server cũng có thể đảm nhận nhiều role, vì vậy các nhóm này không phải các “loại server” loại trừ lẫn nhau và bao quát mọi trường hợp.
+DNS có thể được mô tả từ hai góc độ. Hierarchical authority gồm root, top-level domain và authoritative server của zone cụ thể; phía query gồm các role như stub resolver, recursive resolver và forwarder. Cùng một phần mềm hoặc cùng một server cũng có thể đảm nhận nhiều role, vì vậy các nhóm này không loại trừ lẫn nhau và cũng không bao quát mọi trường hợp.
 
 - Root DNS server cung cấp thông tin referral đến top-level domain server cho bên query.
 - Top-level domain DNS server thường trả về thông tin referral của authoritative server cho target domain.
@@ -584,16 +584,16 @@ Về mặt logic, root server system có 13 root server identifier được đ�
 
 ### ⭐️ DNS resolve diễn ra như thế nào?
 
-Toàn bộ quá trình có khá nhiều bước, tôi đã viết riêng một bài để giới thiệu chi tiết: [Giải thích chi tiết DNS Domain Name System (Application layer)](https://javaguide.cn/cs-basics/network/dns.html).
+Toàn bộ quá trình có khá nhiều bước, tôi đã viết riêng một bài để giới thiệu chi tiết: [Giải thích chi tiết DNS (Domain Name System) (Application layer)](https://javaguide.cn/cs-basics/network/dns.html).
 
 ### Bạn biết DNS hijacking không? Ứng phó như thế nào?
 
-DNS hijacking là một network attack, thông qua việc sửa DNS server resolution result khiến domain user truy cập trỏ đến IP address sai, từ đó khiến user không thể truy cập website bình thường hoặc bị dẫn đến website độc hại. DNS hijacking đôi khi còn được gọi là DNS redirection, DNS spoofing hoặc DNS poisoning.
+DNS hijacking là một network attack, thông qua việc sửa DNS server resolution result khiến domain mà user truy cập trỏ đến IP address sai, từ đó khiến user không thể truy cập website bình thường hoặc bị dẫn đến website độc hại. DNS hijacking đôi khi còn được gọi là DNS redirection, DNS spoofing hoặc DNS poisoning.
 
 ## Tham khảo
 
-- 《HTTP được minh họa》
-- 《Computer Networks: A Top-Down Approach》 (phiên bản thứ bảy)
+- "Minh họa HTTP"
+- "Computer Networks: A Top-Down Approach" (phiên bản thứ bảy)
 - Giải thích chi tiết HTTP/2.0 và HTTPS protocol: <https://juejin.cn/post/7034668672262242318>
 - Toàn bộ HTTP request header | HTTP Request Headers: <https://www.flysnow.org/tools/table/http-request-headers/>
 - HTTP1, HTTP2, HTTP3: <https://juejin.cn/post/6855470356657307662>

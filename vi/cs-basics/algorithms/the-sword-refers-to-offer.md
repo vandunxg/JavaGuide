@@ -136,8 +136,8 @@ int JumpFloorII(int number) {
 
 Java có ba toán tử dịch bit:
 
-1. `"<<"`: **toán tử dịch trái**, tương đương với lũy thừa của 2 với số mũ n
-2. `">>"`: **toán tử dịch phải**, tương đương với chia cho lũy thừa của 2 với số mũ n
+1. `"<<"`: **toán tử dịch trái**, tương đương với nhân với 2^n
+2. `">>"`: **toán tử dịch phải**, tương đương với chia cho 2^n
 3. `">>>"`: **toán tử dịch phải không dấu**. Bất kể bit cao nhất trước khi dịch là 0 hay 1, phần trống phát sinh ở bên trái sau khi dịch đều được điền bằng 0. Tương tự `>>`.
 
 ```java
@@ -191,7 +191,7 @@ Hãy cài đặt một function thay thế khoảng trắng trong một chuỗi 
 
 Bài này không khó. Có thể lặp để kiểm tra ký tự trong chuỗi có phải khoảng trắng hay không. Nếu có thì dùng phương thức `append()` để nối thêm `"%20"`, nếu không thì nối ký tự ban đầu.
 
-Ngoài ra có thể dùng trực tiếp `String.replace()` để thay thế khoảng trắng theo nghĩa đen, giải quyết bằng một dòng code.
+Ngoài ra có thể dùng trực tiếp `String.replace()` để thay thế ký tự khoảng trắng, giải quyết bằng một dòng code.
 
 **Code ví dụ:**
 
@@ -220,15 +220,15 @@ public String replaceSpace(StringBuffer str) {
 }
 ```
 
-## Lũy thừa nguyên của một giá trị
+## Lũy thừa với số mũ nguyên
 
 **Mô tả bài toán:**
 
-Cho một số thực kiểu `double` là `base` và một số nguyên kiểu `int` là `exponent`, hãy tính lũy thừa `exponent` của `base`.
+Cho một số thực kiểu `double` là `base` và một số nguyên kiểu `int` là `exponent`, hãy tính `base` với số mũ `exponent`.
 
 **Phân tích vấn đề:**
 
-Bài này có thể dùng **lũy thừa nhanh**. Cần xử lý hai biên: không thể lấy nghịch đảo khi cơ số bằng 0 và số mũ âm; `Integer.MIN_VALUE` sẽ bị tràn khi lấy số đối, vì vậy trước hết phải chuyển số mũ sang `long`.
+Bài này có thể dùng **lũy thừa nhanh**. Cần xử lý hai trường hợp biên: không thể lấy nghịch đảo khi cơ số bằng 0 với số mũ âm; `Integer.MIN_VALUE` sẽ bị tràn khi lấy số đối, vì vậy trước hết phải chuyển số mũ sang `long`.
 
 Với điều kiện nghiệp vụ “có chính xác bằng 0 hay không”, có thể trực tiếp dùng `base == 0.0`. So sánh bằng epsilon sẽ khiến một cơ số rất nhỏ nhưng khác 0 bị nhận nhầm là 0.
 
@@ -300,7 +300,7 @@ Trước hết đếm số lượng số lẻ, giả sử là n, sau đó tạo 
 
 **Code ví dụ:**
 
-Thuật toán có độ phức tạp thời gian O(n), độ phức tạp không gian O(n)
+Thuật toán có độ phức tạp thời gian O(n), độ phức tạp về không gian O(n)
 
 ```java
 public class Solution {
@@ -340,18 +340,18 @@ Nhập một danh sách liên kết, xuất node thứ k tính từ cuối trong
 **Phân tích vấn đề:**
 
 **Tóm tắt trong một câu:**
-Một trong hai pointer là p1 chạy trước. Sau khi p1 chạy đến node thứ k-1 thì pointer p2 bắt đầu chạy. Khi p1 chạy đến cuối, node mà p2 trỏ tới chính là node thứ k tính từ cuối.
+Pointer p1 chạy trước. Sau khi p1 chạy đến node thứ k-1 thì pointer p2 bắt đầu chạy. Khi p1 chạy đến cuối, node mà p2 trỏ tới chính là node thứ k tính từ cuối.
 
 **Hiểu đơn giản về ý tưởng:**
 
-Giả sử trước hết số node của danh sách liên kết (độ dài) là n.
-Quy luật một: muốn tìm node thứ k tính từ cuối thì cần tiến về trước bao nhiêu bước? Ví dụ node thứ nhất tính từ cuối cần đi n bước, vậy node thứ hai tính từ cuối thì sao? Rõ ràng cần đi n-1 bước. Vì vậy có thể rút ra quy luật: để tìm node thứ k tính từ cuối, cần đi về trước n-k+1 bước.
+Trước hết, giả sử số node của danh sách liên kết (độ dài) là n.
+Quy luật một: muốn tìm node thứ k tính từ cuối thì cần đi bao nhiêu bước? Ví dụ node thứ nhất tính từ cuối cần đi n bước, vậy node thứ hai tính từ cuối thì sao? Rõ ràng cần đi n-1 bước. Vì vậy có thể rút ra quy luật: để tìm node thứ k tính từ cuối, cần đi n-k+1 bước.
 
 **Bắt đầu thuật toán:**
 
 1. Đặt hai pointer p1 và p2 cùng trỏ vào head. Khi p1 đi k-1 bước thì dừng lại. Trước đó p2 không di chuyển.
 2. Bước tiếp theo của p1 là bước thứ k, lúc này p2 bắt đầu di chuyển cùng. Vì sao p2 di chuyển tại thời điểm này? Hãy xem phân tích bên dưới.
-3. Khi p1 đi đến cuối danh sách liên kết, tức là p1 đã đi n bước. Vì p2 bắt đầu di chuyển sau khi p1 đi k-1 bước, nên p1 và p2 luôn cách nhau k-1 bước. Vì vậy khi p1 đi n bước, p2 phải đi được n-(k-1) bước. Tức p2 đã đi n-k+1 bước. Lúc này p2 vừa khéo trỏ đúng vào node thứ k tính từ cuối theo quy luật một.
+3. Khi p1 đi đến cuối danh sách liên kết, tức là p1 đã đi n bước. Vì p2 bắt đầu di chuyển sau khi p1 đi k-1 bước, nên p1 và p2 luôn cách nhau k-1 bước. Vì vậy khi p1 đi n bước, p2 phải đi được n-(k-1) bước. Tức p2 đã đi n-k+1 bước. Lúc này p2 vừa đúng trỏ vào node thứ k tính từ cuối theo quy luật một.
    Như vậy có dễ hiểu hơn không?
 
 **Nội dung kiểm tra:**
@@ -409,7 +409,7 @@ Nhập một danh sách liên kết, đảo ngược danh sách rồi xuất t�
 
 **Phân tích vấn đề:**
 
-Đây là một bài rất thường gặp về danh sách liên kết. Ý tưởng không khó, nhưng khi tự cài đặt có thể thật sự cảm thấy không biết bắt đầu từ đâu. Tôi tham khảo code của người khác.
+Đây là một bài rất thường gặp về danh sách liên kết. Ý tưởng không khó, nhưng khi tự cài đặt có thể thật sự cảm thấy không biết bắt đầu từ đâu. Tôi đã tham khảo code của người khác.
 Ý tưởng là dựa vào đặc điểm node trước trỏ tới node sau của danh sách liên kết, đưa các node phía sau lên phía trước.
 Ví dụ trong hình dưới đây: đổi vị trí node 1 và node 2, sau đó cho node 3 trỏ tới node 2, node 4 trỏ tới node 3. Như vậy danh sách liên kết bên dưới đã được đảo ngược.
 
@@ -461,7 +461,7 @@ Nhập hai danh sách liên kết tăng dần, xuất danh sách liên kết sau
 Có thể phân tích như sau:
 
 1. Giả sử có hai danh sách liên kết A, B;
-2. So sánh giá trị của node đầu A1 của A với node đầu B1 của B. Giả sử A1 nhỏ hơn thì A1 là node đầu;
+2. So sánh giá trị node đầu A1 của A với node đầu B1 của B. Giả sử A1 nhỏ hơn thì A1 là node đầu;
 3. So sánh A2 với B1. Giả sử B1 nhỏ hơn thì A1 trỏ tới B1;
 4. So sánh A2 với B2……
    Cứ lặp như vậy là được, khá dễ hiểu.
@@ -555,13 +555,13 @@ public ListNode Merge(ListNode list1,ListNode list2) {
 
 **Mô tả bài toán:**
 
-Dùng hai stack để cài đặt một queue, hoàn thành thao tác Push và Pop của queue. Các phần tử trong queue có kiểu int.
+Dùng hai stack để cài đặt một queue, thực hiện thao tác Push và Pop trên queue. Các phần tử trong queue có kiểu int.
 
 **Phân tích vấn đề:**
 
 Trước hết ôn lại đặc điểm cơ bản của stack và queue:
-**Stack:** vào sau ra trước (LIFO)
-**Queue:** vào trước ra trước
+**Stack:** vào sau, ra trước (LIFO)
+**Queue:** vào trước, ra trước
 Rõ ràng cần dựa vào một số phương thức cơ bản của stack mà JDK cung cấp để cài đặt. Hãy xem một số phương thức cơ bản của lớp Stack:
 
 ![Một số phương thức thường gặp của lớp Stack](https://oss.javaguide.cn/github/javaguide/cs-basics/algorithms/5985000.jpg)
@@ -588,7 +588,7 @@ public class Solution {
     }
 
     public int pop() {
-        //Nếu cả hai queue đều rỗng thì ném exception, nghĩa là người dùng chưa push phần tử nào
+        //Nếu cả hai stack đều rỗng thì ném exception, nghĩa là người dùng chưa push phần tử nào
         if(stack1.empty()&&stack2.empty()){
             throw new RuntimeException("Queue is empty!");
         }
@@ -612,7 +612,7 @@ Nhập hai chuỗi số nguyên. Chuỗi thứ nhất biểu thị thứ tự pu
 
 **Phân tích bài toán:**
 
-Tôi đã suy nghĩ khá lâu mà không có ý tưởng, sau đó tham khảo [đáp án của Alias](https://www.nowcoder.com/questionTerminal/d77d11405cc7470d82554cb392585106). Cách làm của bạn ấy cũng được viết rất chi tiết và khá dễ hiểu.
+Tôi đã suy nghĩ khá lâu mà không có ý tưởng, sau đó tham khảo [đáp án của Alias](https://www.nowcoder.com/questionTerminal/d77d11405cc7470d82554cb392585106). Cách làm của bạn ấy cũng được trình bày rất chi tiết và khá dễ hiểu.
 
 【Ý tưởng】Dùng một stack phụ, duyệt thứ tự push, trước tiên đưa phần tử đầu tiên vào stack, ở đây là 1, sau đó kiểm tra phần tử trên cùng của stack có phải phần tử đầu tiên trong thứ tự pop hay không, ở đây là 4. Rõ ràng 1≠4, nên tiếp tục push cho đến khi bằng nhau thì bắt đầu pop. Sau khi pop một phần tử thì dịch chuỗi pop về sau một vị trí, tiếp tục cho đến khi không bằng nhau. Lặp như vậy cho đến khi duyệt xong thứ tự push. Nếu stack phụ vẫn chưa rỗng thì chứng tỏ chuỗi pop không phải thứ tự pop của stack đó.
 

@@ -1,6 +1,6 @@
 ---
 title: "Tổng hợp các phương thức tấn công mạng thường gặp (bảo mật)"
-description: "Tổng hợp các cuộc tấn công TCP/IP thường gặp và tư duy phòng vệ, bao quát DDoS, giả mạo IP/ARP, man-in-the-middle và các phương thức khác, nhấn mạnh thực tiễn phòng vệ trong engineering."
+description: "Tổng hợp các cuộc tấn công TCP/IP thường gặp và cách thức phòng vệ, bao quát DDoS, giả mạo IP/ARP, man-in-the-middle và các phương thức khác, nhấn mạnh thực tiễn phòng vệ khi triển khai."
 category: CS Basics
 tag:
   - Computer Network
@@ -12,26 +12,26 @@ head:
 
 > Bài viết này được biên soạn và hoàn thiện từ bài [Các phương thức tấn công TCP/IP thường gặp - Ghi chép Nuanlan - 2021](https://mp.weixin.qq.com/s/AZwWrOlLxRSSi-ywBgZ0fA).
 
-TCP/IP protocol stack hướng tới khả năng liên thông, nhưng khi thiết kế ban đầu, nhiều cơ chế chưa tính đến quy mô tấn công và cường độ đối kháng ngày nay.
+TCP/IP protocol stack hướng tới khả năng liên thông, nhưng khi được thiết kế ban đầu, nhiều cơ chế chưa tính đến quy mô và cường độ tấn công ngày nay.
 
-Các cuộc tấn công IP spoofing, SYN Flood, DDoS, ARP spoofing, DNS hijacking nhìn bề ngoài khác nhau, nhưng về bản chất đều lợi dụng giả định tin cậy, điểm tiêu tốn tài nguyên hoặc chuỗi phân giải trong network protocol.
+Các cuộc tấn công IP spoofing, SYN Flood, DDoS, ARP spoofing, DNS hijacking nhìn bề ngoài khác nhau, nhưng về bản chất đều lợi dụng các giả định tin cậy, điểm tiêu tốn tài nguyên hoặc chuỗi phân giải của network protocol.
 
 Bài viết này chủ yếu trả lời một số câu hỏi:
 
 1. Các phương thức tấn công TCP/IP thường gặp lần lượt lợi dụng cơ chế nào?
 2. Các cuộc tấn công như IP spoofing, SYN Flood, DDoS đại khái xảy ra như thế nào?
 3. Các cuộc tấn công mạng thường gặp gây ra những ảnh hưởng nào?
-4. Trước các cuộc tấn công này, thông thường có những tư duy phòng vệ cơ bản nào?
+4. Trước các cuộc tấn công này, thông thường có những cách thức phòng vệ cơ bản nào?
 
 ## IP spoofing
 
 ### IP là gì?
 
-Trong network, mọi thiết bị đều được cấp một địa chỉ. Địa chỉ này giống như địa chỉ nhà của Xiaolan, gồm **số nhà và số phòng**. **Số nhà** được cấp cho toàn subnet, còn **số phòng** tương ứng với số được cấp cho computer trong subnet; đó chính là địa chỉ trong network. Số tương ứng với **số nhà** là network number, còn số tương ứng với **số phòng** là host number. Toàn bộ địa chỉ này là **IP address**.
+Trong network, mọi thiết bị đều được cấp một địa chỉ. Địa chỉ này giống như địa chỉ nhà của Xiaolan, gồm **số nhà và số phòng**. **Số nhà** được cấp cho toàn subnet, còn **số phòng** là số được cấp cho computer trong subnet; đó chính là địa chỉ trong network. Số tương ứng với **số nhà** là network number, còn số tương ứng với **số phòng** là host number. Toàn bộ địa chỉ này là **IP address**.
 
 ### Có thể biết gì qua IP address?
 
-Qua IP address, chúng ta có thể phán đoán vị trí của server cần truy cập để gửi message đến server. Thông thường, message do sender gửi trước tiên đi qua hub của subnet, được chuyển tiếp đến router gần nhất, sau đó dựa trên vị trí định tuyến để truy cập router tiếp theo, cho đến khi đến đích.
+Qua IP address, chúng ta có thể xác định vị trí của server cần truy cập để gửi message đến server. Thông thường, message do sender gửi trước tiên đi qua hub của subnet, được chuyển tiếp đến router gần nhất, sau đó dựa trên thông tin định tuyến để đi đến router tiếp theo, cho đến khi đến đích.
 
 **Định dạng IP header**:
 
@@ -60,8 +60,7 @@ Mặc dù không thể ngăn chặn IP spoofing, nhưng có thể áp dụng bi�
 SYN Flood là một trong những cuộc tấn công DDoS (Distributed Denial of Service, từ chối dịch vụ phân tán) nguyên thủy và kinh điển nhất trên Internet, nhằm làm cạn kiệt tài nguyên server khả dụng, khiến server không thể truyền legitimate traffic.
 
 SYN Flood lợi dụng cơ chế three-way handshake của TCP protocol. Attacker thường dùng tool hoặc botnet host bị kiểm soát để gửi đến server lượng lớn TCP SYN packet có source IP thay đổi hoặc source port thay đổi. Sau khi server phản hồi các packet này, nó sẽ tạo ra lượng lớn half-open connection. Khi system resource bị tiêu hao hết, server không thể cung cấp service bình thường.
-
-Tăng performance của server hoặc cung cấp thêm connection capacity không đáng kể trước lượng packet khổng lồ của SYN Flood. Mấu chốt để phòng vệ SYN Flood là phán đoán connection request nào đến từ source thật, chặn request từ source không thật để bảo đảm request nghiệp vụ bình thường được phục vụ.
+Tăng performance của server hoặc cung cấp thêm connection capacity cũng không đáng kể trước lượng packet khổng lồ của SYN Flood. Mấu chốt để phòng vệ SYN Flood là xác định connection request nào đến từ source thật, chặn request từ source giả để bảo đảm request nghiệp vụ bình thường được phục vụ.
 
 ![SYN Flood attack làm cạn kiệt tài nguyên server qua lượng lớn half-open connection](https://oss.javaguide.cn/p3-juejin/2b3d2d4dc8f24890b5957df1c7d6feb8~tplv-k3u1fbpfcp-zoom-1.png)
 
@@ -74,9 +73,9 @@ Tăng performance của server hoặc cung cấp thêm connection capacity khôn
 A trước tiên gửi message **SYN** (Synchronization) cho B, yêu cầu B chuẩn bị sẵn sàng nhận data; sau khi nhận được, B phản hồi message **SYN-ACK** (Synchronization-Acknowledgement) cho A. Message này có hai mục đích:
 
 - Xác nhận với A rằng đã chuẩn bị sẵn sàng nhận data,
-- Đồng thời yêu cầu A cũng chuẩn bị sẵn sàng nhận data. Lúc này B đã xác nhận trạng thái nhận với A và chờ A xác nhận, connection ở **half-open state (Half-Open)**, đúng như tên gọi, mới chỉ mở một nửa; sau khi nhận được, A lại gửi message **ACK** (Acknowledgement) cho B, xác nhận với B rằng cũng đã chuẩn bị sẵn sàng nhận data. Đến đây three-way handshake hoàn tất và **connection** được thiết lập.
+- Đồng thời yêu cầu A cũng chuẩn bị sẵn sàng nhận data. Lúc này B đã xác nhận trạng thái nhận với A và chờ A xác nhận, connection ở **half-open state (Half-Open)**, đúng như tên gọi, mới chỉ mở một nửa; sau khi nhận được SYN-ACK, A lại gửi message **ACK** (Acknowledgement) cho B, xác nhận với B rằng cũng đã chuẩn bị sẵn sàng nhận data. Đến đây three-way handshake hoàn tất và **connection** được thiết lập.
 
-Bạn có nhận thấy điểm then chốt nhất nằm ở việc hai bên có cùng chuyển sang **trạng thái có thể nhận message** theo yêu cầu của đối phương hay không không? Việc xác nhận trạng thái này chủ yếu dựa vào **sequence number của message** (SequenceNum) mà hai bên sắp sử dụng. **TCP** cần dùng **sequence number của message** để đánh dấu thứ tự gửi message, bảo đảm message đến ứng dụng tầng trên của bên nhận theo đúng thứ tự gửi.
+Bạn có nhận thấy điểm then chốt nhất nằm ở việc hai bên có cùng chuyển sang **trạng thái có thể nhận message** theo yêu cầu của đối phương hay không? Việc xác nhận trạng thái này chủ yếu dựa vào **sequence number của message** (SequenceNum) mà hai bên sắp sử dụng. **TCP** cần dùng **sequence number của message** để đánh dấu thứ tự gửi message, bảo đảm message đến ứng dụng tầng trên của bên nhận theo đúng thứ tự gửi.
 
 **TCP** là connection **full-duplex** (Duplex), đồng thời hỗ trợ communication hai chiều, tức hai bên có thể đồng thời gửi message cho nhau. Trong đó, message **SYN** và **SYN-ACK** mở channel communication một chiều A→B (B biết sequence number của A); message **SYN-ACK** và **ACK** mở channel communication một chiều B→A (A biết sequence number của B).
 
@@ -88,7 +87,7 @@ Giả sử B cung cấp service qua một **TCP** port. Khi nhận message **SYN
 
 ![Lượng lớn half-open connection trong SYN Flood chiếm dụng tài nguyên server](https://oss.javaguide.cn/p3-juejin/7ff1daddcec44d61994f254e664987b4~tplv-k3u1fbpfcp-zoom-1.png)
 
-Để giúp A kết nối thành công, B cần **phân bổ kernel resource** để duy trì half-open connection. Khi B phải đối mặt với lượng lớn connection A như hình trên, **SYN Flood** attack hình thành. Attacker A có thể điều khiển zombie host gửi lượng lớn message SYN cho B nhưng không phản hồi message ACK, hoặc thẳng tay giả mạo **Source IP** trong message SYN khiến message **SYN-ACK** B phản hồi bị chìm vào hư không. Điều này khiến B bị chiếm giữ bởi lượng lớn half-open connection chắc chắn không thể hoàn tất, cho đến khi resource cạn kiệt và ngừng phản hồi các connection request bình thường.
+Để giúp A kết nối thành công, B cần **phân bổ kernel resource** để duy trì half-open connection. Khi B phải đối mặt với lượng lớn connection từ A như hình trên, **SYN Flood** attack hình thành. Attacker A có thể điều khiển zombie host gửi lượng lớn message SYN cho B nhưng không phản hồi message ACK, hoặc thẳng tay giả mạo **Source IP** trong message SYN khiến message **SYN-ACK** B phản hồi bị chìm vào hư không. Điều này khiến B bị chiếm giữ bởi lượng lớn half-open connection chắc chắn không thể hoàn tất, cho đến khi resource cạn kiệt và ngừng phản hồi các connection request bình thường.
 
 ### Các hình thức thường gặp của SYN Flood là gì?
 
@@ -129,7 +128,7 @@ Lấy một ví dụ. Giả sử hôm nay cần liên hệ với Xiaolan ở m�
 
 Trước hết, receptionist nhận cuộc gọi của caller yêu cầu kết nối đến một phòng cụ thể. Sau đó receptionist cần kiểm tra danh sách tất cả phòng để bảo đảm khách có ở phòng và sẵn sàng nghe máy. Không may là nếu lúc này đột nhiên tất cả đường dây điện thoại cùng sáng lên, họ sẽ nhanh chóng bị quá tải.
 
-Khi server nhận từng **UDP** packet mới, nó sẽ xử lý request qua các bước trên và sử dụng system resource trong quá trình đó. Khi gửi **UDP** packet, mỗi packet đều chứa **IP** address của source device. Trong loại **DDoS** attack này, attacker thường không sử dụng **IP** address thật của mình mà giả mạo source **IP** address của **UDP** packet, nhờ đó che giấu vị trí thật của attacker và có khả năng làm bão hòa response packet từ target server.
+Khi server nhận từng **UDP** packet mới, nó sẽ xử lý request qua các bước trên và sử dụng system resource trong quá trình đó. Khi gửi **UDP** packet, mỗi packet đều chứa **IP** address của source device. Trong loại **DDoS** attack này, attacker thường không sử dụng **IP** address thật của mình mà giả mạo source **IP** address của **UDP** packet, nhờ đó che giấu vị trí thật của attacker và có khả năng khiến response packet từ target server bị bão hòa.
 
 Vì target server sử dụng resource để kiểm tra và phản hồi kết quả của từng **UDP** packet nhận được, khi nhận lượng lớn **UDP** packet, resource của target có thể nhanh chóng cạn kiệt, dẫn đến denial of service đối với normal traffic.
 
@@ -137,17 +136,17 @@ Vì target server sử dụng resource để kiểm tra và phản hồi kết q
 
 ### Giảm thiểu UDP Flood như thế nào?
 
-Phần lớn operating system giới hạn một phần response rate của **ICMP** packet để ngắt **DDoS** attack cần ICMP response. Một nhược điểm của biện pháp giảm thiểu này là trong quá trình attack, legitimate packet cũng có thể bị lọc. Nếu volume của **UDP Flood** đủ lớn để làm bão hòa state table của firewall trên target server, mọi biện pháp giảm thiểu xảy ra ở server level đều không đủ để xử lý bottleneck ở upstream của target device.
+Phần lớn operating system giới hạn tốc độ phản hồi của **ICMP** packet để ngắt **DDoS** attack cần ICMP response. Một nhược điểm của biện pháp giảm thiểu này là trong quá trình attack, legitimate packet cũng có thể bị lọc. Nếu volume của **UDP Flood** đủ lớn để làm bão hòa state table của firewall trên target server, mọi biện pháp giảm thiểu xảy ra ở server level đều không đủ để xử lý bottleneck ở upstream của target device.
 
 ## HTTP Flood (flood)
 
 ### HTTP Flood là gì?
 
-HTTP Flood là một cuộc tấn công DDoS (Distributed Denial of Service, từ chối dịch vụ phân tán) quy mô lớn, nhằm làm target server quá tải bằng HTTP request. Khi target bị bão hòa bởi request và không thể phản hồi normal traffic, denial of service sẽ xảy ra, từ chối các request khác từ real user.
+HTTP Flood là một cuộc tấn công DDoS (Distributed Denial of Service, từ chối dịch vụ phân tán) quy mô lớn, nhằm làm target server quá tải bằng HTTP request. Khi target bị bão hòa bởi request và không thể phản hồi traffic bình thường, denial of service sẽ xảy ra, từ chối các request khác từ user thực.
 
 ![HTTP Flood làm quá tải target server qua lượng lớn request ở application layer](https://oss.javaguide.cn/p3-juejin/aa64869551d94c8d89fa80eaf4395bfa~tplv-k3u1fbpfcp-zoom-1.png)
 
-### Nguyên lý attack của HTTP Flood là gì?
+### Nguyên lý của HTTP Flood attack là gì?
 
 HTTP flood attack là một loại DDoS attack ở “layer 7”. Layer 7 là application layer trong OSI model, chỉ các Internet protocol như HTTP. HTTP là nền tảng của Internet request dựa trên browser, thường dùng để load webpage hoặc gửi form content qua Internet. Việc giảm thiểu application-layer attack đặc biệt phức tạp vì rất khó phân biệt malicious traffic với normal traffic.
 
@@ -155,12 +154,12 @@ HTTP flood attack là một loại DDoS attack ở “layer 7”. Layer 7 là ap
 
 HTTP flood attack có hai loại:
 
-- **HTTP GET attack**: Trong hình thức attack này, nhiều computer hoặc device khác phối hợp với nhau gửi nhiều request đến target server cho image, file hoặc asset khác. Khi target bị nhấn chìm bởi request và response đi vào, các request khác từ normal traffic source sẽ bị denial of service.
-- **HTTP POST attack**: Nói chung, khi submit form trên website, server phải xử lý incoming request và đẩy data vào persistence layer (thường là database). So với processing capacity và bandwidth cần để gửi POST request, quá trình xử lý form data và chạy database command cần thiết có mức độ tiêu tốn tương đối cao. Attack này lợi dụng sự khác biệt về resource consumption tương đối, trực tiếp gửi nhiều POST request đến target server cho đến khi capacity của target server bão hòa và từ chối service.
+- **HTTP GET attack**: Trong hình thức attack này, nhiều computer hoặc device khác phối hợp với nhau gửi nhiều request đến target server cho image, file hoặc asset khác. Khi target bị nhấn chìm bởi request và response, các request khác từ source của traffic bình thường sẽ bị denial of service.
+- **HTTP POST attack**: Nói chung, khi submit form trên website, server phải xử lý incoming request và đẩy data vào persistence layer (thường là database). So với processing capacity và bandwidth cần để gửi POST request, quá trình xử lý form data và chạy database command cần thiết tốn nhiều resource hơn tương đối. Attack này lợi dụng sự khác biệt về resource consumption, trực tiếp gửi nhiều POST request đến target server cho đến khi capacity của target server bão hòa và từ chối service.
 
 ### Phòng vệ HTTP Flood như thế nào?
 
-Như đã nói ở trên, giảm thiểu layer 7 attack rất phức tạp và thường cần thực hiện từ nhiều phương diện. Một cách là challenge device phát request để kiểm tra nó có phải bot hay không, tương tự CAPTCHA test thường dùng khi tạo account online. Bằng cách đưa ra yêu cầu như JavaScript computation challenge, có thể giảm thiểu nhiều attack.
+Như đã nói ở trên, giảm thiểu layer 7 attack rất phức tạp và thường cần thực hiện từ nhiều phương diện. Một cách là thực hiện challenge với device phát request để kiểm tra nó có phải bot hay không, tương tự CAPTCHA test thường dùng khi tạo account online. Bằng cách đưa ra yêu cầu như JavaScript computation challenge, có thể giảm thiểu nhiều attack.
 
 Các cách khác để chặn HTTP flood attack gồm sử dụng Web application firewall (WAF), quản lý IP reputation database để theo dõi và chọn lọc chặn malicious traffic, cùng dynamic analysis do engineer thực hiện. Cloudflare có lợi thế về quy mô với hơn 20 triệu Internet device, có thể phân tích traffic từ nhiều source và giảm thiểu attack tiềm ẩn bằng WAF rule được cập nhật nhanh cùng các chiến lược phòng vệ khác, từ đó loại bỏ DDoS traffic ở application layer.
 
@@ -168,7 +167,7 @@ Các cách khác để chặn HTTP flood attack gồm sử dụng Web applicatio
 
 ### DNS Flood là gì?
 
-Domain Name System (DNS) server là “danh bạ điện thoại” của Internet; Internet device dùng server này để tìm Web server cụ thể nhằm truy cập Internet content. DNS Flood attack là một cuộc tấn công denial-of-service phân tán (DDoS), trong đó attacker nhấn chìm DNS server của một domain bằng lượng lớn traffic để cố làm gián đoạn DNS resolution của domain đó. Nếu user không tìm được danh bạ, họ không thể tìm thấy address dùng để gọi resource cụ thể. Bằng cách làm gián đoạn DNS resolution, DNS Flood attack phá hỏng khả năng website, API hoặc Web application phản hồi legitimate traffic. Rất khó phân biệt DNS Flood attack với normal high traffic, vì lượng traffic quy mô lớn này thường đến từ nhiều unique address, truy vấn record thật của domain và mô phỏng legitimate traffic.
+Domain Name System (DNS) server là “danh bạ điện thoại” của Internet; Internet device dùng server này để tìm Web server cụ thể nhằm truy cập Internet content. DNS Flood attack là một cuộc tấn công denial-of-service phân tán (DDoS), trong đó attacker nhấn chìm DNS server của một domain bằng lượng lớn traffic để cố làm gián đoạn DNS resolution của domain đó. Nếu user không tìm được danh bạ, họ không thể tìm thấy address để truy cập resource cụ thể. Bằng cách làm gián đoạn DNS resolution, DNS Flood attack phá hỏng khả năng website, API hoặc Web application phản hồi traffic hợp lệ. Rất khó phân biệt DNS Flood attack với traffic lớn bình thường, vì lượng traffic quy mô lớn này thường đến từ nhiều unique address, truy vấn record thật của domain và mô phỏng traffic hợp lệ.
 
 ### Nguyên lý attack của DNS Flood là gì?
 
@@ -176,7 +175,7 @@ Domain Name System (DNS) server là “danh bạ điện thoại” của Intern
 
 Chức năng của Domain Name System là chuyển name dễ nhớ (ví dụ example.com) thành address của website server khó nhớ (ví dụ 192.168.0.1), vì vậy tấn công thành công vào DNS infrastructure sẽ khiến phần lớn mọi người không thể sử dụng Internet. DNS Flood attack là một kiểu DNS-based attack tương đối mới, tăng mạnh sau sự nổi lên của [Internet of Things (IoT)](https://www.cloudflare.com/learning/ddos/glossary/internet-of-things-iot/) [botnet](https://www.cloudflare.com/learning/ddos/what-is-a-ddos-botnet/) băng thông cao (như [Mirai](https://www.cloudflare.com/learning/ddos/glossary/mirai-botnet/)). DNS Flood attack sử dụng connection băng thông cao của IP camera, DVR box và device IoT khác để trực tiếp nhấn chìm DNS server của nhà cung cấp lớn. Lượng request khổng lồ từ IoT device nhấn chìm service của DNS provider, ngăn legitimate user truy cập DNS server của provider.
 
-DNS Flood attack khác với [DNS amplification attack](https://www.cloudflare.com/zh-cn/learning/ddos/dns-amplification-ddos-attack/). Khác với DNS Flood attack, DNS amplification attack phản xạ và khuếch đại traffic của DNS server không an toàn để che giấu nguồn attack và tăng hiệu quả attack. DNS amplification attack dùng device có connection bandwidth nhỏ gửi vô số request đến DNS server không an toàn. Các device này gửi request nhỏ cho record DNS rất lớn, nhưng khi gửi request, attacker giả mạo return address thành target victim. Hiệu ứng khuếch đại này giúp attacker phá hoại target lớn hơn bằng resource attack hạn chế.
+DNS Flood attack khác với [DNS amplification attack](https://www.cloudflare.com/zh-cn/learning/ddos/dns-amplification-ddos-attack/). Khác với DNS Flood attack, DNS amplification attack phản xạ và khuếch đại traffic của DNS server không an toàn để che giấu nguồn attack và tăng hiệu quả attack. DNS amplification attack dùng device có connection bandwidth nhỏ gửi vô số request đến DNS server không an toàn. Các device này gửi request nhỏ cho record DNS rất lớn, nhưng khi gửi request, attacker giả mạo return address thành target victim. Hiệu ứng khuếch đại này giúp attacker phá hoại target lớn hơn bằng nguồn lực tấn công hạn chế.
 
 ### Phòng vệ DNS Flood như thế nào?
 
@@ -186,7 +185,7 @@ DNS Flood đã thay đổi phương thức attack truyền thống dựa trên a
 
 Trong **TCP** reset attack, attacker gửi RST packet giả mạo đến một hoặc cả hai bên communication, cố khiến bên nhận đóng connection sớm. TCP có gửi hoặc chấp nhận RST hay không phụ thuộc vào trạng thái connection hiện tại, sequence number, acknowledgment number và các field khác của packet. Với connection đã được thiết lập, bên nhận chỉ đóng connection sau khi RST vượt qua kiểm tra sequence number; RST nằm ngoài window sẽ bị loại bỏ, còn endpoint triển khai RFC 5961 protection sẽ gửi Challenge ACK cho RST nằm trong window nhưng không khớp chính xác.
 
-**TCP** reset attack lợi dụng cơ chế này, gửi reset segment giả mạo đến bên communication để đánh lừa hai bên đóng TCP connection sớm. Nếu reset segment giả mạo hoàn toàn giống thật, receiver sẽ cho rằng nó hợp lệ và đóng **TCP** connection, ngăn connection tiếp tục trao đổi information. Server có thể tạo **TCP** connection mới để khôi phục communication, nhưng vẫn có thể bị attacker reset connection. May mắn là attacker cần một khoảng thời gian để tạo và gửi packet giả mạo, nên trong điều kiện thông thường kiểu attack này chỉ gây ảnh hưởng lớn đến long connection; với short connection, khi bạn chưa kịp attack thì đối phương đã trao đổi information xong.
+**TCP** reset attack lợi dụng cơ chế này, gửi reset segment giả mạo đến bên communication để đánh lừa hai bên đóng TCP connection sớm. Nếu reset segment giả mạo hoàn toàn giống thật, receiver sẽ cho rằng nó hợp lệ và đóng **TCP** connection, ngăn connection tiếp tục trao đổi information. Server có thể tạo **TCP** connection mới để khôi phục communication, nhưng vẫn có thể bị attacker reset connection. May mắn là attacker cần một khoảng thời gian để tạo và gửi packet giả mạo, nên trong điều kiện thông thường kiểu attack này chỉ gây ảnh hưởng lớn đến long connection; với short connection, khi bạn chưa kịp attack thì hai bên đã trao đổi information xong.
 
 TCP thông thường không xác thực TCP header bằng cryptography, vì vậy TLS không thể bảo vệ RST ở TCP layer. Khi cần xác thực packet ở layer thấp hơn, có thể dùng các cơ chế như IPsec hoặc TCP-AO, nhưng chúng yêu cầu cả hai bên communication và network environment cung cấp hỗ trợ tương ứng.
 
@@ -196,9 +195,9 @@ TCP thông thường không xác thực TCP header bằng cryptography, vì vậ
 
 Bây giờ hãy tổng hợp cần làm những gì để giả mạo một **TCP** reset packet:
 
-- Sniff information được hai bên communication trao đổi.
-- Intercept một segment có ACK flag được set thành 1 và đọc ACK number của nó.
-- Giả mạo một TCP reset segment (đặt `RST` flag thành 1), có sequence number bằng ACK number của packet đã intercept ở trên. Đây chỉ là phương án trong điều kiện lý tưởng, giả sử tốc độ trao đổi information không quá nhanh. Trong phần lớn trường hợp, để tăng tỷ lệ thành công, có thể liên tục gửi reset packet có sequence number khác nhau.
+- Sniff thông tin được hai bên communication trao đổi.
+- Intercept một segment có ACK flag bằng 1 và đọc ACK number của nó.
+- Giả mạo một TCP reset segment (đặt `RST` flag thành 1), có sequence number bằng ACK number của packet đã intercept ở trên. Đây chỉ là phương án trong điều kiện lý tưởng, giả sử tốc độ trao đổi thông tin không quá nhanh. Trong phần lớn trường hợp, để tăng tỷ lệ thành công, có thể liên tục gửi reset packet có sequence number khác nhau.
 - Gửi reset packet giả mạo đến một hoặc cả hai bên communication để ngắt connection.
 
 Để experiment đơn giản, có thể dùng local computer giao tiếp với chính nó qua `localhost`, sau đó thực hiện TCP reset attack với chính mình. Cần các bước sau:
@@ -229,7 +228,7 @@ Command này sẽ thử thiết lập connection với service ở trên. Khi nh
 
 > Sniff traffic
 
-Viết một attack program, dùng Python network library `scapy` để đọc data trao đổi giữa hai terminal window và in chúng ra terminal. Code khá dài, dưới đây là một phần; để xem full code, hãy reply TCP attack ở backend. Core của code là gọi sniff method của `scapy`:
+Viết một attack program, dùng Python network library `scapy` để đọc data trao đổi giữa hai terminal window và in chúng ra terminal. Code khá dài, dưới đây là một phần; để xem full code, hãy nhắn `TCP attack` cho tài khoản. Core của code là gọi sniff method của `scapy`:
 
 ![Code dùng Scapy sniff packet của local TCP connection](https://oss.javaguide.cn/p3-juejin/27feb834aa9d4b629fd938611ac9972e~tplv-k3u1fbpfcp-zoom-1.png)
 
@@ -242,7 +241,7 @@ Viết một attack program, dùng Python network library `scapy` để đọc d
 
 > Gửi reset packet giả mạo
 
-Bắt đầu sửa program để gửi TCP reset packet giả mạo nhằm thực hiện TCP reset attack. Theo phân tích ở trên, chỉ cần sửa function prn, yêu cầu nó kiểm tra packet, trích xuất parameter cần thiết, dùng các parameter này để giả mạo TCP reset packet rồi gửi đi.
+Bắt đầu sửa program để gửi TCP reset packet giả mạo nhằm thực hiện TCP reset attack. Theo phân tích ở trên, chỉ cần sửa function prn để nó kiểm tra packet, trích xuất parameter cần thiết, dùng các parameter này để giả mạo TCP reset packet rồi gửi đi.
 
 Ví dụ, giả sử program intercept một segment đi từ (`src_ip`, `src_port`) đến (`dst_ip`, `dst_port`), segment đó đã set ACK flag thành 1 và ACK number là `100,000`. Attack program tiếp theo cần làm như sau:
 
@@ -251,11 +250,11 @@ Ví dụ, giả sử program intercept một segment đi từ (`src_ip`, `src_po
 - Đặt sequence number của packet giả mạo bằng ACK number của packet đã intercept, vì đây là sequence number tiếp theo mà sender mong đợi nhận được.
 - Gọi `send` method của `scapy` để gửi packet giả mạo đến sender của packet đã intercept.
 
-Đối với program của tôi, chỉ cần bỏ comment dòng này và comment dòng ngay phía trên là có thể thực hiện attack toàn diện. Thiết lập TCP connection theo cách ở bước 1, mở window thứ ba để chạy attack program, sau đó nhập một số string vào một terminal của TCP connection, bạn sẽ thấy TCP connection bị ngắt!
+Đối với program của tôi, chỉ cần bỏ comment dòng này và comment dòng ngay phía trên là có thể thực hiện attack. Thiết lập TCP connection theo cách ở bước 1, mở window thứ ba để chạy attack program, sau đó nhập một số string vào một terminal của TCP connection, bạn sẽ thấy TCP connection bị ngắt!
 
 > Experiment thêm
 
-1. Có thể tiếp tục dùng attack program để experiment, tăng giảm 1 sequence number của packet giả mạo để xem chuyện gì xảy ra, xem nó có thực sự cần hoàn toàn giống ACK number của packet đã intercept hay không.
+1. Có thể tiếp tục dùng attack program để experiment, tăng hoặc giảm sequence number của packet giả mạo đi 1 để xem chuyện gì xảy ra, xem nó có thực sự cần hoàn toàn giống ACK number của packet đã intercept hay không.
 2. Mở `Wireshark`, lắng nghe network interface lo0 và dùng filter `ip.src == 127.0.0.1 && ip.dst == 127.0.0.1 && tcp.port == 8000` để lọc data không liên quan. Bạn có thể xem mọi chi tiết của TCP connection.
 3. Gửi data stream nhanh hơn trên connection để khiến attack khó thực hiện hơn.
 
@@ -273,31 +272,31 @@ Từ hình này có thể thấy man-in-the-middle thực chất là attacker. D
 
 ### Nguyên lý của man-in-the-middle attack là gì?
 
-Lấy một ví dụ, tôi ký một labor contract với công ty, mỗi bên giữ một bản. Nếu không biết ai đã sửa nội dung contract thì làm sao biết thật giả? Chỉ còn cách tìm một organization chuyên nghiệp để giám định, đương nhiên phải tốn tiền.
+Lấy một ví dụ, tôi ký một hợp đồng lao động với công ty, mỗi bên giữ một bản. Nếu không biết ai đã sửa nội dung contract thì làm sao biết thật giả? Chỉ còn cách tìm một organization chuyên nghiệp để giám định, đương nhiên phải tốn tiền.
 
-Trong security có câu: **Chúng ta không thể triệt tiêu network crime, chỉ có thể tìm cách tăng cost của network crime**. Vì không thể triệt tiêu tình huống này, chúng ta tìm cách tăng cost để thực hiện hành vi đó. Hôm nay chỉ cần tìm hiểu đơn giản về kiến thức network security cơ bản, cũng là một câu hỏi phỏng vấn thường gặp.
+Trong security có câu: **Chúng ta không thể triệt tiêu network crime, chỉ có thể tìm cách tăng chi phí của network crime**. Vì không thể triệt tiêu tình huống này, chúng ta tìm cách tăng chi phí để thực hiện hành vi đó. Hôm nay chỉ cần tìm hiểu đơn giản về kiến thức network security cơ bản, cũng là một câu hỏi phỏng vấn thường gặp.
 
-Để tránh tình trạng hai bên nói không giữ lời, hai bên đưa vào một organization thứ ba và giao bản gốc contract cho trusted third-party organization. Chỉ cần organization này không tự trộm cắp hoặc sửa đổi, contract tương đối an toàn.
+Để tránh tình trạng hai bên nói không giữ lời, hai bên đưa vào một organization thứ ba và giao bản gốc contract cho trusted third-party organization. Chỉ cần organization này không phản bội niềm tin hoặc sửa đổi, contract tương đối an toàn.
 
-**Nếu bên trong third-party organization không nghiêm ngặt hoặc dễ xảy ra sơ suất thì sao?**
+**Nếu nội bộ third-party organization không được kiểm soát chặt chẽ hoặc dễ xảy ra sơ suất thì sao?**
 
 Mặc dù đã giao bản gốc contract cho third-party organization, cần áp dụng biện pháp gì để ngăn nhân viên bên trong sửa đổi?
 
-Một cách khả thi là đưa vào **digest algorithm**. Hash function ánh xạ data có độ dài bất kỳ thành digest có độ dài cố định. Hash không phải encryption và không cung cấp khả năng decryption ngược; các input khác nhau cũng có thể tạo ra digest giống nhau, vì vậy không thể gọi digest là giá trị duy nhất tuyệt đối. Với cryptographic hash function an toàn, khi input thay đổi, digest thường cũng thay đổi theo.
+Một cách khả thi là đưa vào **digest algorithm**. Hash function ánh xạ data có độ dài bất kỳ thành digest có độ dài cố định. Hash không phải encryption và không cung cấp khả năng giải mã ngược; các input khác nhau cũng có thể tạo ra digest giống nhau, vì vậy không thể gọi digest là giá trị duy nhất tuyệt đối. Với cryptographic hash function an toàn, khi input thay đổi, digest thường cũng thay đổi theo.
 
 #### Các digest algorithm thường dùng là gì?
 
-Các encryption algorithm thường dùng hiện nay gồm message digest algorithm và secure hash algorithm (**SHA**). **MD5** chuyển article có độ dài bất kỳ thành hash value 128-bit, nhưng năm 2004, **MD5** được chứng minh dễ xảy ra collision, tức hai bản gốc tạo ra digest giống nhau. Như vậy chẳng khác nào trao cho hacker một backdoor để dễ dàng giả mạo digest.
+Các encryption algorithm thường dùng hiện nay gồm message digest algorithm và secure hash algorithm (**SHA**). **MD5** chuyển văn bản có độ dài bất kỳ thành hash value 128-bit, nhưng năm 2004, **MD5** được chứng minh dễ xảy ra collision, tức hai bản gốc tạo ra digest giống nhau. Như vậy chẳng khác nào trao cho hacker một backdoor để dễ dàng giả mạo digest.
 
 Vì vậy, trong phần lớn trường hợp sẽ chọn **SHA algorithm**.
 
-**Nếu xuất hiện internal attacker thì sao?**
+**Nếu xuất hiện kẻ nội gián thì sao?**
 
-Tình huống có vẻ đã rất an toàn, về lý thuyết đã ngăn việc sửa contract. Nhưng nếu một employee đồng thời có quyền sửa contract và digest thì gây rối chỉ còn là vấn đề thời gian, vì không system nào có thể hoàn toàn ngăn employee tiếp xúc với sensitive information, trừ khi sensitive information không tồn tại. Vậy có thể cân nhắc lưu contract và digest tách biệt không?
+Tình huống có vẻ đã rất an toàn, về lý thuyết đã ngăn việc sửa contract. Nhưng nếu một employee đồng thời có quyền sửa contract và digest thì việc gây rối chỉ còn là vấn đề thời gian, vì không system nào có thể hoàn toàn ngăn employee tiếp xúc với sensitive information, trừ khi sensitive information không tồn tại. Vậy có thể cân nhắc lưu contract và digest tách biệt không?
 
 **Làm thế nào bảo đảm employee không sửa contract?**
 
-Điều này thực sự khá khó, nhưng cách giải quyết luôn nhiều hơn khó khăn. Đặt contract trong tay hai bên, còn digest trong third-party organization, sẽ làm tăng thêm độ khó sửa đổi.
+Điều này thực sự khá khó, nhưng khó khăn nào cũng có cách giải quyết. Đặt contract trong tay hai bên, còn digest trong third-party organization sẽ làm tăng thêm độ khó sửa đổi.
 
 **Nếu employee thông đồng với một user nào đó thì sao?**
 
@@ -315,13 +314,13 @@ Nếu Mike sửa nội dung contract, signature ban đầu sẽ không thể vư
 
 Digital signature nên được hiểu là “ký bằng private key, verify bằng public key”, chứ không phải “encrypt bằng private key, decrypt bằng public key” theo nghĩa phổ biến. Quy trình toán học của RSA, ECDSA, EdDSA và các signature algorithm khác nhau, nên mô tả bằng signature và verification sẽ chính xác hơn.
 
-Privacy? Không phải dọa mọi người đâu, information là transparent, anh bạn, nhưng vẫn nên cố gắng bảo vệ privacy cá nhân. Hôm nay hãy học symmetric encryption và asymmetric encryption.
+Privacy? Không phải dọa mọi người đâu, information là công khai, bạn ạ, nhưng vẫn nên cố gắng bảo vệ privacy cá nhân. Hôm nay hãy học symmetric encryption và asymmetric encryption.
 
-Trước tiên hãy đọc chữ “key” này, tôi từng đọc sai, thực ra cách đọc khác.
+Trước tiên hãy nhớ cách đọc của từ “key”; trước đây tôi cũng đọc sai, thực ra cách đọc đúng khác.
 
 #### Symmetric encryption là gì?
 
-Symmetric encryption, đúng như tên gọi, bên encryption và bên decryption dùng cùng một key (secret key). Cụ thể hơn, sender dùng encryption algorithm và key tương ứng để encrypt information sắp gửi; còn receiver dùng decryption algorithm và cùng key để mở khóa information, từ đó có thể đọc information.
+Symmetric encryption, đúng như tên gọi, bên mã hóa và bên giải mã dùng cùng một key (secret key). Cụ thể hơn, sender dùng encryption algorithm và key tương ứng để encrypt information sắp gửi; còn receiver dùng decryption algorithm và cùng key để mở khóa information, từ đó có thể đọc information.
 
 ![Hai bên communication dùng cùng key để encrypt và decrypt trong symmetric encryption](https://oss.javaguide.cn/p3-juejin/ef81cb5e2f0a4d3d9ac5a44ecf97e3cc~tplv-k3u1fbpfcp-zoom-1.png)
 
@@ -329,13 +328,13 @@ Symmetric encryption, đúng như tên gọi, bên encryption và bên decryptio
 
 **DES**
 
-Key mà DES sử dụng nhìn bề ngoài có 64 bit, nhưng chỉ 56 bit trong số đó thực sự được dùng cho algorithm; 8 bit còn lại có thể dùng để parity check rồi bị loại bỏ trong algorithm. Vì vậy, effective key length của **DES** là 56 bit, thường gọi key length của **DES** là 56 bit. Giả sử key có 56 bit, dùng brute-force để phá, số lượng key là 2 mũ 56. Nếu thực hiện một lần decryption mỗi nanosecond thì cần thời gian xấp xỉ một năm. Tất nhiên không ai làm vậy. **DES** hiện không còn là encryption method an toàn, chủ yếu vì key 56 bit quá ngắn.
+Key mà DES sử dụng nhìn bề ngoài có 64 bit, nhưng chỉ 56 bit trong số đó thực sự được dùng cho algorithm; 8 bit còn lại có thể dùng để parity check rồi bị loại bỏ trong algorithm. Vì vậy, effective key length của **DES** là 56 bit, thường gọi key length của **DES** là 56 bit. Giả sử key có 56 bit, dùng brute-force để giải mã, số lượng key là 2 mũ 56. Nếu thực hiện một lần decryption mỗi nanosecond thì cần thời gian xấp xỉ một năm. Tất nhiên không ai làm vậy. **DES** hiện không còn là encryption method an toàn, chủ yếu vì key 56 bit quá ngắn.
 
 ![Sơ đồ symmetric encryption algorithm DES](https://oss.javaguide.cn/p3-juejin/9eb3a2bf6cf14132a890bc3447480eeb~tplv-k3u1fbpfcp-zoom-1.jpeg)
 
 **IDEA**
 
-International Data Encryption Algorithm. Key length là 128 bit, ưu điểm là không bị giới hạn bởi patent.
+International Data Encryption Algorithm. Key length là 128 bit, ưu điểm là không bị giới hạn bởi bằng sáng chế.
 
 **AES**
 
@@ -343,7 +342,7 @@ Sau khi DES bị phá, không lâu sau **AES** algorithm được đưa ra, cung
 
 **SM1 và SM4**
 
-Các algorithm trước đều đến từ nước ngoài, còn trong nước tự nghiên cứu **SM1** và **SM4** theo national cryptography. S trong hai tên đều thuộc national standard và algorithm được công khai. Ưu điểm là nhận được sự ủng hộ và công nhận mạnh mẽ của quốc gia.
+Các algorithm trước đều đến từ nước ngoài, còn trong nước tự nghiên cứu **SM1** và **SM4** theo national cryptography. Cả hai đều là national standard và algorithm được công khai. Ưu điểm là nhận được sự ủng hộ và công nhận mạnh mẽ của quốc gia.
 
 **Tổng kết**:
 
@@ -369,7 +368,7 @@ Tổng kết:
 
 #### Các hash algorithm thường gặp là gì?
 
-Hash algorithm thường dùng trong integrity check, content addressing và các scenario khác, nhưng yêu cầu security ở mỗi scenario không giống nhau. Password verification value không thể xử lý như digest của file thông thường: server nên tạo salt riêng cho từng password và dùng hash scheme có cost parameter, phù hợp với password storage; đồng thời lưu salt, algorithm identifier và cost parameter để sau này tăng computation cost hoặc migrate algorithm.
+Hash algorithm thường dùng trong integrity check, content addressing và các trường hợp khác, nhưng yêu cầu security ở mỗi trường hợp không giống nhau. Password verification value không thể xử lý như digest của file thông thường: server nên tạo salt riêng cho từng password và dùng hash scheme có cost parameter, phù hợp với password storage; đồng thời lưu salt, algorithm identifier và cost parameter để sau này tăng computation cost hoặc migrate algorithm.
 
 **MD5** (không khuyến nghị)
 
@@ -377,11 +376,11 @@ MD5 có thể tạo message digest 128 bit, nhưng đã không còn khả năng 
 
 **SHA**
 
-Secure hash algorithm. **SHA** gồm các series như **SHA-1**, **SHA-2** và **SHA-3**. Nó ánh xạ input data thành hash value (hoặc message digest) có length cố định. Process này không thể đảo ngược, nhưng hash value không phải ciphertext và cũng không tương đương message authentication code. SHA-1 không còn phù hợp với security scenario cần collision resistance; system mới thường chọn algorithm cụ thể trong series SHA-2 hoặc SHA-3.
+Secure hash algorithm. **SHA** gồm các dòng như **SHA-1**, **SHA-2** và **SHA-3**. Nó ánh xạ input data thành hash value (hoặc message digest) có length cố định. Process này không thể đảo ngược, nhưng hash value không phải ciphertext và cũng không tương đương message authentication code. SHA-1 không còn phù hợp với security scenario cần collision resistance; system mới thường chọn algorithm cụ thể trong dòng SHA-2 hoặc SHA-3.
 
 **SM3**
 
-National cryptography algorithm **SM3**. Encryption strength xấp xỉ algorithm SHA-256. Chủ yếu do nhận được sự ủng hộ của quốc gia.
+National cryptography algorithm **SM3**. Encryption strength xấp xỉ algorithm SHA-256. Chủ yếu vì nhận được sự ủng hộ mạnh mẽ của quốc gia.
 
 **Tổng kết**:
 
@@ -401,9 +400,9 @@ Certificate có credibility vì issuer của certificate có credibility. Vì v�
 
 Như hình trên, Sum gửi certificate application đến certificate authority. Sau khi verify application information, organization dùng private key của mình để tạo digital signature cho phần chờ ký của certificate. Sau khi nhận certificate, Mike dùng public key của issuer để verify signature; verification thành công cho biết certificate content không bị sửa đổi, đồng thời signature do bên nắm giữ private key của organization tạo ra.
 
-Solution này phụ thuộc vào third-party organization cung cấp trust endorsement cho binding relationship giữa identity và public key. Nếu issuer bị compromise hoặc cấp certificate sai, certificate verification phụ thuộc vào nó có thể bị ảnh hưởng.
+Solution này phụ thuộc vào third-party organization cung cấp trust endorsement cho binding relationship giữa identity và public key. Nếu issuer bị compromise hoặc cấp certificate sai, các hoạt động certificate verification dựa vào issuer đó có thể bị ảnh hưởng.
 
-PKI thực tế thường dùng hierarchical structure gồm root CA, intermediate CA và end-entity certificate, thuận tiện cho việc cô lập root private key, ủy quyền cấp certificate và giới hạn mục đích sử dụng certificate. Chain dài hơn tự nó không tự động loại bỏ trust risk.
+PKI thực tế thường dùng hierarchical structure gồm root CA, intermediate CA và end-entity certificate, thuận tiện cho việc cô lập root private key, ủy quyền cấp certificate và giới hạn mục đích sử dụng certificate. Chain dài hơn không tự động loại bỏ trust risk.
 
 ![Trust chain từ root certificate đến end-entity certificate](https://oss.javaguide.cn/p3-juejin/1481f0409da94ba6bb0fee69bf0996f8~tplv-k3u1fbpfcp-zoom-1.png)
 
@@ -423,13 +422,13 @@ Sau khi biết nguyên lý và mức độ nguy hiểm của man-in-the-middle a
 
 ![Browser cảnh báo security rằng certificate không được trust](https://oss.javaguide.cn/p3-juejin/0dde4b76be6240699312d822a3fe1ed3~tplv-k3u1fbpfcp-zoom-1.png)
 
-Certificate warning của browser cho biết certificate verification không thành công. Nguyên nhân có thể là certificate hết hạn, domain không khớp, certificate chain không được trust, thời gian trên machine local sai hoặc server configuration sai, cũng có thể là man-in-the-middle attack; chỉ dựa vào warning UI thì không thể xác định nguyên nhân cụ thể, user không nên bỏ qua warning để tiếp tục truy cập.
+Cảnh báo certificate của browser cho biết certificate verification không thành công. Nguyên nhân có thể là certificate hết hạn, domain không khớp, certificate chain không được trust, thời gian trên machine local sai hoặc server configuration sai, cũng có thể là man-in-the-middle attack; chỉ dựa vào warning UI thì không thể xác định nguyên nhân cụ thể, user không nên bỏ qua warning để tiếp tục truy cập.
 
-App chịu kiểm soát có thể cân nhắc certificate pinning hoặc public key pinning trong threat model rõ ràng, nhưng đồng thời phải thiết kế certificate rotation, backup key và failure recovery mechanism; nếu không, client có thể không connect được khi certificate được update. Với truy cập bằng browser thông thường, cách đúng là dựa vào system trust store để hoàn tất kiểm tra certificate chain, domain và validity period, thay vì tự trust certificate không rõ nguồn.
+App chịu kiểm soát có thể cân nhắc certificate pinning hoặc public key pinning trong threat model rõ ràng, nhưng đồng thời phải thiết kế certificate rotation, key dự phòng và failure recovery mechanism; nếu không, client có thể không connect được khi certificate được update. Với truy cập bằng browser thông thường, cách đúng là dựa vào system trust store để hoàn tất kiểm tra certificate chain, domain và validity period, thay vì tự trust certificate không rõ nguồn.
 
 ## DDoS
 
-Qua mô tả ở trên, nhiều attack phía trước đều thuộc DDoS attack, vì vậy hãy tổng kết ngắn gọn nội dung liên quan đến attack này.
+Qua mô tả ở trên, nhiều attack nêu trên đều thuộc DDoS attack, vì vậy hãy tổng kết ngắn gọn nội dung liên quan đến attack này.
 
 Thực tế, các công ty Internet lớn trên toàn cầu đều từng hứng chịu lượng lớn **DDoS**.
 
@@ -437,13 +436,13 @@ Năm 2018, GitHub trong chớp mắt hứng chịu bandwidth attack lên đến 
 
 ### DDoS attack rốt cuộc là gì?
 
-DDos có tên đầy đủ là Distributed Denial of Service, dịch là **distributed denial of service**. Đây là việc nhiều attacker ở các vị trí khác nhau đồng thời tấn công một hoặc một số target, là một phương thức attack quy mô lớn mang tính distributed và coordinated. DoS attack đơn lẻ thường theo kiểu one-to-one, lợi dụng một số khiếm khuyết của network protocol và operating system, dùng chiến lược **spoofing và masquerading** để phát động network attack, khiến website server bị lấp đầy bởi lượng lớn information yêu cầu response, tiêu hao network bandwidth hoặc system resource, khiến network hoặc system quá tải, tê liệt và ngừng cung cấp normal network service.
+**DDoS** có tên đầy đủ là Distributed Denial of Service, dịch là **từ chối dịch vụ phân tán**. Đây là việc nhiều attacker ở các vị trí khác nhau đồng thời tấn công một hoặc một số target, là một phương thức attack quy mô lớn mang tính distributed và coordinated. DoS attack đơn lẻ thường theo kiểu one-to-one, lợi dụng một số khiếm khuyết của network protocol và operating system, dùng chiến lược **spoofing và masquerading** để phát động network attack, khiến website server bị lấp đầy bởi lượng lớn request cần phản hồi, tiêu hao network bandwidth hoặc system resource, khiến network hoặc system quá tải, tê liệt và ngừng cung cấp normal network service.
 
 > Lấy một ví dụ
 
-Tôi mở một Chongqing hotpot restaurant có năm mươi chỗ ngồi, nguyên liệu chất lượng và không lừa dối khách hàng. Bình thường cửa hàng rất đông khách và business đặc biệt phát đạt, trong khi hotpot restaurant của Er Gou ở đối diện lại không có khách. Để đối phó với tôi, Er Gou nghĩ ra một cách: gọi năm mươi người đến hotpot restaurant của tôi, ngồi đó nhưng không gọi món, khiến khách khác không thể ăn.
+Tôi mở một Chongqing hotpot restaurant có năm mươi chỗ ngồi, nguyên liệu chất lượng và làm ăn chân chính. Bình thường cửa hàng rất đông khách và business đặc biệt phát đạt, trong khi hotpot restaurant của Er Gou ở đối diện lại không có khách. Để đối phó với tôi, Er Gou nghĩ ra một cách: gọi năm mươi người đến hotpot restaurant của tôi, ngồi đó nhưng không gọi món, khiến khách khác không thể ăn.
 
-Ví dụ trên chính là DDoS attack điển hình. Nói chung, đó là việc attacker dùng zombie host phát động lượng lớn request đến target website trong thời gian ngắn, tiêu hao quy mô lớn host resource của target website khiến website không thể cung cấp service bình thường. Online game, Internet finance và các lĩnh vực khác là những ngành có tần suất DDoS attack cao.
+Ví dụ trên chính là DDoS attack điển hình. Nói chung, đó là việc attacker dùng zombie host phát động lượng lớn request đến target website trong thời gian ngắn, tiêu hao lượng lớn host resource của target website khiến website không thể cung cấp service bình thường. Online game, Internet finance và các lĩnh vực khác là những ngành có tần suất DDoS attack cao.
 
 Có nhiều attack method, chẳng hạn **ICMP Flood**, **UDP Flood**, **NTP Flood**, **SYN Flood**, **CC attack**, **DNS Query Flood** và nhiều loại khác.
 
@@ -453,7 +452,7 @@ Có nhiều attack method, chẳng hạn **ICMP Flood**, **UDP Flood**, **NTP Fl
 
 Vẫn lấy Chongqing hotpot restaurant làm ví dụ: high-defense server giống như tôi bổ sung hai security guard cho restaurant. Hai security guard này có thể bảo vệ restaurant khỏi sự quấy rối của kẻ xấu, đồng thời thường xuyên tuần tra xung quanh restaurant để ngăn kẻ xấu quấy rối.
 
-High-defense server chủ yếu là server có thể tự cung cấp hard defense trên 50Gbps, giúp website chống denial-of-service attack, định kỳ scan network main node và các chức năng khác.
+High-defense server chủ yếu là server có thể tự cung cấp hard defense trên 50Gbps, giúp website chống denial-of-service attack, định kỳ scan network main node và thực hiện các chức năng khác.
 
 #### Blacklist
 
@@ -461,13 +460,13 @@ High-defense server chủ yếu là server có thể tự cung cấp hard defens
 
 #### DDoS scrubbing
 
-**DDos** scrubbing giống như việc tôi phát hiện khách vào restaurant vài phút nhưng mãi không gọi món, nên đuổi họ ra khỏi restaurant.
+**DDoS** scrubbing giống như việc tôi phát hiện khách vào restaurant vài phút nhưng mãi không gọi món, nên đuổi họ ra khỏi restaurant.
 
-**DDoS** scrubbing monitor user request data theo thời gian thực, kịp thời phát hiện traffic bất thường như **DOS** attack và scrub traffic bất thường đó mà không ảnh hưởng đến hoạt động normal business.
+**DDoS** scrubbing giám sát dữ liệu request của user theo thời gian thực, kịp thời phát hiện traffic bất thường như **DoS** attack và scrub traffic bất thường đó mà không ảnh hưởng đến hoạt động normal business.
 
 #### CDN acceleration
 
-CDN acceleration có thể hiểu như sau: để giảm sự quấy rối của kẻ xấu, tôi chuyển hotpot restaurant lên online để nhận delivery order. Như vậy kẻ xấu không tìm được restaurant ở đâu và cũng không thể gây rối.
+CDN acceleration có thể hiểu như sau: để giảm sự quấy rối của kẻ xấu, tôi chuyển hotpot restaurant lên online để nhận delivery order. Như vậy kẻ xấu không tìm ra restaurant ở đâu và cũng không thể gây rối.
 
 Trong thực tế, CDN service phân bổ website access traffic đến nhiều node. Một mặt, nó che giấu real IP của website; mặt khác, ngay cả khi hứng chịu **DDoS** attack, traffic cũng có thể được phân tán đến nhiều node để ngăn origin server sụp đổ.
 

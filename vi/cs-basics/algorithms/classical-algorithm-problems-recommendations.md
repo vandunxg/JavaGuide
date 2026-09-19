@@ -1,6 +1,6 @@
 ---
-title: Tổng hợp tư duy thuật toán kinh điển (kèm đề xuất bài LeetCode)
-description: "Tổng hợp các tư duy thuật toán thường gặp như binary search, two pointers, sliding window, DFS/BFS, backtracking, dynamic programming, greedy, divide and conquer, topological sort, union-find, bit manipulation, đồng thời đưa ra dấu hiệu nhận diện dạng bài, template, bài tiêu biểu và trọng tâm ôn tập."
+title: Tổng hợp các ý tưởng thuật toán kinh điển (kèm đề xuất bài LeetCode)
+description: "Tổng hợp các ý tưởng thuật toán thường gặp như binary search, two pointers, sliding window, DFS/BFS, backtracking, dynamic programming, greedy, divide and conquer, topological sort, union-find, bit manipulation, đồng thời đưa ra dấu hiệu nhận diện dạng bài, template, bài tiêu biểu và trọng tâm ôn tập."
 category: Computer Basics
 tag:
   - Algorithms
@@ -12,50 +12,50 @@ head:
       content: algorithm ideas,binary search,two pointers,sliding window,DFS,BFS,backtracking,dynamic programming,greedy,divide and conquer,topological sort,union-find,bit manipulation,LeetCode problem recommendations
 ---
 
-Đừng học thuộc tư duy thuật toán một cách cô lập. Cách hỏi hữu ích hơn trong phỏng vấn là: tín hiệu nào cho thấy nên dùng nó? Điểm nào trong template dễ viết sai nhất? Nếu interviewer thay đổi điều kiện, tôi nên bắt đầu điều chỉnh từ biến hoặc state nào?
+Đừng học thuộc các ý tưởng thuật toán một cách tách rời. Cách hỏi hữu ích hơn trong phỏng vấn là: tín hiệu nào cho thấy nên dùng nó? Điểm nào trong template dễ viết sai nhất? Nếu interviewer thay đổi điều kiện, bạn nên bắt đầu điều chỉnh từ biến hoặc state nào?
 
-Danh sách bài này được tổ chức theo tư duy. Mỗi nhóm đều đưa ra “tín hiệu nhận diện, template thường dùng, bài tiêu biểu, trọng tâm ôn tập”. Số lượng bài được giới hạn ở mức có thể đại diện cho template; hiểu rõ những bài này trước sẽ hiệu quả hơn việc máy móc làm thêm nhiều bài.
+Danh sách bài này được tổ chức theo ý tưởng. Mỗi nhóm đều đưa ra “tín hiệu nhận diện, template thường dùng, bài tiêu biểu, trọng tâm ôn tập”. Số lượng bài được giới hạn trong phạm vi đủ để đại diện cho template; hiểu rõ những bài này trước sẽ hiệu quả hơn việc máy móc giải thêm nhiều bài.
 
 ## Cách sử dụng danh sách bài
 
-Đừng bắt đầu bằng việc làm hết tất cả bài theo thứ tự. Cách phù hợp hơn cho việc chuẩn bị phỏng vấn là: trước tiên đọc bài viết về template tương ứng, xác nhận bạn có thể tự viết code cốt lõi, sau đó làm “bài bắt buộc”, cuối cùng dùng “bài nâng cao” để kiểm tra trường hợp biên và các biến thể.
+Đừng bắt đầu bằng việc giải hết tất cả bài theo thứ tự. Cách phù hợp hơn cho việc chuẩn bị phỏng vấn là: trước tiên đọc bài viết về template tương ứng, đảm bảo bạn có thể tự viết code cốt lõi, sau đó làm “bài bắt buộc”, cuối cùng dùng “bài nâng cao” để kiểm tra trường hợp biên và các biến thể.
 
-| Mục tiêu                          | Hành động đề xuất                                                                                                                                                                             |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nhanh chóng xây dựng template     | Trước tiên đọc các bài viết về template thường gặp như [binary search](./binary-search.md), [two pointers và sliding window](./two-pointers-and-sliding-window.md), [DFS/BFS](./dfs-bfs.md)   |
-| Bổ sung search và DP              | Tiếp tục đọc [backtracking](./backtracking.md), [dynamic programming](./dynamic-programming.md), tự viết ít nhất 2 bài cơ bản cho mỗi nhóm                                                    |
-| Bổ sung thiếu sót trước phỏng vấn | Dùng [greedy](./greedy.md), [bài toán Top K](./top-k.md), [union-find](../data-structure/union-find.md) để bổ sung các biến thể thường gặp                                                    |
-| Ôn lại đáp án của bản thân        | Với mỗi bài, ghi lại tín hiệu nhận diện dạng bài, ý nghĩa của biến cốt lõi, độ phức tạp và ví dụ trường hợp biên. Nếu không giải thích rõ được, nghĩa là bạn vẫn chưa thực sự nắm vững bài đó |
+| Mục tiêu                               | Hành động đề xuất                                                                                                                                                                             |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nhanh chóng xây dựng template          | Trước tiên đọc các bài viết về template phổ biến như [binary search](./binary-search.md), [two pointers và sliding window](./two-pointers-and-sliding-window.md), [DFS/BFS](./dfs-bfs.md)     |
+| Bổ sung search và DP                   | Tiếp tục đọc [backtracking](./backtracking.md), [dynamic programming](./dynamic-programming.md), tự viết ít nhất 2 bài cơ bản cho mỗi nhóm                                                    |
+| Bổ sung phần còn thiếu trước phỏng vấn | Dùng [greedy](./greedy.md), [bài toán Top K](./top-k.md), [union-find](../data-structure/union-find.md) để bổ sung các biến thể thường gặp                                                    |
+| Ôn lại đáp án của bản thân             | Với mỗi bài, ghi lại tín hiệu nhận diện dạng bài, ý nghĩa của biến cốt lõi, độ phức tạp và ví dụ trường hợp biên. Nếu không giải thích rõ được, nghĩa là bạn vẫn chưa thực sự nắm vững bài đó |
 
 ## Binary search
 
-| Hạng mục             | Nội dung                                                                                                                                                                                                                          |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tín hiệu nhận diện   | Array có thứ tự, điều kiện đơn điệu, tìm biên, tìm giá trị khả thi nhỏ nhất hoặc giá trị khả thi lớn nhất                                                                                                                         |
-| Template thường dùng | Binary search cơ bản, biên trái, biên phải, binary search trên đáp án                                                                                                                                                             |
-| Bài bắt buộc         | [704. Binary search](https://leetcode.cn/problems/binary-search/), [34. Tìm phần tử ở vị trí đầu tiên và cuối cùng trong array đã sắp xếp](https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/) |
-| Bài nâng cao         | [35. Tìm vị trí chèn](https://leetcode.cn/problems/search-insert-position/), [875. Koko ăn chuối](https://leetcode.cn/problems/koko-eating-bananas/)                                                                              |
-| Trọng tâm ôn tập     | Điều kiện vòng lặp, cách tính `mid`, sau khi cập nhật biên có rơi vào vòng lặp vô hạn hay không                                                                                                                                   |
+| Hạng mục             | Nội dung                                                                                                                                                                                                                            |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tín hiệu nhận diện   | Array đã sắp xếp, điều kiện đơn điệu, tìm biên, tìm giá trị khả thi nhỏ nhất hoặc giá trị khả thi lớn nhất                                                                                                                          |
+| Template thường dùng | Binary search cơ bản, biên trái, biên phải, binary search trên đáp án                                                                                                                                                               |
+| Bài bắt buộc         | [704. Binary search](https://leetcode.cn/problems/binary-search/), [34. Tìm vị trí đầu tiên và cuối cùng của phần tử trong array đã sắp xếp](https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/) |
+| Bài nâng cao         | [35. Tìm vị trí chèn](https://leetcode.cn/problems/search-insert-position/), [875. Koko ăn chuối](https://leetcode.cn/problems/koko-eating-bananas/)                                                                                |
+| Trọng tâm ôn tập     | Điều kiện vòng lặp, cách tính `mid`, sau khi cập nhật biên có rơi vào vòng lặp vô hạn hay không                                                                                                                                     |
 
 ## Two pointers
 
-| Hạng mục             | Nội dung                                                                                                                                                                                                            |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tín hiệu nhận diện   | Array có thứ tự, sửa tại chỗ, thu hẹp từ hai đầu vào giữa, fast và slow trong linked list                                                                                                                           |
-| Template thường dùng | Two pointers trái phải, fast và slow pointers, read và write pointers                                                                                                                                               |
-| Bài bắt buộc         | [26. Xóa phần tử trùng trong array đã sắp xếp](https://leetcode.cn/problems/remove-duplicates-from-sorted-array/), [977. Bình phương của array đã sắp xếp](https://leetcode.cn/problems/squares-of-a-sorted-array/) |
-| Bài nâng cao         | [15. Tổng của ba số](https://leetcode.cn/problems/3sum/), [142. Linked list vòng II](https://leetcode.cn/problems/linked-list-cycle-ii/)                                                                            |
-| Trọng tâm ôn tập     | Ý nghĩa của pointer phải cố định, không được bỏ sót điều kiện loại trùng, với bài linked list hãy vẽ trước 3 node                                                                                                   |
+| Hạng mục             | Nội dung                                                                                                                                                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tín hiệu nhận diện   | Array đã sắp xếp, sửa tại chỗ, thu hẹp từ hai đầu về giữa, fast/slow pointer trong linked list                                                                                                                          |
+| Template thường dùng | left/right pointers, fast/slow pointers, read/write pointers                                                                                                                                                            |
+| Bài bắt buộc         | [26. Xóa phần tử trùng lặp trong array đã sắp xếp](https://leetcode.cn/problems/remove-duplicates-from-sorted-array/), [977. Bình phương của array đã sắp xếp](https://leetcode.cn/problems/squares-of-a-sorted-array/) |
+| Bài nâng cao         | [15. Tổng của ba số](https://leetcode.cn/problems/3sum/), [142. Linked list có chu kỳ II](https://leetcode.cn/problems/linked-list-cycle-ii/)                                                                           |
+| Trọng tâm ôn tập     | Ý nghĩa của pointer phải nhất quán, không được bỏ sót điều kiện loại trùng, với bài linked list hãy vẽ trước 3 node                                                                                                     |
 
 ## Sliding window
 
-| Hạng mục             | Nội dung                                                                                                                                                                                                                |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tín hiệu nhận diện   | Subarray liên tiếp, substring liên tiếp, dài nhất/ngắn nhất, window thỏa mãn một điều kiện nào đó                                                                                                                       |
-| Template thường dùng | Window cố định, window biến đổi, counting Map                                                                                                                                                                           |
-| Bài bắt buộc         | [3. Substring dài nhất không có ký tự trùng](https://leetcode.cn/problems/longest-substring-without-repeating-characters/), [209. Subarray có độ dài nhỏ nhất](https://leetcode.cn/problems/minimum-size-subarray-sum/) |
-| Bài nâng cao         | [76. Substring bao phủ nhỏ nhất](https://leetcode.cn/problems/minimum-window-substring/), [438. Tìm tất cả anagram trong string](https://leetcode.cn/problems/find-all-anagrams-in-a-string/)                           |
-| Trọng tâm ôn tập     | Khi nào mở rộng biên phải, khi nào thu hẹp biên trái, duy trì các biến bên trong window như thế nào                                                                                                                     |
+| Hạng mục             | Nội dung                                                                                                                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tín hiệu nhận diện   | Subarray liên tiếp, substring liên tiếp, dài nhất/ngắn nhất, window thỏa mãn một điều kiện nào đó                                                                                                                  |
+| Template thường dùng | Window cố định, window biến đổi, Map đếm                                                                                                                                                                           |
+| Bài bắt buộc         | [3. Substring dài nhất không lặp ký tự](https://leetcode.cn/problems/longest-substring-without-repeating-characters/), [209. Subarray có độ dài nhỏ nhất](https://leetcode.cn/problems/minimum-size-subarray-sum/) |
+| Bài nâng cao         | [76. Substring bao phủ nhỏ nhất](https://leetcode.cn/problems/minimum-window-substring/), [438. Tìm tất cả anagram trong string](https://leetcode.cn/problems/find-all-anagrams-in-a-string/)                      |
+| Trọng tâm ôn tập     | Khi nào mở rộng biên phải, khi nào thu hẹp biên trái, duy trì các biến bên trong window như thế nào                                                                                                                |
 
 ## DFS và BFS
 
@@ -69,23 +69,23 @@ Danh sách bài này được tổ chức theo tư duy. Mỗi nhóm đều đưa
 
 ## Backtracking
 
-| Hạng mục             | Nội dung                                                                                                                        |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Tín hiệu nhận diện   | Liệt kê mọi phương án, lựa chọn path, combination, permutation, subset, ràng buộc bàn cờ                                        |
-| Template thường dùng | `path`, danh sách lựa chọn, level đệ quy, hoàn tác lựa chọn                                                                     |
-| Bài bắt buộc         | [77. Combination](https://leetcode.cn/problems/combinations/), [78. Subset](https://leetcode.cn/problems/subsets/)              |
-| Bài nâng cao         | [39. Tổng combination](https://leetcode.cn/problems/combination-sum/), [51. N quân hậu](https://leetcode.cn/problems/n-queens/) |
-| Trọng tâm ôn tập     | Tham số đệ quy đại diện cho điều gì, điều kiện pruning nên đặt trước vòng lặp hay bên trong vòng lặp                            |
+| Hạng mục             | Nội dung                                                                                                                            |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Tín hiệu nhận diện   | Liệt kê mọi phương án, lựa chọn path, combination, permutation, subset, ràng buộc bàn cờ                                            |
+| Template thường dùng | `path`, danh sách lựa chọn, level đệ quy, hoàn tác lựa chọn                                                                         |
+| Bài bắt buộc         | [77. Combination](https://leetcode.cn/problems/combinations/), [78. Subset](https://leetcode.cn/problems/subsets/)                  |
+| Bài nâng cao         | [39. Tổng các combination](https://leetcode.cn/problems/combination-sum/), [51. N quân hậu](https://leetcode.cn/problems/n-queens/) |
+| Trọng tâm ôn tập     | Tham số đệ quy đại diện cho điều gì, điều kiện pruning nên đặt trước vòng lặp hay bên trong vòng lặp                                |
 
 ## Dynamic programming
 
-| Hạng mục             | Nội dung                                                                                                                                                                                                 |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tín hiệu nhận diện   | Tìm giá trị tối ưu, số phương án, có thể đạt tới hay không, subsequence, knapsack, gộp interval                                                                                                          |
-| Template thường dùng | DP một chiều, DP hai chiều, rolling array, knapsack DP                                                                                                                                                   |
-| Bài bắt buộc         | [70. Leo cầu thang](https://leetcode.cn/problems/climbing-stairs/), [322. Đổi tiền](https://leetcode.cn/problems/coin-change/)                                                                           |
-| Bài nâng cao         | [300. Subsequence tăng dài nhất](https://leetcode.cn/problems/longest-increasing-subsequence/), [416. Chia thành các subset có tổng bằng nhau](https://leetcode.cn/problems/partition-equal-subset-sum/) |
-| Trọng tâm ôn tập     | Ý nghĩa của `dp[i]`, khởi tạo, thứ tự duyệt, có thể nén không gian hay không                                                                                                                             |
+| Hạng mục             | Nội dung                                                                                                                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tín hiệu nhận diện   | Tìm giá trị tối ưu, số phương án, có thể đạt tới hay không, subsequence, knapsack, gộp interval                                                                                                              |
+| Template thường dùng | DP một chiều, DP hai chiều, rolling array, knapsack DP                                                                                                                                                       |
+| Bài bắt buộc         | [70. Leo cầu thang](https://leetcode.cn/problems/climbing-stairs/), [322. Đổi tiền](https://leetcode.cn/problems/coin-change/)                                                                               |
+| Bài nâng cao         | [300. Subsequence tăng dần dài nhất](https://leetcode.cn/problems/longest-increasing-subsequence/), [416. Chia thành các subset có tổng bằng nhau](https://leetcode.cn/problems/partition-equal-subset-sum/) |
+| Trọng tâm ôn tập     | Ý nghĩa của `dp[i]`, khởi tạo, thứ tự duyệt, có thể nén không gian hay không                                                                                                                                 |
 
 ## Greedy
 
@@ -95,7 +95,7 @@ Danh sách bài này được tổ chức theo tư duy. Mỗi nhóm đều đưa
 | Template thường dùng | Chọn sau khi sorting, duy trì biên xa nhất, gộp/phủ interval                                                                                             |
 | Bài bắt buộc         | [455. Phân phát bánh quy](https://leetcode.cn/problems/assign-cookies/), [55. Jump game](https://leetcode.cn/problems/jump-game/)                        |
 | Bài nâng cao         | [45. Jump game II](https://leetcode.cn/problems/jump-game-ii/), [435. Interval không giao nhau](https://leetcode.cn/problems/non-overlapping-intervals/) |
-| Trọng tâm ôn tập     | Vì sao greedy không sai, phản ví dụ có thể bác bỏ strategy hiện tại hay không                                                                            |
+| Trọng tâm ôn tập     | Vì sao chiến lược greedy không sai, phản ví dụ có thể bác bỏ chiến lược hiện tại hay không                                                               |
 
 ## Divide and conquer
 
@@ -105,7 +105,7 @@ Danh sách bài này được tổ chức theo tư duy. Mỗi nhóm đều đưa
 | Template thường dùng | Tách đệ quy, giải subproblem, gộp kết quả                                                                                                                                                              |
 | Bài bắt buộc         | [108. Chuyển array đã sắp xếp thành binary search tree](https://leetcode.cn/problems/convert-sorted-array-to-binary-search-tree/), [148. Sorting linked list](https://leetcode.cn/problems/sort-list/) |
 | Bài nâng cao         | [23. Gộp K linked list tăng dần](https://leetcode.cn/problems/merge-k-sorted-lists/), [215. Phần tử lớn thứ K trong array](https://leetcode.cn/problems/kth-largest-element-in-an-array/)              |
-| Trọng tâm ôn tập     | Điểm kết thúc đệ quy, interval trái phải có chồng lên nhau hay không, độ phức tạp khi gộp                                                                                                              |
+| Trọng tâm ôn tập     | Điều kiện dừng đệ quy, hai interval trái phải có chồng lấn hay không, độ phức tạp khi gộp                                                                                                              |
 
 ## Topological sort
 
@@ -121,7 +121,7 @@ Danh sách bài này được tổ chức theo tư duy. Mỗi nhóm đều đưa
 
 | Hạng mục             | Nội dung                                                                                                                                                                                            |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tín hiệu nhận diện   | Tính liên thông, phân nhóm, network bạn bè, cạnh dư thừa, quan hệ đẳng thức                                                                                                                         |
+| Tín hiệu nhận diện   | Tính liên thông, phân nhóm, nhóm bạn bè, cạnh dư thừa, quan hệ đẳng thức                                                                                                                            |
 | Template thường dùng | `find`, `union`, path compression, gộp theo kích thước                                                                                                                                              |
 | Bài bắt buộc         | [547. Số lượng tỉnh](https://leetcode.cn/problems/number-of-provinces/)                                                                                                                             |
 | Bài nâng cao         | [684. Kết nối dư thừa](https://leetcode.cn/problems/redundant-connection/), [990. Tính thỏa mãn của các phương trình đẳng thức](https://leetcode.cn/problems/satisfiability-of-equality-equations/) |
@@ -137,8 +137,8 @@ Danh sách bài này được tổ chức theo tư duy. Mỗi nhóm đều đưa
 | Bài nâng cao         | [191. Số lượng bit 1](https://leetcode.cn/problems/number-of-1-bits/), [78. Subset](https://leetcode.cn/problems/subsets/)                      |
 | Trọng tâm ôn tập     | Tính chất của XOR, ý nghĩa của `n & (n - 1)`, biểu diễn bit của số âm                                                                           |
 
-## Mục lục ôn tập
+## Điểm bắt đầu lộ trình ôn tập
 
-Bài viết này chỉ giữ lại các dạng bài kinh điển và đề xuất danh sách bài. Lộ trình luyện nhanh 7 ngày và lộ trình hệ thống 30 ngày được duy trì thống nhất trong [tổng quan ôn tập phỏng vấn thuật toán](./README.md). Nếu sau này điều chỉnh nhịp độ ôn tập, chỉ cần cập nhật trang tổng quan để tránh bảng lộ trình trong nhiều danh sách bài bị lệch nhau.
+Bài viết này chỉ giữ lại các dạng bài kinh điển và danh sách bài đề xuất. Lộ trình luyện nhanh 7 ngày và lộ trình hệ thống 30 ngày được duy trì thống nhất trong [tổng quan ôn tập phỏng vấn thuật toán](./README.md). Nếu sau này điều chỉnh nhịp độ ôn tập, chỉ cần cập nhật trang tổng quan để các bảng lộ trình trong nhiều danh sách bài không bị lệch nhau.
 
 <!-- @include: @article-footer.snippet.md -->

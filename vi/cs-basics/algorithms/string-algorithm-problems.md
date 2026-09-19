@@ -1,6 +1,6 @@
 ---
 title: Một số bài toán thuật toán chuỗi thường gặp
-description: Tổng hợp các thuật toán và dạng bài chuỗi thường gặp, tập trung giải thích nguyên lý KMP/BM, kỹ thuật cửa sổ trượt và giúp người đọc hiểu matching hiệu quả cùng cách triển khai.
+description: Tổng hợp các thuật toán và dạng bài chuỗi thường gặp, tập trung giải thích nguyên lý KMP/BM, kỹ thuật cửa sổ trượt và giúp người đọc hiểu matching hiệu quả và cách triển khai.
 category: Computer Fundamentals
 tag:
   - Algorithms
@@ -16,7 +16,7 @@ head:
 
 ## 1. Thuật toán KMP
 
-Khi nói đến các bài toán chuỗi, không thể không nhắc đến thuật toán KMP. Thuật toán này dùng để giải quyết bài toán tìm kiếm chuỗi, tức là tìm vị trí xuất hiện của một chuỗi con trong một chuỗi (S). KMP giảm độ phức tạp thời gian của việc matching ký tự xuống O(m+n), còn độ phức tạp không gian chỉ là O(m). Phương pháp “tìm kiếm brute force” sẽ liên tục quay lui trong chuỗi chính, dẫn đến hiệu suất thấp. Trong khi đó, thuật toán KMP tận dụng thông tin đã matching một phần, giữ con trỏ trên chuỗi chính không quay lui, đồng thời thay đổi con trỏ của chuỗi con để dịch chuỗi mẫu đến vị trí hữu ích nhất.
+Khi nói đến các bài toán chuỗi, không thể không nhắc đến thuật toán KMP. Thuật toán này dùng để giải quyết bài toán tìm kiếm chuỗi, tức là tìm vị trí xuất hiện của một chuỗi con W trong một chuỗi S. KMP giảm độ phức tạp thời gian của việc matching ký tự xuống O(m+n), còn độ phức tạp không gian chỉ là O(m). Phương pháp “tìm kiếm brute force” liên tục quay lui trong chuỗi chính, dẫn đến hiệu suất thấp. Trong khi đó, KMP tận dụng thông tin đã matching một phần, giữ con trỏ trên chuỗi chính không quay lui, đồng thời điều chỉnh con trỏ của chuỗi con để dịch chuỗi mẫu đến vị trí phù hợp nhất.
 
 Chi tiết thuật toán, tham khảo:
 
@@ -29,14 +29,14 @@ Chi tiết thuật toán, tham khảo:
 
 **Ngoài ra, hãy tìm hiểu thêm thuật toán BM!**
 
-> BM cũng là một thuật toán matching chuỗi chính xác. Nó so sánh từ phải sang trái, đồng thời áp dụng hai quy tắc heuristic là quy tắc ký tự xấu và quy tắc hậu tố tốt để quyết định khoảng cách dịch sang phải. Ý tưởng cơ bản là matching ký tự từ phải sang trái. Khi gặp ký tự không khớp, thuật toán lấy giá trị dịch phải lớn nhất từ bảng ký tự xấu và bảng hậu tố tốt, rồi dịch chuỗi mẫu sang phải để tiếp tục matching.
-> [Thuật toán KMP trong matching chuỗi](http://www.ruanyifeng.com/blog/2013/05/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm.html)
+> BM cũng là một thuật toán matching chuỗi chính xác. Nó so sánh từ phải sang trái, đồng thời áp dụng hai quy tắc heuristic là quy tắc ký tự xấu và quy tắc hậu tố tốt để quyết định khoảng cách dịch sang phải. Ý tưởng cơ bản là matching ký tự từ phải sang trái. Khi gặp ký tự không khớp, thuật toán lấy khoảng cách dịch phải lớn nhất từ bảng ký tự xấu và bảng hậu tố tốt, rồi dịch chuỗi mẫu sang phải để tiếp tục matching.
+> Thuật toán KMP trong matching chuỗi: <http://www.ruanyifeng.com/blog/2013/05/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm.html>
 
 ## 2. Thay thế khoảng trắng
 
-> Jianzhi Offer: Hãy triển khai một hàm thay thế từng khoảng trắng trong một chuỗi bằng "%20". Ví dụ, sau khi thay thế chuỗi We Are Happy. sẽ trở thành We%20Are%20Happy.
+> Jianzhi Offer: Hãy triển khai một hàm thay thế mọi khoảng trắng trong một chuỗi bằng "%20". Ví dụ, `We Are Happy.` sau khi thay thế sẽ thành `We%20Are%20Happy`.
 
-Ở đây cung cấp hai phương pháp: ① phương pháp thông thường; ② sử dụng API để giải quyết.
+Có hai phương pháp: ① phương pháp thông thường; ② sử dụng API.
 
 ```java
 //https://www.weiweiblog.cn/replacespace/
@@ -75,7 +75,7 @@ public class Solution {
 
 ```
 
-Với trường hợp thay thế ký tự cố định, chẳng hạn khoảng trắng, phương pháp thứ hai thực chất có thể dùng `replace` để thay thế và cho hiệu suất tốt hơn!
+Với trường hợp thay thế ký tự cố định, chẳng hạn khoảng trắng, phương pháp thứ hai có thể dùng `replace` để đạt hiệu suất tốt hơn!
 
 ```java
 str.toString().replace(" ","%20");
@@ -179,12 +179,12 @@ Explanation:
 Palindrome dài nhất có thể tạo thành là "dccaccd", có độ dài 7.
 ```
 
-Ở trên ta đã biết palindrome là gì. Bây giờ hãy xem hai trường hợp có thể tạo thành palindrome:
+Đã biết palindrome là gì, bây giờ xét hai trường hợp có thể tạo thành palindrome:
 
 - Tổ hợp trong đó số lần xuất hiện của ký tự là số chẵn.
 - **Tổ hợp trong đó số lần xuất hiện của ký tự là số chẵn + một ký tự xuất hiện nhiều nhất trong các ký tự có số lần xuất hiện lẻ** (tham khảo **[issue665](https://github.com/Snailclimb/JavaGuide/issues/665)**).
 
-Chỉ cần thống kê số lần xuất hiện của ký tự, vì chỉ các cặp mới có thể tạo thành palindrome. Do cho phép một ký tự xuất hiện riêng ở giữa, chẳng hạn "abcba", nên nếu cuối cùng còn một chữ cái lẻ thì có thể cộng thêm 1 vào tổng độ dài. Trước tiên chuyển chuỗi thành mảng ký tự. Sau đó duyệt mảng, kiểm tra ký tự tương ứng có trong hashset hay không; nếu không thì thêm vào, nếu có thì tăng `count++`, rồi xóa ký tự đó! Nhờ vậy có thể tìm được số ký tự xuất hiện theo cặp.
+Chỉ cần thống kê số lần xuất hiện của ký tự, vì chỉ các cặp mới có thể tạo thành palindrome. Do cho phép một ký tự xuất hiện riêng ở giữa, chẳng hạn "abcba", nên nếu cuối cùng còn một chữ cái lẻ thì có thể cộng thêm 1 vào tổng độ dài. Trước tiên chuyển chuỗi thành mảng ký tự. Sau đó duyệt mảng, kiểm tra ký tự tương ứng có trong hashset hay không; nếu không thì thêm vào, nếu có thì tăng `count++`, rồi xóa ký tự đó! Nhờ vậy có thể đếm số cặp ký tự.
 
 ```java
 //https://leetcode-cn.com/problems/longest-palindrome/description/
@@ -211,7 +211,7 @@ class Solution {
 
 ### 4.2. Kiểm tra palindrome
 
-> LeetCode: Cho một chuỗi, hãy kiểm tra xem chuỗi đó có phải palindrome hay không; chỉ xét các ký tự chữ cái và chữ số, có thể bỏ qua chữ hoa và chữ thường. Giải thích: trong bài này, chuỗi rỗng được định nghĩa là một palindrome hợp lệ.
+> LeetCode: Cho một chuỗi, hãy kiểm tra xem chuỗi đó có phải palindrome hay không; chỉ xét các ký tự chữ cái và chữ số, không phân biệt chữ hoa và chữ thường. Giải thích: trong bài này, chuỗi rỗng được định nghĩa là một palindrome hợp lệ.
 
 Ví dụ 1:
 
@@ -272,7 +272,7 @@ Input: "cbbd"
 Output: "bb"
 ```
 
-Lấy một phần tử làm tâm, lần lượt tính độ dài palindrome lớn nhất với độ dài chẵn và độ dài lẻ.
+Lấy một phần tử làm tâm, lần lượt tính độ dài palindrome lớn nhất cho trường hợp độ dài chẵn và lẻ.
 
 ```java
 //https://leetcode-cn.com/problems/longest-palindromic-substring/description/
@@ -353,28 +353,28 @@ class Solution {
 }
 ```
 
-## 5. Độ sâu matching dấu ngoặc
+## 5. Độ sâu dãy ngoặc
 
 > iQIYI 2018 Java trong đợt tuyển dụng mùa thu:
-> Một dãy matching dấu ngoặc hợp lệ được định nghĩa như sau:
+> Một dãy ngoặc hợp lệ được định nghĩa như sau:
 >
-> 1. Chuỗi rỗng "" là một dãy matching dấu ngoặc hợp lệ.
-> 2. Nếu "X" và "Y" đều là các dãy matching dấu ngoặc hợp lệ thì "XY" cũng là một dãy matching dấu ngoặc hợp lệ.
-> 3. Nếu "X" là một dãy matching dấu ngoặc hợp lệ thì "(X)" cũng là một dãy matching dấu ngoặc hợp lệ.
-> 4. Mọi dãy dấu ngoặc hợp lệ đều có thể được tạo ra từ các quy tắc trên.
+> 1. Chuỗi rỗng "" là một dãy ngoặc hợp lệ.
+> 2. Nếu "X" và "Y" đều là các dãy ngoặc hợp lệ thì "XY" cũng là một dãy ngoặc hợp lệ.
+> 3. Nếu "X" là một dãy ngoặc hợp lệ thì "(X)" cũng là một dãy ngoặc hợp lệ.
+> 4. Mọi dãy ngoặc hợp lệ đều có thể được tạo ra từ các quy tắc trên.
 >
-> Ví dụ: "", "()", "()()", "((()))" đều là các dãy dấu ngoặc hợp lệ.
-> Với một dãy dấu ngoặc hợp lệ, độ sâu của nó được định nghĩa như sau:
+> Ví dụ: "", "()", "()()", "((()))" đều là các dãy ngoặc hợp lệ.
+> Với một dãy ngoặc hợp lệ, độ sâu của nó được định nghĩa như sau:
 >
 > 1. Độ sâu của chuỗi rỗng "" là 0.
 > 2. Nếu độ sâu của chuỗi "X" là x, độ sâu của chuỗi "Y" là y thì độ sâu của chuỗi "XY" là max(x, y).
 > 3. Nếu độ sâu của "X" là x thì độ sâu của chuỗi "(X)" là x+1.
 >
-> Ví dụ: độ sâu của "()()()" là 1, độ sâu của "((()))" là 3. Bây giờ cho một dãy dấu ngoặc hợp lệ, hãy tính độ sâu của dãy đó.
+> Ví dụ: độ sâu của "()()()" là 1, độ sâu của "((()))" là 3. Cho một dãy ngoặc hợp lệ, hãy tính độ sâu của dãy đó.
 
 ```plain
 Mô tả input:
-Input gồm một dãy dấu ngoặc hợp lệ s, độ dài s length (2 ≤ length ≤ 50), trong dãy chỉ chứa '(' và ')'.
+Input gồm một dãy ngoặc hợp lệ s, độ dài length của s (2 ≤ length ≤ 50), trong dãy chỉ chứa '(' và ')'.
 
 Mô tả output:
 In ra một số nguyên dương, tức độ sâu của dãy.
@@ -389,7 +389,7 @@ Output:
 2
 ```
 
-Code như sau:
+Code:
 
 ```java
 import java.util.Scanner;
@@ -399,7 +399,7 @@ import java.util.Scanner;
  *
  * @author Snailclimb
  * @date 2018-09-06
- * @Description: Tính độ sâu của dãy dấu ngoặc hợp lệ đã cho.
+  * @Description: Tính độ sâu của dãy ngoặc hợp lệ đã cho.
  */
 public class Main {
   public static void main(String[] args) {
@@ -466,7 +466,7 @@ public class Main {
 
 ## Trọng tâm ôn tập phỏng vấn
 
-Các bài toán chuỗi trông có vẻ đa dạng, nhưng thực tế không có nhiều template thường gặp: đếm bằng hash, hai con trỏ, cửa sổ trượt, KMP, palindrome và mô phỏng bằng stack.
+Các bài toán chuỗi trông có vẻ đa dạng, nhưng thực tế chỉ có một số template thường gặp: đếm bằng hash, hai con trỏ, cửa sổ trượt, KMP, palindrome và mô phỏng bằng stack.
 
 | Dạng bài             | Phương pháp thường dùng         | Bài tiêu biểu                                                            |
 | -------------------- | ------------------------------- | ------------------------------------------------------------------------ |
@@ -485,7 +485,7 @@ Khi xử lý bài toán chuỗi, trước tiên có thể đặt 3 câu hỏi:
 
 Một số điểm dễ mắc lỗi:
 
-- Trong Java, `String` immutable; nếu nối chuỗi thường xuyên thì nên dùng `StringBuilder`.
+- Trong Java, `String` là immutable; nếu nối chuỗi thường xuyên thì nên dùng `StringBuilder`.
 - Khi xử lý ký tự Unicode, `char` có thể không đủ; phần lớn bài toán thuật toán thông thường chỉ kiểm tra ASCII hoặc chữ cái viết thường.
 - Chuỗi con palindrome và dãy con palindrome là hai dạng bài khác nhau; dạng đầu thường dùng mở rộng từ tâm, dạng sau thường dùng DP.
 - Trong phỏng vấn KMP, thường không yêu cầu tự suy ra quy trình tính thủ công mảng `next` từ đầu, nhưng cần hiểu tác dụng của nó là bỏ qua prefix đã matching để tránh matching lặp lại.

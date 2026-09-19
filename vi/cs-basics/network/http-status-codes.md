@@ -12,7 +12,7 @@ head:
 
 HTTP status code là bản tóm tắt kết quả xử lý do server trả về cho client. Nhìn vào một status code, về cơ bản bạn có thể phán đoán request thành công, được redirect, gặp lỗi ở client hay gặp lỗi ở server.
 
-Status code trông chỉ là những con số, nhưng nhiều code rất dễ bị nhầm lẫn, chẳng hạn 301 và 302, 401 và 403, 500 và 502, 201 và 204.
+Status code trông chỉ là những con số, nhưng nhiều status code rất dễ bị nhầm lẫn, chẳng hạn 301 và 302, 401 và 403, 500 và 502, 201 và 204.
 
 Bài viết này chủ yếu trả lời một số câu hỏi:
 
@@ -23,9 +23,9 @@ Bài viết này chủ yếu trả lời một số câu hỏi:
 
 ![HTTP status code thường gặp](https://oss.javaguide.cn/github/javaguide/cs-basics/network/http-status-code.png)
 
-### 1xx Informational (mã trạng thái thông tin)
+### 1xx Informational (mã trạng thái Informational)
 
-So với các nhóm status code khác, khả năng cao là bình thường bạn sẽ không gặp 1xx, nên ở đây bỏ qua luôn.
+So với các nhóm status code khác, bạn hầu như không gặp 1xx trong thực tế, nên ở đây bỏ qua.
 
 ### 2xx Success (mã trạng thái thành công)
 
@@ -38,7 +38,7 @@ So với các nhóm status code khác, khả năng cao là bình thường bạn
 
 ![Định nghĩa status code 201 Created trong RFC 9110](https://oss.javaguide.cn/github/javaguide/cs-basics/network/rfc9110-201-created.png)
 
-Ở đây cần nói riêng về status code 204, vì trong quá trình học tập/làm việc hằng ngày chúng ta không gặp nó quá thường xuyên.
+Ở đây cần nói riêng về status code 204, vì trong học tập/công việc hằng ngày bạn không gặp nó quá thường xuyên.
 
 [Mô tả về status code 204 trong HTTP RFC 2616](https://tools.ietf.org/html/rfc2616#section-10.2.5) như sau:
 
@@ -58,7 +58,7 @@ So với các nhóm status code khác, khả năng cao là bình thường bạn
 > The 204 response MUST NOT include a message-body, and thus is always
 > terminated by the first empty line after the header fields.
 
-Nói đơn giản, status code 204 mô tả trường hợp sau khi gửi HTTP request đến server, chúng ta chỉ quan tâm kết quả xử lý có thành công hay không. Nói cách khác, thứ chúng ta cần chỉ là một kết quả: true/false.
+Nói đơn giản, status code 204 mô tả trường hợp sau khi gửi HTTP request đến server, bạn chỉ quan tâm kết quả xử lý có thành công hay không. Nói cách khác, thứ bạn cần chỉ là một kết quả: true/false.
 
 Lấy một ví dụ: bạn muốn theo đuổi một cô gái, bạn hỏi cô ấy: "Mình có thể theo đuổi bạn không?", cô ấy trả lời: "Được!". Coi cô gái này là server thì bạn sẽ dễ hiểu status code 204.
 
@@ -70,14 +70,14 @@ Lấy một ví dụ: bạn muốn theo đuổi một cô gái, bạn hỏi cô 
 ### 4xx Client Error (mã trạng thái lỗi client)
 
 - **400 Bad Request**: HTTP request được gửi đi có vấn đề. Ví dụ, tham số request không hợp lệ hoặc HTTP method không đúng.
-- **401 Unauthorized**: Chưa authentication nhưng lại request resource chỉ có thể truy cập sau khi authentication.
+- **401 Unauthorized**: Chưa authentication nhưng lại request resource yêu cầu authentication mới được truy cập.
 - **403 Forbidden**: Từ chối trực tiếp HTTP request và không xử lý. Thường dùng cho các request bất hợp pháp.
 - **404 Not Found**: Không tìm thấy resource bạn request trên server. Ví dụ, bạn request thông tin của một người dùng nhưng server không tìm thấy người dùng được chỉ định.
-- **409 Conflict**: Resource được request xung đột với trạng thái hiện tại của server, request không thể được xử lý.
+- **409 Conflict**: Resource trong request xung đột với trạng thái hiện tại của server, nên request không thể được xử lý.
 
 ### 5xx Server Error (mã trạng thái lỗi server)
 
-- **500 Internal Server Error**: Server gặp vấn đề (thường là server phát sinh Bug). Ví dụ, server đột nhiên ném exception khi xử lý request, nhưng exception không được xử lý đúng cách trên server.
+- **500 Internal Server Error**: Server gặp vấn đề (thường do server phát sinh bug). Ví dụ, server đột nhiên ném exception khi xử lý request, nhưng exception không được xử lý đúng cách trên server.
 - **502 Bad Gateway**: Gateway của chúng ta chuyển tiếp request đến server, nhưng server lại trả về một response lỗi.
 
 ### Tham khảo

@@ -1,6 +1,6 @@
 ---
 title: Tổng hợp câu hỏi phỏng vấn mạng máy tính thường gặp (phần dưới)
-description: Tổng hợp các câu hỏi phỏng vấn mạng máy tính thường gặp (phần dưới), bao quát kiến thức cơ bản như TCP/UDP, quản lý kết nối, truyền tin tin cậy, HTTP/3, IP, IPv6, NAT và ARP.
+description: Tổng hợp các câu hỏi phỏng vấn mạng máy tính thường gặp (phần dưới), bao quát kiến thức cơ bản như TCP/UDP, quản lý kết nối, truyền dữ liệu tin cậy, HTTP/3, IP, IPv6, NAT và ARP.
 category: Kiến thức cơ sở máy tính
 tag:
   - Mạng máy tính
@@ -10,9 +10,9 @@ head:
       content: câu hỏi phỏng vấn mạng máy tính,TCP vs UDP,bắt tay ba bước TCP,HTTP/3 QUIC,IPv4 vs IPv6,độ tin cậy TCP,địa chỉ IP,giao thức NAT,giao thức ARP,phỏng vấn tầng transport,câu hỏi thường gặp tầng network,dựa trên giao thức TCP,dựa trên giao thức UDP,head-of-line blocking,đóng kết nối bốn bước
 ---
 
-Trong các câu hỏi phỏng vấn mạng máy tính, phần thực sự dễ bị hỏi sâu vào chi tiết thường tập trung ở các kiến thức tầng transport và tầng network như **TCP, UDP, IP, ARP, NAT, IPv4/IPv6**. Ví dụ: Vì sao TCP đáng tin cậy? Vì sao cần bắt tay ba bước và đóng kết nối bốn bước? Vì sao HTTP/3 chuyển sang QUIC dựa trên UDP? Những câu hỏi này không chỉ kiểm tra khái niệm, mà còn kiểm tra sự hiểu biết của bạn về quá trình giao tiếp mạng.
+Trong các câu hỏi phỏng vấn mạng máy tính, phần dễ bị hỏi sâu vào chi tiết thường tập trung ở các kiến thức thuộc transport layer và network layer như **TCP, UDP, IP, ARP, NAT, IPv4/IPv6**. Ví dụ: Vì sao TCP đáng tin cậy? Vì sao cần bắt tay ba bước và đóng kết nối bốn bước? Vì sao HTTP/3 chuyển sang QUIC dựa trên UDP? Những câu hỏi này không chỉ kiểm tra khái niệm, mà còn kiểm tra sự hiểu biết của bạn về quá trình giao tiếp mạng.
 
-Bài viết 《Tổng hợp câu hỏi phỏng vấn mạng máy tính thường gặp (phần dưới)》 sẽ tập trung hệ thống hóa các nội dung thường gặp trong phỏng vấn backend như TCP và UDP, quản lý kết nối TCP, truyền tin tin cậy, địa chỉ IP, ARP, NAT, giúp bạn kết nối các trọng tâm của tầng transport và tầng network.
+Bài viết 《Tổng hợp câu hỏi phỏng vấn mạng máy tính thường gặp (phần dưới)》 sẽ tập trung hệ thống hóa các nội dung thường gặp trong phỏng vấn backend như TCP và UDP, quản lý kết nối TCP, truyền dữ liệu tin cậy, địa chỉ IP, ARP, NAT, giúp bạn kết nối các trọng tâm của transport layer và network layer.
 
 ## TCP và UDP
 
@@ -22,13 +22,13 @@ Bài viết 《Tổng hợp câu hỏi phỏng vấn mạng máy tính thường
    - TCP có hướng kết nối. Trước khi truyền dữ liệu, trước tiên phải thiết lập kết nối thông qua “bắt tay ba bước”; sau khi truyền dữ liệu xong, còn cần giải phóng kết nối thông qua “đóng kết nối bốn bước”. Điều này bảo đảm hai bên đã sẵn sàng giao tiếp.
    - UDP không kết nối. Trước khi gửi dữ liệu không cần thiết lập bất kỳ kết nối nào, chỉ cần gửi thẳng packet (datagram) đi.
 2. **Có phải là truyền tin tin cậy hay không**:
-   - TCP cung cấp dịch vụ truyền dữ liệu tin cậy. TCP sử dụng một loạt cơ chế như sequence number, xác nhận (ACK), retransmission khi timeout, flow control, congestion control để bảo đảm dữ liệu đến đích không lỗi, không mất, không trùng lặp và đúng thứ tự.
+   - TCP cung cấp dịch vụ truyền dữ liệu tin cậy. TCP sử dụng một loạt cơ chế như sequence number, xác nhận (ACK), retransmission khi timeout, flow control và congestion control để bảo đảm dữ liệu đến đích không lỗi, không mất, không trùng lặp và đúng thứ tự.
    - UDP cung cấp phương thức truyền không tin cậy. UDP cố gắng hết sức để chuyển phát (best-effort delivery), nhưng không bảo đảm dữ liệu nhất định sẽ đến nơi, cũng không bảo đảm thứ tự đến nơi, càng không tự động retransmission. Sau khi nhận packet, bên nhận cũng không chủ động gửi xác nhận.
 3. **Có state hay không**:
    - TCP có state. Vì phải bảo đảm độ tin cậy, TCP cần duy trì thông tin state của kết nối ở hai đầu kết nối, chẳng hạn sequence number, window size, dữ liệu nào đã gửi, dữ liệu nào đã nhận xác nhận.
    - UDP stateless. UDP không duy trì state của kết nối. Sau khi bên gửi gửi dữ liệu, nó không còn quan tâm dữ liệu có đến nơi hay không và đến nơi bằng cách nào, vì vậy overhead nhỏ hơn (**rất “tệ bạc”!**).
 4. **Hiệu suất truyền**:
-   - Vì TCP cần thiết lập kết nối, gửi xác nhận, xử lý retransmission nên overhead lớn, hiệu suất truyền tương đối thấp.
+   - Vì TCP cần thiết lập kết nối, gửi xác nhận và xử lý retransmission nên overhead lớn, hiệu suất truyền tương đối thấp.
    - UDP có cấu trúc đơn giản, không có cơ chế điều khiển phức tạp, overhead nhỏ, hiệu suất truyền cao hơn và tốc độ nhanh hơn.
 5. **Hình thức truyền**:
    - TCP hướng byte stream (Byte Stream). TCP xem dữ liệu do application cung cấp là một chuỗi byte không có cấu trúc, có thể chia nhỏ hoặc gộp dữ liệu.
@@ -56,9 +56,9 @@ Bài viết 《Tổng hợp câu hỏi phỏng vấn mạng máy tính thường
 
 ### ⭐️ Khi nào chọn TCP, khi nào chọn UDP?
 
-Chọn TCP hay UDP chủ yếu phụ thuộc vào **yêu cầu về độ tin cậy của việc truyền dữ liệu cao đến đâu, cũng như yêu cầu về tính real-time và hiệu suất cao đến đâu**.
+Chọn TCP hay UDP chủ yếu phụ thuộc vào **mức độ yêu cầu về độ tin cậy của việc truyền dữ liệu, cũng như yêu cầu về tính real-time và hiệu suất**.
 
-Khi **độ chính xác và tính toàn vẹn của dữ liệu đặc biệt quan trọng, tuyệt đối không được xảy ra lỗi**, thông thường nên chọn TCP. Vì TCP cung cấp một bộ cơ chế hoàn chỉnh (bắt tay ba bước, xác nhận, retransmission, flow control...) để bảo đảm dữ liệu được chuyển đến nơi một cách tin cậy và đúng thứ tự. Các trường hợp sử dụng điển hình như sau:
+Khi **độ chính xác và tính toàn vẹn của dữ liệu đặc biệt quan trọng, tuyệt đối không được xảy ra lỗi**, thông thường nên chọn TCP. Vì TCP cung cấp một bộ cơ chế hoàn chỉnh (bắt tay ba bước, xác nhận, retransmission, flow control, congestion control...) để bảo đảm dữ liệu được chuyển đến nơi một cách tin cậy và đúng thứ tự. Các trường hợp sử dụng điển hình như sau:
 
 - **Duyệt Web (HTTP/HTTPS):** Nội dung trang Web, ảnh, script phải được tải đầy đủ thì mới hiển thị chính xác.
 - **Truyền file (FTP, SCP):** Nội dung file không được mất hoặc sai thứ tự bất kỳ byte nào.
@@ -80,7 +80,7 @@ Khi **tính real-time, tốc độ và hiệu suất được ưu tiên, đồng
 
 🐛 Đính chính (tham khảo [issue#1915](https://github.com/Snailclimb/JavaGuide/issues/1915)):
 
-Trước HTTP/3.0, HTTP dựa trên TCP protocol; còn HTTP/3.0 sẽ ngừng sử dụng TCP và chuyển sang **QUIC protocol dựa trên UDP**:
+Trước HTTP/3.0, HTTP dựa trên TCP protocol; còn HTTP/3.0 không còn sử dụng TCP mà chuyển sang **QUIC protocol dựa trên UDP**:
 
 - **HTTP/1.x và HTTP/2.0:** Hai version HTTP này đều được xây dựng rõ ràng trên TCP. TCP cung cấp phương thức truyền tin cậy, có hướng kết nối, bảo đảm dữ liệu đến nơi đúng thứ tự và không lỗi, điều này rất quan trọng đối với việc hiển thị chính xác nội dung Web. Trước khi gửi HTTP request, cần dùng bắt tay ba bước của TCP để thiết lập connection.
 - **HTTP/3.0:** Đây là một thay đổi lớn. HTTP/3 loại bỏ TCP và chuyển sang sử dụng QUIC protocol, còn QUIC được xây dựng trên UDP.
@@ -92,17 +92,17 @@ Trước HTTP/3.0, HTTP dựa trên TCP protocol; còn HTTP/3.0 sẽ ngừng s�
 1. Giải quyết vấn đề head-of-line blocking (Head-of-Line Blocking, viết tắt: HOL blocking).
 2. Giảm độ trễ khi thiết lập connection.
 
-Dưới đây chúng ta sẽ giới thiệu chi tiết hai cải tiến này.
+Sau đây là phần giới thiệu chi tiết về hai cải tiến này.
 
-Trong HTTP/2, dù có thể truyền đồng thời nhiều request/response stream trên một TCP connection (multiplexing), nhưng đặc tính của bản thân TCP (bảo đảm đúng thứ tự và độ tin cậy) khiến nếu một TCP packet của một stream bị mất hoặc trễ, toàn bộ TCP connection sẽ bị block để chờ packet đó retransmission. Điều này khiến tất cả HTTP/2 stream trên TCP connection này đều bị ảnh hưởng, ngay cả khi packet của các stream khác đã đến nơi. **QUIC (chạy trên UDP) giải quyết vấn đề này**. Bên trong QUIC có cơ chế multiplexing và flow control riêng. Các request/response stream khác nhau thực sự độc lập ở tầng QUIC. Nếu packet của một stream bị mất, nó chỉ block stream đó, không ảnh hưởng đến các stream khác trên cùng QUIC connection (về bản chất là multiplexing + polling), giúp nâng cao đáng kể hiệu suất truyền đồng thời.
+Trong HTTP/2, dù có thể truyền đồng thời nhiều request/response stream trên một TCP connection (multiplexing), nhưng đặc tính của bản thân TCP (bảo đảm đúng thứ tự và độ tin cậy) khiến nếu một TCP packet của một stream bị mất hoặc trễ, toàn bộ TCP connection sẽ bị block để chờ retransmission packet đó. Điều này khiến tất cả HTTP/2 stream trên TCP connection này đều bị ảnh hưởng, ngay cả khi packet của các stream khác đã đến nơi. **QUIC (chạy trên UDP) giải quyết vấn đề này**. Bên trong QUIC có cơ chế multiplexing và flow control riêng. Các request/response stream khác nhau thực sự độc lập ở tầng QUIC. Nếu packet của một stream bị mất, nó chỉ block stream đó, không ảnh hưởng đến các stream khác trên cùng QUIC connection (về bản chất là multiplexing + polling), giúp nâng cao đáng kể hiệu suất truyền đồng thời.
 
 Ngoài việc giải quyết vấn đề head-of-line blocking, HTTP/3.0 còn có thể giảm độ trễ của quá trình handshake. Trong HTTP/2.0, nếu muốn thiết lập một HTTPS connection an toàn, cần trải qua TCP handshake ba bước và TLS handshake:
 
-RTT là thời gian round trip để packet đi từ một đầu đến đầu bên kia rồi quay lại, không phải thời gian truyền một chiều. Độ trễ của TCP handshake phải nêu rõ điểm kết thúc đo: sau khi client gửi SYN, khoảng 1 RTT sau sẽ nhận được SYN-ACK, sau đó có thể gửi ACK cuối cùng và application request; server còn cần thêm độ trễ một chiều để nhận ACK và request đó. Khi so sánh HTTP/2 và HTTP/3, cần thống nhất sử dụng cùng một chỉ số như “khi nào client có thể gửi request đầu tiên” hoặc “khi nào client nhận được byte đầu tiên”.
+RTT là thời gian round trip để packet đi từ một đầu đến đầu bên kia rồi quay lại, không phải thời gian truyền một chiều. Khi nói về độ trễ của TCP handshake, phải nêu rõ mốc kết thúc đo: sau khi client gửi SYN, khoảng 1 RTT sau sẽ nhận được SYN-ACK, sau đó có thể gửi ACK cuối cùng và application request; server còn cần thêm độ trễ một chiều để nhận ACK và request đó. Khi so sánh HTTP/2 và HTTP/3, cần thống nhất sử dụng cùng một chỉ số như “khi nào client có thể gửi request đầu tiên” hoặc “khi nào client nhận được byte đầu tiên”.
 
-HTTPS connection của HTTP/2 trước tiên cần thiết lập TCP connection, sau đó hoàn tất TLS handshake. HTTP/3 kết hợp việc thương lượng transport parameter và TLS 1.3 handshake trong quá trình QUIC thiết lập connection. QUIC connection mới thường sử dụng 1-RTT; 0-RTT chỉ áp dụng cho trường hợp khôi phục khi client đang giữ state của connection trước đó, có thể mang early data trong packet đầu tiên, nhưng tồn tại rủi ro replay, chỉ phù hợp với request có thể replay an toàn.
+HTTPS connection của HTTP/2 trước tiên cần thiết lập TCP connection, sau đó hoàn tất TLS handshake. HTTP/3 kết hợp việc thương lượng transport parameters và TLS 1.3 handshake trong quá trình QUIC thiết lập connection. QUIC connection mới thường sử dụng 1-RTT; 0-RTT chỉ áp dụng cho trường hợp khôi phục khi client đang giữ state của connection trước đó, có thể mang early data trong packet đầu tiên, nhưng tồn tại rủi ro replay, chỉ phù hợp với request an toàn khi replay.
 
-Có thể tham khảo hai link dưới đây để xem các chứng minh liên quan:
+Có thể tham khảo hai link dưới đây để xem thêm thông tin liên quan:
 
 - <https://zh.wikipedia.org/zh/HTTP/3>
 - <https://datatracker.ietf.org/doc/rfc9114/>
@@ -124,24 +124,24 @@ Giới thiệu chi tiết: [Vì sao TCP hướng byte stream, còn UDP hướng 
 
 ### Bạn biết những protocol nào dựa trên TCP/UDP?
 
-TCP (Transmission Control Protocol) và UDP (User Datagram Protocol) là hai protocol cốt lõi của tầng transport Internet, cung cấp dịch vụ giao tiếp cơ sở cho nhiều application layer protocol. Dưới đây là một số application layer protocol phổ biến được xây dựng lần lượt trên TCP và UDP:
+TCP (Transmission Control Protocol) và UDP (User Datagram Protocol) là hai protocol cốt lõi của transport layer Internet, cung cấp dịch vụ giao tiếp cơ sở cho nhiều application layer protocol. Dưới đây là một số application layer protocol phổ biến được xây dựng lần lượt trên TCP và UDP:
 
 **Các protocol chạy trên TCP (nhấn mạnh truyền tin cậy, đúng thứ tự):**
 
-| Tên đầy đủ tiếng Việt (viết tắt)           | Tên đầy đủ tiếng Anh               | Công dụng chính                                    | Mô tả và đặc tính                                                                                                                                                                                                 |
+| Tên protocol (viết tắt)                    | Tên đầy đủ tiếng Anh               | Công dụng chính                                    | Mô tả và đặc tính                                                                                                                                                                                                 |
 | ------------------------------------------ | ---------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Hypertext Transfer Protocol (HTTP)         | HyperText Transfer Protocol        | Truyền Web page, hypertext, nội dung multimedia    | **HTTP/1.x và HTTP/2 dựa trên TCP**. Các version đầu không mã hóa, là nền tảng của giao tiếp Web.                                                                                                                 |
+| Hypertext Transfer Protocol (HTTP)         | HyperText Transfer Protocol        | Truyền Web page, hypertext và nội dung multimedia  | **HTTP/1.x và HTTP/2 dựa trên TCP**. Các version đầu không mã hóa, là nền tảng của giao tiếp Web.                                                                                                                 |
 | Hypertext Transfer Protocol Secure (HTTPS) | HyperText Transfer Protocol Secure | Truyền Web được mã hóa                             | Sử dụng TLS để bảo vệ HTTP. HTTP/1.1 và HTTP/2 thường dùng TLS over TCP, HTTP/3 sử dụng QUIC tích hợp TLS 1.3.                                                                                                    |
-| File Transfer Protocol (FTP)               | File Transfer Protocol             | Truyền file                                        | FTP truyền **plaintext** truyền thống, không an toàn. Khuyến nghị sử dụng version an toàn là **SFTP (SSH File Transfer Protocol)** hoặc **FTPS (FTP over SSL/TLS)**.                                              |
-| Simple Mail Transfer Protocol (SMTP)       | Simple Mail Transfer Protocol      | **Gửi** email                                      | Phụ trách gửi email từ client đến server hoặc chuyển tiếp giữa các mail server. Có thể nâng cấp lên truyền được mã hóa bằng **STARTTLS**.                                                                         |
+| File Transfer Protocol (FTP)               | File Transfer Protocol             | Truyền file                                        | FTP truyền **plaintext** theo cách truyền thống, không an toàn. Khuyến nghị sử dụng version an toàn là **SFTP (SSH File Transfer Protocol)** hoặc **FTPS (FTP over SSL/TLS)**.                                    |
+| Simple Mail Transfer Protocol (SMTP)       | Simple Mail Transfer Protocol      | **Gửi** email                                      | Phụ trách gửi email từ client đến server hoặc chuyển tiếp giữa các mail server. Có thể nâng cấp lên truyền dữ liệu mã hóa bằng **STARTTLS**.                                                                      |
 | Post Office Protocol version 3 (POP3)      | Post Office Protocol version 3     | **Nhận** email                                     | Thông thường tải email từ server **về thiết bị local rồi xóa bản sao trên server** (có thể cấu hình giữ lại). **POP3S** là version được mã hóa bằng SSL/TLS.                                                      |
 | Internet Message Access Protocol (IMAP)    | Internet Message Access Protocol   | **Nhận và quản lý** email                          | Email được giữ trên server, hỗ trợ đồng bộ state email trên nhiều thiết bị, quản lý folder, tìm kiếm online... **IMAPS** là version được mã hóa bằng SSL/TLS. Là lựa chọn ưu tiên của các dịch vụ email hiện đại. |
 | Remote Terminal Protocol (Telnet)          | Teletype Network                   | Đăng nhập terminal từ xa                           | Tất cả dữ liệu (bao gồm password) đều được truyền **plaintext**, độ an toàn cực thấp, về cơ bản đã bị SSH thay thế hoàn toàn.                                                                                     |
-| Secure Shell Protocol (SSH)                | Secure Shell                       | Quản trị từ xa an toàn, truyền dữ liệu được mã hóa | Cung cấp đăng nhập từ xa và thực thi command được mã hóa, cùng các chức năng như truyền file an toàn (SFTP), là lựa chọn an toàn thay thế Telnet.                                                                 |
+| Secure Shell Protocol (SSH)                | Secure Shell                       | Quản trị từ xa an toàn, truyền dữ liệu được mã hóa | Cung cấp đăng nhập từ xa và thực thi command qua kết nối mã hóa, cùng các chức năng như truyền file an toàn (SFTP), là lựa chọn an toàn thay thế Telnet.                                                          |
 
 **Các protocol chạy trên UDP (nhấn mạnh truyền nhanh, overhead thấp):**
 
-| Tên đầy đủ tiếng Việt (viết tắt)           | Tên đầy đủ tiếng Anh                  | Công dụng chính                                         | Mô tả và đặc tính                                                                                                                                                                 |
+| Tên protocol (viết tắt)                    | Tên đầy đủ tiếng Anh                  | Công dụng chính                                         | Mô tả và đặc tính                                                                                                                                                                 |
 | ------------------------------------------ | ------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Hypertext Transfer Protocol (HTTP/3)       | HyperText Transfer Protocol version 3 | Truyền Web thế hệ mới                                   | Dựa trên **QUIC** protocol (bản thân QUIC được xây dựng trên UDP), nhằm giảm độ trễ và giảm head-of-line blocking của TCP; khi khôi phục session có thể sử dụng early data 0-RTT. |
 | Dynamic Host Configuration Protocol (DHCP) | Dynamic Host Configuration Protocol   | Phân bổ động IP và network configuration                | Client tự động lấy IP, subnet mask, gateway, DNS server và các thông tin khác từ server.                                                                                          |
@@ -150,7 +150,7 @@ TCP (Transmission Control Protocol) và UDP (User Datagram Protocol) là hai pro
 | RTP Control Protocol (RTCP)                | RTP Control Protocol                  | Giám sát chất lượng và thông tin control của RTP stream | Hoạt động cùng RTP, cung cấp thông tin thống kê như packet loss, latency, jitter, hỗ trợ flow control và congestion management.                                                   |
 | Trivial File Transfer Protocol (TFTP)      | Trivial File Transfer Protocol        | Truyền file đơn giản                                    | Chức năng đơn giản, thường dùng trong các trường hợp truyền file nhỏ như khởi động diskless workstation trong LAN, nâng cấp firmware cho network device.                          |
 | Simple Network Management Protocol (SNMP)  | Simple Network Management Protocol    | Giám sát và quản lý network device                      | Cho phép network administrator query và thay đổi thông tin state của network device.                                                                                              |
-| Network Time Protocol (NTP)                | Network Time Protocol                 | Đồng bộ clock của máy tính                              | Dùng để đồng bộ thời gian giữa các máy tính trong network, bảo đảm tính nhất quán của thời gian.                                                                                  |
+| Network Time Protocol (NTP)                | Network Time Protocol                 | Đồng bộ clock của máy tính                              | Dùng để đồng bộ thời gian giữa các máy tính trong network, bảo đảm thời gian nhất quán.                                                                                           |
 
 **Tóm lại:**
 
@@ -166,11 +166,11 @@ TCP (Transmission Control Protocol) và UDP (User Datagram Protocol) là hai pro
 | **Hành vi mặc định**                 | HTTP/1.0 mặc định short connection; HTTP/1.1 mặc định long connection                                  | Mặc định tắt, application cần bật rõ ràng `SO_KEEPALIVE`                                                        |
 | **Mức độ điều khiển**                | Do HTTP client, Web server hoặc proxy điều khiển theo policy connection                                | Do kernel của OS điều khiển, một số platform cũng cho phép điều chỉnh theo từng socket                          |
 | **Parameter thường gặp**             | `Connection`, `Keep-Alive: timeout/max`, cấu hình timeout của server                                   | `tcp_keepalive_time/intvl/probes` hoặc parameter tương ứng của platform                                         |
-| **Trigger đóng**                     | Đạt idle timeout, giới hạn số request hoặc một bên chủ động đóng                                       | Sau khi idle, gửi probe packet; chỉ đóng sau nhiều lần không response hoặc nhận RST                             |
+| **Trigger đóng**                     | Đạt idle timeout, giới hạn số request hoặc một bên chủ động đóng                                       | Sau khi idle, gửi probe packet; chỉ đóng sau nhiều lần không nhận được response hoặc nhận RST                   |
 | **Khi peer online**                  | Server vẫn có thể chủ động thu hồi idle connection theo cấu hình                                       | Chỉ cần kernel của peer có thể phản hồi ACK thì connection thường tiếp tục được duy trì                         |
-| **Có thể thay heartbeat không**      | Không thể phán đoán business có healthy hay không, chỉ có thể quản lý việc tái sử dụng HTTP connection | Không thể phán đoán thread pool, event loop hay business dependency có hoạt động bình thường hay không          |
+| **Có thể thay heartbeat không**      | Không thể xác định business có healthy hay không, chỉ có thể quản lý việc tái sử dụng HTTP connection  | Không thể xác định thread pool, event loop hay business dependency có hoạt động bình thường hay không           |
 | **Ảnh hưởng của intermediate layer** | Proxy, gateway có thể độc lập quản lý hai đoạn HTTP/TCP connection trước và sau                        | NAT/LB/reverse proxy có thể khiến thứ bạn thăm dò chỉ là một đoạn TCP connection                                |
-| **Quan hệ với HTTP/2/3**             | HTTP/2 cấm connection-level header; HTTP/3/QUIC không sử dụng cơ chế này                               | Chỉ có tác dụng với TCP; HTTP/3/QUIC connection thực sự không bị ảnh hưởng trực tiếp                            |
+| **Quan hệ với HTTP/2/3**             | HTTP/2 không dùng connection-level header; HTTP/3/QUIC không sử dụng cơ chế này                        | Chỉ có tác dụng với TCP; HTTP/3/QUIC connection thực sự không bị ảnh hưởng trực tiếp                            |
 
 **Hành vi mặc định của Keep-Alive khác nhau trong các version HTTP:**
 
@@ -228,13 +228,13 @@ Sau khi kernel nhận IP packet, trước tiên kernel xem protocol identifier c
 
 Thứ thực sự dễ xung đột là việc binding trùng lặp trong **cùng một protocol**, chẳng hạn hai TCP service thường không thể cùng listen trên một local IP và port; khi đó mới liên quan đến các socket reuse option như `SO_REUSEADDR`, `SO_REUSEPORT`.
 
-Ví dụ kinh điển: DNS đồng thời sử dụng `UDP/53` (query hằng ngày) và `TCP/53` (response quá lớn, zone transfer); HTTP/3 thường được deploy với `UDP/443` (QUIC), có thể cùng tồn tại với `TCP/443` của HTTPS truyền thống.
+Ví dụ kinh điển: DNS đồng thời sử dụng `UDP/53` (truy vấn thông thường) và `TCP/53` (response quá lớn, zone transfer); HTTP/3 thường được deploy với `UDP/443` (QUIC), có thể cùng tồn tại với `TCP/443` của HTTPS truyền thống.
 
 ![Ví dụ thực tế DNS và HTTP/3 đồng thời sử dụng port TCP và UDP](https://oss.javaguide.cn/github/javaguide/cs-basics/network/can-tcp-and-udp-use-the-same-port-practical-application-example.png)
 
 Giới thiệu chi tiết: [TCP và UDP có thể sử dụng cùng một port không?](./can-tcp-and-udp-use-the-same-port.md)
 
-### ⭐️ Một host chỉ có thể duy trì tối đa 65535 TCP connection sao?
+### ⭐️ Một host chỉ duy trì được tối đa 65535 TCP connection sao?
 
 Kết luận: **Không phải**. `65535` là port number lớn nhất, không phải giới hạn số connection.
 
@@ -250,15 +250,15 @@ Các yếu tố thực sự giới hạn số connection:
 
 Trong production, vấn đề thường gặp nhất không phải thiếu port, mà là **connection pool cấu hình không phù hợp khiến short connection liên tục được tạo và hủy**, làm cạn ephemeral port. Khi điều tra, trước tiên hãy kiểm tra connection pool và keep-alive có hoạt động hay không, đừng ngay lập tức sửa kernel parameter.
 
-Giới thiệu chi tiết: [Một host chỉ có thể duy trì tối đa 65535 TCP connection sao?](./maximum-number-of-tcp-connections-per-host.md)
+Giới thiệu chi tiết: [Một host chỉ duy trì được tối đa 65535 TCP connection sao?](./maximum-number-of-tcp-connections-per-host.md)
 
 ## IP
 
 ### IP protocol có tác dụng gì?
 
-**IP (Internet Protocol)** là một trong những protocol quan trọng nhất trong TCP/IP protocol, thuộc tầng network, chủ yếu dùng để định nghĩa format của packet, route và address packet, để packet có thể truyền qua các network và đến đúng destination.
+**IP (Internet Protocol)** là một trong những protocol quan trọng nhất trong TCP/IP protocol, thuộc network layer, chủ yếu dùng để định nghĩa format của packet, thực hiện routing và addressing cho packet, để packet có thể truyền qua các network và đến đúng destination.
 
-Hiện tại IP protocol chủ yếu được chia thành hai loại: IPv4 trước đây và IPv6 mới hơn. Hiện cả hai protocol đều đang được sử dụng, nhưng protocol sau đã được đề xuất để thay thế protocol trước.
+Hiện tại IP protocol chủ yếu được chia thành hai loại: IPv4 và IPv6, trong đó IPv6 mới hơn. Hiện cả hai protocol đều đang được sử dụng, nhưng protocol sau đã được đề xuất để thay thế protocol trước.
 
 ### IP address là gì? IP addressing hoạt động như thế nào?
 
@@ -268,13 +268,13 @@ Khi network device gửi IP packet, packet chứa **source IP address** và **de
 
 Network device dựa trên destination IP address để xác định destination của packet, rồi forward packet đến destination network hoặc subnetwork chính xác, từ đó thực hiện giao tiếp giữa các device.
 
-Phương thức addressing dựa trên IP address này là nền tảng của giao tiếp Internet, cho phép packet truyền qua các network khác nhau. Address có unique hay không, có thể global route hay không phụ thuộc vào loại address và scope; không thể khái quát IP address là identity toàn cầu duy nhất của mỗi device.
+Phương thức addressing dựa trên IP address này là nền tảng của giao tiếp Internet, cho phép packet truyền qua các network khác nhau. Việc address có unique và có thể được global route hay không phụ thuộc vào loại address và scope; không thể khái quát IP address là identity toàn cầu duy nhất của mỗi device.
 
 ![IP address giúp packet đến destination](https://oss.javaguide.cn/github/javaguide/cs-basics/network/internet_protocol_ip_address_diagram.png)
 
 ### IP address filtering là gì?
 
-**IP address filtering (IP Address Filtering)** nói đơn giản là giới hạn hoặc chặn quyền truy cập của một IP address cụ thể hoặc một range IP address. Ví dụ, nếu image service của bạn đột nhiên bị một IP address tấn công, bạn có thể cấm IP address đó truy cập image service.
+**IP address filtering (IP Address Filtering)** nói đơn giản là giới hạn hoặc chặn quyền truy cập của một IP address cụ thể hoặc một dải IP address. Ví dụ, nếu image service của bạn đột nhiên bị một IP address tấn công, bạn có thể cấm IP address đó truy cập image service.
 
 IP address filtering là một biện pháp network security đơn giản. Trong ứng dụng thực tế, nó thường được sử dụng cùng các biện pháp network security khác như authentication, authorization và encryption. Chỉ sử dụng IP address filtering không thể bảo đảm hoàn toàn network security.
 
@@ -297,19 +297,19 @@ Ngoài address space lớn hơn, IPv6 còn có các ưu điểm:
 - **ICMPv6 (Internet Control Message Protocol for IPv6):** ICMPv6 trong IPv6 có một số cải tiến so với ICMP trong IPv4, chẳng hạn cải tiến các function như neighbor discovery và Path MTU Discovery, từ đó nâng cao độ tin cậy và performance của network.
 - ……
 
-### Làm thế nào để lấy client IP thật?
+### Làm thế nào để lấy IP thật của client?
 
-Có nhiều phương thức lấy client IP thật, chủ yếu được chia thành phương thức ở application layer, transport layer và network layer.
+Có nhiều phương thức lấy IP thật của client, chủ yếu được chia thành phương thức ở application layer, transport layer và network layer.
 
 **Phương thức ở application layer:**
 
-`X-Forwarded-For` là request header được sử dụng rộng rãi nhưng chưa được standardize trong hệ sinh thái HTTP proxy; cơ chế tương ứng được IETF standardize là HTTP `Forwarded` header. Cả hai đều thuộc HTTP, không thể áp dụng trực tiếp cho các application layer protocol khác như SMTP. Business service cũng không thể vô điều kiện tin tưởng `X-Forwarded-For` do client truyền vào: trusted reverse proxy nên overwrite hoặc normalize giá trị truyền từ bên ngoài, server chỉ parse phần được proxy đã biết append.
+`X-Forwarded-For` là request header được sử dụng rộng rãi nhưng chưa được standardize trong hệ sinh thái HTTP proxy; cơ chế tương ứng được IETF standardize là HTTP `Forwarded` header. Cả hai đều thuộc HTTP, không thể áp dụng trực tiếp cho các application layer protocol khác như SMTP. Business service cũng không thể vô điều kiện tin tưởng `X-Forwarded-For` do client truyền vào: trusted reverse proxy nên overwrite hoặc normalize giá trị truyền từ bên ngoài, server chỉ parse phần do các proxy đã biết thêm vào.
 
 **Phương thức ở transport layer:**
 
-Sử dụng TCP Options field để mang thông tin source IP thật. Phương thức này áp dụng cho mọi protocol dựa trên TCP, không bị giới hạn bởi application layer. Tuy nhiên, đây không phải chức năng được TCP standard hỗ trợ, do đó cần cải tạo cả hai phía giao tiếp. Nghĩa là: phía sender cần có khả năng chèn source IP thật vào TCP Options; phía receiver cần có khả năng đọc IP address trong TCP Options.
+Sử dụng TCP Options field để mang thông tin source IP thật. Phương thức này áp dụng cho mọi protocol dựa trên TCP, không bị giới hạn bởi application layer. Tuy nhiên, đây không phải chức năng được TCP standard hỗ trợ, do đó cần sửa đổi cả hai phía giao tiếp. Nghĩa là: phía sender cần có khả năng chèn source IP thật vào TCP Options; phía receiver cần có khả năng đọc IP address trong TCP Options.
 
-Cũng có thể truyền client IP và Port bằng Proxy Protocol protocol. Phương thức này có thể sử dụng Nginx hoặc reverse proxy server khác hỗ trợ protocol này để lấy IP thật hoặc parse IP thật ở business server.
+Cũng có thể truyền client IP và Port bằng Proxy Protocol. Phương thức này có thể sử dụng Nginx hoặc reverse proxy server khác hỗ trợ protocol này để lấy IP thật hoặc parse IP thật ở business server.
 
 **Phương thức ở network layer:**
 
@@ -327,23 +327,23 @@ NAT không chỉ giảm bớt vấn đề thiếu tài nguyên IPv4 address, mà
 
 ## ARP
 
-### Mac address là gì?
+### MAC address là gì?
 
-MAC address có tên đầy đủ là **Media Access Control Address**, dùng để nhận diện interface của link layer và truyền data frame trong local network. MAC address thuộc về network interface, không phải identity vĩnh viễn của toàn bộ device; một device có thể có nhiều network interface, mỗi interface có thể sử dụng một MAC address khác nhau.
+MAC address có tên đầy đủ là **Media Access Control Address**, dùng để nhận diện interface ở link layer và truyền data frame trong local network. MAC address thuộc về network interface, không phải identity vĩnh viễn của toàn bộ device; một device có thể có nhiều network interface, mỗi interface có thể sử dụng một MAC address khác nhau.
 
 ![Mặt sau của router sẽ ghi MAC address](https://oss.javaguide.cn/github/javaguide/cs-basics/network/router-back-will-indicate-mac-address.png)
 
 MAC address cũng thường được gọi là LAN address, physical address hoặc Ethernet address. Khác với IP address dùng để route ở network layer, MAC address chủ yếu được sử dụng trong link hiện tại hoặc broadcast domain.
 
-> Một điểm khác cần biết là không chỉ network resource mới có IP address, network device cũng có IP address, chẳng hạn router. Nhưng xét về cấu trúc, router và các network device khác có vai trò tạo thành một network, hơn nữa thường là internal network, vì vậy IP address chúng sử dụng thường là internal IP. Khi device trong internal network giao tiếp với device bên ngoài internal network, cần sử dụng NAT protocol.
+> Một điểm khác cần biết là không chỉ network resource mới có IP address, network device cũng có IP address, chẳng hạn router. Nhưng xét về cấu trúc, router và các network device khác có vai trò tạo nên một network, hơn nữa thường là internal network, vì vậy IP address chúng sử dụng thường là internal IP. Khi device trong internal network giao tiếp với device bên ngoài internal network, cần sử dụng NAT protocol.
 
 MAC address thường gặp của Ethernet là EUI-48 có 6 byte (48 bit). IEEE phân bổ các address block có kích thước khác nhau như MA-L, MA-M, MA-S, để vendor tiếp tục phân bổ globally administered address; ngoài ra còn có locally administered address, không cần IEEE phân bổ toàn cầu. OS có thể sửa đổi hoặc randomize MAC address, vì vậy address không bảo đảm bất biến vĩnh viễn, và trong các network khác nhau cũng có thể xuất hiện address giống nhau.
 
-Cuối cùng, hãy nhớ MAC address có một address đặc biệt: FF-FF-FF-FF-FF-FF (address toàn 1), address này biểu thị broadcast address.
+Cuối cùng, hãy nhớ MAC address có một address đặc biệt: FF-FF-FF-FF-FF-FF (địa chỉ gồm toàn bit 1), address này biểu thị broadcast address.
 
 ### ⭐️ ARP protocol giải quyết vấn đề gì?
 
-ARP protocol, có tên đầy đủ là **Address Resolution Protocol**, giải quyết vấn đề chuyển đổi giữa network layer address và link layer address. Vì trong quá trình IP datagram được truyền đi về mặt vật lý, luôn cần biết next hop (destination tiếp theo về mặt vật lý) phải đi đến đâu; nhưng IP address là logical address, còn MAC address mới là physical address. ARP protocol giải quyết một số vấn đề trong việc chuyển IP address thành MAC address.
+ARP protocol, có tên đầy đủ là **Address Resolution Protocol**, giải quyết vấn đề chuyển đổi giữa network layer address và link layer address. Vì khi IP datagram được truyền qua mạng, luôn cần biết next hop (destination tiếp theo trên đường truyền) phải đi đến đâu; nhưng IP address là logical address, còn MAC address mới là physical address. ARP protocol giải quyết một số vấn đề trong việc chuyển IP address thành MAC address.
 
 ### Nguyên lý hoạt động của ARP protocol?
 
@@ -351,12 +351,12 @@ ARP protocol, có tên đầy đủ là **Address Resolution Protocol**, giải 
 
 ## Gợi ý ôn tập
 
-Rất khuyến nghị mọi người đọc cuốn 《HTTP minh họa》. Cuốn sách này không dài nhưng nội dung rất đầy đủ; dù dùng để nắm hệ thống một số kiến thức về network hay chỉ đơn thuần để chuẩn bị cho phỏng vấn đều rất hữu ích. Một số bài viết dưới đây chỉ mang tính tham khảo. Khi học môn này vào năm hai đại học, giáo trình chúng tôi sử dụng là 《Computer Network phiên bản 7》 (do Xie Xiren biên soạn); không khuyến nghị mọi người đọc giáo trình này, sách rất dày và kiến thức thiên về lý thuyết, không chắc mọi người có thể bình tĩnh đọc hết.
+Rất khuyến khích bạn đọc cuốn 《HTTP minh họa》. Cuốn sách này không dài nhưng nội dung rất đầy đủ; dù dùng để nắm một cách có hệ thống một số kiến thức về network hay chỉ đơn thuần để chuẩn bị cho phỏng vấn đều rất hữu ích. Một số bài viết dưới đây chỉ mang tính tham khảo. Khi học môn này vào năm hai đại học, giáo trình chúng tôi sử dụng là 《Computer Network phiên bản 7》 (do Xie Xiren biên soạn); không khuyến nghị bạn đọc giáo trình này, sách rất dày và kiến thức thiên về lý thuyết, không chắc bạn có thể bình tĩnh đọc hết.
 
 ## Tham khảo
 
 - 《HTTP minh họa》
-- 《Phương pháp tiếp cận từ trên xuống dưới về Computer Network》 (phiên bản 7)
+- 《Mạng máy tính: Phương pháp tiếp cận từ trên xuống》 (phiên bản 7)
 - Internet Protocol (IP) là gì?: <https://www.cloudflare.com/zh-cn/learning/network-layer/internet-protocol/>
 - Các phương pháp truyền source IP thật - Geektime: <https://time.geekbang.org/column/article/497864>
 - What Is NAT and What Are the Benefits of NAT Firewalls?: <https://community.fs.com/blog/what-is-nat-and-what-are-the-benefits-of-nat-firewalls.html>

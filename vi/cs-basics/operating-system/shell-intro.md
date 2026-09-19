@@ -17,7 +17,7 @@ Bài viết này sẽ tổng hợp ngắn gọn kiến thức cơ bản về l�
 
 ## Ghi chú về phiên bản
 
-**Các ví dụ trong bài viết áp dụng cho bash phiên bản 4.0+**. bash ở các phiên bản khác nhau có thể có khác biệt ở một số tính năng, đặc biệt là:
+**Các ví dụ trong bài viết áp dụng cho bash phiên bản 4.0+**. Các phiên bản bash khác nhau có thể có khác biệt ở một số tính năng, đặc biệt là:
 
 - **Array**: bash 2.0+ hỗ trợ, còn POSIX sh thuần (như dash) không hỗ trợ.
 - **Một số thao tác với string**: chẳng hạn `${var:offset:length}` có thể không được hỗ trợ ở các phiên bản cũ hơn.
@@ -35,13 +35,13 @@ echo $BASH_VERSION
 
 ### Tại sao cần học Shell?
 
-Khi học một thứ gì đó, phần lớn chúng ta đều hướng đến tính thực tiễn. Xét từ góc độ công việc, học Shell nhằm nâng cao hiệu suất làm việc, tăng output và giúp chúng ta hoàn thành nhiều việc hơn trong thời gian ngắn hơn.
+Khi học một thứ gì đó, phần lớn chúng ta đều hướng đến tính thực tiễn. Xét từ góc độ công việc, học Shell nhằm nâng cao hiệu suất, tăng output và giúp bạn hoàn thành nhiều việc hơn trong thời gian ngắn hơn.
 
-Nhiều người cho rằng lập trình Shell thuộc mảng kiến thức vận hành, nên để nhân viên vận hành thực hiện, còn backend developer như chúng ta không cần học. Tôi cho rằng cách nói này hoàn toàn sai. So với những người chuyên làm Linux operations, yêu cầu về mức độ thành thạo lập trình Shell của chúng ta thấp hơn, nhưng lập trình Shell vẫn là thứ chúng ta bắt buộc phải nắm được!
+Nhiều người cho rằng lập trình Shell thuộc mảng kiến thức vận hành, nên để nhân viên vận hành thực hiện, còn backend developer như bạn không cần học. Tôi cho rằng cách nói này hoàn toàn sai. So với những người chuyên làm Linux operations, yêu cầu về mức độ thành thạo lập trình Shell của bạn thấp hơn, nhưng lập trình Shell vẫn là thứ bạn bắt buộc phải nắm được!
 
 Hiện nay, các ngôn ngữ tự động hóa vận hành phổ biến nhất trên hệ thống Linux là Shell và Python.
 
-Giữa hai ngôn ngữ, Shell gần như là ngôn ngữ lập trình tự động hóa vận hành bắt buộc phải dùng trong các doanh nghiệp IT, đặc biệt không thể thiếu trong các khâu monitoring service, deploy nhanh nghiệp vụ, start/stop service, backup và xử lý dữ liệu, phân tích log trong công việc vận hành. Python phù hợp hơn với việc xử lý logic nghiệp vụ phức tạp, phát triển tool phần mềm vận hành phức tạp và thực hiện truy cập qua web. Shell là một command interpreter, dùng để diễn giải và thực thi các command và program do người dùng nhập. Đây là một cách tương tác đối thoại, trong đó command được phản hồi ngay sau khi nhập.
+Giữa hai ngôn ngữ, Shell gần như là ngôn ngữ lập trình tự động hóa vận hành bắt buộc phải dùng trong các doanh nghiệp IT, đặc biệt không thể thiếu trong monitoring service, triển khai nhanh các chức năng nghiệp vụ, start/stop service, backup và xử lý dữ liệu, phân tích log trong công việc vận hành. Python phù hợp hơn với việc xử lý logic nghiệp vụ phức tạp, phát triển tool vận hành phức tạp và truy cập qua web. Shell là một command interpreter, dùng để diễn giải và thực thi các command và program do người dùng nhập. Đây là hình thức tương tác đối thoại, trong đó command được phản hồi ngay sau khi nhập.
 
 Ngoài ra, hiểu về lập trình Shell cũng là yêu cầu tuyển dụng backend developer của phần lớn các công ty Internet. Hình dưới đây là một số yêu cầu về lập trình Shell của các công ty Internet nổi tiếng mà tôi đã chụp lại.
 
@@ -49,7 +49,7 @@ Ngoài ra, hiểu về lập trình Shell cũng là yêu cầu tuyển dụng ba
 
 ### Shell là gì?
 
-**Shell là command interpreter của hệ thống Linux/Unix**, đóng vai trò cầu nối giữa người dùng và kernel của operating system, chịu trách nhiệm nhận command người dùng nhập vào và gọi program tương ứng.
+**Shell là command interpreter của hệ thống Linux/Unix**, đóng vai trò cầu nối giữa người dùng và kernel của hệ điều hành, chịu trách nhiệm nhận command người dùng nhập vào và gọi program tương ứng.
 
 **Lập trình Shell** là quá trình dùng Shell interpreter (như bash) để kết hợp command, control structure (if/for/while), variable và function thành script tự động hóa. Shell vừa là command interpreter, vừa là một programming language hoàn chỉnh (hỗ trợ variable, array, function, flow control, pipe, redirection, v.v.).
 
@@ -63,26 +63,26 @@ Ngoài ra, hiểu về lập trình Shell cũng là yêu cầu tuyển dụng ba
 
 ### Hello World trong lập trình Shell
 
-Việc đầu tiên khi học bất kỳ programming language nào là output HelloWorld! Sau đây tôi sẽ trình bày cách output Hello World trong lập trình Shell, từ tạo file mới đến viết code Shell.
+Việc đầu tiên khi học bất kỳ programming language nào là output Hello World. Sau đây tôi sẽ trình bày cách output Hello World trong lập trình Shell, từ tạo file mới đến viết code Shell.
 
-（1）Tạo file mới `helloworld.sh`: `touch helloworld.sh`, phần mở rộng là sh (sh là viết tắt của Shell) (phần mở rộng không ảnh hưởng đến việc thực thi script, chỉ cần dễ hiểu theo tên là được; nếu bạn dùng php để viết Shell script thì dùng phần mở rộng php cũng được).
+(1) Tạo file mới `helloworld.sh`: `touch helloworld.sh`, phần mở rộng là sh (sh là viết tắt của Shell) (phần mở rộng không ảnh hưởng đến việc thực thi script, chỉ cần dễ hiểu theo tên là được; nếu bạn dùng php để viết Shell script thì dùng phần mở rộng php cũng được).
 
-（2）Cấp quyền thực thi cho script: `chmod +x helloworld.sh`
+(2) Cấp quyền thực thi cho script: `chmod +x helloworld.sh`
 
-（3）Dùng command vim để sửa file helloworld.sh: `vim helloworld.sh` (vim file ------> vào file -----> command mode ------> nhấn i để vào edit mode -----> sửa file -------> nhấn Esc để vào bottom-line mode -----> nhập `:wq/q!` (nhập wq nghĩa là ghi nội dung và thoát, tức là lưu; nhập q! nghĩa là thoát cưỡng chế mà không lưu)).
+(3) Dùng command vim để sửa file helloworld.sh: `vim helloworld.sh` (vim file ------> vào file -----> command mode ------> nhấn i để vào edit mode -----> sửa file -------> nhấn Esc để vào bottom-line mode -----> nhập `:wq/q!` (nhập wq nghĩa là ghi nội dung và thoát, tức là lưu; nhập q! nghĩa là thoát cưỡng chế mà không lưu)).
 
 Nội dung helloworld.sh như sau:
 
 ```shell
 #!/bin/bash
-set -euo pipefail  # Strict mode: thoát khi gặp lỗi, báo lỗi khi variable chưa định nghĩa, báo lỗi khi pipe thất bại
-# Chương trình Shell đầu tiên, echo là command output trong Linux
+set -euo pipefail  # Strict mode: thoát khi gặp lỗi, báo lỗi khi variable chưa định nghĩa, báo lỗi khi pipeline thất bại
+# Chương trình Shell đầu tiên, echo là command dùng để output trong Linux
 echo "helloworld!"
 ```
 
-Trong Shell, ký hiệu `#` biểu thị comment. **Dòng đầu tiên của Shell khá đặc biệt, thường bắt đầu bằng `#!` để chỉ định loại Shell được sử dụng. Ngoài bash Shell, Linux còn có nhiều phiên bản Shell khác như zsh, dash, v.v... Tuy nhiên bash Shell vẫn là loại được chúng ta sử dụng nhiều nhất.**
+Trong Shell, ký hiệu `#` biểu thị comment. **Dòng đầu tiên của Shell khá đặc biệt, thường bắt đầu bằng `#!` để chỉ định loại Shell được sử dụng. Ngoài bash Shell, Linux còn có nhiều loại Shell khác như zsh, dash, v.v... Tuy nhiên bash Shell vẫn là loại được sử dụng nhiều nhất.**
 
-（4）Chạy script: `./helloworld.sh`. (Lưu ý, nhất định phải viết là `./helloworld.sh`, không phải `helloworld.sh`. Việc chạy các binary program khác cũng tương tự. Nếu viết trực tiếp `helloworld.sh`, hệ thống Linux sẽ tìm trong PATH xem có file tên helloworld.sh hay không; trong PATH chỉ có `/bin`, `/sbin`, `/usr/bin`, `/usr/sbin`, v.v., còn thư mục hiện tại thường không nằm trong PATH. Vì vậy phải viết `./helloworld.sh` để nói cho hệ thống biết hãy tìm trong thư mục hiện tại.)
+(4) Chạy script: `./helloworld.sh`. (Lưu ý, nhất định phải viết là `./helloworld.sh`, không phải `helloworld.sh`. Việc chạy các binary program khác cũng tương tự. Nếu viết trực tiếp `helloworld.sh`, hệ thống Linux sẽ tìm trong PATH xem có file tên helloworld.sh hay không; trong PATH chỉ có `/bin`, `/sbin`, `/usr/bin`, `/usr/sbin`, v.v., còn thư mục hiện tại thường không nằm trong PATH. Vì vậy phải viết `./helloworld.sh` để nói cho hệ thống biết hãy tìm trong thư mục hiện tại.)
 
 ![Hello World trong lập trình Shell](https://oss.javaguide.cn/github/javaguide/cs-basics/shell/55296212.jpg)
 
@@ -133,7 +133,7 @@ echo  "helloworld!"
 
 ### Nhập môn string trong Shell
 
-String là data type thường dùng và hữu ích nhất trong lập trình Shell (ngoài number và string ra thì cũng không có type nào khác thực sự tiện dụng), string có thể dùng single quote hoặc double quote. Điểm này khác với Java.
+String là data type thường dùng và hữu ích nhất trong lập trình Shell (ngoài number và string ra thì Shell cũng không có type nào khác thực sự tiện dụng), string có thể dùng single quote hoặc double quote. Điểm này khác với Java.
 
 Trong single quote, mọi special character (như `$`, backtick, `\`, v.v.) đều mất ý nghĩa đặc biệt và được xem là literal.
 
@@ -145,7 +145,7 @@ Trong double quote, các character sau vẫn giữ ý nghĩa đặc biệt:
 - `!`: history expansion (mặc định chỉ bật trong interactive Shell)
 - `${}`: parameter expansion
 
-**Lưu ý**: string trong single quote là **literal hoàn toàn**, còn string trong double quote sẽ thực hiện variable substitution và command substitution.
+**Lưu ý**: string trong single quote là **literal hoàn toàn**, còn string trong double quote sẽ thực hiện variable expansion và command substitution.
 
 **String dùng single quote:**
 
@@ -245,7 +245,7 @@ expr 5 \* 6      # output 30 (escape đúng)
 Cắt string đơn giản:
 
 ```shell
-# Cắt 10 character từ character thứ 0 của string về sau (index bắt đầu từ 0)
+# Cắt 10 character từ character thứ 0 trở đi (index bắt đầu từ 0)
 str="SnailClimb is a great man"
 echo ${str:0:10} #output:SnailClimb
 ```
@@ -257,10 +257,10 @@ Cắt theo expression:
 # author: amau
 
 var="https://www.runoob.com/linux/linux-shell-variable.html"
-# % biểu thị xóa kết quả match từ cuối, kết quả ngắn nhất
-# %% biểu thị xóa kết quả match từ cuối, kết quả match dài nhất
-# # biểu thị xóa kết quả match từ đầu, kết quả ngắn nhất
-# ## biểu thị xóa kết quả match từ đầu, kết quả match dài nhất
+# % biểu thị xóa phần match từ cuối, kết quả ngắn nhất
+# %% biểu thị xóa phần match từ cuối, kết quả match dài nhất
+# # biểu thị xóa phần match từ đầu, kết quả ngắn nhất
+# ## biểu thị xóa phần match từ đầu, kết quả match dài nhất
 # Lưu ý: * là wildcard, nghĩa là match bất kỳ số lượng character bất kỳ nào
 s1=${var%%t*} #h
 s2=${var%t*}  #https://www.runoob.com/linux/linux-shell-variable.h
@@ -295,7 +295,7 @@ unset array; # Xóa toàn bộ phần tử trong array
 for i in "${array[@]}"; do echo "$i"; done # Duyệt array, array rỗng nên không có output
 ```
 
-**Giải thích quan trọng: khoảng trống trong index của array**:
+**Lưu ý quan trọng: lỗ hổng index của array**:
 
 Sau khi dùng `unset array[1]` để xóa phần tử, array sẽ xuất hiện **khoảng trống trong index**:
 
@@ -405,7 +405,7 @@ B
 
 | **Operator** | **Giải thích** | **Ví dụ**                                                       |
 | ------------ | -------------- | --------------------------------------------------------------- |
-| **&&**       | **AND** logic  | `[[ $a -lt 100 && $b -gt 100 ]]` (chỉ true khi tất cả đều true) |
+| **&&**       | **AND** logic  | `[[ $a -lt 100 && $b -gt 100 ]]` (chỉ true khi cả hai đều true) |
 | **\|\|**     | **OR** logic   | `[[ $a -lt 100 \|\| $b -gt 100 ]]` (chỉ cần một true là true)   |
 
 **Phép logic trong arithmetic expansion**:
@@ -419,7 +419,7 @@ echo $a;
 
 **Thực thi command short-circuit (thường dùng trong production)**:
 
-Trong automation vận hành và pipeline CI/CD, thường dùng `&&` và `||` để điều khiển flow thực thi của command chain. Cách này gọi là **thực thi short-circuit**:
+Trong automation vận hành và pipeline CI/CD, thường dùng `&&` và `||` để điều khiển luồng thực thi của chuỗi command. Cách này gọi là **thực thi short-circuit**:
 
 ```shell
 #!/bin/bash
@@ -690,14 +690,14 @@ echo "Tổng của hai number đã nhập là $result"
 
 **Giải thích quan trọng**:
 
-- **Keyword `local`**: giới hạn variable trong function scope, tránh làm nhiễm global namespace.
+- **Keyword `local`**: giới hạn variable trong function scope, tránh làm ô nhiễm global namespace.
 - **`read -r`**: option `-r` tắt escape backslash, tăng tính an toàn.
-- **Return value của function**: `return` thiết lập exit status từ 0-255, không phù hợp để truyền calculation result. Khi cần truyền data, có thể dùng standard output hoặc variable.
+- **Return value của function**: `return` thiết lập exit status từ 0-255, không phù hợp để truyền kết quả tính toán. Khi cần truyền data, có thể dùng standard output hoặc variable.
 
 **Tại sao dùng local?**
 
 - Trong script phức tạp hoặc khi import nhiều external script, non-local variable có thể bị ghi đè ngoài ý muốn.
-- Global variable pollution có thể dẫn đến configuration drift hoặc logic privilege escalation khó truy vết.
+- Global variable pollution có thể dẫn đến configuration drift hoặc vượt quyền do logic, khó truy vết.
 - Dùng `local` là best practice của functional programming, tương tự khái niệm local variable trong các programming language khác.
 
 Kết quả output:
@@ -750,7 +750,7 @@ Tất cả parameter là 1 2 3 4 5 6 7 8 9 34 73
 
 **Khác biệt cốt lõi giữa `$*` và `$@`**:
 
-| Expression | Không được quote              | Được bọc bằng double quote                                         |
+| Expression | Không đặt trong quote         | Được bọc bằng double quote                                         |
 | ---------- | ----------------------------- | ------------------------------------------------------------------ |
 | `$*`       | Expand thành tất cả parameter | Expand thành **một string duy nhất** (gộp tất cả parameter)        |
 | `$@`       | Expand thành tất cả parameter | Expand thành **các parameter độc lập** (mỗi parameter giữ độc lập) |
@@ -826,12 +826,12 @@ set -euo pipefail
 
 **Hai cách viết Shebang**:
 
-- `#!/bin/bash`: chỉ định trực tiếp path của bash, phù hợp với environment cố định khi bạn biết vị trí bash.
+- `#!/bin/bash`: chỉ định trực tiếp path của bash, phù hợp với môi trường cố định khi bạn biết vị trí bash.
 - `#!/usr/bin/env bash`: tìm bash qua env, portable hơn, phù hợp với các system khác nhau (như macOS / Linux).
 
 **Lựa chọn trong bài viết này**:
 
-- Ví dụ tutorial dùng `#!/bin/bash`: ngắn gọn, rõ ràng, phù hợp để beginner hiểu.
+- Ví dụ tutorial dùng `#!/bin/bash`: ngắn gọn, rõ ràng, phù hợp để người mới hiểu.
 - Ví dụ production dùng `#!/usr/bin/env bash`: nhấn mạnh tính portable.
 
 **2. Quote variable**:
@@ -857,7 +857,7 @@ shellcheck your_script.sh  # static analysis, phát hiện vấn đề thường
 
 ### Nguyên lý hoạt động của pipefail
 
-Theo mặc định, return value của pipe command chỉ phụ thuộc vào command cuối cùng. Sau khi bật `pipefail`, return value của pipe sẽ là return value của command thất bại cuối cùng, giúp tránh bỏ sót lỗi ở các bước giữa.
+Theo mặc định, return value của pipeline chỉ phụ thuộc vào command cuối cùng. Sau khi bật `pipefail`, return value của pipeline sẽ là return value của command thất bại cuối cùng, giúp tránh bỏ sót lỗi ở các bước giữa.
 
 **So sánh qua ví dụ**:
 
@@ -874,13 +874,13 @@ cat huge_file.txt | grep "pattern" | head -n 10
 
 ## Trước khi đưa Shell script vào production
 
-Viết đúng syntax cơ bản mới chỉ là bước đầu. Sau khi script đi vào scheduled task, deployment flow hoặc machine production, còn phải xử lý việc thoát khi thất bại, file tạm, network timeout và exit code của background task. Dưới đây là một số ví dụ hoàn chỉnh.
+Viết đúng syntax cơ bản mới chỉ là bước đầu. Sau khi script đi vào task định kỳ, deployment flow hoặc máy production, còn phải xử lý việc thoát khi thất bại, file tạm, network timeout và exit code của background task. Dưới đây là một số ví dụ hoàn chỉnh.
 
 Hành vi của `set -u` và `set -o pipefail` tương đối rõ ràng; `set -e` có nhiều exception hơn, hành vi trong conditional, function, sub Shell và command substitution đều có thể gây bất ngờ. Có thể xem `set -euo pipefail` là điểm khởi đầu cho script mới, nhưng không thể dùng nó thay cho việc xử lý error tường minh bằng `if ! command; then ... fi`. Việc expand variable vẫn nên thêm double quote tùy tình huống, còn variable bên trong function nên dùng `local` để giới hạn scope.
 
 ### Đặt tổng budget cho network request
 
-Một request cần đồng thời giới hạn cả giai đoạn connect và toàn bộ thời gian truyền. Retry chỉ nên đặt ở một layer: nếu đồng thời bật vòng lặp bên ngoài và `curl --retry`, số request thực tế sẽ nhân lên, tổng thời gian cũng rất khó ước lượng. Function dưới đây do bên ngoài thống nhất kiểm soát số lần thử, đồng thời thêm delay ngẫu nhiên dạng integer từ 0 đến 2 giây sau mỗi lần thất bại:
+Một request cần đồng thời giới hạn cả giai đoạn connect và toàn bộ thời gian truyền. Retry chỉ nên đặt ở một layer: nếu đồng thời bật vòng lặp bên ngoài và `curl --retry`, số request thực tế sẽ nhân lên, tổng thời gian cũng rất khó ước lượng. Function dưới đây tập trung kiểm soát số lần thử ở vòng lặp bên ngoài, đồng thời thêm delay ngẫu nhiên dạng integer từ 0 đến 2 giây sau mỗi lần thất bại:
 
 ```shell
 #!/usr/bin/env bash
@@ -934,7 +934,7 @@ retry_request "$1" || {
 
 Script thực tế còn phải căn cứ vào ngữ nghĩa của API để quyết định error nào có thể retry. Non-idempotent write request, authentication failure và parameter error thường không nên replay trực tiếp.
 
-### File tạm và lock loại trừ lẫn nhau
+### File tạm và lock mutex
 
 Không dùng các path dễ đoán như `/tmp/data_$$`. `mktemp` sẽ tạo file hoặc directory một cách atomic; kết hợp với `trap`, nó có thể cleanup khi thoát bình thường và khi nhận các signal phổ biến:
 
@@ -968,7 +968,7 @@ flock -n 9 || {
 }
 ```
 
-`flock` là cooperative lock, process khác có thể chọn không tuân thủ. NFS client của Linux có thể mô phỏng nó thành whole-file `fcntl` lock, nhưng hành vi thực tế còn chịu ảnh hưởng của kernel client, server và các mount option như `local_lock`. Khi lock file nằm trên network file system, cần kiểm chứng bằng hai client độc lập trong environment deploy mục tiêu, không thể mặc định rằng nó chắc chắn có hiệu lực hoặc chắc chắn mất hiệu lực. Mutual exclusion giữa các machine cũng không thể chỉ viết một câu Redis `SET NX PX`: implementation còn phải xử lý unique token, conditional delete, lease renewal và failure model.
+`flock` là cooperative lock, process khác có thể chọn không tuân thủ. NFS client của Linux có thể mô phỏng nó thành whole-file `fcntl` lock, nhưng hành vi thực tế còn chịu ảnh hưởng của kernel client, server và các mount option như `local_lock`. Khi lock file nằm trên network file system, cần kiểm chứng bằng hai client độc lập trong environment deploy mục tiêu, không thể mặc định rằng nó chắc chắn có hiệu lực hoặc chắc chắn mất hiệu lực. Cơ chế mutual exclusion giữa các machine cũng không thể chỉ viết một câu Redis `SET NX PX`: implementation còn phải xử lý unique token, conditional delete, lease renewal và failure model.
 
 ### Thu thập exit code của background task
 
@@ -1001,7 +1001,7 @@ Viết trực tiếp `while wait -n; do ...; done` cũng chưa đầy đủ: khi
 
 Không redirect cả standard output và standard error của toàn bộ command vào `/dev/null` trong thời gian dài, nếu không khi thất bại sẽ chỉ còn exit code mà không có thông tin chẩn đoán. Chỉ suppress output mà bạn chắc chắn không cần, còn error message hãy ghi vào log hoặc giữ trong standard error. Khi script phụ thuộc vào external command như `curl`, `jq`, v.v., hãy dùng `command -v` để kiểm tra ngay ở giai đoạn khởi động; khi pipe cần nhận biết lỗi của command ở giữa, hãy bật `set -o pipefail`.
 
-### Xác minh trước khi go-live
+### Xác minh trước khi đưa vào production
 
 Nội dung xác minh cần bám sát dependency thực tế của script. Network script tối thiểu phải bao phủ connect failure, timeout và HTTP status không thể retry; concurrent script kiểm tra exit code của từng subprocess; script tạo resource tạm còn phải xác minh việc cleanup hoàn tất sau khi thoát bình thường và sau khi bị signal interrupt. Các command fault injection sẽ sửa firewall, system time hoặc mount state, không phù hợp làm ví dụ chung có thể copy trực tiếp; nên thiết kế riêng trong test environment cô lập theo infrastructure thực tế.
 
@@ -1023,7 +1023,7 @@ Shell phù hợp để nối các command có sẵn thành flow automation nhỏ
 
 ### Gợi ý học tập
 
-Bắt đầu với các task ngắn như filter log, đổi tên file hàng loạt và thống kê file. Sau khi viết xong, trước hết dùng `bash -n` để kiểm tra syntax, sau đó dùng ShellCheck để tìm các vấn đề thường gặp như variable chưa quote, redirect sai, v.v. Sau khi script bắt đầu quản lý background process hoặc system service, hãy tiếp tục học signal, job control, `sed`, `awk` và `grep`. Khi script dài hơn vài trăm dòng, cần data structure phức tạp hoặc exception recovery, các ngôn ngữ đa dụng như Python thường dễ maintain hơn.
+Bắt đầu với các task ngắn như lọc log, đổi tên file hàng loạt và thống kê file. Sau khi viết xong, trước hết dùng `bash -n` để kiểm tra syntax, sau đó dùng ShellCheck để tìm các vấn đề thường gặp như variable chưa quote, redirect sai, v.v. Sau khi script bắt đầu quản lý background process hoặc system service, hãy tiếp tục học signal, job control, `sed`, `awk` và `grep`. Khi script dài hơn vài trăm dòng, cần data structure phức tạp hoặc exception recovery, các ngôn ngữ đa dụng như Python thường dễ bảo trì hơn.
 
 ### Tài nguyên tham khảo
 
