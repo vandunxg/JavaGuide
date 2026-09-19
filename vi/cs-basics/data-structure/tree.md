@@ -1,6 +1,6 @@
 ---
 title: "Giải thích chi tiết về tree structure (binary tree, AVL, B/B+ tree)"
-description: "Giải thích có hệ thống các khái niệm cốt lõi và phương pháp traversal của tree và binary tree, kết hợp các chỉ số như height/depth để củng cố nền tảng data structure và tư duy thuật toán."
+description: "Trình bày có hệ thống các khái niệm cốt lõi và phương pháp traversal của tree và binary tree, kết hợp các chỉ số như height/depth để củng cố nền tảng data structure và tư duy thuật toán."
 category: Computer Science Basics
 tag:
   - Data Structure
@@ -10,11 +10,11 @@ head:
       content: tree,binary tree,binary search tree,balanced tree,traversal,preorder,inorder,postorder,level-order,height,depth
 ---
 
-Tree là một data structure giống với tree trong đời sống (tree bị đảo ngược). Mọi tree không rỗng chỉ có một root node.
+Tree là một data structure giống cây trong đời sống, nhưng bị đảo ngược. Mọi tree không rỗng chỉ có một root node.
 
 Một tree có các đặc điểm sau:
 
-1. Hai node bất kỳ trong một tree được nối với nhau bằng duy nhất một path.
+1. Hai node bất kỳ trong một tree được nối với nhau bằng đúng một path.
 2. Nếu một tree có n node thì chắc chắn có đúng n-1 edge.
 3. Một tree không chứa cycle.
 
@@ -26,9 +26,9 @@ Như hình trên, hãy giải thích một số khái niệm thường dùng tro
 
 - **Node**: Mỗi phần tử trong tree đều có thể gọi chung là node.
 - **Root node**: Node ở tầng cao nhất, hay node không có parent node. Trong hình trên, node A là root node.
-- **Parent node**: Nếu một node chứa child node thì node đó được gọi là parent node của child node. Trong hình trên, node B là parent node của node D và node E.
-- **Child node**: Root node của một subtree mà một node chứa được gọi là child node của node đó. Trong hình trên, node D và node E là child node của node B.
-- **Sibling node**: Các node có cùng parent node được gọi là sibling node của nhau. Trong hình trên, parent node chung của node D và node E là node B, nên D và E là sibling node.
+- **Parent node**: Nếu một node có child node thì node đó được gọi là parent node của child node. Trong hình trên, node B là parent node của node D và node E.
+- **Child node**: Root node của subtree do một node chứa được gọi là child node của node đó. Trong hình trên, node D và node E là child node của node B.
+- **Sibling node**: Các node có cùng parent node được gọi là sibling node. Trong hình trên, parent node chung của node D và node E là node B, nên D và E là sibling node.
 - **Leaf node**: Node không có child node. Trong hình trên, D, F, H, I đều là leaf node.
 - **Height của node**: Số edge trong path dài nhất từ node đó đến leaf node.
 - **Depth của node**: Số edge trong path từ root node đến node đó.
@@ -39,11 +39,11 @@ Như hình trên, hãy giải thích một số khái niệm thường dùng tro
 
 ## Phân loại binary tree
 
-**Binary tree** là một tree structure mà mỗi node có nhiều nhất hai branch (tức không có node nào có branch degree lớn hơn 2).
+**Binary tree** là một tree structure mà mỗi node có nhiều nhất hai branch (tức không có node nào có degree lớn hơn 2).
 
 Các branch của **binary tree** thường được gọi là “**left subtree**” hoặc “**right subtree**”. Ngoài ra, các branch của **binary tree** có thứ tự trái phải và không thể tùy ý đảo ngược.
 
-Tầng thứ i của **binary tree** có nhiều nhất `2^(i-1)` node. Theo định nghĩa “depth của root node bằng 0” trong bài viết này, binary tree có depth bằng k có nhiều nhất `2^(k+1)-1` node (trường hợp là full binary tree), và ít nhất `k+1` node (trường hợp suy biến thành một chain). Về định nghĩa depth của node, các tài liệu trong nước có những quy ước khác nhau; bài viết này sử dụng [định nghĩa depth của node](<https://zh.wikipedia.org/wiki/%E6%A0%91_(%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84)#/%E6%9C%AF%E8%AF%AD>) của Wikipedia.
+Level thứ i của **binary tree** có nhiều nhất `2^(i-1)` node. Theo định nghĩa “depth của root node bằng 0” trong bài viết này, binary tree có depth bằng k có nhiều nhất `2^(k+1)-1` node (trường hợp là full binary tree), và ít nhất `k+1` node (trường hợp suy biến thành một chain). Về định nghĩa depth của node, các tài liệu trong nước có những quy ước khác nhau; bài viết này sử dụng [định nghĩa depth của node](<https://zh.wikipedia.org/wiki/%E6%A0%91_(%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84)#/%E6%9C%AF%E8%AF%AD>) của Wikipedia.
 
 ![Định nghĩa depth của node trên Wikipedia](https://oss.javaguide.cn/github/javaguide/image-20220119112736158.png)
 
@@ -55,22 +55,22 @@ Nếu số node ở mỗi level của một binary tree đều đạt mức tố
 
 ### Complete binary tree
 
-Nếu tất cả level ngoại trừ level cuối đều đầy, đồng thời level cuối đầy hoặc chỉ thiếu liên tiếp một số node ở bên phải, thì binary tree đó là **complete binary tree**.
+Nếu tất cả level ngoại trừ level cuối đều đầy, đồng thời level cuối đầy hoặc chỉ thiếu một số node liên tiếp ở bên phải, thì binary tree đó là **complete binary tree**.
 
 Bạn có thể hình dung một tree được mở rộng bắt đầu từ root node: chỉ sau khi mở rộng xong left child node mới bắt đầu mở rộng right child node; chỉ sau khi mở rộng xong một level mới tiếp tục mở rộng level tiếp theo. Hình dưới đây minh họa điều đó:
 
 ![Complete binary tree](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/complete-binary-tree.png)
 
-Complete binary tree có một tính chất rất hữu ích: **số thứ tự của parent node và child node có quan hệ tương ứng với nhau.**
+Complete binary tree có một tính chất rất hữu ích: **số thứ tự của parent node và child node có quan hệ tương ứng.**
 
-Có thể bạn đã nhận ra rằng khi giá trị của root node là 1, nếu số thứ tự của parent node là i thì số thứ tự của left child node là 2i, còn số thứ tự của right child node là 2i+1. Tính chất này giúp complete binary tree tiết kiệm đáng kể không gian khi lưu bằng array, đồng thời dùng số thứ tự để tìm parent node và child node của một node. Phần lưu trữ binary tree sẽ giới thiệu chi tiết hơn ở phía sau.
+Có thể bạn đã nhận ra rằng khi giá trị của root node là 1, nếu số thứ tự của parent node là i thì số thứ tự của left child node là 2i, còn số thứ tự của right child node là 2i+1. Tính chất này giúp complete binary tree tiết kiệm đáng kể không gian khi lưu bằng array, đồng thời dùng số thứ tự để tìm parent node và child node. Phần lưu trữ binary tree sẽ giới thiệu chi tiết hơn ở phía sau.
 
 ### AVL tree (height-balanced binary search tree)
 
-**AVL tree** là một binary search tree cân bằng theo height và có các tính chất sau:
+**AVL tree** là một binary search tree cân bằng về height và có các tính chất sau:
 
 1. Có thể là một empty tree.
-2. Nếu không rỗng, trị tuyệt đối của chênh lệch height giữa hai subtree trái và phải không vượt quá 1, đồng thời hai subtree trái và phải cũng đều là AVL tree.
+2. Nếu không rỗng, giá trị tuyệt đối của hiệu height giữa hai subtree trái và phải không vượt quá 1, đồng thời hai subtree trái và phải cũng đều là AVL tree.
 
 Red-black tree, scapegoat tree, weight-balanced tree và các tree khác cũng được dùng để tránh binary search tree bị suy biến nghiêm trọng, nhưng điều kiện balance của chúng không giống điều kiện “chênh lệch height giữa left subtree và right subtree không vượt quá 1” của AVL tree. Splay tree đạt được bảo đảm về amortized complexity thông qua việc điều chỉnh sau khi truy cập.
 
@@ -80,15 +80,15 @@ Trước khi giới thiệu balanced binary tree, hãy xem một tree:
 
 **Bạn gọi thứ này là tree à???**
 
-Đúng vậy, thứ này thực sự được gọi là tree, chỉ là tree này đã suy biến thành một linked list, và chúng ta gọi nó là **oblique tree**.
+Đúng vậy, thứ này thực sự được gọi là tree, chỉ là tree này đã suy biến thành một linked list, và nó được gọi là **oblique tree**.
 
 **Nếu vậy thì tại sao tôi không dùng linked list luôn?**
 
 Đúng là như vậy.
 
-Bản thân binary tree thông thường không bảo đảm việc query nhanh hơn linked list. Chỉ khi tận dụng tính có thứ tự của binary search tree hoặc các quan hệ index khác, tree structure mới có thể giúp **search** và **update** data hiệu quả hơn; binary search tree chưa được balance trong trường hợp xấu nhất vẫn suy biến thành `O(n)`.
+Bản thân binary tree thông thường không bảo đảm việc search nhanh hơn linked list. Chỉ khi tận dụng tính có thứ tự của binary search tree hoặc các quan hệ index khác, tree structure mới có thể giúp **search** và **update** data hiệu quả hơn; binary search tree chưa được balance trong trường hợp xấu nhất vẫn suy biến thành `O(n)`.
 
-Tuy nhiên, nếu binary search tree suy biến thành linked list thì lợi thế query do structure có thứ tự mang lại khó thể hiện, hiệu năng cũng giảm mạnh. AVL tree sử dụng điều kiện height balance chặt chẽ hơn để tránh tình trạng này: chênh lệch height giữa left subtree và right subtree của mỗi node nhiều nhất là 1, như hình dưới đây:
+Tuy nhiên, nếu binary search tree suy biến thành linked list thì lợi thế search do structure có thứ tự mang lại khó thể hiện, hiệu năng cũng giảm mạnh. AVL tree sử dụng điều kiện height balance chặt chẽ hơn để tránh tình trạng này: chênh lệch height giữa left subtree và right subtree của mỗi node nhiều nhất là 1, như hình dưới đây:
 
 ![Balanced binary tree](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/balanced-binary-tree.png)
 
@@ -98,13 +98,13 @@ Lưu trữ binary tree chủ yếu được chia thành **linked storage** và *
 
 ### Linked storage
 
-Tương tự linked list, linked storage của binary tree dùng pointer để nối các node lại với nhau và không cần vùng storage liên tục.
+Tương tự linked list, linked storage của binary tree dùng pointer để nối các node lại với nhau và không cần vùng bộ nhớ liên tục.
 
 Mỗi node gồm ba thuộc tính:
 
-- data. data không nhất thiết là một data đơn lẻ; tùy trường hợp, nó có thể là nhiều data thuộc các type khác nhau.
-- Pointer của left node left.
-- Pointer của right node right.
+- data. data không nhất thiết là một giá trị đơn; tùy trường hợp, nó có thể gồm nhiều data thuộc các type khác nhau.
+- Pointer của left node là left.
+- Pointer của right node là right.
 
 Nhưng JAVA không có pointer mà!
 
@@ -114,7 +114,7 @@ Vậy thì dùng reference đến object là được (đừng hỏi tôi tìm o
 
 ### Sequential storage
 
-Sequential storage là lưu trữ bằng array. Mỗi vị trí trong array chỉ lưu data của node, không lưu pointer của left child node và right child node; index của child node được xác định thông qua array index. Số thứ tự của root node là 1. Với mỗi node Node, giả sử node được lưu tại vị trí có array index là i thì left child node được lưu tại vị trí 2i, còn right child node được lưu tại vị trí có array index là 2i+1.
+Sequential storage là lưu trữ bằng array. Mỗi vị trí trong array chỉ lưu data của node, không lưu pointer của left child node và right child node; index của child node được xác định thông qua chỉ số của array. Số thứ tự của root node là 1. Với mỗi node Node, giả sử node được lưu tại vị trí có array index là i thì left child node được lưu tại vị trí 2i, còn right child node được lưu tại vị trí có array index là 2i+1.
 
 Sequential storage bằng array của một complete binary tree được minh họa như hình dưới đây:
 
@@ -132,7 +132,7 @@ Có thể thấy rằng nếu binary tree cần lưu không phải complete bina
 
 ![Preorder traversal](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/preorder-traversal.png)
 
-Preorder traversal của binary tree là output root node trước, sau đó traverse left subtree, cuối cùng traverse right subtree. Khi traverse left subtree và right subtree cũng tuân theo quy tắc preorder traversal, vì vậy có thể implement preorder traversal bằng recursion.
+Preorder traversal của binary tree là output root node trước, sau đó thực hiện traversal trên left subtree và cuối cùng là right subtree. Khi traverse left subtree và right subtree cũng tuân theo quy tắc preorder traversal, vì vậy có thể implement preorder traversal bằng recursion.
 
 Code như sau:
 
@@ -151,7 +151,7 @@ public void preOrder(TreeNode root){
 
 ![Inorder traversal](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/inorder-traversal.png)
 
-Inorder traversal của binary tree là đệ quy thực hiện inorder traversal của left subtree trước, sau đó output value của root node, rồi đệ quy thực hiện inorder traversal của right subtree. Bạn có thể hình dung việc dùng một bàn tay ép phẳng tree: parent node bị ép vào giữa left child node và right child node, như hình dưới đây:
+Inorder traversal của binary tree là việc đệ quy thực hiện inorder traversal của left subtree trước, sau đó output value của root node, rồi đệ quy thực hiện inorder traversal của right subtree. Bạn có thể hình dung việc dùng một bàn tay ép phẳng tree: parent node bị ép vào giữa left child node và right child node, như hình dưới đây:
 
 ![Inorder traversal của binary tree sau khi ép phẳng](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/inorder-traversal2.png)
 
@@ -172,7 +172,7 @@ public void inOrder(TreeNode root){
 
 ![Postorder traversal](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/postorder-traversal.png)
 
-Postorder traversal của binary tree là đệ quy thực hiện postorder traversal của left subtree trước, sau đó đệ quy thực hiện postorder traversal của right subtree, cuối cùng output value của root node.
+Postorder traversal của binary tree là việc đệ quy thực hiện postorder traversal của left subtree trước, sau đó đệ quy thực hiện postorder traversal của right subtree, cuối cùng output value của root node.
 
 Code như sau:
 
@@ -200,7 +200,7 @@ Trong phỏng vấn về tree structure, câu hỏi thường bắt đầu từ 
 | B tree             | Multi-way balanced search tree                                                 | Thân thiện với disk IO                                   |
 | B+ tree            | Data thường nằm ở leaf node, các leaf node được nối bằng linked list có thứ tự | MySQL index, range query                                 |
 
-Template traversal binary tree cần có thể tự viết:
+Cần tự viết được template traversal binary tree:
 
 ```java
 void dfs(TreeNode root) {
@@ -222,9 +222,9 @@ Các câu trả lời thường gặp về BST:
 - AVL tree balance chặt chẽ hơn red-black tree, query ổn định hơn; yêu cầu balance của red-black tree rộng hơn, chi phí điều chỉnh khi insert/delete thấp hơn.
 - B+ tree phù hợp với database index: mỗi node có thể lưu nhiều key hơn, height của tree thấp hơn, linked list có thứ tự ở leaf node phù hợp với range query.
 
-Có thể phân loại bài toán thuật toán binary tree trước dựa trên việc “current node đảm nhiệm vai trò gì trong recursion”:
+Có thể phân loại các bài toán thuật toán về binary tree dựa trên việc “current node đảm nhiệm vai trò gì trong recursion”:
 
-- Nhóm path: current node cần được thêm vào path, sau khi recursion kết thúc thì undo; thường gặp trong path từ root đến leaf và tổng path.
+- Nhóm path: current node cần được thêm vào path, sau khi recursion kết thúc thì undo; thường gặp trong path từ root đến leaf và path sum.
 - Nhóm thông tin subtree: left subtree và right subtree trả kết quả trước, current node sau đó merge chúng; thường gặp khi tính height, diameter và balanced binary tree.
 - Nhóm phân nhánh hội tụ: left subtree và right subtree lần lượt tìm target, current node xác định có phải điểm hội tụ hay không; thường gặp khi tìm lowest common ancestor.
 - Nhóm construction: xác định root node trước, sau đó chia interval của left subtree và right subtree; thường gặp khi xây dựng binary tree từ preorder + inorder.
@@ -260,7 +260,7 @@ List<List<Integer>> levelOrder(TreeNode root) {
 }
 ```
 
-Khi verify BST, không nên chỉ so sánh current node với left child và right child. Cách đúng là truyền upper bound và lower bound cho mỗi subtree:
+Khi verify BST, không nên chỉ so sánh current node với left child và right child. Cách đúng là truyền lower bound và upper bound cho mỗi subtree:
 
 ```java
 boolean isValidBST(TreeNode root) {
@@ -278,7 +278,7 @@ boolean check(TreeNode node, long lower, long upper) {
 }
 ```
 
-Lowest common ancestor (LCA) có thể dùng tư duy postorder: left subtree và right subtree tìm target node trước, current node sau đó dựa vào return value để xác định có hội tụ hay không.
+Lowest common ancestor (LCA) có thể xử lý theo tư duy postorder: left subtree và right subtree tìm target node trước, current node sau đó dựa vào return value để xác định có hội tụ hay không.
 
 ```java
 TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
@@ -296,7 +296,7 @@ TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
 
 Ý nghĩa của đoạn code này là: nếu `p` và `q` lần lượt xuất hiện trong left subtree và right subtree thì current node là lowest common ancestor; nếu chỉ xuất hiện ở một bên thì tiếp tục return kết quả của bên đó lên trên.
 
-Khi xây dựng binary tree từ preorder + inorder, phần tử đầu tiên của preorder array là root node; trong inorder array, phần bên trái root node là left subtree, phần bên phải là right subtree. Để tránh phải tìm root node trong array tuyến tính mỗi lần, thông thường trước tiên dùng hash table để ghi lại index trong inorder.
+Khi xây dựng binary tree từ preorder + inorder, phần tử đầu tiên của preorder array là root node; trong inorder array, phần bên trái root node là left subtree, phần bên phải là right subtree. Để tránh phải tìm root node bằng cách tìm tuyến tính trong array mỗi lần, thông thường trước tiên dùng hash table để ghi lại index trong inorder.
 
 ```java
 TreeNode buildTree(int[] preorder, int[] inorder) {
@@ -328,9 +328,9 @@ TreeNode build(
 }
 ```
 
-Điểm dễ sai nhất trong bài toán construction là boundary của interval. Bạn nên viết rõ ý nghĩa của `preLeft/preRight` và `inLeft/inRight` trước, sau đó dựa vào kích thước left subtree `leftSize` để chia preorder array.
+Điểm dễ sai nhất trong bài toán construction là boundary của các interval. Bạn nên viết rõ ý nghĩa của `preLeft/preRight` và `inLeft/inRight` trước, sau đó dựa vào kích thước left subtree `leftSize` để chia preorder array.
 
-## Minh họa quy trình và các boundary sample
+## Minh họa quy trình và các ví dụ boundary
 
 Với bài toán binary tree, trước tiên có thể xác định “current node cần làm gì”, rồi quyết định dùng preorder, inorder, postorder hay level-order.
 
@@ -341,11 +341,11 @@ Postorder: xử lý left subtree và right subtree trước, sau đó xử lý c
 Level-order: tiến hành theo từng level, phù hợp với minimum depth, thống kê theo level và serialization.
 ```
 
-Bạn nên tự viết và kiểm tra một số boundary sample trước:
+Trước khi tự viết, nên kiểm tra một số boundary case:
 
 - Empty tree: nhiều bài nên return empty list, `0` hoặc `true`.
-- Chỉ có một node: cả recursion exit và level-order queue đều phải xử lý được.
-- Linked list suy biến: depth của recursion có thể đạt `n`, không được viết nhầm complexity thành `O(logn)`.
+- Chỉ có một node: cả điểm thoát của recursion và level-order queue đều phải xử lý được.
+- Tree suy biến thành linked list: depth của recursion có thể đạt `n`, không được viết nhầm complexity thành `O(logn)`.
 - BST có `Integer.MIN_VALUE` / `Integer.MAX_VALUE`: nên dùng `long` cho upper bound và lower bound.
 - Trong LCA, một target node là ancestor của target node còn lại: khi gặp target node phải return current node ngay.
 - Khi xây dựng tree mà array rỗng: recursive interval sẽ trở thành `preLeft > preRight`, cần return `null`.

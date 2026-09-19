@@ -11,7 +11,7 @@ head:
       content: câu hỏi phỏng vấn SQL, truy vấn SELECT, điều kiện WHERE, sắp xếp ORDER BY, loại bỏ trùng lặp DISTINCT, phân trang LIMIT, SQL Basics
 ---
 
-> Nguồn câu hỏi: [Nowcoder - SQL cần biết và phải biết](https://www.nowcoder.com/exam/oj?page=1&tab=SQL%E7%AF%87&topicId=298)
+> Nguồn câu hỏi: [Nowcoder - SQL cần biết và thành thạo](https://www.nowcoder.com/exam/oj?page=1&tab=SQL%E7%AF%87&topicId=298)
 
 ## Truy xuất dữ liệu
 
@@ -59,7 +59,7 @@ SELECT DISTINCT prod_id
 FROM OrderItems
 ```
 
-Điểm cần biết: `DISTINCT` dùng để trả về các giá trị khác nhau duy nhất trong cột.
+Điểm cần biết: `DISTINCT` dùng để trả về các giá trị duy nhất trong cột.
 
 ### Truy xuất tất cả cột
 
@@ -135,7 +135,7 @@ FROM Orders
 ORDER BY cust_id,order_date DESC
 ```
 
-Điểm cần biết: khi `order by` sắp xếp theo nhiều cột, cột được sắp xếp trước đặt ở phía trước, cột được sắp xếp sau đặt ở phía sau. Các cột khác nhau có thể dùng quy tắc sắp xếp khác nhau.
+Điểm cần biết: khi `order by` sắp xếp theo nhiều cột, cột được ưu tiên sắp xếp trước đặt ở phía trước. Các cột khác nhau có thể dùng quy tắc sắp xếp khác nhau.
 
 ### Sắp xếp theo số lượng và giá
 
@@ -167,7 +167,7 @@ Có bảng `Vendors`:
 | Xiaolongkan |
 | Dalongyi    |
 
-Câu lệnh SQL dưới đây có vấn đề không? Hãy sửa để câu lệnh chạy đúng và trả về kết quả theo thứ tự ngược của `vend_name`.
+Câu lệnh SQL dưới đây có vấn đề không? Hãy sửa để câu lệnh chạy đúng và trả về kết quả theo thứ tự giảm dần của `vend_name`.
 
 ```sql
 SELECT vend_name,
@@ -275,7 +275,7 @@ ORDER BY prod_price
 
 ### Trả về nhiều sản phẩm hơn
 
-Bảng `OrderItems` có: mã đơn hàng `order_num`, số lượng sản phẩm `quantity`.
+Bảng `OrderItems` có mã đơn hàng `order_num` và số lượng sản phẩm `quantity`.
 
 | order_num | quantity |
 | --------- | -------- |
@@ -503,7 +503,7 @@ WHERE prod_desc LIKE '%toy%carrots%'
 
 ### Alias
 
-Một cách dùng phổ biến của alias là đổi tên cột của bảng trong kết quả truy xuất (để đáp ứng yêu cầu của báo cáo hoặc khách hàng). Có bảng `Vendors` đại diện cho thông tin nhà cung cấp, trong đó `vend_id` là id nhà cung cấp, `vend_name` là tên nhà cung cấp, `vend_address` là địa chỉ nhà cung cấp và `vend_city` là thành phố của nhà cung cấp.
+Một cách dùng phổ biến của alias là đổi tên cột trong kết quả truy vấn (để đáp ứng yêu cầu của báo cáo hoặc khách hàng). Có bảng `Vendors` đại diện cho thông tin nhà cung cấp, trong đó `vend_id` là id nhà cung cấp, `vend_name` là tên nhà cung cấp, `vend_address` là địa chỉ nhà cung cấp và `vend_city` là thành phố của nhà cung cấp.
 
 | vend_id | vend_name     | vend_address | vend_city |
 | ------- | ------------- | ------------ | --------- |
@@ -528,7 +528,7 @@ ORDER BY vname
 
 ### Giảm giá
 
-Cửa hàng mẫu của chúng ta đang có chương trình giảm giá, tất cả sản phẩm đều giảm 10%. Bảng `Products` chứa id sản phẩm `prod_id` và giá sản phẩm `prod_price`.
+Cửa hàng mẫu đang có chương trình giảm giá, tất cả sản phẩm đều giảm 10%. Bảng `Products` chứa id sản phẩm `prod_id` và giá sản phẩm `prod_price`.
 
 【Bài toán】Viết câu lệnh SQL để trả về `prod_id`, `prod_price` và `sale_price` từ bảng `Products`. `sale_price` là một calculated field chứa giá khuyến mãi. Gợi ý: có thể nhân với 0.9 để nhận 90% giá gốc (tức giảm 10%).
 
@@ -559,7 +559,7 @@ Cho bảng `Customers` như sau:
 | a6      | Lee Chen  | Lee Chen     | Oak Park  |
 | a7      | Hex Liu   | Hex Liu      | Oak Park  |
 
-【Bài toán】Viết câu lệnh SQL để trả về ID khách hàng (`cust_id`), tên khách hàng (`cust_name`) và tên đăng nhập (`user_login`), trong đó tên đăng nhập toàn bộ là chữ in hoa và được tạo từ hai ký tự đầu của người liên hệ khách hàng (`cust_contact`) cùng ba ký tự đầu của thành phố (`cust_city`). Gợi ý: cần dùng function, phép nối chuỗi và alias.
+【Bài toán】Viết câu lệnh SQL để trả về ID khách hàng (`cust_id`), tên khách hàng (`cust_name`) và tên đăng nhập (`user_login`), trong đó tên đăng nhập toàn bộ là chữ in hoa và được tạo từ hai ký tự đầu trong thông tin liên hệ của khách hàng (`cust_contact`) cùng ba ký tự đầu của thành phố (`cust_city`). Gợi ý: cần dùng function, phép nối chuỗi và alias.
 
 Đáp án:
 
@@ -614,24 +614,24 @@ ORDER BY order_date
 
 Các function thường dùng để xử lý ngày và thời gian:
 
-| Function        | Mô tả                                       |
-| --------------- | ------------------------------------------- |
-| `ADDDATE()`     | Thêm một ngày (ngày, tuần, v.v.)            |
-| `ADDTIME()`     | Thêm một khoảng thời gian (giờ, phút, v.v.) |
-| `CURDATE()`     | Trả về ngày hiện tại                        |
-| `CURTIME()`     | Trả về thời gian hiện tại                   |
-| `DATE()`        | Trả về phần ngày của datetime               |
-| `DATEDIFF`      | Tính chênh lệch giữa hai ngày               |
-| `DATE_FORMAT()` | Trả về chuỗi ngày hoặc thời gian đã format  |
-| `DAY()`         | Trả về phần ngày trong một ngày             |
-| `DAYOFWEEK()`   | Trả về thứ tương ứng với một ngày           |
-| `HOUR()`        | Trả về phần giờ của một thời gian           |
-| `MINUTE()`      | Trả về phần phút của một thời gian          |
-| `MONTH()`       | Trả về phần tháng của một ngày              |
-| `NOW()`         | Trả về ngày và thời gian hiện tại           |
-| `SECOND()`      | Trả về phần giây của một thời gian          |
-| `TIME()`        | Trả về phần thời gian của datetime          |
-| `YEAR()`        | Trả về phần năm của một ngày                |
+| Function        | Mô tả                                             |
+| --------------- | ------------------------------------------------- |
+| `ADDDATE()`     | Cộng thêm một khoảng thời gian (ngày, tuần, v.v.) |
+| `ADDTIME()`     | Thêm một khoảng thời gian (giờ, phút, v.v.)       |
+| `CURDATE()`     | Trả về ngày hiện tại                              |
+| `CURTIME()`     | Trả về thời gian hiện tại                         |
+| `DATE()`        | Trả về phần ngày của datetime                     |
+| `DATEDIFF`      | Tính chênh lệch giữa hai ngày                     |
+| `DATE_FORMAT()` | Trả về chuỗi ngày hoặc thời gian đã format        |
+| `DAY()`         | Trả về phần ngày trong một ngày                   |
+| `DAYOFWEEK()`   | Trả về thứ trong tuần tương ứng với một ngày      |
+| `HOUR()`        | Trả về phần giờ của một thời gian                 |
+| `MINUTE()`      | Trả về phần phút của một thời gian                |
+| `MONTH()`       | Trả về phần tháng của một ngày                    |
+| `NOW()`         | Trả về ngày và thời gian hiện tại                 |
+| `SECOND()`      | Trả về phần giây của một thời gian                |
+| `TIME()`        | Trả về phần thời gian của datetime                |
+| `YEAR()`        | Trả về phần năm của một ngày                      |
 
 ## Tổng hợp dữ liệu
 
@@ -669,7 +669,7 @@ FROM OrderItems
 
 ### Xác định tổng số sản phẩm BR01 đã bán
 
-Bảng `OrderItems` đại diện cho các sản phẩm đã bán, `quantity` đại diện cho số lượng sản phẩm đã bán và `prod_id` là sản phẩm.
+Bảng `OrderItems` đại diện cho các sản phẩm đã bán, `quantity` đại diện cho số lượng sản phẩm đã bán và `prod_id` là ID sản phẩm.
 
 | quantity | prod_id |
 | -------- | ------- |
@@ -716,11 +716,11 @@ WHERE prod_price <= 10
 - `GROUP BY` trả về một bản ghi cho mỗi nhóm.
 - `GROUP BY` thường đi kèm các aggregate function như `COUNT`, `MAX`, `SUM`, `AVG`.
 - `GROUP BY` có thể nhóm theo một hoặc nhiều cột.
-- `GROUP BY` sắp xếp theo trường nhóm, sau đó `ORDER BY` có thể sắp xếp theo trường tổng hợp.
+- Sau khi `GROUP BY` theo trường nhóm, `ORDER BY` có thể sắp xếp theo trường tổng hợp.
 
 `HAVING`:
 
-- `HAVING` dùng để lọc kết quả `GROUP BY` đã tổng hợp.
+- `HAVING` dùng để lọc kết quả đã tổng hợp của `GROUP BY`.
 - `HAVING` phải được dùng cùng `GROUP BY`.
 - `WHERE` và `HAVING` có thể cùng xuất hiện trong một query.
 
@@ -783,7 +783,7 @@ ORDER BY cheapest_item
 
 ### Trả về mã của tất cả đơn hàng có tổng số lượng không nhỏ hơn 100
 
-`OrderItems` đại diện cho bảng sản phẩm đơn hàng, bao gồm mã đơn hàng `order_num` và số lượng đơn hàng `quantity`.
+`OrderItems` đại diện cho bảng sản phẩm đơn hàng, bao gồm mã đơn hàng `order_num` và số lượng sản phẩm `quantity`.
 
 | order_num | quantity |
 | --------- | -------- |
@@ -795,7 +795,7 @@ ORDER BY cheapest_item
 | a2        | 19       |
 | a7        | 5        |
 
-【Bài toán】Viết câu lệnh SQL để trả về tất cả mã đơn hàng có tổng số lượng đơn hàng không nhỏ hơn 100, cuối cùng sắp xếp kết quả tăng dần theo mã đơn hàng.
+【Bài toán】Viết câu lệnh SQL để trả về tất cả mã đơn hàng có tổng số lượng sản phẩm không nhỏ hơn 100, cuối cùng sắp xếp kết quả tăng dần theo mã đơn hàng.
 
 Đáp án:
 
@@ -883,14 +883,14 @@ ORDER BY items, order_num;
 
 ## Dùng subquery
 
-Subquery là một SQL query được lồng trong query lớn hơn, còn gọi là inner query hoặc inner select. Câu lệnh chứa subquery cũng được gọi là outer query hoặc outer select. Nói đơn giản, subquery là việc dùng kết quả của một query `SELECT` (subquery) làm nguồn dữ liệu hoặc điều kiện phán đoán của một SQL statement khác (main query).
+Subquery là một SQL query được lồng trong query lớn hơn, còn gọi là inner query hoặc inner select. Câu lệnh chứa subquery cũng được gọi là outer query hoặc outer select. Nói đơn giản, subquery là việc dùng kết quả của một query `SELECT` (subquery) làm nguồn dữ liệu hoặc điều kiện kiểm tra của một SQL statement khác (main query).
 
 Subquery có thể được nhúng trong các statement `SELECT`, `INSERT`, `UPDATE` và `DELETE`, đồng thời có thể dùng cùng các toán tử `=`, `<`, `>`, `IN`, `BETWEEN`, `EXISTS`, v.v.
 
 Subquery thường được dùng trong mệnh đề `WHERE` và mệnh đề `FROM`:
 
 - Khi dùng trong mệnh đề `WHERE`, tùy toán tử mà subquery có thể trả về dữ liệu một dòng một cột, nhiều dòng một cột hoặc một dòng nhiều cột. Subquery cần trả về giá trị có thể làm điều kiện truy vấn của mệnh đề WHERE.
-- Khi dùng trong mệnh đề `FROM`, subquery thường trả về dữ liệu nhiều dòng nhiều cột, tương đương một temporary table để phù hợp với quy tắc phía sau `FROM` là một bảng. Cách này có thể thực hiện query kết hợp nhiều bảng.
+- Khi dùng trong mệnh đề `FROM`, subquery thường trả về dữ liệu nhiều dòng nhiều cột, tương đương một temporary table để phù hợp với quy tắc phần sau `FROM` phải là một bảng. Cách này có thể thực hiện query kết hợp nhiều bảng.
 
 > Lưu ý: Database MySQL bắt đầu hỗ trợ subquery từ phiên bản 4.1, các phiên bản cũ hơn không hỗ trợ.
 
@@ -925,7 +925,7 @@ WHERE condition;
 
 ### Trả về danh sách khách hàng mua sản phẩm có giá từ 10 đô la trở lên
 
-Bảng `OrderItems` đại diện cho bảng sản phẩm đơn hàng, có các trường mã đơn hàng `order_num`, giá đơn hàng `item_price`; bảng `Orders` đại diện cho bảng thông tin đơn hàng, có khách hàng `id: cust_id` và mã đơn hàng `order_num`.
+Bảng `OrderItems` đại diện cho bảng sản phẩm đơn hàng, có các trường mã đơn hàng `order_num` và giá đơn hàng `item_price`; bảng `Orders` đại diện cho bảng thông tin đơn hàng, có ID khách hàng `cust_id` và mã đơn hàng `order_num`.
 
 Bảng `OrderItems`:
 
@@ -1315,7 +1315,7 @@ Bảng `OrderItems` có mã đơn hàng sản phẩm `order_num`, số lượng 
 | a5        | 15       | 25         |
 | a7        | 7        | 7          |
 
-【Bài toán】Ngoài việc trả về tên khách hàng và mã đơn hàng, hãy trả về tên khách hàng (`cust_name`) trong bảng `Customers` và mã đơn hàng tương ứng (`order_num`) trong bảng `Orders`, thêm cột thứ ba `OrderTotal` chứa tổng giá của mỗi đơn hàng, sau đó sắp xếp tăng dần theo tên khách hàng rồi theo mã đơn hàng.
+【Bài toán】Ngoài tên khách hàng và mã đơn hàng, hãy thêm cột thứ ba `OrderTotal` chứa tổng giá của mỗi đơn hàng, sau đó sắp xếp tăng dần theo tên khách hàng rồi theo mã đơn hàng.
 
 ```sql
 # Cú pháp equi-join đơn giản
@@ -1336,9 +1336,9 @@ GROUP BY c.cust_name
 ORDER BY c.cust_name,o.order_num
 ```
 
-Cách này sai! Chỉ aggregate theo `cust_name` quả thực phù hợp với yêu cầu, nhưng không phù hợp với cú pháp `GROUP BY`.
+Cách này sai! Chỉ `GROUP BY` theo `cust_name` đúng với yêu cầu, nhưng không hợp lệ về cú pháp `GROUP BY`.
 
-Trong statement select, nếu không có statement `GROUP BY`, `cust_name` và `order_num` sẽ trả về nhiều giá trị, còn `sum(quantity * item_price)` chỉ trả về một giá trị. Dùng `group by` `cust_name` có thể khiến `cust_name` và `sum(quantity * item_price)` tương ứng một-một, hay nói cách khác là **aggregate**, vì vậy tương tự cũng cần aggregate theo `order_num`.
+Trong statement `SELECT`, nếu không có `GROUP BY`, `cust_name` và `order_num` sẽ trả về nhiều giá trị, còn `SUM(quantity * item_price)` chỉ trả về một giá trị. Dùng `GROUP BY cust_name` giúp `cust_name` và `SUM(quantity * item_price)` tương ứng một-một, hay nói cách khác là **aggregate**; tương tự, cũng cần aggregate theo `order_num`.
 
 > **Tóm lại, các trường trong select hoặc phải cùng aggregate, hoặc đều không aggregate.**
 
@@ -1471,7 +1471,7 @@ Bảng khách hàng `Customers` có các trường id khách hàng `cust_id` và
 | cust221  | an        |
 | cust2217 | hex       |
 
-【Bài toán】Viết câu lệnh SQL để trả về tên khách hàng và tổng tiền của các đơn hàng có tổng giá không nhỏ hơn 1000 (`order_num` trong bảng `OrderItems`).
+【Bài toán】Viết câu lệnh SQL để trả về tên khách hàng và tổng tiền của họ, tính từ các mã đơn hàng (`order_num`) trong bảng `OrderItems`, chỉ với tổng giá không nhỏ hơn 1000.
 
 Gợi ý: cần tính tổng (`item_price` nhân với `quantity`). Sắp xếp kết quả theo tổng tiền và dùng cú pháp `INNER JOIN`.
 
@@ -1646,7 +1646,7 @@ Có bảng `Products` chứa `vend_id` (id nhà cung cấp) và `prod_id` (id s�
 | a0003   | prod_id_vivo phone   |
 | a0010   | prod_id_huawei phone |
 
-【Bài toán】Liệt kê nhà cung cấp (`vend_id` trong bảng `Vendors`) và số lượng sản phẩm họ cung cấp, bao gồm cả nhà cung cấp không có sản phẩm. Cần dùng OUTER JOIN và aggregate function `COUNT()` để tính số lượng từng sản phẩm trong bảng `Products`, cuối cùng sắp xếp tăng dần theo `vend_id`.
+【Bài toán】Liệt kê nhà cung cấp (`vend_id` trong bảng `Vendors`) và số lượng sản phẩm họ cung cấp, bao gồm cả nhà cung cấp không có sản phẩm. Cần dùng OUTER JOIN và aggregate function `COUNT()` để tính số lượng sản phẩm của từng nhà cung cấp trong bảng `Products`, cuối cùng sắp xếp tăng dần theo `vend_id`.
 
 Lưu ý: cột `vend_id` xuất hiện trong nhiều bảng, vì vậy mỗi lần tham chiếu cần ghi đầy đủ định danh.
 
@@ -1682,7 +1682,7 @@ Tên cột trong result set của `UNION` luôn bằng tên cột trong statemen
 `JOIN` và `UNION`:
 
 - Các cột của bảng được nối trong `JOIN` có thể khác nhau, nhưng số lượng và thứ tự cột của tất cả query trong `UNION` phải giống nhau.
-- `UNION` đặt các dòng sau query cạnh nhau (theo chiều dọc), còn `JOIN` đặt các cột sau query cạnh nhau (theo chiều ngang), tức là tạo thành một tích Cartesian.
+- `UNION` xếp các dòng của các query theo chiều dọc, còn `JOIN` xếp các cột của các query theo chiều ngang, tức là tạo thành một tích Cartesian.
 
 ### Kết hợp hai statement SELECT (1)
 
@@ -1733,7 +1733,7 @@ Bảng `OrderItems` chứa thông tin sản phẩm đơn hàng, trường `prod_
 
 Đáp án:
 
-Chỉ dùng một statement select thì sử dụng `or` thay cho `union`.
+Chỉ dùng một statement `SELECT` thì sử dụng `OR` thay cho `UNION`.
 
 ```sql
 SELECT prod_id, quantity
@@ -1787,7 +1787,7 @@ Bảng `Customers` có các trường tên khách hàng `cust_name`, thông tin 
 | cust1     | 8695193      | MI         | <cust1@cust.com>  |
 | cust2     | 8695194      | IL         | <cust2@cust.com>  |
 
-【Bài toán】Sửa SQL sai dưới đây.
+【Bài toán】Sửa câu SQL sai dưới đây.
 
 ```sql
 SELECT cust_name, cust_contact, cust_email
@@ -1813,7 +1813,7 @@ WHERE cust_state = 'IL'
 ORDER BY cust_name;
 ```
 
-Khi dùng `union` để kết hợp query, chỉ được dùng một mệnh đề `order by`, và nó phải nằm sau statement `select` cuối cùng.
+Khi dùng `UNION` để kết hợp các query, chỉ được dùng một mệnh đề `ORDER BY`, và nó phải nằm sau statement `SELECT` cuối cùng.
 
 Hoặc có thể dùng `or` trực tiếp:
 

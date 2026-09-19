@@ -1,5 +1,5 @@
 ---
-title: "Tổng hợp câu hỏi phỏng vấn về union-find: path compression, tính liên thông và Java template"
+title: "Tổng hợp câu hỏi phỏng vấn union-find: path compression, tính liên thông và Java template"
 description: "Tổng hợp câu hỏi phỏng vấn về union-find, giải thích Union Find, find, union, path compression, union by size, tính liên thông, cycle detection, số lượng tỉnh và các bài LeetCode thường gặp."
 category: Computer Basics
 tag:
@@ -10,9 +10,9 @@ head:
       content: union-find,Union Find,path compression,union by size,connectivity,graph algorithms,cycle detection,number of provinces,Java union-find,LeetCode
 ---
 
-Union-find chuyên giải quyết các vấn đề về “phân nhóm” và “tính liên thông”. Hai phần tử có thuộc cùng một nhóm không? Sau khi hợp nhất hai set thì còn bao nhiêu connected components? Thêm một edge vào graph có tạo thành cycle không? Tất cả đều có thể được xử lý bằng union-find.
+Union-find chuyên giải quyết các vấn đề về “phân nhóm” và “tính liên thông”. Hai phần tử có thuộc cùng một nhóm không? Sau khi hợp nhất hai set còn bao nhiêu connected components? Thêm một edge vào graph có tạo thành cycle không? Tất cả đều có thể xử lý bằng union-find.
 
-Trong phỏng vấn, code của nó không dài, nhưng nếu viết `find` không tốt thì sẽ ảnh hưởng trực tiếp đến complexity.
+Trong phỏng vấn, code không dài, nhưng nếu viết `find` không tốt thì sẽ ảnh hưởng trực tiếp đến complexity.
 
 Tổng quan nội dung:
 
@@ -22,18 +22,18 @@ Tổng quan nội dung:
 4. Vì sao path compression và union by size có thể tăng tốc?
 5. Union-find phù hợp với những vấn đề về tính liên thông nào?
 
-![Forest structure của các connected components được biểu diễn bằng parent pointer trong union-find](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/union-find.png)
+![Cấu trúc forest của các connected components được biểu diễn bằng parent pointer trong union-find](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/union-find.png)
 
 ## Union-find là gì?
 
-Union-find (Disjoint Set Union, DSU, còn gọi là Union Find) duy trì một nhóm các set không giao nhau. Nó đặc biệt giỏi trả lời hai loại vấn đề:
+Union-find (Disjoint Set Union, DSU, còn gọi là Union Find) duy trì một nhóm các set đôi một không giao nhau. Nó đặc biệt phù hợp để trả lời hai loại vấn đề:
 
 1. **Truy vấn**: hiện tại hai phần tử có thuộc cùng một set không?
 2. **Hợp nhất**: hợp nhất hai set chứa hai phần tử thành một set.
 
-Nó không quan tâm đến cấu trúc đầy đủ bên trong set, cũng không quan tâm giữa hai node cụ thể đã đi qua những edge nào. Ví dụ trong quan hệ xã hội, union-find có thể nhanh chóng cho bạn biết A và B có thuộc cùng một network quan hệ không; nhưng nó không cho bạn biết shortest path từ A đến B là gì.
+Nó không quan tâm đến cấu trúc đầy đủ bên trong set, cũng không quan tâm giữa hai node cụ thể đã đi qua những edge nào. Ví dụ trong quan hệ xã hội, union-find có thể nhanh chóng cho bạn biết A và B có thuộc cùng một mạng lưới quan hệ không; nhưng nó không cho bạn biết shortest path từ A đến B là gì.
 
-Đây cũng là điểm khác nhau giữa union-find và BFS/DFS: BFS/DFS giống như mỗi lần đều search trực tiếp dọc theo graph; còn union-find duy trì quan hệ liên thông trong quá trình hợp nhất, để các truy vấn sau đó chỉ cần kiểm tra representative node của hai phần tử có giống nhau không.
+Đây cũng là điểm khác nhau giữa union-find và BFS/DFS: BFS/DFS giống như mỗi lần đều search trực tiếp trên graph; còn union-find duy trì quan hệ liên thông trong quá trình hợp nhất, để các truy vấn sau chỉ cần kiểm tra representative node của hai phần tử có giống nhau không.
 
 ## Union-find biểu diễn set như thế nào?
 
@@ -54,7 +54,7 @@ parent[2] = 2
 
 Sau khi thực hiện `union(0, 1)`, có thể gắn root node của `1` vào bên dưới root node của `0`. Khi đó `0` và `1` thuộc cùng một set. Tiếp tục thực hiện `union(1, 2)`, dù truyền vào `1` và `2`, nhưng thứ thực sự được hợp nhất là root node của `1` và root node của `2`.
 
-Vì vậy, điểm mấu chốt trong union-find không phải là “parent node hiện tại của node là ai”, mà là “đi dọc theo các parent node lên trên, cuối cùng root node là ai”. `find(x)` thực hiện chính việc này.
+Vì vậy, điểm mấu chốt trong union-find không phải là “parent node hiện tại của node là ai”, mà là “lần theo các parent node lên trên, cuối cùng xác định root node là ai”. `find(x)` thực hiện chính việc này.
 
 ## Ba thao tác cốt lõi
 
@@ -66,29 +66,29 @@ Các thao tác thường gặp của union-find có thể khái quát thành ba 
 | `union(a, b)`     | Hợp nhất hai set chứa `a` và `b`                                  |
 | `connected(a, b)` | Kiểm tra representative node của `a` và `b` có giống nhau không   |
 
-Nếu root node của hai phần tử giống nhau, nghĩa là chúng đã thuộc cùng một set; nếu root node khác nhau, `union` sẽ gắn một root node vào bên dưới root node còn lại.
+Nếu root node của hai phần tử giống nhau, nghĩa là chúng đã thuộc cùng một set; nếu root node khác nhau, `union` sẽ gắn một root node vào bên dưới root node kia.
 
 ## Trọng tâm phỏng vấn
 
-- Có thể viết `find` và `union`.
+- Có thể tự viết `find` và `union`.
 - Có thể giải thích tác dụng của path compression.
 - Có thể dùng union-find để đếm connected components.
 - Có thể xử lý cycle detection trong graph, bài toán friend circle, số lượng tỉnh và quan hệ đẳng thức.
-- Có thể giải thích union-find phù hợp với dynamic merge nhưng không phù hợp với việc xóa thường xuyên.
+- Có thể giải thích union-find phù hợp với việc merge động nhưng không phù hợp với việc xóa thường xuyên.
 
 ## Từ Quick Find đến Quick Union
 
 Khi tìm hiểu union-find, có thể xem trước hai phiên bản cực đoan:
 
 - **Quick Find**: array lưu trực tiếp mã set mà mỗi phần tử thuộc về. Truy vấn hai phần tử có cùng nhóm rất nhanh, nhưng khi hợp nhất hai set thì phải quét toàn bộ array để sửa mã set.
-- **Quick Union**: array lưu parent node và dùng root node để đại diện cho set. Khi hợp nhất chỉ cần sửa parent pointer của một root node, nhưng nếu tree quá cao thì `find` sẽ chậm hơn.
+- **Quick Union**: array lưu parent node và dùng root node để đại diện cho set. Khi hợp nhất chỉ cần sửa parent pointer của một root node, nhưng nếu tree quá cao thì `find` sẽ chậm.
 
 Trong phỏng vấn và làm bài, phiên bản tối ưu của Quick Union thường được dùng: **path compression + union by size/rank**.
 
 - **Path compression**: mỗi lần `find(x)`, gắn trực tiếp các node trên đường đi vào bên dưới root node, để những lần truy vấn sau nhanh hơn.
 - **Union by size**: khi hợp nhất hai set, gắn tree nhỏ vào bên dưới tree lớn để hạn chế chiều cao của tree.
 
-Kết hợp hai tối ưu này có thể đưa nhiều thao tác của union-find xuống thời gian rất gần hằng số.
+Kết hợp hai tối ưu này có thể khiến thời gian của nhiều thao tác union-find gần như hằng số.
 
 ## Template cơ bản
 
@@ -142,42 +142,42 @@ class UnionFind {
 }
 ```
 
-`parent[x]` biểu thị parent node của `x`. Parent node của root node là chính nó. Path compression sẽ khiến các node trên đường tìm kiếm được gắn trực tiếp vào bên dưới root node, giúp những lần truy vấn sau nhanh hơn.
+`parent[x]` biểu thị parent node của `x`. Parent node của root node là chính nó. Path compression sẽ khiến các node trên đường đi được gắn trực tiếp vào bên dưới root node, giúp những lần truy vấn sau nhanh hơn.
 
 Template này có hai chi tiết đáng xem riêng:
 
-1. `parent[x] = find(parent[x])` trong `find()` là path compression. Sau khi recursion trả về root node, nó đồng thời nối trực tiếp `x` với root node.
-2. `union()` dùng `size` để quyết định gắn node nào vào bên dưới node nào, đây là union by size. Cách này giúp giảm mức tăng chiều cao của tree.
+1. `parent[x] = find(parent[x])` trong `find()` là path compression. Sau khi recursion trả về root node, phép gán này đồng thời nối trực tiếp `x` với root node.
+2. `union()` dùng `size` để quyết định root node nào được gắn bên dưới root node nào, đây là union by size. Cách này giúp hạn chế chiều cao của tree tăng lên.
 
-`count` biểu thị số connected components hiện còn. Mỗi lần `union()` thực sự hợp nhất hai set vốn không liên thông, `count` mới giảm 1; nếu hai phần tử vốn đã liên thông thì không được giảm lặp lại.
+`count` biểu thị số connected components hiện còn. Mỗi lần `union()` thực sự hợp nhất hai set vốn không liên thông, `count` mới giảm 1; nếu hai phần tử vốn đã liên thông thì không được giảm thêm.
 
-## Complexity
+## Độ phức tạp
 
-Sau khi dùng path compression và union by size, amortized complexity của một thao tác union-find là `O(α(n))`, trong đó `α(n)` là inverse Ackermann function, tăng cực kỳ chậm. Trong phỏng vấn thực tế, thường chỉ cần nói “thời gian gần như hằng số”.
+Sau khi dùng path compression và union by size, amortized complexity của một thao tác union-find là `O(α(n))`, trong đó `α(n)` là inverse Ackermann function, tăng cực kỳ chậm. Trong phỏng vấn thực tế, thường chỉ cần nói “thời gian gần như hằng số” là đủ.
 
 Space complexity là `O(n)`, chủ yếu đến từ hai array `parent` và `size`.
 
 ## Trường hợp sử dụng điển hình
 
-| Trường hợp sử dụng                       | Cách xử lý                                                                                    |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Kiểm tra hai node có liên thông không    | So sánh `find(a)` và `find(b)`                                                                |
-| Hợp nhất hai set                         | `union(a, b)`                                                                                 |
-| Đếm số connected components              | Khởi tạo bằng `n`, mỗi lần hợp nhất thành công thì giảm 1                                     |
-| Kiểm tra undirected graph có cycle không | Nếu hai đầu của một edge đã liên thông, thêm edge sẽ tạo cycle                                |
-| Phương trình đẳng thức                   | Hợp nhất các quan hệ bằng nhau trước, sau đó kiểm tra các quan hệ khác nhau có xung đột không |
+| Trường hợp sử dụng                     | Cách xử lý                                                                                    |
+| -------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Kiểm tra hai node có liên thông không  | So sánh `find(a)` và `find(b)`                                                                |
+| Hợp nhất hai set                       | `union(a, b)`                                                                                 |
+| Đếm số connected components            | Khởi tạo bằng `n`, mỗi lần hợp nhất thành công thì giảm 1                                     |
+| Kiểm tra graph vô hướng có cycle không | Nếu hai đầu của một edge đã liên thông, thêm edge sẽ tạo cycle                                |
+| Phương trình đẳng thức                 | Hợp nhất các quan hệ bằng nhau trước, sau đó kiểm tra các quan hệ khác nhau có xung đột không |
 
-Union-find đặc biệt phù hợp với những vấn đề “các quan hệ liên tục được hợp nhất và cần truy vấn có cùng nhóm hay không”, chẳng hạn số lượng tỉnh, kết nối dư thừa, hợp nhất account, và thuật toán Kruskal trong minimum spanning tree.
+Union-find đặc biệt phù hợp với những vấn đề “các quan hệ liên tục được hợp nhất và cần truy vấn có cùng nhóm hay không”, chẳng hạn số lượng tỉnh, kết nối dư thừa, hợp nhất account và thuật toán Kruskal trong minimum spanning tree.
 
-Tuy nhiên, union-find không giỏi xử lý việc xóa quan hệ. Vì một khi hai set đã được hợp nhất, thông tin về những edge nào bên trong khiến chúng liên thông thường đã bị nén lại. Sau khi xóa một edge, không thể xác định set còn liên thông hay không chỉ bằng cách sửa đơn giản array `parent`.
+Tuy nhiên, union-find không giỏi xử lý việc xóa quan hệ. Vì một khi hai set đã được hợp nhất, thông tin về những edge nào tạo ra tính liên thông thường đã bị nén mất. Sau khi xóa một edge, không thể xác định các set còn liên thông hay không chỉ bằng cách sửa đơn giản array `parent`.
 
 ## Điểm dễ sai
 
 - Trong `find`, phải trả về root node, không phải parent node.
-- Khi thực hiện path compression, không được bỏ mất giá trị trả về của recursion.
+- Khi thực hiện path compression, không được bỏ qua giá trị trả về của recursion.
 - Khi `union`, chỉ khi hai set vốn không liên thông thì số connected components mới giảm 1.
 - Union-find phù hợp với việc hợp nhất, không giỏi xử lý xóa quan hệ.
-- Bài toán grid hai chiều cần ánh xạ `(i, j)` thành mã một chiều, ví dụ `i * cols + j`.
+- Bài toán grid hai chiều cần ánh xạ `(i, j)` thành chỉ số một chiều, ví dụ `i * cols + j`.
 
 ## Bài tập đề xuất
 

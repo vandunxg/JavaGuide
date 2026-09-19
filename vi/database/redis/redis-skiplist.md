@@ -1,6 +1,6 @@
 ---
-title: Redis sử dụng skip list để triển khai sorted set vì sao
-description: Giải thích chi tiết vì sao sorted set Zset của Redis chọn skip list thay vì red-black tree, B+ tree; trình bày nguyên lý cấu trúc dữ liệu, phân tích độ phức tạp thời gian và triển khai trong Redis source code.
+title: Vì sao Redis sử dụng skip list để triển khai sorted set
+description: Giải thích chi tiết vì sao sorted set Zset của Redis chọn skip list thay vì red-black tree, B+ tree; trình bày nguyên lý cấu trúc dữ liệu, phân tích độ phức tạp thời gian và triển khai trong source code của Redis.
 category: Database
 tag:
   - Redis
@@ -12,13 +12,13 @@ head:
 
 ## Lời mở đầu
 
-Trong những năm gần đây, các câu hỏi phỏng vấn Redis thường đề cập đến thiết kế bên trong của những cấu trúc dữ liệu phổ biến. Trong đó có một câu hỏi khá thú vị: “Vì sao sorted set bên trong Redis sử dụng skip list, thay vì balanced tree, red-black tree hoặc B+ tree?”.
+Trong những năm gần đây, các câu hỏi phỏng vấn về Redis thường đề cập đến thiết kế bên trong của những cấu trúc dữ liệu phổ biến. Trong đó có một câu hỏi khá thú vị: “Vì sao sorted set bên trong Redis sử dụng skip list, thay vì balanced tree, red-black tree hoặc B+ tree?”.
 
 Bài viết này lấy câu hỏi phỏng vấn thường gặp ở các công ty lớn làm điểm bắt đầu để giúp bạn tìm hiểu chi tiết về cấu trúc dữ liệu skip list.
 
 Nếu bạn chỉ muốn nhanh chóng nắm được multi-level index, độ phức tạp truy vấn và khung trả lời phỏng vấn về skip list, có thể đọc trước [Tổng hợp câu hỏi phỏng vấn về skip list](../../cs-basics/data-structure/skip-list.md), sau đó quay lại bài viết này để xem triển khai source code của Redis ZSet.
 
-Mạch nội dung tổng thể của bài viết như hình dưới đây. Tác giả sẽ trình bày từ cách sử dụng cơ bản của sorted set đến phân tích và triển khai source code của skip list, giúp bạn hiểu và nắm vững hơn về triển khai skip list bên trong sorted set của Redis.
+Bố cục tổng thể của bài viết như hình dưới đây. Tác giả sẽ trình bày từ cách sử dụng cơ bản của sorted set đến phân tích và triển khai source code của skip list, giúp bạn hiểu và nắm vững hơn về skip list bên trong sorted set của Redis.
 
 ![](https://oss.javaguide.cn/javaguide/database/redis/skiplist/202401222005468.png)
 
@@ -54,7 +54,7 @@ Lúc này, dùng lệnh `object` để xem cấu trúc dữ liệu của zset, c
 "ziplist"
 ```
 
-Do các nhà thiết kế cân nhắc rằng dữ liệu Redis được lưu trong memory, để tiết kiệm không gian memory quý giá, khi số phần tử của sorted set nhỏ hơn 64 byte và số lượng nhỏ hơn 128, Redis sẽ sử dụng ziplist. Giá trị mặc định của các ngưỡng này đến từ hai cấu hình sau:
+Do dữ liệu Redis được lưu trong memory, để tiết kiệm không gian memory quý giá, Redis sẽ sử dụng ziplist khi độ dài mỗi phần tử nhỏ hơn 64 byte và số lượng phần tử nhỏ hơn 128. Giá trị mặc định của các ngưỡng này đến từ hai cấu hình sau:
 
 ```bash
 zset-max-ziplist-value 64
@@ -63,7 +63,7 @@ zset-max-ziplist-entries 128
 
 Chỉ cần một phần tử trong sorted set vượt quá một trong hai ngưỡng này, nó sẽ chuyển sang **skiplist** (thực tế là dict+skiplist, đồng thời mượn dictionary để tăng hiệu quả lấy phần tử được chỉ định).
 
-Hãy thử thêm một phần tử dài hơn 64 byte, có thể thấy storage bên dưới của sorted set chuyển sang skiplist.
+Hãy thử thêm một phần tử dài hơn 64 byte, có thể thấy cấu trúc lưu trữ bên dưới của sorted set chuyển sang skiplist.
 
 ```bash
 127.0.0.1:6379> zadd rankList 90 yigemingzihuichaoguo64zijiedeyonghumingchengyongyuceshitiaobiaodeshijiyunyong
@@ -101,13 +101,13 @@ So với linked list có thứ tự ban đầu cần 6 lần, skip list của ch
 
 ![](https://oss.javaguide.cn/javaguide/database/redis/skiplist/202401222005524.png)
 
-Việc thêm phần tử cũng tương tự. Giả sử cần thêm phần tử 7 vào sorted set này, trước hết cần dùng skip list để tìm **giá trị lớn nhất nhỏ hơn phần tử 7**, tức vị trí của phần tử 6 trong hình dưới đây. Sau đó chèn nó vào sau phần tử 6, để index của phần tử 6 trỏ đến node 7 mới chèn. Quy trình như sau:
+Việc thêm phần tử cũng tương tự. Giả sử cần thêm phần tử 7 vào sorted set này, trước hết cần dùng skip list để tìm **giá trị lớn nhất nhỏ hơn phần tử 7**, tức vị trí của phần tử 6 trong hình dưới đây. Sau đó chèn phần tử 7 vào sau phần tử 6, để index của phần tử 6 trỏ đến node 7 mới chèn. Quy trình như sau:
 
 1. Bắt đầu từ index cấp 2 và định vị đến index của phần tử 4.
 2. Xem index kế tiếp của index 4 là 8, rồi tìm xuống cấp dưới.
-3. Đến index cấp 1, thấy index kế tiếp của index 4 là 6, nhỏ hơn phần tử cần chèn 7, nên con trỏ tiến đến vị trí index 6.
+3. Đến index cấp 1, thấy index kế tiếp của index 4 là 6, nhỏ hơn phần tử cần chèn 7, nên con trỏ tiến đến vị trí của index 6.
 4. Tiếp tục so sánh, node kế tiếp của 6 là index 8, lớn hơn phần tử 7, nên tiếp tục tìm xuống.
-5. Cuối cùng đến node ban đầu của 6, thấy node kế tiếp là 7; con trỏ không thể tìm xuống tiếp. Từ đó biết phần tử 6 là giá trị lớn nhất nhỏ hơn phần tử cần chèn 7, nên chèn phần tử 7.
+5. Cuối cùng đến node gốc của 6, thấy node kế tiếp là 7; con trỏ không thể tìm xuống tiếp. Từ đó biết phần tử 6 là giá trị lớn nhất nhỏ hơn phần tử cần chèn 7, nên chèn phần tử 7.
 
 ![](https://oss.javaguide.cn/javaguide/database/redis/skiplist/202401222005480.png)
 
@@ -135,7 +135,7 @@ Giả sử số phần tử là n, số phần tử r của index cấp k đư�
 r=n/2^k
 ```
 
-Tương tự, hãy suy ra chiều cao tối đa của index. Thông thường, số phần tử của index cấp cao nhất là 2. Gọi tổng số phần tử là n, chiều cao index là h, thay vào công thức trên ta được:
+Tương tự, hãy suy ra chiều cao tối đa của index. Thông thường, số phần tử của index cấp cao nhất là 2. Gọi tổng số phần tử là n, chiều cao index là h; thay vào công thức trên ta được:
 
 ```bash
 2= n/2^h
@@ -145,7 +145,7 @@ Tương tự, hãy suy ra chiều cao tối đa của index. Thông thường, s
 => h=log2^n -1
 ```
 
-Redis lại là một in-memory database. Giả sử số phần tử tối đa là **65536**, thay **65536** vào công thức trên thì chiều cao tối đa là 16. Vì vậy, chúng ta nên bảo đảm chiều cao index được xây dựng cho một phần tử sau khi thêm không vượt quá 16.
+Redis lại là một in-memory database. Giả sử số phần tử tối đa là **65536**, thay **65536** vào công thức trên thì chiều cao tối đa là 16. Vì vậy, chúng ta nên bảo đảm chiều cao index tạo cho một phần tử sau khi thêm không vượt quá 16.
 
 Vì muốn cố gắng bảo đảm mỗi index cấp trên bằng một nửa index cấp dưới, khi triển khai thuật toán tạo chiều cao, có thể thiết kế như sau:
 
@@ -161,9 +161,9 @@ Quay lại việc thêm 7 ở trên, thuật toán ngẫu nhiên cho kết quả
 
 Cuối cùng là thao tác xóa. Giả sử cần xóa phần tử 10, phải định vị giá trị lớn nhất nhỏ hơn 10 ở **từng cấp** của skip list. Các bước thực hiện là:
 
-1. Node kế tiếp của index 4 cấp 2 là 8, con trỏ tiến lên.
+1. Node kế tiếp của index cấp 2 tại 4 là 8, con trỏ tiến lên.
 2. Index 8 không có node kế tiếp, cấp này không có phần tử cần xóa, con trỏ đi thẳng xuống.
-3. Node kế tiếp của index 8 cấp 1 là 10. Điều đó nghĩa là khi xóa, index 8 cấp 1 cần ngắt liên kết giữa con trỏ của mình và index 10 cấp 1, rồi xóa 10.
+3. Node kế tiếp của index cấp 1 tại 8 là 10. Điều đó nghĩa là khi xóa, index cấp 1 tại 8 cần ngắt liên kết giữa con trỏ của mình và index cấp 1 tại 10, rồi xóa 10.
 4. Sau khi định vị xong ở index cấp 1, con trỏ đi xuống, node kế tiếp là 9, con trỏ tiến lên.
 5. Node kế tiếp của 9 là 10, tương tự cần cho nó trỏ đến null để xóa 10.
 
@@ -171,7 +171,7 @@ Cuối cùng là thao tác xóa. Giả sử cần xóa phần tử 10, phải đ
 
 ### Định nghĩa template
 
-Sau khi có ý tưởng tổng thể, chúng ta có thể bắt đầu triển khai một skip list. Trước hết, định nghĩa node **Node** trong skip list. Từ phần minh họa ở trên, có thể thấy mỗi **Node** bao gồm các thành phần sau:
+Sau khi có ý tưởng tổng thể, chúng ta có thể bắt đầu triển khai một skip list. Trước hết, hãy định nghĩa **Node** trong skip list. Từ phần minh họa ở trên, có thể thấy mỗi **Node** bao gồm các thành phần sau:
 
 1. Giá trị **value** được lưu trữ.
 2. Địa chỉ của node kế tiếp.
@@ -201,7 +201,7 @@ class Node {
 
 ### Thêm phần tử
 
-Sau khi định nghĩa node, trước hết hãy triển khai việc thêm phần tử. Khi thêm phần tử, bước đầu tiên đương nhiên là thiết lập **data**; chỉ cần gán **value** được truyền vào cho **data**.
+Sau khi định nghĩa node, trước hết hãy triển khai việc thêm phần tử. Khi thêm phần tử, trước tiên thiết lập **data** bằng cách gán **value** được truyền vào cho **data**.
 
 Tiếp theo là thiết lập chiều cao **maxLevel**. Ở trên đã nêu cách thực hiện: chiều cao mặc định là 1, tức chỉ có một node trong linked list ban đầu; mỗi lần thuật toán ngẫu nhiên cho kết quả lớn hơn 0.5 thì chiều cao index tăng 1. Từ đó có thuật toán tính chiều cao `randomLevel()`:
 
@@ -226,9 +226,9 @@ private int randomLevel() {
 }
 ```
 
-Sau đó thiết lập địa chỉ node kế tiếp của **Node** hiện tại cần chèn và của index **Node**. Bước này phức tạp hơn một chút. Giả sử chiều cao của node hiện tại là 4, tức 1 node cộng với 3 index, ta tạo một array có độ dài 4 là **maxOfMinArr**, rồi duyệt để tìm giá trị lớn nhất nhỏ hơn **value** trong các node index ở từng cấp.
+Sau đó thiết lập địa chỉ node kế tiếp của **Node** cần chèn và các index của **Node** đó. Bước này phức tạp hơn một chút. Giả sử chiều cao của node hiện tại là 4, tức 1 node cộng với 3 index, ta tạo một array có độ dài 4 là **maxOfMinArr**, rồi duyệt để tìm giá trị lớn nhất nhỏ hơn **value** trong các node index ở từng cấp.
 
-Giả sử cần chèn **value** là 5. Kết quả tìm trong array cho thấy node trước của node hiện tại, node trước của index cấp 1 và cấp 2 đều là 4; index cấp 3 là null.
+Giả sử cần chèn **value** là 5. Kết quả tìm trong array cho thấy node tiền nhiệm của node cần chèn, node tiền nhiệm của index cấp 1 và cấp 2 đều là 4; index cấp 3 là null.
 
 ![](https://oss.javaguide.cn/javaguide/database/redis/skiplist/202401222005299.png)
 
@@ -298,7 +298,7 @@ Logic truy vấn khá đơn giản: bắt đầu từ index cấp cao nhất c�
 - **Ở index cấp 1**: Con trỏ hiện tại `p` là node `5`. Node kế tiếp `forwards[0]` của `p` trỏ đến node `5` ở tầng thấp nhất. Vì `5 < 8`, con trỏ `p` di chuyển sang phải đến node `5` ở tầng thấp nhất. Lúc này con trỏ `p` là node `5` ở tầng thấp nhất. `forwards[0]` kế tiếp trỏ đến node `6` ở tầng thấp nhất. Vì `6 < 8`, con trỏ `p` di chuyển sang phải đến node `6` ở tầng thấp nhất. Con trỏ `p` hiện là node `6` ở tầng thấp nhất. `forwards[0]` kế tiếp trỏ đến node `7` ở tầng thấp nhất. Vì `7 < 8`, con trỏ `p` di chuyển sang phải đến node `7` ở tầng thấp nhất. `forwards[0]` kế tiếp trỏ đến node `8` ở tầng thấp nhất. Vì `8` không nhỏ hơn `8` (tức `8 < 8` là `false`), việc tìm sang phải ở cấp hiện tại kết thúc. Lúc này đã duyệt hết mọi cấp, vòng lặp `for` kết thúc.
 - **Định vị và kiểm tra cuối cùng**: Sau khi tìm ở mọi cấp, con trỏ `p` dừng tại node `7` ở tầng thấp nhất (index cấp 0). Đây là node có giá trị lớn nhất nhỏ hơn giá trị đích `8` trong toàn bộ skip list. Kiểm tra **node kế tiếp** của node `7` (tức `p.forwards[0]`): `p.forwards[0]` trỏ đến node `8`. Kiểm tra xem `p.forwards[0].data` (giá trị của node `8`) có bằng giá trị đích `8` hay không. Điều kiện thỏa mãn (`8 == 8`), **tìm kiếm thành công, tìm thấy node `8`**.
 
-Vì vậy, cách triển khai code cũng gần giống các bước trên: bắt đầu từ index cao nhất và tìm về phía trước; nếu node kế tiếp không null và nhỏ hơn giá trị cần tìm thì tiếp tục tìm, gặp node không nhỏ hơn thì đi xuống. Lặp lại như vậy cho đến khi nhận được node lớn nhất trong skip list hiện tại nhưng nhỏ hơn giá trị cần tìm, rồi kiểm tra node kế tiếp của nó có bằng giá trị cần tìm hay không:
+Vì vậy, cách triển khai code cũng gần giống các bước trên: bắt đầu từ index cao nhất và tìm sang phải; nếu node kế tiếp không null và nhỏ hơn giá trị cần tìm thì tiếp tục tìm, gặp node không nhỏ hơn thì đi xuống. Lặp lại như vậy cho đến khi nhận được node lớn nhất trong skip list hiện tại nhưng nhỏ hơn giá trị cần tìm, rồi kiểm tra node kế tiếp của nó có bằng giá trị cần tìm hay không:
 
 ```java
 public Node get(int value) {
@@ -335,7 +335,7 @@ Cuối cùng là logic xóa. Cần tìm giá trị lớn nhất nhỏ hơn node 
 2. Ở index cấp 2, bắt đầu tìm từ index 5 và thấy giá trị lớn nhất nhỏ hơn 10 là 8, tiếp tục đi xuống.
 3. Tương tự, index cấp 1 cho kết quả 8, tiếp tục đi xuống.
 4. Ở node ban đầu tìm thấy 9.
-5. Bắt đầu từ index cấp cao nhất, kiểm tra node kế tiếp của từng node nhỏ hơn 10 có phải 10 hay không. Nếu bằng 10, cho node đó trỏ đến node kế tiếp của 10, rồi giao node 10 cùng các index của nó cho GC thu hồi.
+5. Bắt đầu từ index cấp cao nhất, kiểm tra node kế tiếp của từng node nhỏ hơn 10 có phải 10 hay không. Nếu bằng 10, cho node đó trỏ đến node kế tiếp của 10, rồi để GC thu hồi node 10 cùng các index của nó.
 
 ![](https://oss.javaguide.cn/javaguide/database/redis/skiplist/202401222005350.png)
 
@@ -436,7 +436,7 @@ public class SkipList {
         }
 
         Node p = h;
-        // Sửa chữa quan trọng: tìm kiếm bắt đầu từ cấp cao nhất hiện tại của skip list
+        // Điểm chỉnh sửa quan trọng: tìm kiếm bắt đầu từ cấp cao nhất hiện tại của skip list
         for (int i = levelCount - 1; i >= 0; i--) {
             while (p.forwards[i] != null && p.forwards[i].data < value) {
                 p = p.forwards[i];
@@ -554,7 +554,7 @@ public static void main(String[] args) {
         skipList.printAll();
 
         SkipList.Node node = skipList.get(22);
-        System.out.println("**********Kết quả truy vấn:" + node+ " **********");
+        System.out.println("**********Kết quả truy vấn:" + node+" **********");
 
         skipList.delete(22);
         System.out.println("**********Kết quả xóa**********");
@@ -578,7 +578,7 @@ Cuối cùng, hãy trả lời câu hỏi phỏng vấn ở đầu bài viết: 
 
 Trước hết hãy so sánh với balanced tree. Balanced tree còn được gọi là **AVL tree**, là một balanced binary tree nghiêm ngặt. Điều kiện cân bằng phải được thỏa mãn: độ chênh lệch chiều cao giữa left subtree và right subtree của mọi node không vượt quá 1, tức balance factor nằm trong `[-1,1]`. Độ phức tạp thời gian thêm, xóa và truy vấn của balanced tree cũng giống skip list, đều là **O(log n)**.
 
-Đối với range query, balanced tree cũng có thể đạt hiệu quả giống skip list thông qua inorder traversal. Tuy nhiên, mỗi thao tác thêm hoặc xóa đều phải bảo đảm toàn bộ cây cân bằng tuyệt đối giữa các node trái và phải. Chỉ cần mất cân bằng thì phải dùng thao tác rotation để duy trì cân bằng, quá trình này khá tốn thời gian.
+Đối với range query, balanced tree cũng có thể đạt hiệu quả giống skip list thông qua inorder traversal. Tuy nhiên, mỗi thao tác thêm hoặc xóa đều phải bảo đảm toàn bộ cây cân bằng tuyệt đối giữa các left subtree và right subtree. Chỉ cần mất cân bằng thì phải dùng thao tác rotation để duy trì cân bằng, quá trình này khá tốn thời gian.
 
 ![](https://oss.javaguide.cn/javaguide/database/redis/skiplist/202401222005312.png)
 
@@ -590,7 +590,7 @@ Skip list ra đời với mục đích khắc phục một số nhược điểm
 >
 > Skip list là một cấu trúc dữ liệu có thể dùng để thay thế balanced tree. Skip list sử dụng cân bằng xác suất thay vì cân bằng bị ép buộc nghiêm ngặt. Vì vậy, thuật toán thêm và xóa trong skip list đơn giản hơn rất nhiều, đồng thời nhanh hơn đáng kể so với các thuật toán tương đương trong balanced tree.
 
-Tác giả cũng đưa vào đây code cốt lõi của thao tác thêm trong AVL tree. Có thể thấy mỗi thao tác thêm đều cần recursive để định vị vị trí chèn, sau đó khi quay lui về root còn phải kiểm tra các node trên đường đi có mất cân bằng hay không, rồi điều chỉnh bằng cách rotation node.
+Tác giả cũng đưa ra code cốt lõi của thao tác thêm trong AVL tree. Có thể thấy mỗi thao tác thêm đều cần recursive để định vị vị trí chèn, sau đó khi quay lui về root còn phải kiểm tra các node trên đường đi có mất cân bằng hay không, rồi điều chỉnh bằng cách rotation node.
 
 ```java
 // Thêm key và value mới vào binary search tree
@@ -696,7 +696,7 @@ private Node < K, V > add(Node < K, V > node, K key, V val) {
 Có lẽ những bạn sử dụng MySQL đều biết cấu trúc dữ liệu B+ tree. B+ tree là một cấu trúc dữ liệu phổ biến, có các đặc điểm sau:
 
 1. **Cấu trúc multi-way tree**: Đây là một multi-way tree, mỗi node có thể chứa nhiều node con, làm giảm chiều cao của cây và cho hiệu quả truy vấn cao.
-2. **Hiệu quả lưu trữ cao**: Node không phải leaf lưu nhiều key, node leaf lưu value, giúp mỗi node có thể lưu nhiều key hơn; khi truy vấn theo range dựa trên index, hiệu quả truy vấn cao hơn.
+2. **Hiệu quả lưu trữ cao**: Non-leaf node lưu nhiều key, leaf node lưu value, giúp mỗi node có thể lưu nhiều key hơn; khi truy vấn theo range dựa trên index, hiệu quả truy vấn cao hơn.
 3. **Tính cân bằng**: Đây là một cây cân bằng tuyệt đối, chiều cao các nhánh của cây không chênh lệch nhiều, bảo đảm độ phức tạp thời gian truy vấn và thêm là **O(log n)**.
 4. **Truy cập tuần tự**: Các node leaf được nối với nhau bằng con trỏ linked list, thể hiện tốt trong range query.
 5. **Phân bố dữ liệu đồng đều**: Khi thêm vào B+ tree, dữ liệu có thể được phân bố lại, giúp dữ liệu phân bố đồng đều hơn trong toàn cây và bảo đảm hiệu quả của range query và xóa.
@@ -705,9 +705,9 @@ Có lẽ những bạn sử dụng MySQL đều biết cấu trúc dữ liệu B
 
 Vì vậy, B+ tree phù hợp hơn để làm một trong các cấu trúc index phổ biến trong database và file system. Tư tưởng cốt lõi của nó là định vị được càng nhiều index càng tốt với càng ít I/O càng tốt để lấy dữ liệu truy vấn. Đối với in-memory database như Redis, điều này không thật sự cần thiết. Vì Redis là in-memory database nên không thể lưu lượng dữ liệu quá lớn; do đó index không cần được duy trì bằng cách như B+ tree, chỉ cần duy trì ngẫu nhiên theo xác suất là đủ, giúp tiết kiệm memory. Hơn nữa, khi dùng skip list để triển khai zset, implementation đơn giản hơn: khi thêm chỉ cần dùng index để chèn dữ liệu vào vị trí phù hợp trong linked list, rồi duy trì ngẫu nhiên một số index có chiều cao nhất định; không cần như B+ tree, khi phát hiện mất cân bằng lúc thêm lại phải split và merge node.
 
-### Lý do do tác giả Redis đưa ra
+### Lý do tác giả Redis đưa ra
 
-Tất nhiên, chúng ta cũng có thể xem những lý do do chính tác giả Redis đưa ra:
+Tất nhiên, chúng ta cũng có thể xem những lý do chính tác giả Redis đưa ra:
 
 > There are a few reasons:
 > 1、They are not very memory intensive. It's up to you basically. Changing parameters about the probability of a node to have a given number of levels will make then less memory intensive than btrees.
@@ -724,7 +724,7 @@ Dịch ra có nghĩa là:
 
 ## Tóm tắt
 
-Bài viết đã dành nhiều nội dung để giới thiệu nguyên lý hoạt động và implementation của skip list, giúp bạn hiểu sâu hơn về ưu nhược điểm của cấu trúc dữ liệu này. Cuối cùng, bài viết so sánh đặc điểm của các thao tác trên từng cấu trúc dữ liệu, từ đó giúp bạn hiểu tốt hơn câu hỏi phỏng vấn này. Khi tìm hiểu skip list, bạn nên cố gắng kết hợp với việc tự vẽ và mô phỏng bằng tay để nắm được chi tiết quá trình thêm, xóa, sửa, truy vấn.
+Bài viết đã dành nhiều nội dung để giới thiệu nguyên lý hoạt động và implementation của skip list, giúp bạn hiểu sâu hơn về ưu nhược điểm của cấu trúc dữ liệu này. Cuối cùng, bài viết so sánh đặc điểm của các thao tác trên từng cấu trúc dữ liệu, từ đó giúp bạn hiểu tốt hơn câu hỏi phỏng vấn này. Khi tìm hiểu skip list, bạn nên cố gắng kết hợp với việc tự vẽ mô phỏng để nắm được chi tiết quá trình thêm, xóa, sửa, truy vấn.
 
 ## Đọc thêm về cấu trúc dữ liệu
 

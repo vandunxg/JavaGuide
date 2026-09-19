@@ -22,7 +22,7 @@ head:
 
 - `database` - Container lưu trữ dữ liệu có tổ chức (thường là một file hoặc một nhóm file).
 - `table` - Danh sách có cấu trúc của một loại dữ liệu cụ thể.
-- `schema` - Thông tin về bố cục và đặc tính của database và table. Schema định nghĩa dữ liệu được lưu trữ trong table như thế nào, bao gồm lưu loại dữ liệu nào, dữ liệu được phân tách ra sao, từng phần thông tin được đặt tên thế nào. Database và table đều có schema.
+- `schema` - Thông tin về bố cục và đặc tính của database và table. Schema định nghĩa dữ liệu được lưu trữ trong table như thế nào, bao gồm loại dữ liệu được lưu trữ, cách dữ liệu được phân tách và cách đặt tên cho từng phần thông tin. Database và table đều có schema.
 - `column` - Một field trong table. Mọi table đều gồm một hoặc nhiều column.
 - `row` - Một record trong table.
 - `primary key` - Một column (hoặc một nhóm column), có giá trị nhận diện duy nhất từng row trong table.
@@ -45,7 +45,7 @@ Cấu trúc cú pháp SQL bao gồm:
 
 #### Điểm chính của cú pháp SQL
 
-- **SQL statement không phân biệt chữ hoa chữ thường**, nhưng tên database table, column và value có phân biệt hay không còn phụ thuộc vào DBMS cụ thể và cấu hình. Ví dụ: `SELECT`, `select` và `Select` là như nhau.
+- **SQL statement không phân biệt chữ hoa chữ thường**, nhưng tên database, table, column và value có phân biệt hay không còn phụ thuộc vào DBMS cụ thể và cấu hình. Ví dụ: `SELECT`, `select` và `Select` là như nhau.
 - **Nhiều SQL statement phải được phân tách bằng dấu chấm phẩy (`;`)**.
 - Khi xử lý SQL statement, **mọi khoảng trắng đều bị bỏ qua**.
 
@@ -74,7 +74,7 @@ SQL hỗ trợ ba loại comment:
 
 #### DDL (Data Definition Language)
 
-Data Definition Language (DDL) là ngôn ngữ trong nhóm ngôn ngữ SQL, chịu trách nhiệm định nghĩa cấu trúc dữ liệu và định nghĩa database object.
+Data Definition Language (DDL) là ngôn ngữ trong SQL, chịu trách nhiệm định nghĩa cấu trúc dữ liệu và database object.
 
 Chức năng chính của DDL là **định nghĩa database object**.
 
@@ -82,7 +82,7 @@ Các lệnh cốt lõi của DDL là `CREATE`, `ALTER`, `DROP`.
 
 #### DML (Data Manipulation Language)
 
-Data Manipulation Language (DML) là các câu lệnh dùng để thao tác database, thực hiện việc truy cập object và dữ liệu trong database.
+Data Manipulation Language (DML) là các câu lệnh dùng để thao tác database, thực hiện truy cập object và dữ liệu trong database.
 
 Chức năng chính của DML là **truy cập dữ liệu**, vì vậy cú pháp của nó chủ yếu xoay quanh **đọc và ghi database**.
 
@@ -108,7 +108,7 @@ Quyền được hỗ trợ cũng khác nhau tùy DBMS và thực thể bảo m�
 
 ## Thêm, xóa, sửa, truy vấn
 
-Thêm, xóa, sửa, truy vấn, còn gọi là CRUD, là các thao tác cơ bản trong những thao tác cơ bản của database.
+Thêm, xóa, sửa, truy vấn, còn gọi là CRUD, là các thao tác cơ bản của database.
 
 ### Chèn dữ liệu
 
@@ -172,7 +172,7 @@ TRUNCATE TABLE user;
 
 Statement `SELECT` dùng để truy vấn dữ liệu từ database.
 
-`DISTINCT` dùng để trả về các value khác nhau duy nhất. Nó áp dụng cho tất cả column, nghĩa là chỉ khi value của mọi column đều giống nhau thì mới được xem là giống nhau.
+`DISTINCT` dùng để trả về các value duy nhất. Nó áp dụng cho tất cả column, nghĩa là chỉ khi value của mọi column đều giống nhau thì mới được xem là giống nhau.
 
 `LIMIT` giới hạn số row trả về. Có thể có hai tham số: tham số đầu tiên là row bắt đầu, tính từ 0; tham số thứ hai là tổng số row trả về.
 
@@ -221,7 +221,7 @@ SELECT * FROM mytable LIMIT 2, 3;
 
 `order by` dùng để sắp xếp result set theo một hoặc nhiều column. Mặc định record được sắp xếp tăng dần; nếu cần sắp xếp giảm dần, có thể dùng keyword `desc`.
 
-Khi `order by` sắp xếp nhiều column, column được sắp xếp trước đặt ở trước, column được sắp xếp sau đặt ở sau. Các column khác nhau cũng có thể dùng quy tắc sắp xếp khác nhau.
+Khi `order by` sắp xếp nhiều column, column được sắp xếp trước được đặt trước, column được sắp xếp sau được đặt sau. Các column khác nhau cũng có thể dùng quy tắc sắp xếp khác nhau.
 
 ```sql
 SELECT * FROM products
@@ -236,7 +236,7 @@ ORDER BY prod_price DESC, prod_name ASC;
 - `group by` trả về một record cho mỗi group.
 - `group by` thường đi kèm các aggregate như `count`, `max`, `sum`, `avg`.
 - `group by` có thể nhóm theo một hoặc nhiều column.
-- Sau khi `group by` sắp xếp theo column dùng để group, `order by` có thể sắp xếp theo summary column.
+- Sau khi `group by` sắp xếp theo column dùng để group, `order by` có thể sắp xếp theo column tổng hợp.
 
 **Group**
 
@@ -276,14 +276,14 @@ HAVING COUNT(*) > 1;
 
 ## Subquery
 
-Subquery là SQL query được lồng trong một query lớn hơn, còn được gọi là inner query hoặc inner select. Statement chứa subquery cũng được gọi là outer query hoặc outer select. Nói đơn giản, subquery là việc dùng kết quả của một `select` query (subquery) làm nguồn dữ liệu hoặc điều kiện xét đoán cho một SQL statement khác (main query).
+Subquery là SQL query được lồng trong một query lớn hơn, còn được gọi là inner query hoặc inner select. Statement chứa subquery cũng được gọi là outer query hoặc outer select. Nói đơn giản, subquery là việc dùng kết quả của một `select` query (subquery) làm nguồn dữ liệu hoặc điều kiện cho một SQL statement khác (main query).
 
 Subquery có thể được nhúng trong statement `SELECT`, `INSERT`, `UPDATE` và `DELETE`, đồng thời có thể dùng cùng các operator `=`, `<`, `>`, `IN`, `BETWEEN`, `EXISTS`.
 
-Subquery thường được dùng sau clause `WHERE` và clause `FROM`:
+Subquery thường được dùng trong clause `WHERE` và clause `FROM`:
 
 - Khi dùng cho clause `WHERE`, tùy operator khác nhau, subquery có thể trả về dữ liệu một row một column, nhiều row một column hoặc một row nhiều column. Subquery cần trả về value có thể làm điều kiện query của clause `WHERE`.
-- Khi dùng cho clause `FROM`, subquery thường trả về dữ liệu nhiều row nhiều column, tương đương trả về một temporary table, phù hợp với quy tắc phía sau `FROM` phải là table. Cách này có thể thực hiện query kết hợp nhiều table.
+- Khi dùng cho clause `FROM`, subquery thường trả về dữ liệu nhiều row nhiều column, tương đương trả về một temporary table, vì sau `FROM` phải là table. Cách này có thể thực hiện query kết hợp nhiều table.
 
 > Lưu ý: Database MYSQL chỉ bắt đầu hỗ trợ subquery từ version 4.1, các version cũ không hỗ trợ.
 
@@ -325,7 +325,7 @@ WHERE cust_id IN (SELECT cust_id
                                       WHERE prod_id = 'RGAN01'));
 ```
 
-Inner query được thực thi trước parent query để kết quả của inner query có thể được truyền cho outer query. Quy trình thực thi có thể tham khảo hình dưới:
+Inner query được thực thi trước outer query để kết quả của inner query có thể được truyền cho outer query. Quy trình thực thi có thể tham khảo hình dưới:
 
 ![](https://oss.javaguide.cn/p3-juejin/c439da1f5d4e4b00bdfa4316b933d764~tplv-k3u1fbpfcp-zoom-1.png)
 
@@ -372,7 +372,7 @@ WHERE cust_name = 'Kids Place';
 
 ### IN và BETWEEN
 
-- Operator `IN` dùng trong clause `WHERE`, có tác dụng chọn một value bất kỳ trong một số value cụ thể được chỉ định.
+- Operator `IN` dùng trong clause `WHERE`, có tác dụng chọn một value trong các value cụ thể được chỉ định.
 - Operator `BETWEEN` dùng trong clause `WHERE`, có tác dụng chọn value nằm trong một phạm vi.
 
 **Ví dụ IN**
@@ -425,11 +425,11 @@ WHERE prod_price NOT BETWEEN 3 AND 5;
 
 ### LIKE
 
-- Operator `LIKE` dùng trong clause `WHERE`, có tác dụng xác định string có khớp pattern hay không.
+- Operator `LIKE` dùng trong clause `WHERE`, có tác dụng xác định string có khớp với pattern hay không.
 - Chỉ dùng `LIKE` khi field là text value.
 - `LIKE` hỗ trợ hai wildcard: `%` và `_`.
 - Không nên lạm dụng wildcard; wildcard ở đầu pattern sẽ khiến việc match rất chậm.
-- `%` biểu thị một character bất kỳ xuất hiện số lần bất kỳ.
+- `%` biểu thị một chuỗi ký tự có độ dài bất kỳ.
 - `_` biểu thị một character bất kỳ xuất hiện một lần.
 
 **Ví dụ %**
@@ -548,7 +548,7 @@ Tên column trong result set của `UNION` luôn bằng tên column trong statem
 `JOIN` và `UNION`:
 
 - Các column của table được join trong `JOIN` có thể khác nhau, nhưng trong `UNION`, số lượng column và thứ tự column của tất cả query phải giống nhau.
-- `UNION` đặt các row sau query cạnh nhau (theo chiều dọc), còn `JOIN` đặt các column sau query cạnh nhau (theo chiều ngang), tức tạo thành Cartesian product.
+- `UNION` đặt các row của các query cạnh nhau (theo chiều dọc), còn `JOIN` đặt các column của các query cạnh nhau (theo chiều ngang), tức tạo thành Cartesian product.
 
 ## Function
 
@@ -579,7 +579,7 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 
 | Function        | Mô tả                                         |
 | --------------- | --------------------------------------------- |
-| `AddDate()`     | Thêm một ngày (ngày, tuần, v.v.)              |
+| `AddDate()`     | Cộng thêm ngày (ngày, tuần, v.v.)             |
 | `AddTime()`     | Thêm một khoảng thời gian (giờ, phút, v.v.)   |
 | `CurDate()`     | Trả về ngày hiện tại                          |
 | `CurTime()`     | Trả về thời gian hiện tại                     |
@@ -587,8 +587,8 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 | `DateDiff()`    | Tính chênh lệch giữa hai ngày                 |
 | `Date_Add()`    | Function tính toán ngày có tính linh hoạt cao |
 | `Date_Format()` | Trả về string ngày hoặc thời gian đã format   |
-| `Day()`         | Trả về phần ngày trong một date               |
-| `DayOfWeek()`   | Trả về thứ tương ứng với một date             |
+| `Day()`         | Trả về phần ngày của một date                 |
+| `DayOfWeek()`   | Trả về thứ trong tuần của một date            |
 | `Hour()`        | Trả về phần giờ trong một time                |
 | `Minute()`      | Trả về phần phút trong một time               |
 | `Month()`       | Trả về phần tháng trong một date              |
@@ -752,7 +752,7 @@ DROP VIEW top_10_user_view;
 
 ### Index (INDEX)
 
-**Index là một data structure dùng để query và tìm kiếm dữ liệu nhanh, bản chất có thể xem như một data structure đã được sắp xếp.**
+**Index là một data structure dùng để query và retrieve dữ liệu nhanh, bản chất có thể xem như một data structure đã được sắp xếp.**
 
 Tác dụng của index tương tự mục lục của sách. Ví dụ, khi tra từ điển, nếu không có mục lục thì chỉ có thể tìm từng trang một, tốc độ rất chậm. Nếu có mục lục, chỉ cần tìm vị trí của từ trong mục lục rồi lật trực tiếp đến trang đó.
 
@@ -766,7 +766,7 @@ Tác dụng của index tương tự mục lục của sách. Ví dụ, khi tra 
 - Tạo và duy trì index tốn nhiều thời gian. Khi thêm, xóa hoặc sửa dữ liệu trong table, nếu dữ liệu có index thì index cũng cần được cập nhật động, làm giảm hiệu suất thực thi SQL.
 - Index cần dùng file vật lý để lưu trữ, đồng thời cũng chiếm một phần dung lượng.
 
-Tuy nhiên, **dùng index nhất định sẽ cải thiện query performance sao?**
+Tuy nhiên, **dùng index có nhất thiết cải thiện query performance không?**
 
 Trong phần lớn trường hợp, index query nhanh hơn full table scan. Nhưng nếu lượng dữ liệu trong database không lớn thì dùng index chưa chắc mang lại cải thiện đáng kể.
 
@@ -1004,7 +1004,7 @@ SET PASSWORD FOR myuser = 'mypass';
 
 ## Stored procedure
 
-Stored procedure có thể được xem như một batch xử lý một chuỗi SQL operation. Stored procedure có thể được gọi bởi trigger, stored procedure khác và các application như Java, Python, PHP.
+Stored procedure có thể được xem như một batch xử lý một loạt SQL operation. Stored procedure có thể được gọi bởi trigger, stored procedure khác và các application như Java, Python, PHP.
 
 ![Stored procedure MySQL](https://oss.javaguide.cn/p3-juejin/60afdc9c9a594f079727ec64a2e698a3~tplv-k3u1fbpfcp-zoom-1.jpeg)
 
@@ -1016,7 +1016,7 @@ Lợi ích của việc dùng stored procedure:
 
 Tạo stored procedure:
 
-- Khi tạo stored procedure trong command line, cần tự định nghĩa delimiter vì command line dùng `;` làm ký hiệu kết thúc, trong khi stored procedure cũng chứa dấu chấm phẩy nên sẽ nhận nhầm các dấu chấm phẩy này là ký hiệu kết thúc, gây lỗi cú pháp.
+- Khi tạo stored procedure trong command line, cần tự định nghĩa delimiter vì command line dùng `;` làm ký hiệu kết thúc, trong khi stored procedure cũng chứa dấu chấm phẩy nên sẽ nhận nhầm các dấu chấm phẩy này là ký hiệu kết thúc và gây lỗi cú pháp.
 - Bao gồm ba loại parameter `in`, `out` và `inout`.
 - Mọi thao tác gán value cho variable đều cần dùng statement `select into`.
 - Mỗi lần chỉ có thể gán value cho một variable, không hỗ trợ thao tác trên collection.
@@ -1025,7 +1025,7 @@ Cần lưu ý: **Alibaba 《Sổ tay phát triển Java》bắt buộc không đ
 
 ![](https://oss.javaguide.cn/p3-juejin/93a5e011ade4450ebfa5d82057532a49~tplv-k3u1fbpfcp-zoom-1.png)
 
-Việc có nên dùng trong project hay không còn tùy vào nhu cầu thực tế của project; chỉ cần cân nhắc kỹ ưu nhược điểm.
+Việc có nên dùng trong project hay không còn tùy nhu cầu thực tế; chỉ cần cân nhắc kỹ ưu nhược điểm.
 
 ### Tạo stored procedure
 
@@ -1069,7 +1069,7 @@ Các bước cụ thể để dùng cursor:
 
 - Sau khi declare, bắt buộc phải mở cursor để sử dụng. Quá trình này dùng statement SELECT đã định nghĩa ở trên để thực sự truy xuất dữ liệu.
 
-- Với cursor đã được điền dữ liệu, lấy (truy xuất) từng row theo nhu cầu.
+- Với cursor chứa dữ liệu, lấy (truy xuất) từng row theo nhu cầu.
 
 - Khi kết thúc việc dùng cursor, bắt buộc phải đóng cursor và nếu có thể thì giải phóng cursor (phụ thuộc vào DBMS cụ thể).
 
@@ -1078,10 +1078,10 @@ DELIMITER $
 CREATE  PROCEDURE getTotal()
 BEGIN
     DECLARE total INT;
-    -- Tạo variable nhận dữ liệu cursor
+    -- Tạo variable nhận dữ liệu từ cursor
     DECLARE sid INT;
     DECLARE sname VARCHAR(10);
-    -- Tạo variable tổng số
+    -- Tạo variable lưu tổng số
     DECLARE sage INT;
     -- Tạo variable đánh dấu kết thúc
     DECLARE done INT DEFAULT false;
@@ -1109,7 +1109,7 @@ call getTotal();
 
 ## Trigger
 
-Trigger là một database object liên quan đến thao tác trên table. Khi event được chỉ định xuất hiện trên table chứa trigger, object đó sẽ được gọi, tức event thao tác trên table sẽ trigger việc thực thi trigger trên table.
+Trigger là một database object liên quan đến thao tác trên table. Khi một event được chỉ định xảy ra trên table gắn với trigger, object này sẽ được gọi, tức event thao tác trên table sẽ kích hoạt trigger.
 
 Có thể dùng trigger để audit trail, ghi record thay đổi vào một table khác.
 
@@ -1123,29 +1123,29 @@ Có thể dùng trigger để audit trail, ghi record thay đổi vào một tab
 Nhược điểm của trigger:
 
 - SQL trigger chỉ có thể cung cấp validation mở rộng, không thể thay thế mọi validation. Một số validation đơn giản phải được thực hiện ở application layer. Ví dụ, có thể dùng JavaScript để validate input của user ở client, hoặc dùng server-side scripting language như JSP, PHP, ASP.NET, Perl để validate input của user ở server.
-- Việc gọi và thực thi SQL trigger từ client application là không visible, vì vậy rất khó tìm hiểu chuyện gì xảy ra ở database layer.
+- Việc gọi và thực thi SQL trigger từ client application không thể quan sát được, vì vậy rất khó biết chuyện gì xảy ra ở database layer.
 - SQL trigger có thể làm tăng overhead của database server.
 
 MySQL không cho phép dùng statement CALL trong trigger, tức không thể gọi stored procedure.
 
-> Lưu ý: Trong MySQL, dấu chấm phẩy `;` là identifier kết thúc statement. Khi gặp dấu chấm phẩy, MySQL xem đoạn statement đó đã kết thúc và có thể bắt đầu thực thi. Vì vậy, khi interpreter gặp dấu chấm phẩy trong action thực thi trigger, nó sẽ bắt đầu thực thi rồi báo lỗi vì không tìm thấy END tương ứng với BEGIN.
+> Lưu ý: Trong MySQL, dấu chấm phẩy `;` là ký hiệu kết thúc statement. Khi gặp dấu chấm phẩy, MySQL xem đoạn statement đó đã kết thúc và có thể bắt đầu thực thi. Vì vậy, khi interpreter gặp dấu chấm phẩy trong action thực thi trigger, nó sẽ bắt đầu thực thi rồi báo lỗi vì không tìm thấy END tương ứng với BEGIN.
 >
-> Lúc này sẽ cần command `DELIMITER` (`DELIMITER` có nghĩa là delimiter, separator). Đây là một command không cần identifier kết thúc statement, cú pháp là: `DELIMITER new_delimiter`. `new_delimiter` có thể là một symbol dài một hoặc nhiều ký tự; mặc định là dấu chấm phẩy `;`, nhưng có thể đổi thành symbol khác như `$` - `DELIMITER $`. Sau đó, các statement kết thúc bằng dấu chấm phẩy sẽ không khiến interpreter phản ứng; chỉ khi gặp `$` thì nó mới xem là statement kết thúc. Lưu ý, sau khi dùng xong cần nhớ đổi lại.
+> Lúc này sẽ cần command `DELIMITER` (`DELIMITER` có nghĩa là delimiter, separator). Đây là một command không cần ký hiệu kết thúc statement, cú pháp là: `DELIMITER new_delimiter`. `new_delimiter` có thể là một symbol gồm một hoặc nhiều ký tự; mặc định là dấu chấm phẩy `;`, nhưng có thể đổi thành symbol khác như `$` - `DELIMITER $`. Sau đó, các statement kết thúc bằng dấu chấm phẩy sẽ không khiến interpreter phản ứng; chỉ khi gặp `$` thì nó mới xem là statement kết thúc. Lưu ý, sau khi dùng xong cần nhớ đổi lại.
 
 Trước MySQL version 5.7.2, mỗi table được định nghĩa tối đa sáu trigger.
 
-- `BEFORE INSERT` - Activate trước khi insert dữ liệu vào table.
-- `AFTER INSERT` - Activate sau khi insert dữ liệu vào table.
-- `BEFORE UPDATE` - Activate trước khi update dữ liệu trong table.
-- `AFTER UPDATE` - Activate sau khi update dữ liệu trong table.
-- `BEFORE DELETE` - Activate trước khi xóa dữ liệu khỏi table.
-- `AFTER DELETE` - Activate sau khi xóa dữ liệu khỏi table.
+- `BEFORE INSERT` - Được kích hoạt trước khi insert dữ liệu vào table.
+- `AFTER INSERT` - Được kích hoạt sau khi insert dữ liệu vào table.
+- `BEFORE UPDATE` - Được kích hoạt trước khi update dữ liệu trong table.
+- `AFTER UPDATE` - Được kích hoạt sau khi update dữ liệu trong table.
+- `BEFORE DELETE` - Được kích hoạt trước khi xóa dữ liệu khỏi table.
+- `AFTER DELETE` - Được kích hoạt sau khi xóa dữ liệu khỏi table.
 
 Tuy nhiên, từ MySQL version 5.7.2 trở lên, có thể định nghĩa nhiều trigger cho cùng một trigger event và thời điểm thao tác.
 
 **`NEW` và `OLD`**:
 
-- MySQL định nghĩa keyword `NEW` và `OLD` để biểu thị row dữ liệu đã trigger trigger trong table nơi trigger được định nghĩa.
+- MySQL định nghĩa keyword `NEW` và `OLD` để biểu thị row dữ liệu làm trigger được kích hoạt trong table nơi trigger được định nghĩa.
 - Trong trigger kiểu `INSERT`, `NEW` biểu thị dữ liệu mới sắp được (`BEFORE`) hoặc đã được (`AFTER`) insert;
 - Trong trigger kiểu `UPDATE`, `OLD` biểu thị dữ liệu cũ sắp hoặc đã bị sửa, `NEW` biểu thị dữ liệu mới sắp hoặc đã được sửa thành;
 - Trong trigger kiểu `DELETE`, `OLD` biểu thị dữ liệu cũ sắp hoặc đã bị xóa;
@@ -1173,9 +1173,9 @@ END;
 Giải thích:
 
 - `trigger_name`: tên trigger
-- `trigger_time` : thời điểm trigger được activate. Giá trị là `BEFORE` hoặc `AFTER`.
+- `trigger_time` : thời điểm trigger được kích hoạt. Giá trị là `BEFORE` hoặc `AFTER`.
 - `trigger_event` : event mà trigger lắng nghe. Giá trị là `INSERT`, `UPDATE` hoặc `DELETE`.
-- `table_name` : đối tượng mà trigger lắng nghe. Chỉ định table tạo trigger.
+- `table_name` : table mà trigger theo dõi. Chỉ định table tạo trigger.
 - `FOR EACH ROW`: giám sát cấp row, là cách viết cố định của MySQL; DBMS khác sẽ khác.
 - `trigger_statements`: action được trigger thực thi. Là danh sách gồm một hoặc nhiều SQL statement; mỗi statement trong danh sách đều phải kết thúc bằng dấu chấm phẩy `;`.
 

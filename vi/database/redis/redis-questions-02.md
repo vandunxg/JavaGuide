@@ -16,11 +16,11 @@ head:
 
 ### Redis transaction là gì?
 
-Bạn có thể hiểu transaction trong Redis như sau: **Redis transaction cung cấp một chức năng đóng gói nhiều command request. Sau đó, tất cả command đã đóng gói sẽ được thực thi theo thứ tự và không bị ngắt giữa chừng.**
+Bạn có thể hiểu transaction trong Redis như sau: **Redis transaction cung cấp chức năng đóng gói nhiều command request. Sau đó, tất cả command đã đóng gói sẽ được thực thi theo thứ tự và không bị ngắt giữa chừng.**
 
 Redis transaction được sử dụng rất ít trong phát triển thực tế, chức năng khá hạn chế; không nên nhầm lẫn nó với transaction của relational database mà chúng ta thường hiểu.
 
-Ngoài việc không đáp ứng atomicity và durability, mỗi command trong transaction đều phải tương tác mạng với Redis server, đây là hành vi khá lãng phí tài nguyên. Rõ ràng có thể thực thi nhiều command một lần, nên cách làm này thực sự khó hiểu.
+Ngoài việc không đáp ứng atomicity và durability, mỗi command trong transaction đều phải trao đổi qua network với Redis server, đây là hành vi khá lãng phí tài nguyên. Rõ ràng có thể thực thi nhiều command một lần, nên cách làm này thực sự khó hiểu.
 
 Vì vậy, không khuyến nghị sử dụng Redis transaction trong phát triển hằng ngày.
 
@@ -45,7 +45,7 @@ Sau command [`MULTI`](https://redis.io/commands/multi), bạn có thể nhập n
 Quy trình như sau:
 
 1. Bắt đầu transaction (`MULTI`);
-2. Đưa command vào queue (các command thao tác batch trên Redis được thực thi theo thứ tự first in, first out (FIFO));
+2. Đưa command vào queue (các command của Redis được thực thi theo thứ tự first in, first out (FIFO));
 3. Thực thi transaction (`EXEC`).
 
 Bạn cũng có thể dùng command [`DISCARD`](https://redis.io/commands/discard) để hủy một transaction; command này sẽ xóa toàn bộ command được lưu trong transaction queue.
@@ -128,7 +128,7 @@ QUEUED
 (nil)
 ```
 
-Giới thiệu liên quan trên website Redis: [https://redis.io/topics/transactions](https://redis.io/topics/transactions)
+Phần giới thiệu liên quan trên website Redis: [https://redis.io/topics/transactions](https://redis.io/topics/transactions)
 
 ![Redis transaction](https://oss.javaguide.cn/github/javaguide/database/redis/redis-transactions.png)
 
@@ -143,7 +143,7 @@ Redis transaction khác với transaction của relational database mà chúng t
 
 Khi xảy ra lỗi lúc chạy, ngoài command bị lỗi trong quá trình thực thi, các command khác trong Redis transaction vẫn có thể thực thi bình thường. Ngoài ra, Redis transaction không hỗ trợ thao tác rollback. Vì vậy, Redis transaction thực tế không đáp ứng atomicity.
 
-Website Redis cũng giải thích lý do không hỗ trợ rollback. Nói ngắn gọn, các developer Redis cho rằng không cần hỗ trợ rollback; cách này đơn giản, thuận tiện hơn và performance tốt hơn. Developer Redis cho rằng ngay cả khi command thực thi lỗi, lỗi đó cũng nên được phát hiện trong quá trình phát triển chứ không phải ở production.
+Website Redis cũng giải thích lý do không hỗ trợ rollback. Nói ngắn gọn, các developer của Redis cho rằng không cần hỗ trợ rollback; cách này đơn giản, thuận tiện hơn và performance tốt hơn. Họ cho rằng ngay cả khi command thực thi lỗi, lỗi đó cũng nên được phát hiện trong quá trình phát triển chứ không phải ở production.
 
 ![Vì sao Redis không hỗ trợ rollback](https://oss.javaguide.cn/github/javaguide/database/redis/redis-rollback.png)
 
@@ -182,7 +182,7 @@ Tuy nhiên, nếu Lua script bị lỗi và kết thúc giữa chừng, các com
 
 Nếu muốn tất cả command trong Lua script được thực thi, phải bảo đảm cú pháp statement và command đều đúng.
 
-Ngoài ra, Redis 7.0 bổ sung tính năng [Redis functions](https://redis.io/docs/latest/develop/programmability/functions-intro/); bạn có thể xem Redis functions là script mạnh hơn Lua.
+Ngoài ra, Redis 7.0 bổ sung tính năng [Redis functions](https://redis.io/docs/latest/develop/programmability/functions-intro/); bạn có thể xem Redis functions là một script mạnh hơn Lua.
 
 ## ⭐️ Tối ưu performance Redis (quan trọng)
 
@@ -200,7 +200,7 @@ Việc thực thi một Redis command có thể được đơn giản hóa thàn
 3. Thực thi command;
 4. Trả về kết quả.
 
-Tổng thời gian của bước 1 và bước 4 được gọi là **Round Trip Time (RTT, round-trip time)**, tức thời gian dữ liệu truyền trên network.
+Tổng thời gian của bước 1 và bước 4 được gọi là **Round Trip Time (RTT, thời gian khứ hồi)**, tức thời gian dữ liệu truyền trên network.
 
 Dùng batch operation có thể giảm số lần network transmission, từ đó giảm network overhead một cách hiệu quả và giảm mạnh RTT.
 
@@ -215,7 +215,7 @@ Redis có một số command native hỗ trợ batch operation, ví dụ:
 - `SADD` (thêm một hoặc nhiều element vào set được chỉ định)
 - ……
 
-Tuy nhiên, trong Redis Cluster, giải pháp sharding cluster chính thức của Redis, việc dùng các native batch operation command này có thể có một số vấn đề cần xử lý. Ví dụ, `MGET` không bảo đảm mọi key đều nằm trên cùng một **hash slot**; `MGET` có thể vẫn cần nhiều lần network transmission và cũng không bảo đảm atomic operation. Tuy vậy, so với non-batch operation, cách này vẫn tiết kiệm được không ít lần network transmission.
+Tuy nhiên, trong Redis Cluster, giải pháp cluster sharding chính thức của Redis, việc dùng các native batch operation command này có thể có một số vấn đề cần xử lý. Ví dụ, `MGET` không bảo đảm mọi key đều nằm trên cùng một **hash slot**; `MGET` có thể vẫn cần nhiều lần network transmission và cũng không bảo đảm atomic operation. Tuy vậy, so với non-batch operation, cách này vẫn tiết kiệm được không ít lần network transmission.
 
 Phiên bản đơn giản của toàn bộ quy trình như sau (thường do Redis client triển khai, chúng ta không cần tự triển khai thủ công):
 
@@ -225,13 +225,13 @@ Phiên bản đơn giản của toàn bộ quy trình như sau (thường do Red
 
 Nếu muốn giải quyết vấn đề nhiều lần network transmission này, cách thường dùng là tự duy trì quan hệ giữa key và slot. Tuy nhiên, cách này kém linh hoạt; dù cải thiện performance nhưng cũng làm tăng độ phức tạp của hệ thống.
 
-> Redis Cluster không sử dụng consistent hashing mà dùng **hash slot partition**; mỗi key-value pair thuộc về một **hash slot**. Khi client gửi command request, trước tiên cần tìm hash slot tương ứng theo key bằng công thức tính ở trên, sau đó tra cứu quan hệ mapping giữa hash slot và node để tìm Redis node đích.
+> Redis Cluster không sử dụng consistent hashing mà dùng **phân vùng hash slot**; mỗi key-value pair thuộc về một **hash slot**. Khi client gửi command request, trước tiên cần tìm hash slot tương ứng theo key bằng công thức tính ở trên, sau đó tra cứu quan hệ mapping giữa hash slot và node để tìm Redis node đích.
 >
 > Tôi đã giới thiệu chi tiết phần Redis Cluster trong bài [Giải thích chi tiết Redis Cluster (trả phí)](https://javaguide.cn/database/redis/redis-cluster.html), nếu quan tâm bạn có thể xem.
 
 #### pipeline
 
-Đối với command không hỗ trợ batch operation, chúng ta có thể dùng **pipeline** để đóng gói một loạt Redis command thành một nhóm. Các Redis command này được gửi đến Redis server trong một lần, chỉ cần một lần network transmission. Tuy nhiên, cần chú ý kiểm soát **số lượng element** trong một batch operation (chẳng hạn không quá 500; thực tế còn liên quan đến số byte của element), tránh khiến lượng dữ liệu network transmission quá lớn.
+Đối với command không hỗ trợ batch operation, chúng ta có thể dùng **pipeline** để đóng gói một loạt Redis command thành một nhóm. Các Redis command này được gửi đến Redis server trong một lần, chỉ cần một lần network transmission. Tuy nhiên, cần chú ý kiểm soát **số lượng element** trong một batch operation (chẳng hạn không quá 500; thực tế còn liên quan đến số byte của element), tránh khiến lượng dữ liệu truyền qua network quá lớn.
 
 Tương tự các native batch operation command như `MGET` và `MSET`, pipeline cũng có một số vấn đề khi dùng trên Redis Cluster. Nguyên nhân tương tự: không thể bảo đảm mọi key đều nằm trên cùng một **hash slot**. Nếu muốn sử dụng, client cần tự duy trì quan hệ giữa key và slot.
 
@@ -254,7 +254,7 @@ Ngoài ra, pipeline không phù hợp để thực thi một nhóm command có q
 
 #### Lua script
 
-Lua script cũng hỗ trợ batch operation nhiều command. Một Lua script có thể được xem như một command để thực thi, có thể xem là **atomic operation**. Nghĩa là trong quá trình thực thi Lua script, không có script hoặc Redis command khác được thực thi đồng thời, bảo đảm operation không bị instruction khác chèn vào hoặc can thiệp; đây là điều pipeline không có.
+Lua script cũng hỗ trợ batch operation nhiều command. Một Lua script có thể được xem như một command để thực thi, có thể xem là **atomic operation**. Nghĩa là trong quá trình thực thi Lua script, không có script hoặc Redis command khác được thực thi đồng thời, bảo đảm operation không bị command khác chèn vào hoặc can thiệp; đây là điều pipeline không thể bảo đảm.
 
 Ngoài ra, Lua script hỗ trợ một số xử lý logic đơn giản, chẳng hạn dùng command để đọc value rồi xử lý trong Lua script; pipeline không có khả năng này.
 
@@ -267,7 +267,7 @@ Tuy nhiên, Lua script vẫn có các hạn chế sau:
 
 Trước đây tôi đã đề cập: với expired key, Redis dùng strategy **periodic deletion + lazy deletion**.
 
-Trong lúc thực hiện periodic deletion, nếu đột nhiên gặp nhiều expired key, client request phải chờ thread thực hiện nhiệm vụ dọn expired key định kỳ hoàn tất, vì thread nhiệm vụ định kỳ này chạy trong Redis main thread. Điều đó khiến client request không được xử lý kịp thời và tốc độ response chậm hơn.
+Trong lúc thực hiện periodic deletion, nếu đột nhiên gặp nhiều expired key, client request phải chờ thread dọn expired key định kỳ hoàn tất, vì thread này chạy trong Redis main thread. Điều đó khiến client request không được xử lý kịp thời và tốc độ response chậm hơn.
 
 **Giải quyết như thế nào?** Dưới đây là hai cách thường dùng:
 
@@ -276,7 +276,7 @@ Trong lúc thực hiện periodic deletion, nếu đột nhiên gặp nhiều ex
 
 Theo tôi, bất kể có bật lazy-free hay không, chúng ta vẫn nên cố gắng đặt thời gian hết hạn ngẫu nhiên cho key.
 
-### Redis bigkey
+### Redis bigkey (big key)
 
 #### bigkey là gì?
 
@@ -292,10 +292,10 @@ Nói đơn giản, nếu value tương ứng với một key chiếm lượng me
 bigkey thường được tạo ra bởi các nguyên nhân sau:
 
 - Thiết kế chương trình không phù hợp, chẳng hạn trực tiếp dùng kiểu String để lưu binary data của file lớn.
-- Không cân nhắc đầy đủ quy mô dữ liệu nghiệp vụ, chẳng hạn khi dùng kiểu collection không tính đến tốc độ tăng nhanh của data volume.
+- Không cân nhắc đầy đủ quy mô dữ liệu nghiệp vụ, chẳng hạn khi dùng kiểu collection không tính đến tốc độ tăng nhanh của dữ liệu.
 - Không kịp thời dọn garbage data, chẳng hạn hash chứa quá nhiều key-value pair vô dụng.
 
-Ngoài việc tiêu tốn nhiều memory space và bandwidth hơn, bigkey còn ảnh hưởng khá lớn đến performance.
+Ngoài việc tiêu tốn nhiều memory và bandwidth hơn, bigkey còn ảnh hưởng khá lớn đến performance.
 
 Trong bài [Tổng hợp nguyên nhân Redis bị blocking thường gặp](./redis-common-blocking-problems-summary.md), chúng ta đã đề cập big key còn gây ra vấn đề blocking. Cụ thể, chủ yếu thể hiện ở ba khía cạnh sau:
 
@@ -339,7 +339,7 @@ Biggest string found '"ballcat:oauth:refresh_auth:f6cdb384-9a9d-4f2f-af01-dc3f28
 
 Từ kết quả chạy command này, có thể thấy command sẽ scan toàn bộ key trong Redis, gây ảnh hưởng nhất định đến performance Redis. Ngoài ra, cách này chỉ tìm được top 1 bigkey của mỗi data structure (String type chiếm nhiều memory nhất, composite data type có nhiều element nhất). Tuy nhiên, nhiều element trong một key không có nghĩa key đó cũng chiếm nhiều memory; cần phán đoán thêm dựa trên tình hình nghiệp vụ cụ thể.
 
-Khi thực thi command này trên production, cần chỉ định parameter `-i` để kiểm soát tần suất scan và giảm ảnh hưởng đến Redis. `redis-cli -p 6379 --bigkeys -i 3` nghĩa là sau mỗi lần scan trong quá trình scan sẽ nghỉ 3 giây.
+Khi thực thi command này trên production, cần chỉ định parameter `-i` để kiểm soát tần suất scan và giảm ảnh hưởng đến Redis. `redis-cli -p 6379 --bigkeys -i 3` nghĩa là sau mỗi lần scan sẽ nghỉ 3 giây.
 
 **2. Dùng command SCAN tích hợp sẵn trong Redis**
 
@@ -378,22 +378,22 @@ Các cách xử lý và tối ưu bigkey thường dùng như sau (có thể k�
 
 - **Chia nhỏ bigkey**: chia một bigkey thành nhiều key nhỏ. Ví dụ, chia một Hash có hàng vạn field thành nhiều Hash theo strategy nhất định (chẳng hạn rehash lần hai).
 - **Dọn thủ công**: Redis 4.0+ có thể dùng command `UNLINK` để bất đồng bộ xóa một hoặc nhiều key được chỉ định. Với Redis dưới 4.0, có thể cân nhắc dùng command `SCAN` kết hợp `DEL` để xóa theo batch.
-- **Dùng data structure phù hợp**: chẳng hạn không dùng String để lưu binary data của file, dùng HyperLogLog để thống kê page UV, dùng Bitmap để lưu state information (0/1).
+- **Dùng data structure phù hợp**: chẳng hạn không dùng String để lưu binary data của file, dùng HyperLogLog để thống kê page UV, dùng Bitmap để lưu thông tin trạng thái (0/1).
 - **Bật lazy-free**: tính năng lazy-free được giới thiệu từ Redis 4.0, cho phép Redis bất đồng bộ giải phóng memory mà key sử dụng; operation này được giao cho một child thread riêng xử lý để tránh blocking main thread.
 
-### Redis hotkey
+### Redis hotkey (hot key)
 
 #### hotkey là gì?
 
 Nếu số lần truy cập một key khá nhiều và rõ ràng nhiều hơn các key khác, key đó có thể được xem là **hotkey**. Ví dụ, một Redis instance xử lý 5000 request mỗi giây, trong đó lượng truy cập một key nào đó lên tới 2000 request mỗi giây, key đó có thể được xem là hotkey.
 
-Nguyên nhân chính khiến hotkey xuất hiện là lượng truy cập vào một hot data tăng đột biến, chẳng hạn sự kiện hot search lớn hoặc sản phẩm tham gia flash sale.
+Nguyên nhân chính khiến hotkey xuất hiện là lượng truy cập vào một hot data tăng đột biến, chẳng hạn sự kiện hot search nổi bật hoặc sản phẩm tham gia flash sale.
 
 #### hotkey có tác hại gì?
 
 Xử lý hotkey sẽ chiếm dụng nhiều CPU và bandwidth, có thể ảnh hưởng đến việc Redis instance xử lý bình thường các request khác. Ngoài ra, nếu request truy cập hotkey đột nhiên vượt quá capacity xử lý của Redis, Redis có thể trực tiếp bị down. Khi đó, lượng lớn request sẽ dồn xuống database phía sau và có thể khiến database crash.
 
-Vì vậy, hotkey rất có thể trở thành bottleneck performance của system, cần được tối ưu riêng để bảo đảm high availability và stability của system.
+Vì vậy, hotkey rất có thể trở thành performance bottleneck của hệ thống, cần được tối ưu riêng để bảo đảm high availability và stability của hệ thống.
 
 #### Phát hiện hotkey như thế nào?
 
@@ -428,7 +428,7 @@ maxmemory-policy volatile-lfu
 maxmemory-policy allkeys-lfu
 ```
 
-Cần lưu ý command parameter `hotkeys` cũng làm tăng CPU và memory consumption của Redis instance (global scan), vì vậy cần thận trọng khi sử dụng.
+Cần lưu ý command `--hotkeys` cũng làm tăng CPU và memory consumption của Redis instance (global scan), vì vậy cần thận trọng khi sử dụng.
 
 **2. Dùng command `MONITOR`.**
 
@@ -461,11 +461,11 @@ Project [hotkey](https://gitee.com/jd-platform-opensource/hotkey) của JD Retai
 
 **4. Ước tính trước dựa trên tình hình nghiệp vụ.**
 
-Có thể dự đoán một số hotkey dựa trên tình hình nghiệp vụ, chẳng hạn data sản phẩm tham gia flash sale. Tuy nhiên, không thể dự đoán mọi hotkey, ví dụ các sự kiện tin tức hot phát sinh đột ngột.
+Có thể dự đoán một số hotkey dựa trên tình hình nghiệp vụ, chẳng hạn data sản phẩm tham gia flash sale. Tuy nhiên, không thể dự đoán mọi hotkey, ví dụ các sự kiện tin tức nóng phát sinh đột ngột.
 
 **5. Ghi lại và phân tích trong business code.**
 
-Thêm logic tương ứng trong business code để ghi lại và phân tích tình hình truy cập key. Tuy nhiên, cách này làm tăng độ phức tạp của business code nên thường cũng không được dùng.
+Thêm logic tương ứng trong code nghiệp vụ để ghi lại và phân tích tình hình truy cập key. Tuy nhiên, cách này làm tăng độ phức tạp của code nghiệp vụ nên thường cũng không được dùng.
 
 **6. Dùng Redis analysis service của public cloud.**
 
@@ -500,7 +500,7 @@ Chúng ta biết việc thực thi một Redis command có thể được đơn 
 3. Thực thi command;
 4. Trả về kết quả.
 
-Redis thống kê thời gian của bước thực thi command; slow query command chính là các command có thời gian thực thi dài.
+Redis thống kê thời gian thực thi command; slow query command chính là các command có thời gian thực thi dài.
 
 Vì sao Redis có slow query command?
 
@@ -513,7 +513,7 @@ Phần lớn command trong Redis có time complexity O(1), nhưng cũng có mộ
 - `SINTER`/`SUNION`/`SDIFF`: tính intersection/union/difference của nhiều Set.
 - ……
 
-Vì time complexity của các command này là O(n), đôi khi chúng cũng scan toàn bộ table; n càng tăng thì thời gian thực thi càng dài. Tuy nhiên, không phải tuyệt đối không được dùng các command này mà cần xác định rõ giá trị N. Khi có nhu cầu traversal, có thể dùng `HSCAN`, `SSCAN`, `ZSCAN` thay thế.
+Vì time complexity của các command này là O(n), đôi khi chúng cũng quét toàn bộ table; n càng tăng thì thời gian thực thi càng dài. Tuy nhiên, không phải tuyệt đối không được dùng các command này mà cần xác định rõ giá trị N. Khi có nhu cầu traversal, có thể dùng `HSCAN`, `SSCAN`, `ZSCAN` thay thế.
 
 Ngoài các command có time complexity O(n) có thể gây slow query, còn có một số command có time complexity có thể lớn hơn O(N), chẳng hạn:
 
@@ -558,13 +558,13 @@ Lấy nội dung slow query log rất đơn giản, chỉ cần dùng command `S
 ```bash
 127.0.0.1:6379> SLOWLOG GET # truy vấn slow log
  1) 1) (integer) 5
-    2) (integer) 1684326682
-    3) (integer) 12000
-    4) 1) "KEYS"
-       2) "*"
-    5) "172.17.0.1:61152"
-    6) ""
-   // ...
+   2) (integer) 1684326682
+   3) (integer) 12000
+   4) 1) "KEYS"
+      2) "*"
+   5) "172.17.0.1:61152"
+   6) ""
+  // ...
 ```
 
 Mỗi entry trong slow query log gồm sáu giá trị sau:
@@ -604,7 +604,7 @@ OK
 
 #### Cache penetration là gì?
 
-Nói đơn giản, cache penetration là khi key của một lượng lớn request không hợp lệ, **hoàn toàn không tồn tại trong cache cũng không tồn tại trong database**. Điều này khiến các request đi thẳng đến database mà không qua cache, gây áp lực rất lớn cho database và có thể khiến database trực tiếp bị down vì quá nhiều request.
+Nói đơn giản, cache penetration là khi key trong nhiều request không hợp lệ, **hoàn toàn không tồn tại trong cache cũng không tồn tại trong database**. Điều này khiến các request đi thẳng đến database mà không qua cache, gây áp lực rất lớn cho database và có thể khiến database trực tiếp bị down vì quá nhiều request.
 
 ![Cache penetration](https://oss.javaguide.cn/github/javaguide/database/redis/redis-cache-penetration.png)
 
@@ -616,7 +616,7 @@ Cách cơ bản nhất là thực hiện tốt việc validate parameter trướ
 
 **1. Cache invalid key**
 
-Nếu cả cache và database đều không tìm thấy data của một key, ghi key đó vào Redis và đặt thời gian hết hạn, command cụ thể là: `SET key value EX 10086`. Cách này có thể giải quyết trường hợp key request thay đổi không thường xuyên. Nếu hacker tấn công độc hại và tạo một request key khác nhau mỗi lần, Redis sẽ cache một lượng lớn invalid key. Rõ ràng, giải pháp này không thể giải quyết vấn đề từ gốc. Nếu nhất định phải dùng cách này để giải quyết cache penetration, nên đặt thời gian hết hạn của invalid key ngắn hơn, chẳng hạn 1 phút.
+Nếu cả cache và database đều không tìm thấy data của một key, ghi key đó vào Redis và đặt thời gian hết hạn, command cụ thể là: `SET key value EX 10086`. Cách này có thể giải quyết trường hợp key request thay đổi không thường xuyên. Nếu hacker tấn công ác ý và tạo một request key khác nhau mỗi lần, Redis sẽ cache một lượng lớn invalid key. Rõ ràng, giải pháp này không thể giải quyết vấn đề từ gốc. Nếu nhất định phải dùng cách này để giải quyết cache penetration, nên đặt thời gian hết hạn của invalid key ngắn hơn, chẳng hạn 1 phút.
 
 Ngoài ra, thông thường chúng ta thiết kế key như sau: `table name:column name:primary key name:primary key value`.
 
@@ -630,7 +630,7 @@ public Object getObjectInclNullById(Integer id) {
     if (cacheValue == null) {
         // Lấy data từ database
         Object storageValue = storage.get(key);
-        // Cache empty object
+        // Cache object rỗng
         cache.set(key, storageValue);
         // Nếu storage data rỗng, cần đặt thời gian hết hạn (300 giây)
         if (storageValue == null) {
@@ -673,7 +673,7 @@ Giải pháp rate limiting cụ thể có thể tham khảo bài viết: [Giải
 
 #### Cache breakdown là gì?
 
-Trong cache breakdown, key của request tương ứng với **hot data**; data đó **tồn tại trong database nhưng không tồn tại trong cache (thường vì bản data trong cache đã hết hạn)**. Điều này có thể khiến một lượng lớn request trong thời gian ngắn trực tiếp đánh vào database, gây áp lực rất lớn cho database và có thể khiến database bị down.
+Trong cache breakdown, key của request tương ứng với **hot data**; data đó **tồn tại trong database nhưng không tồn tại trong cache (thường vì bản data trong cache đã hết hạn)**. Điều này có thể khiến một lượng lớn request trong thời gian ngắn đổ thẳng vào database, gây áp lực rất lớn cho database và có thể khiến database bị down.
 
 ![Cache breakdown](https://oss.javaguide.cn/github/javaguide/database/redis/redis-cache-breakdown.png)
 
@@ -682,8 +682,8 @@ Ví dụ: trong quá trình flash sale, data của một sản phẩm flash sale
 #### Có những cách giải quyết nào?
 
 1. **Không bao giờ hết hạn** (không khuyến nghị): đặt hot data không hết hạn hoặc đặt thời gian hết hạn rất dài.
-2. **Preheat trước** (khuyến nghị): preheat hot data trước, lưu vào cache và đặt thời gian hết hạn hợp lý; ví dụ data trong flash sale không hết hạn trước khi flash sale kết thúc.
-3. **Dùng lock** (tùy tình huống): sau khi cache invalid, dùng mutex lock để bảo đảm chỉ một request query database và update cache.
+2. **Preheat** (khuyến nghị): đưa hot data vào cache trước và đặt thời gian hết hạn hợp lý; ví dụ data trong flash sale không hết hạn trước khi flash sale kết thúc.
+3. **Dùng lock** (tùy tình huống): sau khi cache hết hạn, dùng mutex lock để bảo đảm chỉ một request query database và update cache.
 
 #### Cache penetration và cache breakdown khác nhau như thế nào?
 
@@ -697,7 +697,7 @@ Trong cache breakdown, key của request tương ứng với **hot data**; data 
 
 Tôi thấy cái tên cache avalanche khá thú vị, haha.
 
-Thực tế, cache avalanche mô tả một tình huống đơn giản: **cache mất hiệu lực trên diện rộng cùng một thời điểm, khiến lượng lớn request trực tiếp dồn xuống database và gây áp lực rất lớn cho database.** Điều này giống như avalanche, database bị áp đảo với sức tàn phá mạnh và có thể trực tiếp bị down vì quá nhiều request.
+Thực tế, cache avalanche mô tả một tình huống đơn giản: **cache mất hiệu lực trên diện rộng cùng một thời điểm, khiến lượng lớn request trực tiếp dồn xuống database và gây áp lực rất lớn cho database.** Điều này giống như avalanche, database có thể trực tiếp bị down vì áp lực quá lớn từ các request.
 
 Ngoài ra, cache service down cũng gây ra hiện tượng cache avalanche, khiến mọi request dồn xuống database.
 
@@ -709,13 +709,13 @@ Ví dụ: lượng lớn data trong cache hết hạn cùng một thời điểm
 
 **Với trường hợp Redis service không khả dụng**:
 
-1. **Redis Cluster**: dùng Redis Cluster để tránh việc toàn bộ cache service không thể sử dụng khi một single node gặp vấn đề. Redis Cluster và Redis Sentinel là hai giải pháp Redis Cluster thường dùng nhất; có thể tham khảo bài [Giải thích chi tiết Redis Cluster (trả phí)](https://javaguide.cn/database/redis/redis-cluster.html).
+1. **Redis Cluster**: dùng Redis Cluster để tránh việc toàn bộ cache service không thể sử dụng khi một node đơn gặp sự cố. Redis Cluster và Redis Sentinel là hai giải pháp triển khai Redis cluster phổ biến nhất; có thể tham khảo bài [Giải thích chi tiết Redis Cluster (trả phí)](https://javaguide.cn/database/redis/redis-cluster.html).
 2. **Multi-level cache**: thiết lập multi-level cache, chẳng hạn kết hợp local cache và Redis cache thành secondary cache; khi Redis cache gặp vấn đề vẫn có thể lấy một phần data từ local cache.
 
 **Với trường hợp lượng lớn cache đồng thời mất hiệu lực**:
 
 1. **Đặt thời gian mất hiệu lực ngẫu nhiên** (tùy chọn): đặt thời gian mất hiệu lực ngẫu nhiên cho cache, chẳng hạn cộng thêm một giá trị ngẫu nhiên trên thời gian hết hạn cố định. Cách này tránh nhiều cache đồng thời hết hạn và giảm rủi ro cache avalanche.
-2. **Preheat trước** (khuyến nghị): preheat hot data trước, lưu vào cache và đặt thời gian hết hạn hợp lý, chẳng hạn data trong flash sale không hết hạn trước khi flash sale kết thúc.
+2. **Preheat** (khuyến nghị): đưa hot data vào cache trước và đặt thời gian hết hạn hợp lý, chẳng hạn data trong flash sale không hết hạn trước khi flash sale kết thúc.
 3. **Persistent cache strategy** (tùy tình huống): dù thường không khuyến nghị đặt cache không bao giờ hết hạn, với một số data quan trọng và ít thay đổi có thể cân nhắc strategy này.
 
 #### Triển khai cache preheating như thế nào?
@@ -733,7 +733,7 @@ Cache avalanche và cache breakdown khá giống nhau, nhưng nguyên nhân cach
 
 Consistency giữa cache và database là một technical challenge khá phổ biến. Đưa cache vào chủ yếu để cải thiện performance và giảm áp lực database, nhưng đúng là nó cũng mang đến rủi ro data không nhất quán. Consistency tuyệt đối thường đồng nghĩa với complexity và performance overhead cao hơn, vì vậy trong thực tế chúng ta thường chọn strategy phù hợp theo business scenario để tìm điểm cân bằng giữa performance và consistency.
 
-Dưới đây sẽ nói riêng về **Cache Aside Pattern**. Đây là một cache read/write strategy rất phổ biến, logic read/write như sau:
+Dưới đây là phần riêng về **Cache Aside Pattern**. Đây là một cache read/write strategy rất phổ biến, logic read/write như sau:
 
 - **Read operation**:
   1. Trước tiên thử đọc data từ cache.
@@ -754,7 +754,7 @@ Nếu update database thành công nhưng bước xóa cache thất bại, có h
 1. **Rút ngắn cache expiration time (TTL - Time To Live)** (không khuyến nghị, chỉ xử lý phần ngọn): làm thời gian hết hạn của cache data ngắn hơn để cache load data từ database. Giải pháp này không phù hợp với scenario thao tác cache trước rồi mới thao tác database.
 2. **Thêm cơ chế retry cache update** (thường dùng): nếu cache service hiện không khả dụng khiến xóa cache thất bại, đợi một khoảng thời gian rồi retry; số lần retry có thể tự đặt. Tuy nhiên, phù hợp hơn là dùng message queue để triển khai asynchronous retry: gửi message retry xóa cache vào message queue, sau đó consumer chuyên dụng retry cho đến khi thành công. Dù thêm một message queue, lợi ích tổng thể vẫn lớn hơn.
 
-Bài viết liên quan: [Vấn đề consistency giữa cache và database, đọc bài này là đủ - Waterdrop and Silver Bullet](https://mp.weixin.qq.com/s?__biz=MzIyOTYxNDI5OA==&mid=2247487312&idx=1&sn=fa19566f5729d6598155b5c676eee62c&chksm=e8beb8e5dfc931f3e35655da9da0b61c79f2843101c130cf38996446975014f958a6481aacf1&scene=178&cur_album_id=1699766580538032128#rd).
+Bài viết liên quan: [Vấn đề consistency giữa cache và database, đọc bài này là đủ - Waterdrop and Silver Bullet](https://mp.weixin.qq.com/s?__biz=MzIyOTYxNDI5OA==&mid=2247487312&idx=1&sn=fa19566f5729d6598155b5c676eee62d&chksm=e8beb8e5dfc931f3e35655da9da0b61c79f2843101c130cf38996446975014f958a6481aacf1&scene=178&cur_album_id=1699766580538032128#rd).
 
 ### Những trường hợp nào có thể khiến Redis bị blocking?
 
@@ -762,13 +762,13 @@ Các nguyên nhân thường gặp khiến Redis bị blocking:
 
 - Thực thi command có complexity `O(n)` (như `KEYS *`, `HGETALL`, `LRANGE`, `SMEMBERS`, v.v.); data volume tăng khiến thời gian thực thi quá dài.
 - Khi thực thi command `SAVE` để tạo RDB snapshot, main thread bị synchronous blocking; còn `BGSAVE` tránh blocking bằng child process `fork`.
-- AOF ghi log trong main thread, có thể do ghi log sau khi command thực thi mà blocking command tiếp theo.
+- AOF ghi log trong main thread, có thể chặn các command tiếp theo do ghi log sau khi command thực thi.
 - Khi AOF flush xuống disk (`fsync`), background thread đồng bộ với disk; disk pressure lớn khiến `fsync` blocking, từ đó blocking thao tác `write` của main thread, đặc biệt rõ ràng với cấu hình `appendfsync always` hoặc `everysec`.
 - Trong quá trình AOF rewrite, khi append nội dung rewrite buffer vào AOF file mới sẽ phát sinh blocking.
 - Thao tác trên big key (string > 1MB hoặc composite type có > 5000 element) gây client timeout, network blocking và worker thread blocking.
 - Khi dùng `flushdb` hoặc `flushall` để xóa database, việc xóa nhiều key-value pair và giải phóng memory gây main thread blocking.
 - Khi cluster expansion hoặc shrink, data migration là synchronous operation; big key migration khiến node ở cả hai đầu bị blocking trong thời gian dài và có thể trigger failover.
-- Memory không đủ trigger Swap, operating system swap memory Redis ra hard disk, khiến performance read/write giảm mạnh.
+- Memory không đủ trigger Swap, operating system swap memory của Redis ra hard disk, khiến performance read/write giảm mạnh.
 - Process khác chiếm CPU quá mức khiến Redis throughput giảm.
 - Các vấn đề network như connection refusal, latency cao, network card soft interrupt, v.v. khiến Redis bị blocking.
 
@@ -791,7 +791,7 @@ Có thể đọc bài viết này để biết chi tiết: [Tổng hợp nguyên
 1. Vì sao cần Redis Cluster? Đã giải quyết vấn đề gì? Có ưu điểm gì?
 2. Redis Cluster thực hiện sharding như thế nào?
 3. Vì sao Redis Cluster có 16384 hash slot?
-4. Xác định key đã cho nên được phân bố vào hash slot nào như thế nào?
+4. Làm thế nào xác định key đã cho được phân bố vào hash slot nào?
 5. Redis Cluster có hỗ trợ reassign hash slot không?
 6. Redis Cluster có thể cung cấp service trong thời gian expansion/shrink không?
 7. Các node trong Redis Cluster giao tiếp với nhau như thế nào?
@@ -803,10 +803,10 @@ Có thể đọc bài viết này để biết chi tiết: [Tổng hợp nguyên
 Trong quá trình sử dụng Redis thực tế, chúng ta nên cố gắng tuân thủ một số quy ước thường gặp:
 
 1. Dùng connection pool: tránh thường xuyên tạo và đóng client connection.
-2. Cố gắng không dùng instruction O(n), khi dùng command O(n) cần chú ý số lượng n: các command O(n) như `KEYS *`, `HGETALL`, `LRANGE`, `SMEMBERS`, `SINTER`/`SUNION`/`SDIFF` không phải tuyệt đối không được dùng, nhưng cần xác định rõ giá trị n. Khi có nhu cầu traversal, có thể dùng `HSCAN`, `SSCAN`, `ZSCAN` thay thế.
+2. Cố gắng không dùng command có độ phức tạp O(n), khi dùng command O(n) cần chú ý số lượng n: các command O(n) như `KEYS *`, `HGETALL`, `LRANGE`, `SMEMBERS`, `SINTER`/`SUNION`/`SDIFF` không phải tuyệt đối không được dùng, nhưng cần xác định rõ giá trị n. Khi có nhu cầu traversal, có thể dùng `HSCAN`, `SSCAN`, `ZSCAN` thay thế.
 3. Dùng batch operation để giảm network transmission: native batch operation command (như `MGET`, `MSET`, v.v.), pipeline và Lua script.
 4. Cố gắng không dùng Redis transaction: chức năng Redis transaction khá hạn chế, có thể dùng Lua script thay thế.
-5. Nghiêm cấm bật monitor trong thời gian dài: ảnh hưởng khá lớn đến performance.
+5. Nghiêm cấm bật `MONITOR` trong thời gian dài: ảnh hưởng khá lớn đến performance.
 6. Kiểm soát lifecycle của key: tránh lưu quá nhiều data ít được truy cập trong Redis.
 7. ……
 

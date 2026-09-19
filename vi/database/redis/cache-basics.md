@@ -20,21 +20,21 @@ head:
 
 ## Tư tưởng cơ bản của cache
 
-Nhiều bạn chỉ biết cache có thể cải thiện performance của hệ thống và giảm **thời gian phản hồi** (Response Time), nhưng chưa hiểu rõ tư tưởng cốt lõi của cache là gì.
+Nhiều bạn chỉ biết cache có thể cải thiện performance của hệ thống và giảm **thời gian phản hồi** (Response Time), nhưng chưa hiểu rõ bản chất của cache là gì.
 
-Tư tưởng cơ bản của cache thực ra rất đơn giản, đó là áp dụng chiến lược tối ưu performance kinh điển **dùng không gian đổi lấy thời gian**. Nói cách khác, dùng thêm storage để lưu một số dữ liệu có thể được sử dụng hoặc tính toán lại, từ đó giảm thời gian lấy lại hoặc tính toán lại dữ liệu.
+Tư tưởng cơ bản của cache thực ra rất đơn giản, đó là áp dụng chiến lược tối ưu performance kinh điển **dùng không gian đổi lấy thời gian**. Nói cách khác, dùng thêm storage để lưu những dữ liệu có thể được dùng lại hoặc tính toán, từ đó giảm thời gian lấy lại hoặc tính toán dữ liệu.
 
 Khi nói đến việc dùng không gian đổi lấy thời gian, ngoài cache, bạn còn nghĩ ra ví dụ nào khác không? Dưới đây là một số ví dụ thường gặp:
 
-- **Index**: index là một cấu trúc dữ liệu riêng, tổ chức một số cột hoặc field trong bảng database theo một quy tắc sắp xếp nhất định. Dù chiếm thêm storage, index có thể cải thiện đáng kể hiệu quả truy vấn và giảm chi phí sắp xếp dữ liệu.
-- **Dư thừa field trong bảng database**: lưu dư thừa trong cùng một bảng những dữ liệu thường được query kết hợp, để giảm việc query liên kết nhiều bảng, từ đó cải thiện performance query và giảm áp lực cho database.
+- **Index**: index là một cấu trúc dữ liệu riêng, tổ chức một số cột hoặc field trong bảng database theo một quy tắc sắp xếp nhất định. Dù chiếm thêm storage, index có thể cải thiện đáng kể hiệu suất truy vấn và giảm chi phí sắp xếp dữ liệu.
+- **Dư thừa field trong bảng database**: lưu dư thừa trong cùng một bảng các dữ liệu thường được query kết hợp, để giảm việc query join nhiều bảng, từ đó cải thiện performance query và giảm áp lực cho database.
 - **CDN (Content Delivery Network)**: phân phối static resource đến nhiều edge node để truy cập từ vị trí gần nhất, qua đó tăng tốc độ truy cập static resource và giảm tải cho server origin cùng bandwidth.
 
 Khi lập trình, bạn cần học cách khái quát và tổng hợp, kết nối những điều đã học với nhau! Nếu trong buổi phỏng vấn bạn có thể trao đổi được những điều này, interviewer chắc chắn sẽ có ấn tượng tốt về bạn.
 
-Đừng nghĩ cache quá cao siêu. Dù cache thực sự có cost-performance rất cao trong việc cải thiện performance hệ thống, khi học và áp dụng cache, bạn sẽ nhận ra tư tưởng cache cũng được sử dụng rộng rãi trong CPU, operating system và nhiều nơi khác.
+Đừng nghĩ cache quá cao siêu. Dù cache thực sự mang lại hiệu quả rất cao so với chi phí trong việc cải thiện performance hệ thống, khi học và áp dụng cache, bạn sẽ nhận ra tư tưởng cache cũng được sử dụng rộng rãi trong CPU, operating system và nhiều nơi khác.
 
-Ví dụ, **CPU Cache** lưu dữ liệu trong memory để giải quyết vấn đề tốc độ xử lý của **CPU** không tương xứng với tốc độ truy cập memory; memory lưu dữ liệu trên hard disk để giải quyết vấn đề tốc độ **I/O** của hard disk quá chậm.
+Ví dụ, **CPU Cache** lưu dữ liệu trong memory để giải quyết vấn đề tốc độ xử lý của **CPU** không tương xứng với tốc độ truy cập memory; memory cache dữ liệu từ hard disk để giải quyết vấn đề tốc độ **I/O** của hard disk quá chậm.
 
 ![Sơ đồ mô hình CPU Cache](https://oss.javaguide.cn/github/javaguide/java/concurrent/cpu-cache.png)
 
@@ -42,7 +42,7 @@ Một ví dụ khác, để tăng tốc độ chuyển đổi từ virtual addre
 
 ![Dịch địa chỉ sau khi thêm TLB](https://oss.javaguide.cn/github/javaguide/cs-basics/operating-system/physical-virtual-address-translation-mmu.png)
 
-Lấy browser được sử dụng hằng ngày làm ví dụ, browser sẽ cache các image hoặc static file đã truy cập (browser cache), nhờ đó tốc độ load sẽ tăng đáng kể khi truy cập lại cùng một page.
+Ví dụ, browser thường cache các image hoặc static file đã truy cập (browser cache), nhờ đó tốc độ load sẽ tăng đáng kể khi truy cập lại cùng một page.
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/chrome-clear-cache.png)
 
@@ -64,7 +64,7 @@ Sơ đồ monolithic architecture thường gặp như sau: dùng **Nginx** đ�
 
 ![Sơ đồ local cache](https://oss.javaguide.cn/github/javaguide/database/redis/local-cache.png)
 
-**Lưu ý:** Khi sử dụng local cache trong cluster mode, phải cân nhắc **load balancing strategy**. Nếu Nginx sử dụng **Round-Robin** mặc định, request của cùng một user có thể ngẫu nhiên rơi vào các machine khác nhau, khiến cache hit rate cực thấp. Giải pháp như sau:
+**Lưu ý:** Khi sử dụng local cache trong cluster mode, phải cân nhắc **load balancing strategy**. Nếu Nginx sử dụng **Round-Robin** mặc định, request của cùng một user có thể ngẫu nhiên được chuyển đến các machine khác nhau, khiến cache hit rate cực thấp. Giải pháp như sau:
 
 1. **Gateway layer**: sử dụng consistent hashing hoặc Sticky Session để bảo đảm request của cùng một user luôn được chuyển đến cùng một machine.
 2. **Application layer**: chỉ sử dụng local cache cho data **“gần như không thay đổi trên toàn hệ thống”** (chẳng hạn configuration dictionary), không dùng cho data theo user.
@@ -78,7 +78,7 @@ Sơ đồ monolithic architecture thường gặp như sau: dùng **Nginx** đ�
 **2. `Ehcache`, `Guava Cache` và `Spring Cache` là ba local cache framework được sử dụng khá nhiều.**
 
 - So với hai loại còn lại, `Ehcache` nặng hơn. Tuy nhiên, so với `Guava Cache` và `Spring Cache`, `Ehcache` hỗ trợ tích hợp vào Hibernate và MyBatis làm multi-level cache, có thể persistence data cache vào local disk, đồng thời cũng cung cấp giải pháp cluster (khá hạn chế, có thể bỏ qua).
-- `Guava Cache` và `Spring Cache` khá giống nhau. `Guava` được sử dụng nhiều hơn `Spring Cache`; nó cung cấp API rất tiện lợi, đồng thời hỗ trợ thiết lập thời gian hiệu lực của cache và các chức năng khác. Implementation bên trong của nó cũng khá gọn gàng, nhiều nơi có tư tưởng tương tự `ConcurrentHashMap`.
+- `Guava Cache` và `Spring Cache` khá giống nhau. `Guava` được sử dụng nhiều hơn `Spring Cache`; nó cung cấp API rất tiện lợi, đồng thời hỗ trợ thiết lập thời gian hiệu lực của cache và các chức năng khác. Implementation bên trong của nó cũng khá gọn gàng, nhiều nơi có cơ chế tương tự `ConcurrentHashMap`.
 - Nếu dùng annotation của `Spring Cache` để implement cache, code sẽ trông rất gọn gàng và elegant, nhưng cũng dễ phát sinh các vấn đề như cache penetration và out of memory.
 
 **3. Caffeine, một lựa chọn mới nổi.**
@@ -90,11 +90,11 @@ Ví dụ code tạo local cache bằng `Caffeine`, sử dụng builder pattern:
 ```java
 // Ví dụ tạo local cache bằng Caffeine
 Cache<String, String> cache = Caffeine.newBuilder()
-        // Hết hạn sau 60 ngày kể từ khi ghi
+        // Hết hạn 60 ngày sau khi ghi
         .expireAfterWrite(60, TimeUnit.DAYS)
         // Dung lượng ban đầu
         .initialCapacity(100)
-        // Giới hạn số lượng entry tối đa
+        // Giới hạn số entry tối đa
         .maximumSize(500)
         // Bật chức năng thống kê
         .recordStats()
@@ -108,13 +108,13 @@ Cache<String, String> cache = Caffeine.newBuilder()
 Tuy nhiên, local cache có những hạn chế sau:
 
 - **Local cache gắn chặt với application và không thân thiện với distributed architecture**. Ví dụ, khi cùng một service được deploy trên nhiều machine, cache giữa các service không thể dùng chung vì local cache chỉ tồn tại trên machine hiện tại.
-- **Dung lượng local cache bị giới hạn rõ rệt bởi machine nơi service được deploy.** Nếu service của hệ thống hiện tại tiêu thụ nhiều memory, dung lượng còn có thể dùng cho local cache sẽ rất ít.
+- **Dung lượng local cache bị giới hạn rõ rệt bởi machine nơi service được deploy.** Nếu service của hệ thống hiện tại tiêu thụ nhiều memory, dung lượng dành cho local cache sẽ rất ít.
 
 ### Distributed cache
 
 #### Distributed cache là gì?
 
-Có thể xem distributed cache (Distributed Cache) là một service của memory database, có chức năng cuối cùng là cung cấp service cho cache data.
+Có thể xem distributed cache (Distributed Cache) là một memory database service, có mục đích cuối cùng là cung cấp dịch vụ cache data.
 
 Distributed cache tồn tại độc lập với application, nhiều application có thể cùng sử dụng một distributed cache service.
 
@@ -122,7 +122,7 @@ Hình dưới đây là sơ đồ kiến trúc đơn giản sử dụng distribu
 
 ![Distributed cache](https://oss.javaguide.cn/github/javaguide/database/redis/distributed-cache.png)
 
-Sau khi sử dụng distributed cache, cache service có thể được deploy trên một server riêng. Ngay cả khi cùng một service được deploy trên nhiều machine, chúng vẫn sử dụng chung một cache. Ngoài ra, performance, capacity và chức năng được cung cấp bởi distributed cache service riêng cũng mạnh hơn nhiều.
+Sau khi sử dụng distributed cache, cache service có thể được deploy trên một server riêng. Ngay cả khi cùng một service được deploy trên nhiều machine, chúng vẫn sử dụng chung một cache. Ngoài ra, performance, capacity và các chức năng của distributed cache service riêng cũng mạnh hơn nhiều.
 
 **Trong thiết kế software system không có silver bullet, việc đưa vào bất kỳ công nghệ nào thường cũng giống như con dao hai lưỡi.** Nếu sử dụng đúng cách, công nghệ có thể mang lại lợi ích lớn cho hệ thống. Nếu không, bạn chỉ tốn công sức mà không thu được kết quả.
 
@@ -133,7 +133,7 @@ Nói đơn giản, việc đưa distributed cache vào hệ thống thường ma
 
 #### Có những giải pháp distributed cache nào?
 
-Trong các distributed cache, những lựa chọn lâu đời và được sử dụng nhiều vẫn là **Memcached** và **Redis**. Tuy nhiên, hiện nay hầu như không còn thấy project nào dùng **Memcached** làm cache, mà đều trực tiếp dùng **Redis**.
+Trong các distributed cache, những lựa chọn lâu đời và được sử dụng nhiều vẫn là **Memcached** và **Redis**. Tuy nhiên, hiện nay hầu như không còn thấy project nào dùng **Memcached** làm cache, mà đều chuyển sang dùng **Redis**.
 
 Memcached từng được sử dụng khá phổ biến khi distributed cache mới bắt đầu phát triển. Sau đó, cùng với sự phát triển của Redis, mọi người dần chuyển sang Redis mạnh hơn.
 
@@ -146,7 +146,7 @@ Hiện nay, hai distributed cache open source sau vẫn là các lựa chọn th
 - [Dragonfly](https://github.com/dragonflydb/dragonfly): memory database được xây dựng cho nhu cầu workload của application hiện đại, tương thích hoàn toàn với API của Redis và Memcached, không cần sửa code khi migration, tự nhận là memory database nhanh nhất thế giới.
 - [KeyDB](https://github.com/Snapchat/KeyDB): một high-performance fork của Redis, tập trung vào multi-threading, memory efficiency và high throughput.
 
-Tuy nhiên, cá nhân tôi vẫn khuyến nghị ưu tiên Redis cho distributed cache. Redis đã trải qua kiểm chứng production trong nhiều năm, có ecosystem rất tốt và tài liệu cũng đầy đủ.
+Tuy nhiên, cá nhân tôi vẫn khuyến nghị ưu tiên Redis cho distributed cache. Redis đã được kiểm chứng qua nhiều năm trong production, có ecosystem rất tốt và tài liệu cũng đầy đủ.
 
 ### Multi-level cache
 
@@ -156,7 +156,7 @@ Tuy nhiên, cá nhân tôi vẫn khuyến nghị ưu tiên Redis cho distributed
 
 Đến đây có lẽ nhiều bạn sẽ hỏi: **Đã dùng distributed cache rồi thì vì sao còn cần local cache?**
 
-Mặc dù local cache và distributed cache đều là cache, tốc độ truy cập local cache lớn hơn rất nhiều so với distributed cache, vì truy cập local cache không phát sinh network overhead, như đã đề cập ở trên.
+Mặc dù local cache và distributed cache đều là cache, tốc độ truy cập local cache nhanh hơn rất nhiều so với distributed cache, vì truy cập local cache không phát sinh network overhead, như đã đề cập ở trên.
 
 Tuy nhiên, trong điều kiện thông thường, cũng không khuyến nghị sử dụng multi-level cache vì nó làm tăng gánh nặng maintenance (chẳng hạn cần bảo đảm tính nhất quán dữ liệu giữa L1 cache và L2 cache). Hơn nữa, với phần lớn trường hợp sử dụng, hiệu quả cải thiện thực tế không quá lớn.
 
@@ -165,31 +165,33 @@ Dưới đây là hai trường hợp sử dụng phù hợp với multi-level c
 - Data cache không thường xuyên thay đổi, tương đối ổn định;
 - Lưu lượng truy cập data đặc biệt lớn, chẳng hạn trường hợp flash sale.
 
-Trong giải pháp multi-level cache, level cache thứ nhất (L1) sử dụng local memory (chẳng hạn Caffeine), level cache thứ hai (L2) sử dụng distributed cache (chẳng hạn Redis).
+Trong giải pháp multi-level cache, cache level thứ nhất (L1) sử dụng local memory (chẳng hạn Caffeine), cache level thứ hai (L2) sử dụng distributed cache (chẳng hạn Redis).
 
 ![Multi-level cache](https://oss.javaguide.cn/javaguide/database/redis/multilevel-cache.png)
 
 Khi đọc cache data, trước tiên đọc từ L1 và trả về trực tiếp nếu hit; nếu L1 miss thì đọc từ L2. Nếu L2 hit, trước tiên nên ghi data về L1 của instance hiện tại rồi mới trả về kết quả, tránh việc mỗi lần L1 miss sau đó đều phải truy cập L2 lặp lại. Nếu L2 cũng không có data, tiếp tục query database. Sau khi query thành công, ghi data vào cả L1 và L2. Cách này có thể giảm số lần đọc L2 và giảm áp lực cho L2.
 
-Một số open source implementation của multi-level cache được khuyến nghị:
+Một số implementation open source của multi-level cache được khuyến nghị:
 
-- [J2Cache](https://gitee.com/ld/J2Cache): Java cache framework hai level dựa trên local memory và Redis.
+- [J2Cache](https://gitee.com/ld/J2Cache): Java cache framework hai cấp dựa trên local memory và Redis.
 - [JetCache](https://github.com/alibaba/jetcache): cache framework do Alibaba open source, hỗ trợ multi-level cache, tự động refresh distributed cache, TTL và các chức năng khác.
 
 #### Đảm bảo tính nhất quán của multi-level cache như thế nào?
 
-Trong hệ thống multi-level cache, chi phí để bảo đảm strong consistency quá cao. Một số cache framework cung cấp chức năng multi-level cache trong industry về cơ bản đều bảo đảm eventual consistency. Chẳng hạn, có thể sử dụng cơ chế publish/subscribe của Redis, Redis Stream hoặc message queue để bảo đảm khi local cache của một instance thay đổi, các instance khác có thể kịp thời update local cache của chúng nhằm duy trì tính nhất quán của cache.
+Trong hệ thống multi-level cache, chi phí để bảo đảm strong consistency quá cao. Các cache framework cung cấp multi-level cache trên thị trường về cơ bản đều bảo đảm eventual consistency. Chẳng hạn, có thể sử dụng cơ chế publish/subscribe của Redis, Redis Stream hoặc message queue để bảo đảm khi local cache của một instance thay đổi, các instance khác có thể kịp thời update local cache của chúng nhằm duy trì tính nhất quán của cache.
 
 Giải pháp của Zhengcaiyun Technology là Canal + broadcast message, được giới thiệu đơn giản như sau:
 
-1. DB sửa data: trước tiên sửa data trong database.
-2. Trigger update cache thông qua việc lắng nghe Canal message: dùng Canal lắng nghe thao tác thay đổi database, khi phát hiện data thay đổi thì trigger update cache.
+1. DB cập nhật data: trước tiên cập nhật data trong database.
+2. Trigger update cache bằng cách lắng nghe Canal message: dùng Canal lắng nghe thao tác thay đổi database, khi phát hiện data thay đổi thì trigger update cache.
 3. Đồng bộ Redis cache: với Redis cache, vì trong cluster chỉ dùng chung một bản data nên chỉ cần đồng bộ cache trực tiếp.
 4. Đồng bộ local cache: vì local cache nằm trong các JVM instance khác nhau, cần dựa vào cơ chế broadcast message queue (MQ) để broadcast thông báo update đến các business instance, từ đó đồng bộ local cache.
 
 Xem chi tiết: [Thiết kế và thực chiến hệ thống distributed multi-level cache](https://juejin.cn/post/7225634879152570405)
 
 ## Đọc thêm về data structure
+
+Các vấn đề về cache thường được truy đến các data structure cụ thể:
 
 - [Giải thích chi tiết Bloom Filter](../../cs-basics/data-structure/bloom-filter.md): tìm hiểu cache penetration, false positive rate và khó khăn khi xóa.
 - [Tổng hợp câu hỏi phỏng vấn về LRU cache](../../cs-basics/data-structure/lru-cache.md): tìm hiểu eviction strategy của local cache, cách viết `LinkedHashMap` và tư tưởng page replacement.

@@ -1,6 +1,6 @@
 ---
-title: Tổng hợp câu hỏi phỏng vấn Cơ sở dữ liệu cơ bản
-description: Tổng hợp câu hỏi phỏng vấn và kiến thức về cơ sở dữ liệu, DBMS, hệ thống cơ sở dữ liệu, sự khác nhau giữa các khái niệm DBA, chức năng cốt lõi của DBMS, tuple, key, primary key, foreign key và các khái niệm cốt lõi của cơ sở dữ liệu quan hệ, cùng cách sử dụng ER diagram.
+title: Tổng hợp câu hỏi phỏng vấn Database Basics thường gặp
+description: Tổng hợp câu hỏi phỏng vấn và kiến thức về database, DBMS, Database System, DBA, sự khác nhau giữa các khái niệm này, chức năng cốt lõi của DBMS, tuple, key, primary key, foreign key và các khái niệm cốt lõi của database quan hệ, cùng cách sử dụng ER diagram.
 category: Database
 tag:
   - Cơ sở dữ liệu cơ bản
@@ -12,18 +12,18 @@ head:
 
 <!-- @include: @small-advertisement.snippet.md -->
 
-Đây là phần kiến thức nền tảng về cơ sở dữ liệu, bạn nhất định phải hiểu và ghi nhớ. Tuy chỉ là kiến thức lý thuyết nhưng phần này rất quan trọng, là nền tảng cho việc học cơ sở dữ liệu MySQL sau này. PS: Vì phần này liên quan đến quá nhiều nội dung mang tính khái niệm nên đã tham khảo các giới thiệu tương ứng trên Wikipedia và Baidu Baike.
+Đây là phần kiến thức nền tảng về database, bạn nhất định phải hiểu và ghi nhớ. Tuy chỉ là kiến thức lý thuyết nhưng phần này rất quan trọng, là nền tảng cho việc học database MySQL sau này. PS: Vì phần này liên quan đến quá nhiều nội dung mang tính khái niệm nên đã tham khảo các phần giới thiệu tương ứng trên Wikipedia và Baidu Baike.
 
-## Database, DBMS, hệ thống cơ sở dữ liệu và DBA là gì?
+## Database, DBMS, Database System và DBA là gì?
 
-Bốn khái niệm này mô tả các tầng khác nhau, từ dữ liệu đến việc quản lý toàn bộ hệ thống. Ta thường dùng ví dụ thư viện để liên kết và hiểu chúng.
+Bốn khái niệm này mô tả các cấp độ khác nhau, từ dữ liệu đến việc quản lý toàn bộ hệ thống. Ta thường dùng ví dụ thư viện để liên kết và hiểu chúng.
 
-- **Database (Database - DB):** Giống như toàn bộ sách và tài liệu được lưu trên các kệ trong thư viện. Về mặt kỹ thuật, database là tập hợp dữ liệu có cấu trúc được tổ chức, mô tả và lưu trữ theo một mô hình dữ liệu nhất định, có thể được nhiều người dùng chia sẻ. Đây là thứ cốt lõi mà ta truy cập và lưu trữ: thông tin.
+- **Database (Database - DB):** Giống như toàn bộ sách và tài liệu được lưu trên các kệ trong thư viện. Về mặt kỹ thuật, database là tập hợp dữ liệu có cấu trúc được tổ chức, mô tả và lưu trữ theo một mô hình dữ liệu nhất định, có thể được nhiều người dùng chia sẻ. Đây là thông tin cốt lõi mà chúng ta truy cập và lưu trữ.
 - **Database Management System (Database Management System - DBMS):** Giống như hệ thống quản lý của toàn bộ thư viện, bao gồm quy tắc phân loại và biên mục sách, quy trình mượn trả, hệ thống kiểm tra an toàn, v.v. Về mặt kỹ thuật, DBMS là một phần mềm lớn, chẳng hạn MySQL, Oracle và PostgreSQL mà ta thường dùng. Nhiệm vụ cốt lõi của nó là tổ chức, lưu trữ dữ liệu một cách khoa học, truy xuất và bảo trì dữ liệu hiệu quả; che giấu sự phức tạp của thao tác file ở tầng dưới, cung cấp một bộ interface tiêu chuẩn (như SQL) để thao tác dữ liệu, đồng thời xử lý các vấn đề phức tạp như concurrency control, transaction management và permission control.
 - **Database System (Database System - DBS):** Là toàn bộ thư viện đang vận hành bình thường. Đây là khái niệm lớn hơn, không chỉ bao gồm sách (DB) và hệ thống quản lý (DBMS), mà còn bao gồm phần cứng, ứng dụng và người sử dụng.
-- **Database Administrator (Database Administrator - DBA):** Giống như giám đốc thư viện, chịu trách nhiệm để toàn bộ hệ thống cơ sở dữ liệu vận hành bình thường. Phạm vi công việc rất rộng, gồm thiết kế, cài đặt, giám sát, performance tuning, backup và recovery, quản lý bảo mật, v.v., nhằm bảo đảm hệ thống ổn định, hiệu quả và an toàn.
+- **Database Administrator (Database Administrator - DBA):** Giống như người quản lý thư viện, chịu trách nhiệm để toàn bộ database system vận hành bình thường. Phạm vi công việc rất rộng, gồm thiết kế, cài đặt, giám sát, performance tuning, backup và recovery, quản lý bảo mật, v.v., nhằm bảo đảm hệ thống ổn định, hiệu quả và an toàn.
 
-Ta thường nhầm DB và DBMS, nên nhắc lại ngắn gọn: **Thông thường khi nói "dùng database MySQL", thực tế là dùng MySQL (DBMS) để quản lý một hoặc nhiều database (DB).**
+DB và DBMS thường bị nhầm lẫn, nên nhắc lại ngắn gọn: **Thông thường khi nói "dùng database MySQL", thực tế là dùng MySQL (DBMS) để quản lý một hoặc nhiều database (DB).**
 
 ## DBMS có những chức năng chính nào?
 
@@ -108,7 +108,7 @@ Trong những năm gần đây, để đáp ứng nhu cầu về lượng dữ l
 **2. Database document, đại diện là MongoDB.**
 
 - **Đặc điểm:** Lưu trữ các document bán cấu trúc (như JSON/BSON), cấu trúc linh hoạt, không cần định nghĩa trước cấu trúc bảng.
-- **Trường hợp sử dụng:** Đặc biệt phù hợp với các nghiệp vụ có cấu trúc dữ liệu thay đổi và lặp nhanh, như chân dung người dùng, hệ thống quản lý nội dung, lưu trữ log, v.v.
+- **Trường hợp sử dụng:** Đặc biệt phù hợp với các nghiệp vụ có cấu trúc dữ liệu thay đổi và phát triển nhanh, như chân dung người dùng, hệ thống quản lý nội dung, lưu trữ log, v.v.
 
 **3. Database dạng column, đại diện là HBase, Cassandra.**
 
@@ -133,10 +133,10 @@ Nói đơn giản, NewSQL là: **distributed storage + SQL + transaction**. NewS
 Một số mục tiêu trong thiết kế database NewSQL:
 
 1. Mở rộng theo chiều ngang (Scale Out): Tăng năng lực tải của hệ thống bằng cách thêm máy. Tương tự là Scale Up (mở rộng theo chiều dọc), tức nâng cấp thiết bị phần cứng để tăng năng lực tải của hệ thống.
-2. Tính nhất quán mạnh (Strict Consistency): Ở mọi thời điểm, dữ liệu trên tất cả node đều giống nhau.
+2. Tính nhất quán mạnh (Strict Consistency): Ở mọi thời điểm, dữ liệu trên tất cả các node đều giống nhau.
 3. High Availability: Hệ thống gần như luôn có thể cung cấp dịch vụ.
 4. Hỗ trợ SQL tiêu chuẩn (Structured Query Language): Các database quan hệ như PostgreSQL, MySQL và Oracle đều hỗ trợ SQL.
-5. Transaction (ACID): Tính atomic (Atomicity), consistency (Consistency), isolation (Isolation); durability (Durability).
+5. Transaction (ACID): atomicity (Atomicity), consistency (Consistency), isolation (Isolation) và durability (Durability).
 6. Tương thích với database quan hệ phổ biến: Tương thích với các database quan hệ thường dùng như MySQL, Oracle và PostgreSQL.
 7. Cloud Native: Có thể triển khai theo hướng công cụ hóa và tự động hóa trên public cloud, private cloud và hybrid cloud.
 8. HTAP (Hybrid Transactional/Analytical Processing): Hỗ trợ xử lý kết hợp OLTP và OLAP.
@@ -186,8 +186,8 @@ graph TD
 
 ### Khái niệm cơ bản
 
-- **Tuple (Tuple):** Tuple là đơn vị cơ bản trong database quan hệ, tương ứng với một record trong bảng hai chiều. Mỗi tuple chứa đầy đủ thông tin của một entity. Ví dụ, toàn bộ thông tin của một sinh viên (mã số, họ tên, tuổi, v.v.) tạo thành một tuple trong bảng sinh viên.
-- **Key (Key):** Key là tập hợp một hoặc nhiều attribute có thể định danh duy nhất tuple trong relation. Vai trò chính của key là bảo đảm tính duy nhất và toàn vẹn của dữ liệu.
+- **Tuple:** Tuple là đơn vị cơ bản trong database quan hệ, tương ứng với một record trong bảng hai chiều. Mỗi tuple chứa đầy đủ thông tin của một entity. Ví dụ, toàn bộ thông tin của một sinh viên (mã số, họ tên, tuổi, v.v.) tạo thành một tuple trong bảng sinh viên.
+- **Key:** Key là tập hợp một hoặc nhiều attribute có thể định danh duy nhất tuple trong relation. Vai trò chính của key là bảo đảm tính duy nhất và toàn vẹn của dữ liệu.
 
 ### Phân loại key
 
@@ -202,15 +202,15 @@ graph TD
 
 ## ER diagram là gì?
 
-Khi thực hiện một project, bạn nhất định nên thử vẽ ER diagram để làm rõ thiết kế database. Đây cũng là nội dung interviewer thường hỏi khi trao đổi về project của bạn.
+Khi thực hiện một project, bạn nhất định nên thử vẽ ER diagram để làm rõ thiết kế database. Đây cũng là nội dung người phỏng vấn thường hỏi khi trao đổi về project của bạn.
 
 **ER diagram** là viết tắt của Entity Relationship Diagram (sơ đồ quan hệ thực thể), cung cấp phương pháp biểu diễn entity type, attribute và relationship.
 
 ER diagram gồm 3 yếu tố sau:
 
 - **Entity:** Thường là object nghiệp vụ trong thế giới thực, tất nhiên cũng có thể dùng object logic. Ví dụ, một hệ thống quản lý trường học sẽ có các entity như sinh viên, giáo viên, môn học, lớp, v.v. Trong ER diagram, entity được biểu diễn bằng hình chữ nhật.
-- **Attribute:** Là attribute mà một entity sở hữu, dùng để mô tả các yếu tố cấu thành entity; trong thiết kế sản phẩm có thể hiểu là field. Trong ER diagram, attribute được biểu diễn bằng hình oval.
-- **Relationship:** Là quan hệ giữa các entity, được biểu diễn bằng hình thoi trong ER diagram. Quan hệ này không chỉ có liên kết nghiệp vụ, mà còn có thể biểu thị số lượng tương ứng giữa các entity bằng số. Ví dụ, một lớp có nhiều sinh viên là một relationship giữa các entity.
+- **Attribute:** Là attribute mà một entity sở hữu, dùng để mô tả các yếu tố cấu thành entity; trong thiết kế sản phẩm có thể hiểu là field. Trong ER diagram, attribute được biểu diễn bằng hình elip.
+- **Relationship:** Là quan hệ giữa các entity, được biểu diễn bằng hình thoi trong ER diagram. Quan hệ này không chỉ thể hiện liên kết nghiệp vụ, mà còn có thể biểu thị bằng số lượng quan hệ giữa các entity. Ví dụ, một lớp có nhiều sinh viên là một relationship giữa các entity.
 
 Hình dưới đây là ER diagram của việc đăng ký môn học. Mỗi sinh viên có thể đăng ký một số môn học, một môn học cũng có thể được nhiều người đăng ký, nên quan hệ giữa chúng là nhiều-nhiều (M: N). Ngoài ra, còn hai loại relationship khác giữa các entity là 1-1 (1:1) và 1-nhiều (1: N).
 
@@ -266,14 +266,14 @@ Attribute (tương ứng với field trong bảng) không thể bị chia nhỏ 
 
 Một số khái niệm quan trọng:
 
-- **Functional dependency:** Trong một bảng, nếu khi giá trị của attribute (hoặc nhóm attribute) X được xác định thì chắc chắn xác định được giá trị của attribute Y, ta nói Y functionally dependent vào X, viết là X → Y.
-- **Partial functional dependency:** Nếu X→Y và tồn tại một tập con thực sự X0 của X sao cho X0→Y, thì gọi là Y partial functional dependency vào X. Ví dụ, trong relation R về thông tin cơ bản của sinh viên (mã số sinh viên, số căn cước, họ tên), hiển nhiên giá trị của mã số sinh viên là duy nhất. Trong relation R, (mã số sinh viên, số căn cước) -> (họ tên), (mã số sinh viên) -> (họ tên), (số căn cước) -> (họ tên); vì vậy họ tên partial functional dependency vào (mã số sinh viên, số căn cước).
-- **Full functional dependency:** Trong một relation, nếu một data item non-prime attribute phụ thuộc vào toàn bộ key thì gọi là full functional dependency. Ví dụ, trong relation R về thông tin cơ bản của sinh viên (mã số sinh viên, lớp, họ tên), giả sử các lớp khác nhau có thể có cùng mã số sinh viên nhưng trong cùng một lớp thì mã số không trùng. Trong relation R, (mã số sinh viên, lớp) -> (họ tên), nhưng (mã số sinh viên) -> (họ tên) không đúng và (lớp) -> (họ tên) cũng không đúng, nên họ tên full functional dependency vào (mã số sinh viên, lớp).
-- **Transitive functional dependency:** Trong relation schema R(U), giả sử X, Y, Z là các tập con attribute khác nhau của U. Nếu X xác định Y, Y xác định Z, X không chứa Y, Y không xác định X và (X∪Y)∩Z là tập rỗng, thì gọi Z transitive functional dependency vào X. Transitive functional dependency gây dư thừa và bất thường dữ liệu. Các tập con Y và Z trong transitive functional dependency thường cùng thuộc về một đối tượng, nên có thể gộp chúng vào một bảng. Ví dụ, trong relation R (mã số sinh viên, họ tên, tên khoa, trưởng khoa), mã số sinh viên → tên khoa, tên khoa → trưởng khoa, nên tồn tại transitive functional dependency của non-prime attribute trưởng khoa đối với mã số sinh viên.
+- **Functional dependency:** Trong một bảng, nếu khi giá trị của attribute (hoặc nhóm attribute) X được xác định thì chắc chắn xác định được giá trị của attribute Y, ta nói Y có functional dependency vào X, viết là X → Y.
+- **Partial functional dependency:** Nếu X→Y và tồn tại một tập con thực sự X0 của X sao cho X0→Y, thì gọi là Y có partial functional dependency vào X. Ví dụ, trong relation R về thông tin cơ bản của sinh viên (mã số sinh viên, số căn cước, họ tên), hiển nhiên giá trị của mã số sinh viên là duy nhất. Trong relation R, (mã số sinh viên, số căn cước) -> (họ tên), (mã số sinh viên) -> (họ tên), (số căn cước) -> (họ tên); vì vậy họ tên có partial functional dependency vào (mã số sinh viên, số căn cước).
+- **Full functional dependency:** Trong một relation, nếu một non-prime attribute phụ thuộc vào toàn bộ key thì gọi là full functional dependency. Ví dụ, trong relation R về thông tin cơ bản của sinh viên (mã số sinh viên, lớp, họ tên), giả sử các lớp khác nhau có thể có cùng mã số sinh viên nhưng trong cùng một lớp thì mã số không trùng. Trong relation R, (mã số sinh viên, lớp) -> (họ tên), nhưng (mã số sinh viên) -> (họ tên) không đúng và (lớp) -> (họ tên) cũng không đúng, nên họ tên có full functional dependency vào (mã số sinh viên, lớp).
+- **Transitive functional dependency:** Trong relation schema R(U), giả sử X, Y, Z là các tập con attribute khác nhau của U. Nếu X xác định Y, Y xác định Z, X không chứa Y, Y không xác định được X và (X∪Y)∩Z là tập rỗng, thì gọi Z có transitive functional dependency vào X. Transitive functional dependency gây dư thừa và bất thường dữ liệu. Các tập con Y và Z trong transitive functional dependency thường cùng thuộc về một đối tượng, nên có thể gộp chúng vào một bảng. Ví dụ, trong relation R (mã số sinh viên, họ tên, tên khoa, trưởng khoa), mã số sinh viên → tên khoa, tên khoa → trưởng khoa, nên tồn tại transitive functional dependency của non-prime attribute trưởng khoa đối với mã số sinh viên.
 
 ### 3NF (Third Normal Form)
 
-3NF loại bỏ transitive functional dependency của non-prime attribute đối với key trên nền tảng 2NF. Thiết kế database đáp ứng yêu cầu 3NF về cơ bản giải quyết được các vấn đề dư thừa dữ liệu quá lớn, bất thường khi thêm, sửa và xóa. Ví dụ, trong relation R (mã số sinh viên, họ tên, tên khoa, trưởng khoa), mã số sinh viên → tên khoa, tên khoa → trưởng khoa, nên tồn tại transitive functional dependency của non-prime attribute trưởng khoa đối với mã số sinh viên. Vì vậy, thiết kế bảng này không đáp ứng yêu cầu 3NF.
+3NF loại bỏ transitive functional dependency của non-prime attribute đối với key trên nền tảng 2NF. Thiết kế database đáp ứng yêu cầu 3NF về cơ bản giải quyết được các vấn đề dư thừa dữ liệu quá mức, bất thường khi thêm, sửa và xóa. Ví dụ, trong relation R (mã số sinh viên, họ tên, tên khoa, trưởng khoa), mã số sinh viên → tên khoa, tên khoa → trưởng khoa, nên tồn tại transitive functional dependency của non-prime attribute trưởng khoa đối với mã số sinh viên. Vì vậy, thiết kế bảng này không đáp ứng yêu cầu 3NF.
 
 ## Primary key và foreign key khác nhau thế nào?
 
@@ -284,7 +284,7 @@ Xét từ định nghĩa và thuộc tính, điểm khác nhau là:
 
 Dùng ví dụ thương mại điện tử đơn giản: giả sử có hai bảng: `users` (bảng người dùng) và `orders` (bảng order).
 
-- Trong bảng `users`, column `user_id` là **primary key**. `user_id` của mỗi người dùng đều là duy nhất, ta dùng nó để phân biệt Zhang San và Li Si.
+- Trong bảng `users`, column `user_id` là **primary key**. `user_id` của mỗi người dùng đều là duy nhất, ta dùng nó để phân biệt Trương Tam và Lý Tứ.
 - Trong bảng `orders`, `order_id` là **primary key** của chính bảng này. Đồng thời bảng có một column `user_id`, column này là **foreign key**, tham chiếu đến primary key `user_id` của bảng `users`.
 
 Ràng buộc foreign key này bảo đảm rằng:
@@ -425,13 +425,13 @@ Trong thao tác database, `DROP`, `DELETE` và `TRUNCATE` là ba lệnh xóa d�
 
 ### Tốc độ thực thi
 
-Nhìn chung: `DROP` > `TRUNCATE` > `DELETE` (tác giả chưa kiểm thử thực tế).
+Nhìn chung: `DROP` > `TRUNCATE` > `DELETE` (tôi chưa kiểm thử thực tế).
 
-- Khi thực thi lệnh `DELETE`, database sẽ tạo log `binlog`; việc ghi log cần tốn thời gian, nhưng có ưu điểm là thuận tiện cho rollback và khôi phục dữ liệu.
+- Khi thực thi lệnh `DELETE`, database sẽ ghi log `binlog`; việc ghi log cần tốn thời gian, nhưng có ưu điểm là thuận tiện cho rollback và khôi phục dữ liệu.
 - Khi thực thi lệnh `TRUNCATE`, database không tạo log, nên nhanh hơn `DELETE`. Ngoài ra, nó còn reset giá trị tự tăng của table và khôi phục index về kích thước ban đầu.
 - Lệnh `DROP` giải phóng toàn bộ không gian mà table chiếm dụng.
 
-Tips: Bạn nên quan tâm nhiều hơn đến trường hợp sử dụng thay vì hiệu suất thực thi.
+Lưu ý: Bạn nên quan tâm nhiều hơn đến trường hợp sử dụng thay vì hiệu suất thực thi.
 
 ## DML và DDL khác nhau thế nào?
 
@@ -539,7 +539,7 @@ graph TD
 **Mục tiêu:** Bảo đảm hệ thống database vận hành ổn định và hiệu quả.
 **Công việc chính:**
 
-- Giám sát hằng ngày: giám sát performance, không gian và phân tích error log.
+- Giám sát hằng ngày: giám sát performance, dung lượng và phân tích error log.
 - Tối ưu performance: tối ưu query, điều chỉnh index và tuning parameter.
 - Backup và recovery dữ liệu: backup định kỳ, diễn tập recovery.
 - Quản lý bảo mật: quản lý quyền, cập nhật security patch và audit.

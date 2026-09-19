@@ -12,14 +12,16 @@
 
 ## Trạng thái
 
-- Batch hiện tại: 3
+- Batch hiện tại: 4
 - Mục tiêu batch: 50 file
 - Cách chọn: theo thứ tự lộ trình trong `vi/PROGRESS.md`
-- Trạng thái: hoàn tất batch 3
+- Trạng thái: hoàn tất batch 4
 - Kết quả batch 2: 50 file đã tối ưu; không có file unchanged
 - Kiểm tra batch 2: `git diff --check` đạt; `make check` exit 0; `make vi-build` thành công, 721 pages
 - Kết quả batch 3: 50 file đã tối ưu; không có file unchanged
 - Kiểm tra batch 3: `git diff --check` đạt; `make check` exit 0; `make vi-build` thành công, 721 pages
+- Kết quả batch 4: 50 file đã tối ưu; không có file unchanged
+- Kiểm tra batch 4: `git diff --check` đạt; `make check` exit 0; `make vi-build` thành công, 721 pages
 
 |   # | File                                                     | Agent       | Trạng thái | Ghi chú                     |
 | --: | -------------------------------------------------------- | ----------- | ---------- | --------------------------- |
@@ -183,3 +185,58 @@
 | 148 | `cs-basics/algorithms/classical-algorithm-problems-recommendations.md`    | reviewer-148 | verified   | Đã đối chiếu và tối ưu |
 | 149 | `cs-basics/algorithms/common-data-structures-leetcode-recommendations.md` | reviewer-149 | verified   | Đã đối chiếu và tối ưu |
 | 150 | `cs-basics/algorithms/the-sword-refers-to-offer.md`                       | reviewer-150 | verified   | Đã đối chiếu và tối ưu |
+
+## Batch 4 — 50 file tiếp theo
+
+|   # | File                                                                                  | Agent        | Trạng thái | Ghi chú                |
+| --: | ------------------------------------------------------------------------------------- | ------------ | ---------- | ---------------------- |
+| 151 | `cs-basics/data-structure/README.md`                                                  | reviewer-151 | verified   | Đã đối chiếu và tối ưu |
+| 152 | `cs-basics/data-structure/linear-data-structure.md`                                   | reviewer-152 | verified   | Đã đối chiếu và tối ưu |
+| 153 | `cs-basics/data-structure/hash-table.md`                                              | reviewer-153 | verified   | Đã đối chiếu và tối ưu |
+| 154 | `cs-basics/data-structure/tree.md`                                                    | reviewer-154 | verified   | Đã đối chiếu và tối ưu |
+| 155 | `cs-basics/data-structure/heap.md`                                                    | reviewer-155 | verified   | Đã đối chiếu và tối ưu |
+| 156 | `cs-basics/data-structure/red-black-tree.md`                                          | reviewer-156 | verified   | Đã đối chiếu và tối ưu |
+| 157 | `cs-basics/data-structure/skip-list.md`                                               | reviewer-157 | verified   | Đã đối chiếu và tối ưu |
+| 158 | `cs-basics/data-structure/trie.md`                                                    | reviewer-158 | verified   | Đã đối chiếu và tối ưu |
+| 159 | `cs-basics/data-structure/union-find.md`                                              | reviewer-159 | verified   | Đã đối chiếu và tối ưu |
+| 160 | `cs-basics/data-structure/bloom-filter.md`                                            | reviewer-160 | verified   | Đã đối chiếu và tối ưu |
+| 161 | `cs-basics/data-structure/graph.md`                                                   | reviewer-161 | verified   | Đã đối chiếu và tối ưu |
+| 162 | `cs-basics/data-structure/lru-cache.md`                                               | reviewer-162 | verified   | Đã đối chiếu và tối ưu |
+| 163 | `database/README.md`                                                                  | reviewer-163 | verified   | Đã đối chiếu và tối ưu |
+| 164 | `database/basis.md`                                                                   | reviewer-164 | verified   | Đã đối chiếu và tối ưu |
+| 165 | `database/nosql.md`                                                                   | reviewer-165 | verified   | Đã đối chiếu và tối ưu |
+| 166 | `database/character-set.md`                                                           | reviewer-166 | verified   | Đã đối chiếu và tối ưu |
+| 167 | `database/mysql/README.md`                                                            | reviewer-167 | verified   | Đã đối chiếu và tối ưu |
+| 168 | `database/mysql/a-thousand-lines-of-mysql-study-notes.md`                             | reviewer-168 | verified   | Đã đối chiếu và tối ưu |
+| 169 | `database/mysql/mysql-query-cache.md`                                                 | reviewer-169 | verified   | Đã đối chiếu và tối ưu |
+| 170 | `database/mysql/mysql-index-invalidation.md`                                          | reviewer-170 | verified   | Đã đối chiếu và tối ưu |
+| 171 | `database/mysql/innodb-implementation-of-mvcc.md`                                     | reviewer-171 | verified   | Đã đối chiếu và tối ưu |
+| 172 | `database/mysql/mysql-high-performance-optimization-specification-recommendations.md` | reviewer-172 | verified   | Đã đối chiếu và tối ưu |
+| 173 | `database/mysql/mysql-backup-and-restore.md`                                          | reviewer-173 | verified   | Đã đối chiếu và tối ưu |
+| 174 | `database/mysql/mysql-auto-increment-primary-key-continuous.md`                       | reviewer-174 | verified   | Đã đối chiếu và tối ưu |
+| 175 | `database/mysql/mysql-query-execution-plan.md`                                        | reviewer-175 | verified   | Đã đối chiếu và tối ưu |
+| 176 | `database/mysql/how-sql-executed-in-mysql.md`                                         | reviewer-176 | verified   | Đã đối chiếu và tối ưu |
+| 177 | `database/mysql/some-thoughts-on-database-storage-time.md`                            | reviewer-177 | verified   | Đã đối chiếu và tối ưu |
+| 178 | `database/mysql/mysql-index.md`                                                       | reviewer-178 | verified   | Đã đối chiếu và tối ưu |
+| 179 | `database/mysql/mysql-logs.md`                                                        | reviewer-179 | verified   | Đã đối chiếu và tối ưu |
+| 180 | `database/mysql/mysql-to-elasticsearch-sync.md`                                       | reviewer-180 | verified   | Đã đối chiếu và tối ưu |
+| 181 | `database/mysql/index-invalidation-caused-by-implicit-conversion.md`                  | reviewer-181 | verified   | Đã đối chiếu và tối ưu |
+| 182 | `database/mysql/transaction-isolation-level.md`                                       | reviewer-182 | verified   | Đã đối chiếu và tối ưu |
+| 183 | `database/redis/README.md`                                                            | reviewer-183 | verified   | Đã đối chiếu và tối ưu |
+| 184 | `database/redis/redis-data-structures-01.md`                                          | reviewer-184 | verified   | Đã đối chiếu và tối ưu |
+| 185 | `database/redis/redis-data-structures-02.md`                                          | reviewer-185 | verified   | Đã đối chiếu và tối ưu |
+| 186 | `database/redis/redis-questions-01.md`                                                | reviewer-186 | verified   | Đã đối chiếu và tối ưu |
+| 187 | `database/redis/redis-questions-02.md`                                                | reviewer-187 | verified   | Đã đối chiếu và tối ưu |
+| 188 | `database/redis/cache-basics.md`                                                      | reviewer-188 | verified   | Đã đối chiếu và tối ưu |
+| 189 | `database/redis/redis-skiplist.md`                                                    | reviewer-189 | verified   | Đã đối chiếu và tối ưu |
+| 190 | `database/redis/redis-delayed-task.md`                                                | reviewer-190 | verified   | Đã đối chiếu và tối ưu |
+| 191 | `database/redis/redis-cluster.md`                                                     | reviewer-191 | verified   | Đã đối chiếu và tối ưu |
+| 192 | `database/redis/redis-persistence.md`                                                 | reviewer-192 | verified   | Đã đối chiếu và tối ưu |
+| 193 | `database/redis/redis-stream-mq.md`                                                   | reviewer-193 | verified   | Đã đối chiếu và tối ưu |
+| 194 | `database/redis/redis-memory-fragmentation.md`                                        | reviewer-194 | verified   | Đã đối chiếu và tối ưu |
+| 195 | `database/redis/redis-common-blocking-problems-summary.md`                            | reviewer-195 | verified   | Đã đối chiếu và tối ưu |
+| 196 | `database/sql/README.md`                                                              | reviewer-196 | verified   | Đã đối chiếu và tối ưu |
+| 197 | `database/sql/sql-syntax-summary.md`                                                  | reviewer-197 | verified   | Đã đối chiếu và tối ưu |
+| 198 | `database/sql/sql-questions-01.md`                                                    | reviewer-198 | verified   | Đã đối chiếu và tối ưu |
+| 199 | `database/sql/sql-questions-02.md`                                                    | reviewer-199 | verified   | Đã đối chiếu và tối ưu |
+| 200 | `database/sql/sql-questions-03.md`                                                    | reviewer-200 | verified   | Đã đối chiếu và tối ưu |

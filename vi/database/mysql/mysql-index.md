@@ -12,17 +12,17 @@ head:
 
 > Cảm ơn [WT-AHA](https://github.com/WT-AHA) đã hoàn thiện bài viết này, PR liên quan: <https://github.com/Snailclimb/JavaGuide/pull/1648>.
 
-Chỉ cần đã trải qua vài cuộc phỏng vấn, bạn hẳn biết rõ rằng kiến thức về database index xuất hiện trong phỏng vấn với tần suất cao đến mức khó tin.
+Chỉ cần đã trải qua vài cuộc phỏng vấn, bạn hẳn biết kiến thức về database index xuất hiện với tần suất cao đến mức khó tin.
 
-Ngoài việc rất quan trọng khi chuẩn bị phỏng vấn, sử dụng index đúng cách còn cải thiện performance của SQL rất rõ rệt, là một biện pháp SQL optimization có chi phí/hiệu quả khá tốt.
+Ngoài việc rất quan trọng khi chuẩn bị phỏng vấn, sử dụng index đúng cách còn cải thiện rõ rệt performance của SQL, là một biện pháp SQL optimization có hiệu quả cao so với chi phí.
 
 ## Giới thiệu về index
 
-**Index là một data structure dùng để query và tìm kiếm data nhanh, về bản chất có thể xem là một data structure đã được sắp xếp.**
+**Index là một data structure dùng để query và tìm kiếm data nhanh; về bản chất, có thể xem đây là một data structure đã được sắp xếp.**
 
-Vai trò của index tương đương với mục lục của một cuốn sách. Ví dụ, khi tra từ điển, nếu không có mục lục thì chúng ta chỉ có thể tìm từ cần tra từng trang một, tốc độ rất chậm; nếu có mục lục, trước tiên chúng ta chỉ cần tra vị trí của từ trong mục lục, sau đó lật thẳng đến trang đó.
+Vai trò của index tương đương với mục lục của một cuốn sách. Ví dụ, khi tra từ điển, nếu không có mục lục thì bạn chỉ có thể tìm từ cần tra từng trang một, tốc độ rất chậm; nếu có mục lục, bạn chỉ cần tra vị trí của từ trong mục lục rồi lật thẳng đến trang đó.
 
-Có nhiều loại data structure ở tầng dưới của index. Các index structure thường gặp gồm B tree, B+ tree, Hash và red-black tree. Trong MySQL, dù là InnoDB hay MyISAM, đều sử dụng B+ tree làm index structure.
+Có nhiều loại data structure ở tầng dưới của index. Các index structure thường gặp gồm B tree, B+ tree, Hash và red-black tree. Trong MySQL, cả InnoDB và MyISAM đều sử dụng B+ tree làm index structure.
 
 ## Ưu và nhược điểm của index
 
@@ -34,7 +34,7 @@ Có nhiều loại data structure ở tầng dưới của index. Các index str
 
 **Nhược điểm của index:**
 
-1. **Tốn thời gian tạo và maintain**: Bản thân việc tạo index cần thời gian, đặc biệt khi thao tác trên table lớn. Quan trọng hơn, khi **insert, delete, update (DML operation)** data trong table, ngoài việc thao tác với data, các index liên quan cũng phải được update và maintain động, điều này sẽ **làm giảm hiệu suất thực thi của các DML operation này**.
+1. **Tốn thời gian tạo và maintain**: Bản thân việc tạo index cần thời gian, đặc biệt khi thao tác trên table lớn. Quan trọng hơn, khi **insert, delete, update (DML operation)** data trong table, ngoài việc thao tác với data, các index liên quan cũng phải được update và maintain, điều này sẽ **làm giảm hiệu suất thực thi của các DML operation này**.
 2. **Chiếm storage space**: Bản chất index cũng là một data structure, cần được lưu dưới dạng physical file (hoặc memory structure), vì vậy sẽ **chiếm thêm một phần disk space**. Càng nhiều index, index càng lớn thì càng chiếm nhiều space.
 3. **Có thể bị dùng sai hoặc mất hiệu lực**: Nếu thiết kế index không phù hợp hoặc câu query viết không tốt, query optimizer có thể không chọn sử dụng index (hoặc chọn nhầm index), thậm chí khiến performance giảm.
 
@@ -50,9 +50,9 @@ Có nhiều loại data structure ở tầng dưới của index. Các index str
 
 ### Hash table
 
-Hash table là tập hợp các cặp key-value. Thông qua key có thể nhanh chóng lấy value tương ứng, vì vậy hash table có thể truy xuất data nhanh (gần O(1)).
+Hash table là tập hợp các cặp key-value. Thông qua key, có thể nhanh chóng lấy value tương ứng, vì vậy hash table có thể truy xuất data nhanh (gần O(1)).
 
-**Vì sao có thể nhanh chóng lấy value thông qua key?** Nguyên nhân nằm ở **hash algorithm** (còn gọi là hashing algorithm). Thông qua hash algorithm, chúng ta có thể nhanh chóng tìm index tương ứng với key; tìm được index là tìm được value tương ứng.
+**Vì sao có thể nhanh chóng lấy value thông qua key?** Nguyên nhân nằm ở **hash algorithm** (còn gọi là hashing algorithm). Thông qua hash algorithm, ta có thể nhanh chóng tìm index tương ứng với key; tìm được index là tìm được value tương ứng.
 
 ```java
 hash = hashfunc(key)
@@ -61,13 +61,13 @@ index = hash % array_size
 
 ![](https://oss.javaguide.cn/github/javaguide/database/mysql20210513092328171.png)
 
-Tuy nhiên! Hash algorithm có vấn đề **hash collision**, tức là nhiều key khác nhau cuối cùng cho ra cùng một index. Thông thường, cách giải quyết được dùng nhiều là **chaining**. Chaining là lưu data bị hash collision trong linked list. Chẳng hạn, trước JDK1.8, `HashMap` giải quyết hash collision bằng chaining. Tuy nhiên, từ JDK1.8 trở đi, để tăng search performance khi linked list quá dài, `HashMap` đã đưa vào red-black tree.
+Tuy nhiên! Hash algorithm có vấn đề **hash collision**, tức là nhiều key khác nhau cuối cùng cho ra cùng một index. Cách giải quyết thường dùng là **chaining**, tức lưu data bị hash collision trong linked list. Chẳng hạn, trước JDK 1.8, `HashMap` giải quyết hash collision bằng chaining. Tuy nhiên, từ JDK 1.8 trở đi, để tăng search performance khi linked list quá dài, `HashMap` đã đưa vào red-black tree.
 
 ![](https://oss.javaguide.cn/github/javaguide/database/mysql20210513092224836.png)
 
 Để giảm khả năng xảy ra hash collision, một hash function tốt nên phân phối data một cách “đồng đều” trong toàn bộ tập hợp hash value có thể có.
 
-Storage engine InnoDB của MySQL không trực tiếp hỗ trợ hash index thông thường, nhưng trong InnoDB tồn tại một loại “adaptive hash index” đặc biệt. Adaptive hash index không phải hash index thuần túy theo nghĩa truyền thống, mà kết hợp đặc điểm của B+Tree và hash index để thích ứng tốt hơn với data access pattern và performance requirement trong ứng dụng thực tế. Mỗi hash bucket của adaptive hash index thực tế là một cấu trúc B+Tree nhỏ. Cấu trúc B+Tree này có thể lưu nhiều cặp key-value thay vì chỉ một key. Điều này giúp giảm độ dài của hash collision chain và nâng cao hiệu quả của index. Để xem giới thiệu chi tiết về Adaptive Hash Index, có thể tham khảo bài viết [Các “Buffer” khác nhau của MySQL: Adaptive Hash Index](https://mp.weixin.qq.com/s/ra4v1XR5pzSWc-qtGO-dBg).
+Storage engine InnoDB của MySQL không trực tiếp hỗ trợ hash index thông thường, nhưng trong InnoDB tồn tại một loại “adaptive hash index” đặc biệt. Adaptive hash index không phải hash index thuần túy theo nghĩa truyền thống, mà kết hợp đặc điểm của B+Tree và hash index để thích ứng tốt hơn với data access pattern và performance requirement trong ứng dụng thực tế. Mỗi hash bucket của adaptive hash index thực tế là một cấu trúc B+Tree nhỏ. Cấu trúc B+Tree này có thể lưu nhiều cặp key-value thay vì chỉ một key. Điều này giúp rút ngắn hash collision chain và nâng cao hiệu quả của index. Để xem giới thiệu chi tiết về Adaptive Hash Index, có thể tham khảo bài viết [Các “Buffer” khác nhau của MySQL: Adaptive Hash Index](https://mp.weixin.qq.com/s/ra4v1XR5pzSWc-qtGO-dBg).
 
 Hash table nhanh như vậy, **vì sao MySQL không dùng nó làm index structure?** Chủ yếu vì Hash index không hỗ trợ query theo thứ tự và range query. Nếu cần sort data trong table hoặc thực hiện range query thì Hash index không đáp ứng được. Ngoài ra, mỗi lần I/O chỉ có thể lấy một record.
 
@@ -77,7 +77,7 @@ Hãy thử hình dung tình huống sau:
 SELECT * FROM tb1 WHERE id < 500;
 ```
 
-Trong range query này, ưu thế rất rõ: chỉ cần duyệt trực tiếp các leaf node nhỏ hơn 500 là đủ. Còn Hash index định vị theo hash algorithm, chẳng lẽ phải tính hash một lần cho từng data từ 1 đến 499 để định vị hay sao? Đây chính là nhược điểm lớn nhất của Hash.
+Trong range query này, ưu thế rất rõ: chỉ cần duyệt trực tiếp các leaf node nhỏ hơn 500 là đủ. Còn Hash index định vị theo hash algorithm; chẳng lẽ phải tính hash một lần cho từng data từ 1 đến 499 để định vị hay sao? Đây chính là nhược điểm lớn nhất của Hash.
 
 ### Binary Search Tree (BST)
 
@@ -119,7 +119,7 @@ Red-black tree là một binary search tree tự balance. Thông qua color chang
 
 ![Red-black tree](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/red-black-tree.png)
 
-Khác với AVL tree, red-black tree không theo đuổi balance nghiêm ngặt mà chỉ balance tương đối. Vì vậy, query performance của red-black tree giảm đôi chút: do tính balance tương đối yếu, height của tree có thể lớn hơn, khiến một số data cần trải qua nhiều disk I/O mới query được. Đây cũng là nguyên nhân chính MySQL không chọn red-black tree. Cũng vì vậy, hiệu suất insert và delete của red-black tree được nâng cao đáng kể: khi insert và delete node, red-black tree chỉ cần thực hiện O(1) rotation và color change để duy trì trạng thái cơ bản balanced, thay vì phải thực hiện O(logn) rotation như AVL tree.
+Khác với AVL tree, red-black tree không theo đuổi balance nghiêm ngặt mà chỉ balance tương đối. Vì vậy, query performance của red-black tree giảm đôi chút: do tính balance tương đối yếu, height của tree có thể lớn hơn, khiến một số data cần trải qua nhiều disk I/O mới query được. Đây cũng là nguyên nhân chính MySQL không chọn red-black tree. Cũng vì vậy, hiệu suất insert và delete của red-black tree được nâng cao đáng kể: khi insert và delete node, red-black tree chỉ cần thực hiện số lần rotation và color change là O(1) để duy trì trạng thái cơ bản balanced, thay vì phải thực hiện O(logn) rotation như AVL tree.
 
 **Red-black tree được ứng dụng khá rộng rãi. Tầng dưới của TreeMap, TreeSet và HashMap từ JDK1.8 đều sử dụng red-black tree. Với trường hợp data nằm trong memory, performance của red-black tree rất tốt.**
 
@@ -144,9 +144,9 @@ Nếu chỉ muốn ôn nhanh B tree và B+ tree từ góc độ data structure, 
 
 Trong MySQL, MyISAM engine và InnoDB engine đều sử dụng B+Tree làm index structure, nhưng cách implement của hai engine không hoàn toàn giống nhau (nội dung dưới đây được tổng hợp từ _Con đường tu dưỡng của Java engineer_).
 
-> Trong MyISAM engine, data field của leaf node B+Tree lưu địa chỉ của data record. Khi search index, trước tiên thực hiện search index theo B+Tree search algorithm; nếu key được chỉ định tồn tại thì lấy giá trị data field, sau đó dùng giá trị của data field làm địa chỉ để đọc data record tương ứng. Đây được gọi là **non-clustered index (non-clustered index)**.
+> Trong MyISAM engine, data field của leaf node B+Tree lưu địa chỉ của data record. Khi search index, trước tiên thực hiện search index theo B+Tree search algorithm; nếu key được chỉ định tồn tại thì lấy giá trị data field, sau đó dùng giá trị của data field làm địa chỉ để đọc data record tương ứng. Đây được gọi là **non-clustered index**.
 >
-> Trong InnoDB engine, bản thân data file chính là index file. Khác với MyISAM, index file và data file tách rời; bản thân data file của table là một index structure được tổ chức theo B+Tree, data field của leaf node lưu full data record. Key của index này là primary key của data table, vì vậy bản thân data file của InnoDB table chính là primary index. Đây được gọi là **clustered index (clustered index)**; các index còn lại đều là **secondary index**, data field của secondary index lưu giá trị primary key của record tương ứng thay vì địa chỉ, đây cũng là điểm khác MyISAM. Khi search theo primary index, chỉ cần tìm node chứa key là có thể lấy data; khi search theo secondary index, trước tiên phải lấy giá trị primary key rồi đi qua primary index một lần nữa. Vì vậy, khi thiết kế table, không nên dùng field quá dài làm primary key, cũng không nên dùng field không monotonic làm primary key, vì điều đó khiến primary index thường xuyên bị split.
+> Trong InnoDB engine, bản thân data file chính là index file. Khác với MyISAM, index file và data file tách rời; bản thân data file của table là một index structure được tổ chức theo B+Tree, data field của leaf node lưu full data record. Key của index này là primary key của data table, vì vậy bản thân data file của InnoDB table chính là primary index. Đây được gọi là **clustered index**; các index còn lại đều là **secondary index**, data field của secondary index lưu giá trị primary key của record tương ứng thay vì địa chỉ, đây cũng là điểm khác MyISAM. Khi search theo primary index, chỉ cần tìm node chứa key là có thể lấy data; khi search theo secondary index, trước tiên phải lấy giá trị primary key rồi đi qua primary index một lần nữa. Vì vậy, khi thiết kế table, không nên dùng field quá dài làm primary key, cũng không nên dùng field không monotonic làm primary key, vì điều đó khiến primary index thường xuyên bị split.
 
 ## Tổng hợp các loại index
 
@@ -159,12 +159,12 @@ Phân loại theo data structure:
 
 Phân loại theo storage method ở tầng dưới:
 
-- Clustered index (clustered index): Index mà index structure và data được lưu cùng nhau; primary key index trong InnoDB thuộc clustered index.
-- Non-clustered index (non-clustered index): Index mà index structure và data được lưu tách rời; secondary index (auxiliary index) thuộc non-clustered index. MyISAM engine của MySQL, bất kể primary key hay non-primary key, đều sử dụng non-clustered index.
+- Clustered index: Index mà index structure và data được lưu cùng nhau; primary key index trong InnoDB thuộc clustered index.
+- Non-clustered index: Index mà index structure và data được lưu tách rời; secondary index (auxiliary index) thuộc non-clustered index. MyISAM engine của MySQL, bất kể primary key hay non-primary key, đều sử dụng non-clustered index.
 
 Phân loại theo application:
 
-- Primary key index: Tăng tốc query + giá trị column duy nhất (không được có NULL) + mỗi table chỉ có một.
+- Primary key index: Tăng tốc query + giá trị column duy nhất (không được có NULL) + mỗi table chỉ có một index.
 - Normal index: Chỉ tăng tốc query.
 - Unique index: Tăng tốc query + giá trị column duy nhất (có thể có NULL).
 - Covering index: Một index chứa (hay nói cách khác là cover) value của mọi field cần query.
@@ -174,7 +174,7 @@ Phân loại theo application:
 
 Các index feature mới được implement trong MySQL 8.x:
 
-- Invisible index: Còn gọi là hidden index, không được optimizer sử dụng nhưng vẫn cần maintain, thường dùng trong các scenario soft delete và gray release. Primary key không thể đặt thành hidden (bao gồm cả đặt explicit hoặc implicit).
+- Invisible index: Còn gọi là hidden index, không được optimizer sử dụng nhưng vẫn cần maintain, thường dùng trong các scenario soft delete và gray release. Primary key không thể đặt thành hidden (dù đặt explicit hay implicit).
 - Descending index: Các version trước đã hỗ trợ chỉ định index giảm dần bằng desc, nhưng thực tế index tạo ra vẫn là ascending index thông thường. Chỉ từ MySQL 8.x mới thực sự hỗ trợ descending index. Ngoài ra, trong MySQL 8.x, câu lệnh GROUP BY không còn được implicit sort.
 - Functional index: Từ MySQL 8.0.13 bắt đầu hỗ trợ dùng function hoặc expression value trong index, tức là index có thể chứa function hoặc expression.
 
@@ -184,19 +184,19 @@ Column primary key của data table sử dụng primary key index.
 
 Một data table chỉ có thể có một primary key, primary key không được là null và không được trùng lặp.
 
-Trong table InnoDB của MySQL, khi không explicit chỉ định primary key cho table, trước tiên InnoDB sẽ tự động kiểm tra xem table có field nào có unique index và không cho phép giá trị null hay không. Nếu có, field đó sẽ được chọn làm primary key mặc định; nếu không, InnoDB sẽ tự động tạo một primary key tự tăng 6 Byte.
+Trong table InnoDB của MySQL, khi không explicit chỉ định primary key cho table, trước tiên InnoDB sẽ tự động kiểm tra xem table có field nào có unique index và không cho phép giá trị null hay không. Nếu có, field đó sẽ được chọn làm primary key mặc định; nếu không, InnoDB sẽ tự động tạo một primary key tự tăng 6 byte.
 
 ![Primary key index](https://oss.javaguide.cn/github/javaguide/open-source-project/cluster-index.png)
 
 ## Secondary index
 
-Leaf node của secondary index lưu primary key value. Nói cách khác, thông qua secondary index có thể định vị vị trí của primary key; secondary index còn được gọi là auxiliary index/non-primary key index.
+Leaf node của secondary index lưu primary key value. Nói cách khác, thông qua secondary index có thể tìm được primary key; secondary index còn được gọi là auxiliary index/non-primary key index.
 
 Unique index, normal index, prefix index và các index khác đều thuộc secondary index.
 
 PS: Nếu chưa hiểu, bạn có thể tạm bỏ qua, xem tiếp từ từ; phần sau sẽ có câu trả lời, hoặc bạn cũng có thể tự search.
 
-1. **Unique index (Unique Key)**: Unique index cũng là một constraint. Attribute column của unique index không được xuất hiện data trùng lặp, nhưng cho phép data là NULL; một table cho phép tạo nhiều unique index. Phần lớn mục đích tạo unique index là đảm bảo tính duy nhất của data trong attribute column chứ không phải query efficiency.
+1. **Unique index (Unique Key)**: Unique index cũng là một constraint. Column của unique index không được chứa data trùng lặp, nhưng cho phép data là NULL; một table cho phép tạo nhiều unique index. Phần lớn mục đích tạo unique index là đảm bảo tính duy nhất của data trong column chứ không phải query efficiency.
 2. **Normal index (Index)**: Tác dụng duy nhất của normal index là query data nhanh. Một table cho phép tạo nhiều normal index và cho phép data trùng lặp, có NULL.
 3. **Prefix index (Prefix)**: Prefix index chỉ áp dụng cho data dạng string. Prefix index tạo index trên một số character đầu tiên của text; so với normal index, data được tạo nhỏ hơn vì chỉ lấy một số character đầu tiên.
 4. **Full-text index (Full Text)**: Full-text index chủ yếu dùng để tìm thông tin keyword trong lượng lớn text data, là một kỹ thuật được database của search engine sử dụng. Trước Mysql5.6 chỉ MyISAM engine hỗ trợ full-text index; từ 5.6 trở đi InnoDB cũng hỗ trợ full-text index.
@@ -213,7 +213,7 @@ Secondary index:
 
 Clustered index (Clustered Index) là index mà index structure và data được lưu cùng nhau, không phải một loại index độc lập. Primary key index trong InnoDB thuộc clustered index.
 
-Trong MySQL, file `.ibd` của table thuộc InnoDB engine chứa index và data của table đó. Với table thuộc InnoDB engine, mỗi non-leaf node của index (B+ tree) lưu index, leaf node lưu index và data tương ứng với index.
+Trong MySQL, file `.ibd` của table thuộc InnoDB engine chứa index và data của table đó. Với table thuộc InnoDB engine, mỗi non-leaf node của index (B+ tree) lưu các key của index, còn leaf node lưu key và data tương ứng.
 
 #### Ưu và nhược điểm của clustered index
 
@@ -331,7 +331,7 @@ Chờ một lúc, 1 triệu test data sẽ được insert xong!
 Để sort 1 triệu data theo `score`, cần thực thi SQL dưới đây.
 
 ```sql
-# Sort giảm dần
+#Sort giảm dần
 SELECT `score`,`name` FROM `cus_order` ORDER BY `score` DESC;
 ```
 
@@ -410,11 +410,11 @@ Tiếp theo là một câu hỏi phỏng vấn thường gặp: nếu có index 
 3. Query `b=1 AND c=1`: Giống trường hợp thứ hai, toàn bộ index cũng không được sử dụng.
 4. Query `b=1 AND a=1 AND c=1`: Query này có thể dùng index. Khi query optimizer phân tích SQL, với composite index, nó sẽ reorder query condition để sử dụng index. Nó sẽ reorder điều kiện `b=1` và `a=1` thành `a=1 AND b=1 AND c=1`.
 
-MySQL 8.0.13 giới thiệu index skip scan (Index Skip Scan, viết tắt là ISS), có thể nâng cao query efficiency trong một số scenario index query. Trước khi có ISS, composite index query không thỏa leftmost-prefix matching principle sẽ thực hiện full table scan. ISS cho phép MySQL tránh full table scan trong một số trường hợp, ngay cả khi query condition không phù hợp leftmost prefix. Tuy nhiên, feature này khá hạn chế, không thể so với Oracle; MySQL 8.0.31 còn báo cáo một bug: [Bug #109145 Using index for skip scan cause incorrect result](https://bugs.mysql.com/bug.php?id=109145) (đã được sửa ở version sau). Theo đề xuất cá nhân, chỉ cần biết có feature này là được, không cần đào sâu; project thực tế cũng chưa chắc dùng được.
+MySQL 8.0.13 giới thiệu index skip scan (Index Skip Scan, viết tắt là ISS), có thể nâng cao query efficiency trong một số scenario index query. Trước khi có ISS, composite index query không thỏa leftmost-prefix matching principle sẽ thực hiện full table scan. ISS cho phép MySQL tránh full table scan trong một số trường hợp, ngay cả khi query condition không phù hợp leftmost prefix. Tuy nhiên, feature này khá ít tác dụng, không thể so với Oracle; MySQL 8.0.31 còn báo cáo một bug: [Bug #109145 Using index for skip scan cause incorrect result](https://bugs.mysql.com/bug.php?id=109145) (đã được sửa ở version sau). Theo đề xuất cá nhân, chỉ cần biết có feature này là được, không cần đào sâu; project thực tế cũng chưa chắc dùng được.
 
 ## Index condition pushdown
 
-**Index condition pushdown (Index Condition Pushdown, viết tắt là ICP)** là một index optimization feature được cung cấp từ **MySQL 5.6**. Nó cho phép storage engine thực hiện điều kiện phán đoán của một phần `WHERE` clause trong quá trình index traversal, trực tiếp filter các record không thỏa điều kiện, từ đó giảm số lần table lookup và nâng cao query efficiency.
+**Index condition pushdown (Index Condition Pushdown, viết tắt là ICP)** là một index optimization feature được cung cấp từ **MySQL 5.6**. Nó cho phép storage engine đánh giá một phần điều kiện trong mệnh đề `WHERE` khi traversal index, trực tiếp filter các record không thỏa điều kiện, từ đó giảm số lần table lookup và nâng cao query efficiency.
 
 Giả sử có table tên `user`, gồm 4 field `id`, `username`, `zipcode` và `birthdate`, đồng thời đã tạo composite index `(zipcode, birthdate)`.
 
@@ -464,7 +464,7 @@ Có thể thấy, **ngoài giảm số lần table lookup, index condition pushd
 Cuối cùng, hãy tổng hợp phạm vi áp dụng của index condition pushdown:
 
 1. Áp dụng cho query của InnoDB engine và MyISAM engine.
-2. Áp dụng cho range query có execution plan là range, ref, eq_ref, ref_or_null.
+2. Áp dụng cho query có execution plan thuộc range, ref, eq_ref hoặc ref_or_null.
 3. Với InnoDB table, chỉ dùng cho non-clustered index. Mục tiêu của index condition pushdown là giảm số lần đọc full row, từ đó giảm I/O operation. Với clustered index của InnoDB, full record đã được đọc vào InnoDB buffer. Trong trường hợp này, dùng index condition pushdown không giảm được I/O.
 4. Subquery không thể dùng index condition pushdown, vì subquery thường tạo temporary table để xử lý result, mà các temporary table này không có index.
 5. Stored procedure không thể dùng index condition pushdown, vì storage engine không thể gọi stored function.
@@ -473,7 +473,7 @@ Cuối cùng, hãy tổng hợp phạm vi áp dụng của index condition pushd
 
 ### Chọn field phù hợp để tạo index
 
-- **Field không NULL**: Data của index field nên cố gắng không là NULL, vì database khó optimization hơn với field có data là NULL. Nếu field thường xuyên được query nhưng không thể tránh NULL, nên dùng short value hoặc short character có semantic rõ ràng như 0, 1, true, false để thay thế.
+- **Field không NULL**: Data của index field nên cố gắng không là NULL, vì database khó tối ưu hơn với field có data là NULL. Nếu field thường xuyên được query nhưng không thể tránh NULL, nên dùng short value hoặc short character có semantic rõ ràng như 0, 1, true, false để thay thế.
 - **Field được query thường xuyên**: Field dùng để tạo index nên là field được query rất thường xuyên.
 - **Field được dùng làm query condition**: Field được dùng làm WHERE condition nên được cân nhắc tạo index.
 - **Field thường xuyên cần sort**: Index đã được sort, query có thể tận dụng thứ tự của index để tăng tốc sort query.
@@ -493,9 +493,9 @@ Loại vấn đề này thường gặp nhất. Bản chất là query condition
 - **Wildcard ở đầu trong LIKE fuzzy query**: Chẳng hạn `LIKE "%abc"`, tính không xác định của prefix character khiến optimizer không thể khóa điểm bắt đầu của scan range.
 - **ORDER BY sorting trap**: Sort column không hit index, hướng sort không nhất quán với index structure, v.v. khiến phát sinh memory sort hoặc disk sort bổ sung (`Using filesort`).
 
-**2. Cost decision của optimizer (thỏa hiệp dựa trên I/O cost)**
+**2. Quyết định về cost của optimizer (thỏa hiệp dựa trên I/O cost)**
 
-Loại vấn đề này không phải bản thân index không dùng được, mà là sau khi tính toán, MySQL optimizer cho rằng tổng overhead của “không đi qua normal index” lại nhỏ hơn.
+Loại vấn đề này không phải do bản thân index không dùng được, mà là sau khi tính toán, MySQL optimizer cho rằng tổng chi phí khi không dùng normal index lại nhỏ hơn.
 
 - **`SELECT \*` không suy nghĩ khiến table lookup quá tải**: Khi query nhiều column không được covering index và lượng data hit khá lớn (thường trên 20%~30%), optimizer sẽ nhận định sequential I/O của full table scan tốt hơn random I/O do table lookup thường xuyên, từ đó chủ động bỏ index.
 - **Điều kiện `OR` dẫn đến full table scan**: Chỉ cần một phía của điều kiện nối bằng `OR` không có index tương ứng thì sẽ trigger full table scan. Ngay cả khi hai phía đều có index, nếu cost dự kiến của Index Merge quá cao thì vẫn bị bỏ qua.
@@ -505,23 +505,23 @@ Giới thiệu chi tiết: [Tổng hợp các tình huống MySQL index mất hi
 
 ### Cân nhắc kỹ khi tạo index cho field được update thường xuyên
 
-Index có thể mang lại query efficiency, nhưng chi phí maintain index cũng không nhỏ. Nếu một field không thường xuyên được query mà ngược lại thường xuyên bị sửa, càng không nên tạo index trên field đó.
+Index có thể cải thiện query efficiency, nhưng chi phí maintain index cũng không nhỏ. Nếu một field không thường xuyên được query mà ngược lại thường xuyên bị sửa, càng không nên tạo index trên field đó.
 
 ### Giới hạn số lượng index trên mỗi table
 
-Index không phải càng nhiều càng tốt, nên giới hạn index của một table không quá 5! Index có thể nâng cao efficiency, nhưng cũng có thể làm giảm efficiency.
+Index không phải càng nhiều càng tốt, nên giới hạn index của một table không quá 5! Index có thể nâng cao efficiency, nhưng cũng có thể làm giảm performance.
 
-Index có thể tăng query efficiency, nhưng đồng thời cũng làm giảm insert và update efficiency, thậm chí trong một số trường hợp còn làm giảm query efficiency.
+Index có thể tăng query efficiency, nhưng đồng thời cũng làm giảm insert và update efficiency, thậm chí trong một số trường hợp còn làm giảm performance của query.
 
-Vì khi MySQL optimizer chọn cách optimization query, nó sẽ dựa trên statistics để đánh giá từng index có thể dùng nhằm tạo execution plan tốt nhất. Nếu đồng thời có quá nhiều index có thể dùng cho query, thời gian MySQL optimizer tạo execution plan sẽ tăng, đồng thời query performance cũng giảm.
+Vì khi MySQL optimizer chọn cách optimization query, nó sẽ dựa trên statistics để đánh giá từng index có thể dùng nhằm tạo execution plan tốt nhất. Nếu đồng thời có quá nhiều index có thể dùng cho query, thời gian MySQL optimizer tạo execution plan sẽ tăng và query performance cũng giảm.
 
 ### Cố gắng cân nhắc composite index thay vì single-column index
 
-Vì index cần chiếm disk space, có thể hiểu đơn giản mỗi index tương ứng với một B+ tree. Nếu field của một table quá nhiều và index quá nhiều, khi data của table đạt đến một quy mô nhất định, space mà index chiếm cũng rất lớn, đồng thời thời gian tốn khi sửa index cũng nhiều. Nếu là composite index, nhiều field nằm trên một index thì sẽ tiết kiệm được nhiều disk space và hiệu suất thao tác sửa data cũng tăng.
+Vì index cần chiếm disk space, có thể hiểu đơn giản mỗi index tương ứng với một B+ tree. Nếu field của một table quá nhiều và index quá nhiều, khi data của table đạt đến một quy mô nhất định, space mà index chiếm cũng rất lớn, đồng thời việc sửa index cũng tốn nhiều thời gian. Nếu là composite index, nhiều field nằm trên một index thì sẽ tiết kiệm được nhiều disk space và hiệu suất thao tác sửa data cũng tăng.
 
 ### Lưu ý tránh redundant index
 
-Redundant index là index có chức năng giống nhau. Nếu có thể hit index `(a, b)` thì chắc chắn có thể hit index `(a)`, vậy index `(a)` là redundant index. Chẳng hạn hai index `(name,city)` và `(name)` là redundant index; query có thể hit index trước chắc chắn cũng hit được index sau. Trong phần lớn trường hợp, nên mở rộng index hiện có thay vì tạo index mới.
+Redundant index là index có chức năng giống nhau. Nếu có thể hit index `(a, b)` thì chắc chắn có thể hit index `(a)`, vậy index `(a)` là redundant index. Chẳng hạn hai index `(name,city)` và `(name)` là redundant index; query có thể hit index thứ nhất chắc chắn cũng hit được index thứ hai. Trong phần lớn trường hợp, nên mở rộng index hiện có thay vì tạo index mới.
 
 ### Dùng prefix index thay cho normal index với field dạng string
 
@@ -529,15 +529,15 @@ Prefix index chỉ áp dụng cho field dạng string và chiếm ít space hơn
 
 ### Xóa index không được sử dụng trong thời gian dài
 
-Xóa index không được sử dụng trong thời gian dài, vì sự tồn tại của index không dùng sẽ gây performance loss không cần thiết.
+Xóa index không được sử dụng trong thời gian dài, vì sự tồn tại của index không dùng sẽ gây suy giảm performance không cần thiết.
 
 MySQL 5.7 có thể query view `schema_unused_indexes` của database `sys` để xem những index nào chưa từng được sử dụng.
 
-### Biết cách phân tích SQL có đi qua index query hay không
+### Biết cách phân tích SQL có dùng index để query hay không
 
-Có thể dùng lệnh `EXPLAIN` để phân tích **execution plan** của SQL, từ đó biết câu lệnh có hit index hay không. Execution plan là cách thực thi cụ thể của một SQL statement sau khi được MySQL query optimizer optimization.
+Có thể dùng lệnh `EXPLAIN` để phân tích **execution plan** của SQL, từ đó biết câu lệnh có hit index hay không. Execution plan là cách thực thi cụ thể của một SQL statement sau khi được MySQL query optimizer tối ưu.
 
-`EXPLAIN` không thực sự execute statement liên quan, mà thông qua **query optimizer** phân tích statement, tìm query plan tối ưu và hiển thị information tương ứng.
+`EXPLAIN` không thực sự execute statement liên quan mà chỉ thông qua **query optimizer** để phân tích statement, tìm query plan tối ưu và hiển thị information tương ứng.
 
 Output format của `EXPLAIN` như sau:
 
@@ -572,7 +572,7 @@ Do giới hạn độ dài, ở đây chỉ giới thiệu đơn giản về MyS
 
 ## Đọc thêm về data structure
 
-Khi tìm hiểu MySQL index, nên quay lại xem bản thân tree structure một lần:
+Khi tìm hiểu MySQL index, nên quay lại xem bản thân tree structure:
 
 - [Giải thích chi tiết về tree structure](../../cs-basics/data-structure/tree.md): So sánh binary search tree, AVL, red-black tree, B tree và B+ tree.
 - [Giải thích chi tiết về red-black tree](../../cs-basics/data-structure/red-black-tree.md): Tìm hiểu trade-off của self-balancing search tree trong memory, sau đó so sánh vì sao B+ tree phù hợp hơn với disk index.

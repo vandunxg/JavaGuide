@@ -1,6 +1,6 @@
 ---
 title: "Giải thích chi tiết 5 kiểu dữ liệu cơ bản của Redis"
-description: "Giải thích chi tiết cách sử dụng và trường hợp sử dụng của 5 kiểu dữ liệu cơ bản String, List, Set, Hash, Zset của Redis, phân tích sâu nguyên lý triển khai của các cấu trúc dữ liệu bên trong như SDS, skip list, ziplist."
+description: "Giải thích chi tiết cách sử dụng và các trường hợp áp dụng của 5 kiểu dữ liệu cơ bản String, List, Set, Hash, Zset của Redis, phân tích sâu nguyên lý triển khai của các cấu trúc dữ liệu tầng dưới như SDS, skip list, ziplist."
 category: Database
 tag:
   - Redis
@@ -12,17 +12,17 @@ head:
 
 Redis có tổng cộng 5 kiểu dữ liệu cơ bản: String (chuỗi), List (danh sách), Set (tập hợp), Hash (bảng băm), Zset (tập hợp có thứ tự).
 
-5 kiểu dữ liệu này được cung cấp trực tiếp cho người dùng, là hình thức lưu trữ dữ liệu. Cơ chế triển khai bên dưới chủ yếu dựa trên 8 cấu trúc dữ liệu sau: chuỗi động đơn giản (SDS), LinkedList (linked list hai chiều), Dict (hash table/từ điển), SkipList (skip list), Intset (tập hợp số nguyên), ZipList (ziplist), QuickList (danh sách nhanh).
+5 kiểu dữ liệu này được cung cấp trực tiếp cho người dùng, là dạng lưu trữ dữ liệu. Cơ chế triển khai tầng dưới chủ yếu dựa trên 8 cấu trúc dữ liệu sau: chuỗi động đơn giản (SDS), LinkedList (linked list hai chiều), Dict (hash table/từ điển), SkipList (skip list), Intset (tập hợp số nguyên), ZipList (ziplist), QuickList (danh sách nhanh).
 
-Cấu trúc dữ liệu bên dưới tương ứng với 5 kiểu dữ liệu cơ bản của Redis được triển khai như bảng sau:
+Các cấu trúc dữ liệu tầng dưới tương ứng với 5 kiểu dữ liệu cơ bản của Redis được triển khai như bảng sau:
 
 | String | List                         | Hash         | Set         | Zset             |
 | :----- | :--------------------------- | :----------- | :---------- | :--------------- |
 | SDS    | LinkedList/ZipList/QuickList | Dict,ZipList | Dict,Intset | ZipList,SkipList |
 
-Trước Redis 3.2, cơ chế triển khai bên dưới của List là LinkedList hoặc ZipList. Từ Redis 3.2 trở đi, Redis đưa vào QuickList, là sự kết hợp giữa LinkedList và ZipList, nên cơ chế triển khai bên dưới của List chuyển thành QuickList. Từ Redis 7.0, ZipList được thay thế bằng ListPack.
+Trước Redis 3.2, cơ chế triển khai tầng dưới của List là LinkedList hoặc ZipList. Từ Redis 3.2 trở đi, Redis đưa vào QuickList, là sự kết hợp giữa LinkedList và ZipList, nên cơ chế triển khai tầng dưới của List chuyển thành QuickList. Từ Redis 7.0, ZipList được thay thế bằng ListPack.
 
-Bạn có thể tìm thấy phần giới thiệu rất chi tiết về kiểu/cấu trúc dữ liệu Redis trên website chính thức của Redis:
+Bạn có thể tìm thấy phần giới thiệu rất chi tiết về các kiểu/cấu trúc dữ liệu của Redis trên website chính thức của Redis:
 
 - [Redis Data Structures](https://redis.com/redis-enterprise/data-structures/)
 - [Redis Data types tutorial](https://redis.io/docs/manual/data-types/data-types-tutorial/)
@@ -37,11 +37,11 @@ Trong tương lai, khi các phiên bản Redis mới được phát hành, có t
 
 String là kiểu dữ liệu đơn giản nhất và cũng là kiểu dữ liệu được sử dụng phổ biến nhất trong Redis.
 
-String là kiểu dữ liệu binary-safe, có thể dùng để lưu trữ mọi loại dữ liệu như chuỗi, số nguyên, số thực, hình ảnh (mã hóa hoặc giải mã base64 của hình ảnh, hoặc đường dẫn hình ảnh), đối tượng đã serialization.
+String là kiểu dữ liệu binary-safe, có thể dùng để lưu trữ mọi loại dữ liệu như chuỗi, số nguyên, số thực, hình ảnh (dữ liệu ảnh được encode hoặc decode bằng base64, hoặc đường dẫn ảnh), đối tượng sau serialization.
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220719124403897.png)
 
-Mặc dù Redis được viết bằng ngôn ngữ C, Redis không sử dụng cách biểu diễn chuỗi của C mà tự xây dựng một **chuỗi động đơn giản** (Simple Dynamic String, **SDS**). So với chuỗi nguyên bản của C, SDS của Redis không chỉ lưu được dữ liệu dạng văn bản mà còn lưu được dữ liệu nhị phân, đồng thời độ phức tạp khi lấy độ dài chuỗi là O(1) (chuỗi C là O(N)). Ngoài ra, API SDS của Redis an toàn và không gây tràn buffer.
+Mặc dù Redis được viết bằng ngôn ngữ C, Redis không sử dụng cách biểu diễn chuỗi của C mà tự xây dựng một **chuỗi động đơn giản** (Simple Dynamic String, **SDS**). So với chuỗi gốc của C, SDS của Redis không chỉ lưu được dữ liệu dạng văn bản mà còn lưu được dữ liệu nhị phân, đồng thời độ phức tạp khi lấy độ dài chuỗi là O(1) (chuỗi C là O(N)). Ngoài ra, API SDS của Redis an toàn và không gây tràn buffer.
 
 ### Lệnh thường dùng
 
@@ -78,7 +78,7 @@ OK
 (nil)
 ```
 
-**Đặt hàng loạt**:
+**Thiết lập hàng loạt**:
 
 ```bash
 > MSET key1 value1 key2 value2
@@ -118,7 +118,7 @@ OK
 
 **Trường hợp cần lưu trữ dữ liệu thông thường**
 
-- Ví dụ: cache Session, Token, địa chỉ hình ảnh, đối tượng đã serialization (tiết kiệm memory hơn so với lưu bằng Hash).
+- Ví dụ: cache Session, Token, địa chỉ hình ảnh, đối tượng sau serialization (tiết kiệm bộ nhớ hơn so với lưu bằng Hash).
 - Lệnh liên quan: `SET`, `GET`.
 
 **Trường hợp cần đếm**
@@ -134,9 +134,9 @@ Có thể dùng lệnh `SETNX key value` để triển khai một distributed lo
 
 ### Giới thiệu
 
-List trong Redis thực chất là cơ chế triển khai của cấu trúc dữ liệu linked list. Tôi đã giới thiệu chi tiết cấu trúc dữ liệu linked list trong bài viết [Cấu trúc dữ liệu tuyến tính: array, linked list, stack, queue](https://javaguide.cn/cs-basics/data-structure/linear-data-structure.html), nên ở đây không giới thiệu thêm.
+List trong Redis thực chất là cơ chế triển khai của cấu trúc dữ liệu linked list. Bài viết [Cấu trúc dữ liệu tuyến tính: array, linked list, stack, queue](https://javaguide.cn/cs-basics/data-structure/linear-data-structure.html) đã giới thiệu chi tiết về cấu trúc dữ liệu này, nên ở đây không giới thiệu thêm.
 
-Nhiều ngôn ngữ lập trình cấp cao có sẵn cơ chế triển khai linked list, chẳng hạn như `LinkedList` trong Java, nhưng ngôn ngữ C không triển khai linked list, vì vậy Redis đã tự triển khai cấu trúc dữ liệu linked list của mình. List của Redis được triển khai bằng **linked list hai chiều**, tức là hỗ trợ tìm kiếm và duyệt ngược, giúp thao tác thuận tiện hơn nhưng làm phát sinh thêm một phần chi phí memory.
+Nhiều ngôn ngữ lập trình cấp cao có sẵn cơ chế triển khai linked list, chẳng hạn như `LinkedList` trong Java, nhưng ngôn ngữ C không triển khai linked list, vì vậy Redis đã tự triển khai cấu trúc dữ liệu linked list của mình. List của Redis được triển khai bằng **linked list hai chiều**, tức là hỗ trợ tìm kiếm và duyệt ngược, giúp thao tác thuận tiện hơn nhưng làm phát sinh thêm một phần chi phí bộ nhớ.
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220719124413287.png)
 
@@ -180,7 +180,7 @@ Nhiều ngôn ngữ lập trình cấp cao có sẵn cơ chế triển khai link
 "value3"
 ```
 
-Tôi đã vẽ riêng một sơ đồ để mọi người dễ hiểu các lệnh `RPUSH`, `LPOP`, `LPUSH`, `RPOP`:
+Tôi đã vẽ riêng một sơ đồ để mọi người dễ hình dung các lệnh `RPUSH`, `LPOP`, `LPUSH`, `RPOP`:
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/redis-list.png)
 
@@ -209,7 +209,7 @@ Thông qua lệnh `LRANGE`, bạn có thể triển khai truy vấn phân trang 
 
 ### Trường hợp sử dụng
 
-**Hiển thị information feed**
+**Hiển thị feed thông tin**
 
 - Ví dụ: bài viết mới nhất, cập nhật mới nhất.
 - Lệnh liên quan: `LPUSH`, `LRANGE`.
@@ -218,15 +218,15 @@ Thông qua lệnh `LRANGE`, bạn có thể triển khai truy vấn phân trang 
 
 `List` có thể dùng làm message queue, chỉ là chức năng quá đơn giản và tồn tại nhiều thiếu sót, không khuyến nghị sử dụng theo cách này.
 
-Tương đối mà nói, cấu trúc dữ liệu `Stream` mới được Redis 5.0 thêm vào phù hợp hơn để làm message queue, nhưng chức năng vẫn rất sơ sài. So với message queue chuyên dụng, nó vẫn còn nhiều thiếu sót, chẳng hạn như khó giải quyết vấn đề mất message và message bị dồn ứ.
+Tương đối mà nói, cấu trúc dữ liệu `Stream` mới được Redis 5.0 thêm vào phù hợp hơn để làm message queue, nhưng chức năng vẫn rất sơ sài. So với message queue chuyên dụng, nó vẫn còn nhiều thiếu sót, chẳng hạn như khó giải quyết vấn đề mất message và message tồn đọng.
 
 ## Hash (hash)
 
 ### Giới thiệu
 
-Hash trong Redis là một bảng ánh xạ field-value (cặp key-value) thuộc kiểu String, đặc biệt phù hợp để lưu trữ object. Khi thao tác về sau, bạn có thể trực tiếp sửa giá trị của một số field trong object này.
+Hash trong Redis là một bảng ánh xạ field-value (cặp key-value) kiểu String, đặc biệt phù hợp để lưu trữ object. Khi thao tác về sau, bạn có thể trực tiếp sửa giá trị của một số field trong object này.
 
-Hash tương tự `HashMap` trước JDK1.8, cơ chế triển khai bên trong cũng gần giống (array + linked list). Tuy nhiên, Hash của Redis đã được tối ưu thêm.
+Hash tương tự `HashMap` trước JDK1.8, cách triển khai bên trong cũng tương tự (array + linked list). Tuy nhiên, Hash của Redis đã được tối ưu thêm.
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220719124421703.png)
 
@@ -283,9 +283,9 @@ OK
 
 ### Giới thiệu
 
-Kiểu Set trong Redis là một tập hợp không có thứ tự. Các phần tử trong tập hợp không có thứ tự trước sau nhưng đều là duy nhất, tương tự `HashSet` trong Java. Khi cần lưu trữ một list nhưng không muốn xuất hiện dữ liệu trùng lặp, Set là một lựa chọn tốt. Ngoài ra, Set cung cấp API quan trọng để kiểm tra một phần tử có nằm trong tập hợp Set hay không, điều mà List không thể cung cấp.
+Kiểu Set trong Redis là một tập hợp không có thứ tự. Các phần tử trong tập hợp không có thứ tự trước sau nhưng đều là duy nhất, tương tự `HashSet` trong Java. Khi cần lưu trữ một list nhưng không muốn xuất hiện dữ liệu trùng lặp, Set là một lựa chọn tốt. Ngoài ra, Set cung cấp API quan trọng để kiểm tra một phần tử có nằm trong một Set hay không, điều mà List không thể cung cấp.
 
-Bạn có thể dễ dàng triển khai các phép toán giao, hợp và hiệu trên Set. Chẳng hạn, bạn có thể lưu tất cả người mà một người dùng theo dõi vào một tập hợp, đồng thời lưu tất cả follower của người đó vào một tập hợp khác. Khi đó, Set có thể rất thuận tiện để triển khai các chức năng như cùng theo dõi, cùng follower và cùng sở thích. Đây chính là quá trình tìm giao.
+Bạn có thể dễ dàng triển khai các phép toán giao, hợp và hiệu trên Set. Chẳng hạn, bạn có thể lưu tất cả người mà một người dùng theo dõi vào một tập hợp, đồng thời lưu tất cả follower của người đó vào một tập hợp khác. Khi đó, Set có thể rất thuận tiện để triển khai các chức năng như theo dõi chung, follower chung và sở thích chung. Đây chính là quá trình tìm giao.
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220719124430264.png)
 
@@ -365,7 +365,7 @@ Bạn có thể dễ dàng triển khai các phép toán giao, hợp và hiệu 
 
 **Trường hợp cần lấy giao, hợp và hiệu của nhiều nguồn dữ liệu**
 
-- Ví dụ: bạn chung (giao), follower chung (giao), cùng theo dõi (giao), gợi ý bạn bè (hiệu), gợi ý âm nhạc (hiệu), gợi ý tài khoản đăng ký (hiệu + giao) và các trường hợp khác.
+- Ví dụ: bạn bè chung (giao), follower chung (giao), theo dõi chung (giao), gợi ý bạn bè (hiệu), gợi ý âm nhạc (hiệu), gợi ý tài khoản đăng ký (hiệu + giao) và các trường hợp khác.
 - Lệnh liên quan: `SINTER` (giao), `SINTERSTORE` (giao), `SUNION` (hợp), `SUNIONSTORE` (hợp), `SDIFF` (hiệu), `SDIFFSTORE` (hiệu).
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220719074543513.png)
@@ -379,23 +379,23 @@ Bạn có thể dễ dàng triển khai các phép toán giao, hợp và hiệu 
 
 ### Giới thiệu
 
-Sorted Set tương tự Set, nhưng so với Set, Sorted Set bổ sung một tham số trọng số `score`, giúp các phần tử trong tập hợp được sắp xếp theo thứ tự dựa trên `score`. Ngoài ra, có thể lấy list phần tử theo phạm vi của `score`. Nó hơi giống sự kết hợp giữa `HashMap` và `TreeSet` trong Java.
+Sorted Set tương tự Set, nhưng so với Set, Sorted Set bổ sung một tham số trọng số `score`, giúp các phần tử trong tập hợp được sắp xếp theo thứ tự dựa trên `score`. Ngoài ra, có thể lấy danh sách phần tử theo phạm vi của `score`. Nó hơi giống sự kết hợp giữa `HashMap` và `TreeSet` trong Java.
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220719124437791.png)
 
 ### Lệnh thường dùng
 
-| Lệnh                                          | Giới thiệu                                                                                                                                                               |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ZADD key score1 member1 score2 member2 ...    | Thêm một hoặc nhiều phần tử vào sorted set được chỉ định                                                                                                                 |
-| ZCARD KEY                                     | Lấy số lượng phần tử trong sorted set được chỉ định                                                                                                                      |
-| ZSCORE key member                             | Lấy giá trị score của phần tử được chỉ định trong sorted set được chỉ định                                                                                               |
-| ZINTERSTORE destination numkeys key1 key2 ... | Lưu giao của tất cả sorted set đã cho vào destination, thực hiện phép aggregate SUM trên giá trị score tương ứng của các phần tử giống nhau, numkeys là số lượng tập hợp |
-| ZUNIONSTORE destination numkeys key1 key2 ... | Tìm hợp, các nội dung khác tương tự ZINTERSTORE                                                                                                                          |
-| ZDIFFSTORE destination numkeys key1 key2 ...  | Tìm hiệu, các nội dung khác tương tự ZINTERSTORE                                                                                                                         |
-| ZRANGE key start end                          | Lấy các phần tử giữa start và end của sorted set được chỉ định (score từ thấp đến cao)                                                                                   |
-| ZREVRANGE key start end                       | Lấy các phần tử giữa start và end của sorted set được chỉ định (score từ cao xuống thấp)                                                                                 |
-| ZREVRANK key member                           | Lấy thứ hạng của phần tử được chỉ định trong sorted set được chỉ định (sắp xếp theo score từ cao xuống thấp)                                                             |
+| Lệnh                                          | Giới thiệu                                                                                                                                                              |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ZADD key score1 member1 score2 member2 ...    | Thêm một hoặc nhiều phần tử vào sorted set được chỉ định                                                                                                                |
+| ZCARD KEY                                     | Lấy số lượng phần tử trong sorted set được chỉ định                                                                                                                     |
+| ZSCORE key member                             | Lấy giá trị score của phần tử được chỉ định trong sorted set được chỉ định                                                                                              |
+| ZINTERSTORE destination numkeys key1 key2 ... | Lưu giao của tất cả sorted set đã cho vào destination, thực hiện phép tổng hợp SUM trên giá trị score tương ứng của các phần tử giống nhau, numkeys là số lượng tập hợp |
+| ZUNIONSTORE destination numkeys key1 key2 ... | Tìm hợp, các nội dung khác tương tự ZINTERSTORE                                                                                                                         |
+| ZDIFFSTORE destination numkeys key1 key2 ...  | Tìm hiệu, các nội dung khác tương tự ZINTERSTORE                                                                                                                        |
+| ZRANGE key start end                          | Lấy các phần tử giữa start và end của sorted set được chỉ định (score từ thấp đến cao)                                                                                  |
+| ZREVRANGE key start end                       | Lấy các phần tử giữa start và end của sorted set được chỉ định (score từ cao xuống thấp)                                                                                |
+| ZREVRANK key member                           | Lấy thứ hạng của phần tử được chỉ định trong sorted set được chỉ định (sắp xếp theo score từ cao xuống thấp)                                                            |
 
 Để xem thêm các lệnh Redis Sorted Set và hướng dẫn sử dụng chi tiết, hãy xem phần giới thiệu tương ứng trên website chính thức của Redis: <https://redis.io/commands/?group=sorted-set> .
 
@@ -465,9 +465,9 @@ value1
 
 ### Trường hợp sử dụng
 
-**Trường hợp cần lấy ngẫu nhiên các phần tử trong nguồn dữ liệu và sắp xếp theo một trọng số nào đó**
+**Trường hợp cần lấy ngẫu nhiên các phần tử từ nguồn dữ liệu rồi sắp xếp theo một trọng số nào đó**
 
-- Ví dụ: các loại bảng xếp hạng như bảng xếp hạng tặng quà trong phòng livestream, bảng xếp hạng số bước chân trên mạng xã hội, bảng xếp hạng cấp bậc trong game, bảng xếp hạng độ hot của chủ đề và nhiều loại khác.
+- Ví dụ: các loại bảng xếp hạng như bảng xếp hạng tặng quà trong phòng livestream, bảng xếp hạng số bước chân trên WeChat, bảng xếp hạng cấp bậc trong Honor of Kings, bảng xếp hạng độ hot của chủ đề và nhiều loại khác.
 - Lệnh liên quan: `ZRANGE` (sắp xếp từ thấp đến cao), `ZREVRANGE` (sắp xếp từ cao xuống thấp), `ZREVRANK` (thứ hạng của phần tử được chỉ định).
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/2021060714195385.png)
@@ -485,7 +485,7 @@ value1
 
 | Kiểu dữ liệu | Mô tả                                                                                                                                                                                                                                                          |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| String       | Kiểu dữ liệu binary-safe, có thể dùng để lưu trữ mọi loại dữ liệu như chuỗi, số nguyên, số thực, hình ảnh (mã hóa hoặc giải mã base64 của hình ảnh, hoặc đường dẫn hình ảnh), object đã serialization.                                                         |
+| String       | Kiểu dữ liệu binary-safe, có thể dùng để lưu trữ mọi loại dữ liệu như chuỗi, số nguyên, số thực, hình ảnh (mã hóa hoặc giải mã base64 của hình ảnh, hoặc đường dẫn hình ảnh), object sau serialization.                                                        |
 | List         | List của Redis được triển khai bằng linked list hai chiều, hỗ trợ tìm kiếm và duyệt ngược, giúp thao tác thuận tiện hơn nhưng làm phát sinh thêm một phần chi phí memory.                                                                                      |
 | Hash         | Bảng ánh xạ field-value (cặp key-value) thuộc kiểu String, đặc biệt phù hợp để lưu trữ object. Khi thao tác về sau, bạn có thể trực tiếp sửa giá trị của một số field trong object này.                                                                        |
 | Set          | Tập hợp không có thứ tự, các phần tử trong tập hợp không có thứ tự trước sau nhưng đều là duy nhất, tương tự `HashSet` trong Java.                                                                                                                             |
@@ -493,11 +493,11 @@ value1
 
 ## Đọc thêm về cấu trúc dữ liệu
 
-Các kiểu dữ liệu Redis sử dụng nhiều cấu trúc dữ liệu cơ bản ở phía sau. Nếu muốn bổ sung kiến thức về tầng dưới dưới góc độ phỏng vấn, bạn có thể đọc kết hợp các bài viết sau:
+Các kiểu dữ liệu Redis sử dụng nhiều cấu trúc dữ liệu cơ bản ở phía sau. Nếu muốn bổ sung kiến thức về cơ chế bên trong dưới góc độ phỏng vấn, bạn có thể đọc kết hợp các bài viết sau:
 
 - [Giải thích chi tiết về cấu trúc dữ liệu tuyến tính](../../cs-basics/data-structure/linear-data-structure.md): hiểu mối quan hệ giữa List, queue và linked list.
-- [Tổng hợp câu hỏi phỏng vấn về hash table](../../cs-basics/data-structure/hash-table.md): hiểu cách tìm kiếm và xử lý collision của các cấu trúc như Hash, Set.
-- [Tổng hợp câu hỏi phỏng vấn về skip list](../../cs-basics/data-structure/skip-list.md): hiểu các đánh đổi về cấu trúc phía sau khả năng truy vấn theo phạm vi và lấy thứ hạng của Sorted Set.
+- [Tổng hợp câu hỏi phỏng vấn về hash table](../../cs-basics/data-structure/hash-table.md): hiểu cách tìm kiếm và xử lý hash collision của các cấu trúc như Hash, Set.
+- [Tổng hợp câu hỏi phỏng vấn về skip list](../../cs-basics/data-structure/skip-list.md): hiểu những đánh đổi trong cấu trúc phía sau khả năng truy vấn theo phạm vi và lấy thứ hạng của Sorted Set.
 
 ## Tham khảo
 

@@ -1,6 +1,6 @@
 ---
 title: "Tổng hợp câu hỏi phỏng vấn SQL thường gặp (2)"
-description: "Phần thứ hai của tổng hợp câu hỏi phỏng vấn SQL thường gặp, giải thích chi tiết các câu lệnh thao tác dữ liệu DML như INSERT, UPDATE, DELETE, bao gồm kỹ thuật chèn hàng loạt, nhập từ bảng khác, chèn kèm cập nhật và các kỹ thuật thực chiến khác."
+description: "Phần thứ hai của tổng hợp câu hỏi phỏng vấn SQL thường gặp, giải thích chi tiết các câu lệnh thao tác dữ liệu DML như INSERT, UPDATE, DELETE, bao gồm kỹ thuật chèn hàng loạt, nhập từ bảng khác, chèn kèm cập nhật và các kỹ thuật thực hành khác."
 category: Database
 tag:
   - Database Basics
@@ -15,7 +15,7 @@ head:
 
 ## Thao tác thêm, xóa, sửa
 
-Tổng hợp các cách chèn bản ghi vào SQL:
+Tổng hợp các cách chèn bản ghi bằng SQL:
 
 - **Chèn thông thường (toàn bộ trường)**: `INSERT INTO table_name VALUES (value1, value2, ...)`
 - **Chèn thông thường (giới hạn trường)**: `INSERT INTO table_name (column1, column2, ...) VALUES (value1, value2, ...)`
@@ -65,7 +65,7 @@ Bảng `exam_record`:
 | submit_time | datetime   | YES  |     |                | (NULL)  | Thời gian nộp bài |
 | score       | tinyint(4) | YES  |     |                | (NULL)  | Điểm              |
 
-Chúng ta đã tạo bảng mới `exam_record_before_2021` để sao lưu các bản ghi làm bài đã hoàn thành trước năm 2021. Cấu trúc giống bảng `exam_record`. Hãy nhập các bản ghi làm bài đã hoàn thành trước năm 2021 vào bảng này.
+Đã tạo bảng mới `exam_record_before_2021` để sao lưu các bản ghi làm bài đã hoàn thành trước năm 2021. Cấu trúc giống bảng `exam_record`. Hãy nhập các bản ghi làm bài đã hoàn thành trước năm 2021 vào bảng này.
 
 **Đáp án**:
 
@@ -78,7 +78,7 @@ WHERE YEAR(submit_time) < 2021;
 
 ### Chèn bản ghi (3)
 
-**Mô tả**: Hiện có một đề thi SQL độ khó cao có ID 9003, thời lượng một tiếng rưỡi. Hãy chèn thời gian phát hành `2021-01-01 00:00:00` vào bảng thông tin đề thi `examination_info`. Dù đề thi có ID này đã tồn tại hay chưa, thao tác vẫn phải chèn thành công. Hãy thử chèn đề thi này.
+**Mô tả**: Hiện có một đề thi SQL độ khó cao có ID 9003, thời lượng một tiếng rưỡi. Hãy chèn thời gian phát hành `2021-01-01 00:00:00` vào bảng thông tin đề thi `examination_info`. Dù đề thi có ID này tồn tại hay không, thao tác vẫn phải chèn thành công. Hãy thử chèn đề thi này.
 
 Bảng thông tin đề thi `examination_info`:
 
@@ -143,7 +143,7 @@ SET tag = REPLACE(tag,'PYTHON','Python')
 | submit_time | datetime   | YES  |     |                | (NULL)  | Thời gian nộp bài |
 | score       | tinyint(4) | YES  |     |                | (NULL)  | Điểm              |
 
-**Yêu cầu**: Hãy chuyển toàn bộ các bản ghi trong bảng `exam_record` bắt đầu làm bài **trước** ngày 1 tháng 9 năm 2021 và **chưa hoàn thành** sang trạng thái hoàn thành bị động, tức là đổi thời gian hoàn thành thành `'2099-01-01 00:00:00'` và điểm thành `0`.
+**Yêu cầu**: Hãy chuyển toàn bộ các bản ghi trong bảng `exam_record` bắt đầu làm bài **trước** ngày 1 tháng 9 năm 2021 và **chưa hoàn thành** sang trạng thái được đánh dấu là đã hoàn thành, tức là đổi thời gian hoàn thành thành `'2099-01-01 00:00:00'` và điểm thành `0`.
 
 **Ý tưởng**: Hãy chú ý các từ khóa trong đề bài (đã được tô sáng), điều kiện **trước** một mốc thời gian. Khi đó cần nghĩ ngay đến việc so sánh thời gian. Có thể dùng trực tiếp `xxx_time < "2021-09-01 00:00:00"`, hoặc dùng hàm `date()` để so sánh. Điều kiện thứ hai là **chưa hoàn thành**, tức thời gian hoàn thành là `NULL`, tương ứng với thời gian nộp bài trong đề, nghĩa là `submit_time là NULL`.
 
@@ -168,7 +168,7 @@ Bảng bản ghi làm bài `exam_record`: **`start_time`** là thời gian bắt
 | submit_time | datetime   | YES  |     |                | (NULL)  | Thời gian nộp bài |
 | score       | tinyint(4) | YES  |     |                | (NULL)  | Điểm              |
 
-**Yêu cầu**: Hãy xóa các bản ghi trong bảng `exam_record` có thời gian làm bài nhỏ hơn 5 phút tròn và điểm không đạt (điểm đạt là 60 điểm).
+**Yêu cầu**: Hãy xóa các bản ghi trong bảng `exam_record` có thời gian làm bài dưới 5 phút và điểm không đạt (điểm đạt là 60 điểm).
 
 **Ý tưởng**: Dù bài này luyện tập thao tác xóa, nhìn kỹ thì nó kiểm tra cách dùng các hàm thời gian. Với phép so sánh số phút được nêu ở đây, các hàm thường dùng là **`TIMEDIFF`** và **`TIMESTAMPDIFF`**. Cách dùng của hai hàm hơi khác nhau, trong đó hàm sau linh hoạt hơn; lựa chọn tùy thói quen.
 
@@ -180,9 +180,9 @@ TIMEDIFF(time1, time2)
 
 Cả hai tham số đều bắt buộc, mỗi tham số là một biểu thức thời gian hoặc ngày giờ. Nếu tham số được chỉ định không hợp lệ hoặc là `NULL`, hàm sẽ trả về `NULL`.
 
-Với bài này, có thể dùng trong hàm `minute`, vì `TIMEDIFF` tính hiệu thời gian; bọc thêm hàm `MINUTE` bên ngoài sẽ tính ra số phút.
+Với bài này, có thể dùng `TIMEDIFF` bên trong hàm `MINUTE`, vì `TIMEDIFF` tính hiệu thời gian; bọc thêm hàm `MINUTE` bên ngoài sẽ tính ra số phút.
 
-2. `TIMESTAMPDIFF`: dùng để tính chênh lệch thời gian giữa hai ngày
+2. `TIMESTAMPDIFF`: dùng để tính chênh lệch thời gian giữa hai mốc thời gian
 
 ```sql
 TIMESTAMPDIFF(unit,datetime_expr1,datetime_expr2)
@@ -228,7 +228,7 @@ Bảng bản ghi làm bài `exam_record`: `start_time` là thời gian bắt đ�
 | submit_time | datetime   | YES  |     |                | (NULL)  | Thời gian nộp bài |
 | score       | tinyint(4) | YES  |     |                | (NULL)  | Điểm              |
 
-**Yêu cầu**: Trong các bản ghi của bảng `exam_record` mà **chưa hoàn thành** **hoặc** có thời gian làm bài nhỏ hơn 5 phút tròn, hãy xóa 3 bản ghi có thời gian bắt đầu làm bài sớm nhất.
+**Yêu cầu**: Trong các bản ghi của bảng `exam_record` mà **chưa hoàn thành** **hoặc** có thời gian làm bài dưới 5 phút, hãy xóa 3 bản ghi có thời gian bắt đầu làm bài sớm nhất.
 
 **Ý tưởng**: Bài này khá đơn giản, nhưng cần chú ý thông tin trong đề: thời gian kết thúc nếu chưa hoàn thành thì để trống, đây chính là một điều kiện.
 
@@ -264,7 +264,7 @@ LIMIT 3
 - `TRUNCATE`: làm trống bảng, không xóa cấu trúc bảng, không thể hoàn tác
 - `DELETE`: xóa dữ liệu, có thể hoàn tác
 
-Ở đây chọn `TRUNCATE` vì: `TRUNCATE` chỉ có thể tác động lên bảng; `TRUNCATE` xóa tất cả các hàng trong bảng nhưng giữ nguyên cấu trúc bảng, các constraint, index và những thành phần khác; `TRUNCATE` đặt lại giá trị tự tăng của bảng; sau khi dùng `TRUNCATE`, không gian mà bảng và index chiếm dụng sẽ trở về kích thước ban đầu.
+Ở đây chọn `TRUNCATE` vì: `TRUNCATE` chỉ có thể tác động lên bảng; `TRUNCATE` xóa tất cả các hàng trong bảng nhưng giữ nguyên cấu trúc bảng, các constraint, index và những thành phần khác; `TRUNCATE` đặt lại giá trị tự tăng của bảng; sau khi dùng `TRUNCATE`, dung lượng mà bảng và index chiếm dụng sẽ trở về kích thước ban đầu.
 
 Bài này cũng có thể dùng `DELETE`, nhưng sau khi xóa còn phải dùng `ALTER` để thiết lập thủ công giá trị ban đầu của khóa chính.
 
@@ -385,7 +385,7 @@ DROP TABLE IF EXISTS exam_record_2014;
 
 **Mô tả**: Hiện có một bảng thông tin đề thi `examination_info`, trong đó chứa thông tin về nhiều loại đề thi. Để truy vấn bảng thuận tiện và nhanh hơn, cần tạo các index sau trong bảng `examination_info`:
 
-Quy tắc: tạo ordinary index `idx_duration` trên cột `duration`, tạo unique index `uniq_idx_exam_id` trên cột `exam_id`, tạo full-text index `full_idx_tag` trên cột `tag`.
+Quy tắc: tạo index thường `idx_duration` trên cột `duration`, tạo unique index `uniq_idx_exam_id` trên cột `exam_id`, tạo full-text index `full_idx_tag` trên cột `tag`.
 
 Theo yêu cầu, kết quả trả về như sau:
 
@@ -399,10 +399,10 @@ Ghi chú: Hệ thống sẽ dùng câu lệnh `SHOW INDEX FROM examination_info`
 
 **Ý tưởng**: Trước hết cần nắm các loại index thường gặp:
 
-- B-Tree index: B-Tree (hay còn gọi là cây cân bằng) index là loại index phổ biến và mặc định nhất. Nó phù hợp với nhiều điều kiện truy vấn, có thể nhanh chóng định vị dữ liệu thỏa mãn điều kiện. B-Tree index phù hợp với thao tác tìm kiếm thông thường, hỗ trợ truy vấn bằng, truy vấn phạm vi và sắp xếp.
-- Unique index: Unique index tương tự B-Tree index thông thường, điểm khác biệt là nó yêu cầu giá trị của cột được lập index phải là duy nhất. Điều này có nghĩa là khi chèn hoặc cập nhật dữ liệu, MySQL sẽ kiểm tra tính duy nhất của cột index.
+- B-Tree index: B-Tree (hay còn gọi là cây cân bằng) index là loại index phổ biến và mặc định nhất. Nó phù hợp với nhiều điều kiện truy vấn, có thể nhanh chóng định vị dữ liệu thỏa mãn điều kiện. B-Tree index phù hợp với thao tác tìm kiếm thông thường, hỗ trợ truy vấn bằng giá trị, truy vấn phạm vi và sắp xếp.
+- Unique index: Unique index tương tự B-Tree index thông thường, điểm khác biệt là nó yêu cầu giá trị của cột được tạo index phải là duy nhất. Điều này có nghĩa là khi chèn hoặc cập nhật dữ liệu, MySQL sẽ kiểm tra tính duy nhất của cột index.
 - Primary key index: Primary key index là một loại unique index đặc biệt, dùng để định danh duy nhất từng hàng dữ liệu trong bảng. Mỗi bảng chỉ có một primary key index, giúp tăng tốc độ truy cập dữ liệu và bảo đảm tính toàn vẹn dữ liệu.
-- Full-text index: Full-text index dùng để tìm kiếm toàn văn trong dữ liệu văn bản. Nó hỗ trợ tìm kiếm từ khóa trong trường văn bản, không chỉ tìm kiếm bằng hoặc tìm kiếm phạm vi đơn giản. Full-text index phù hợp với các trường hợp sử dụng cần tìm kiếm toàn văn.
+- Full-text index: Full-text index dùng để tìm kiếm toàn văn trong dữ liệu văn bản. Nó hỗ trợ tìm kiếm từ khóa trong trường văn bản, không chỉ tìm kiếm theo giá trị bằng hoặc theo phạm vi đơn giản. Full-text index phù hợp với các trường hợp sử dụng cần tìm kiếm toàn văn.
 
 ```sql
 -- Ví dụ:

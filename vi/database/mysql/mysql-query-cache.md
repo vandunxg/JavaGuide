@@ -10,11 +10,11 @@ head:
       content: "MySQL Query Cache,Query Cache,cơ chế cache MySQL,cache invalidation,MySQL 8.0,tối ưu hiệu năng truy vấn,quản lý bộ nhớ MySQL"
 ---
 
-Cache là một phương thức tối ưu hiệu năng hệ thống hiệu quả và thiết thực. Dù là hệ điều hành, các loại phần mềm ứng dụng hay Web service, chúng đều sử dụng rộng rãi cơ chế cache.
+Cache là phương thức hiệu quả và thiết thực để tối ưu hiệu năng hệ thống. Dù là hệ điều hành, phần mềm ứng dụng hay Web service, chúng đều sử dụng rộng rãi cơ chế cache.
 
-Tuy nhiên, các DBA có kinh nghiệm đều khuyên nên tắt Query Cache (cache truy vấn) tích hợp sẵn của MySQL trong môi trường production. Hơn nữa, từ MySQL 5.7.20, Query Cache đã bị deprecated mặc định. Đến MySQL 8.0 trở đi, tính năng Query Cache thậm chí đã bị xóa hoàn toàn.
+Tuy nhiên, các DBA có kinh nghiệm đều khuyên nên tắt Query Cache (cache truy vấn) tích hợp sẵn của MySQL trong môi trường production. Hơn nữa, từ MySQL 5.7.20, Query Cache đã mặc định bị deprecated. Từ MySQL 8.0 trở đi, tính năng Query Cache thậm chí đã bị xóa hoàn toàn.
 
-Vậy tại sao lại như vậy? Query Cache thực sự vô dụng đến thế sao?
+Vậy tại sao lại như vậy? Query Cache thực sự không đáng dùng đến thế sao?
 
 Hãy bắt đầu bài viết với một số câu hỏi sau.
 
@@ -29,7 +29,7 @@ Kiến trúc MySQL như hình dưới đây:
 
 ![](https://oss.javaguide.cn/github/javaguide/mysql/mysql-architecture.png)
 
-Để tăng tốc độ phản hồi của các câu truy vấn hoàn toàn giống nhau, MySQL Server sẽ thực hiện phép tính Hash trên câu truy vấn để nhận được một giá trị Hash. MySQL Server không xử lý SQL theo bất kỳ cách nào, SQL phải hoàn toàn giống nhau thì giá trị Hash mới giống nhau. Sau khi nhận được giá trị Hash, MySQL dùng giá trị Hash đó để đối chiếu kết quả của câu truy vấn trong Query Cache.
+Để tăng tốc độ phản hồi của các câu truy vấn hoàn toàn giống nhau, MySQL Server sẽ tính Hash của câu truy vấn để nhận được một giá trị Hash. MySQL Server không xử lý SQL theo bất kỳ cách nào, SQL phải hoàn toàn giống nhau thì giá trị Hash mới giống nhau. Sau khi nhận được giá trị Hash, MySQL dùng giá trị Hash đó để đối chiếu kết quả của câu truy vấn trong Query Cache.
 
 - Nếu khớp (cache hit), result set của truy vấn sẽ được trả trực tiếp về client, không cần parse hay thực thi truy vấn nữa.
 - Nếu không khớp (cache miss), giá trị Hash và result set sẽ được lưu vào Query Cache để sử dụng về sau.
@@ -71,13 +71,13 @@ mysql> show variables like '%query_cache%';
 1 row in set (0.01 sec)
 ```
 
-Sau đây, chúng ta giải thích thông tin được in ra bởi lệnh `show variables like '%query_cache%';` trước phiên bản 8.0.
+Dưới đây là giải thích thông tin được in ra bởi lệnh `show variables like '%query_cache%';` trước phiên bản 8.0.
 
-- **`have_query_cache`:** MySQL Server đó có hỗ trợ Query Cache hay không. Nếu là YES thì có hỗ trợ, nếu không thì không hỗ trợ.
-- **`query_cache_limit`:** Kích thước result set lớn nhất được Query Cache của MySQL cache. Khi result set lớn hơn giá trị này, nó sẽ không được cache.
-- **`query_cache_min_res_unit`:** Kích thước block nhỏ nhất (byte) được Query Cache cấp phát. Khi truy vấn được thực hiện, MySQL lưu result set vào Query Cache. Tuy nhiên, nếu result set cần lưu khá lớn và vượt quá giá trị `query_cache_min_res_unit`, MySQL sẽ vừa lấy result vừa lưu dữ liệu. Nói cách khác, một truy vấn có thể cần thực hiện thao tác cấp phát memory nhiều lần. Điều chỉnh `query_cache_min_res_unit` phù hợp có thể tối ưu memory.
-- **`query_cache_size`:** Dung lượng memory được cấp phát để cache result set, đơn vị là byte và giá trị phải là bội số nguyên của 1024. Tài liệu chính thức MySQL 5.7 cho biết giá trị mặc định là `1048576` (1 MB), đặt bằng 0 sẽ disable Query Cache. Giá trị mặc định giữa các bản minor version có thể khác nhau, nên chỉ định rõ trong file cấu hình thay vì phụ thuộc vào hành vi mặc định.
-- **`query_cache_type`:** Thiết lập loại Query Cache, mặc định là ON. Đặt giá trị GLOBAL có thể thiết lập loại cho mọi client connection tiếp theo. Client có thể đặt giá trị SESSION để ảnh hưởng đến việc sử dụng Query Cache của chính mình.
+- **`have_query_cache`:** MySQL Server có hỗ trợ Query Cache hay không. Nếu là YES thì có hỗ trợ, nếu không thì không hỗ trợ.
+- **`query_cache_limit`:** Kích thước lớn nhất của result set được MySQL Query Cache lưu. Khi result set lớn hơn giá trị này, nó sẽ không được cache.
+- **`query_cache_min_res_unit`:** Kích thước block nhỏ nhất (byte) được Query Cache cấp phát. Khi truy vấn được thực hiện, MySQL lưu result set vào Query Cache. Tuy nhiên, nếu result set cần lưu khá lớn và vượt quá giá trị `query_cache_min_res_unit`, MySQL sẽ vừa đọc result vừa lưu dữ liệu. Nói cách khác, một truy vấn có thể cần thực hiện thao tác cấp phát memory nhiều lần. Điều chỉnh `query_cache_min_res_unit` phù hợp có thể tối ưu memory.
+- **`query_cache_size`:** Dung lượng memory được cấp phát để cache result set, đơn vị là byte và giá trị phải là bội số của 1024. Tài liệu chính thức MySQL 5.7 cho biết giá trị mặc định là `1048576` (1 MB), đặt bằng 0 sẽ disable Query Cache. Giá trị mặc định giữa các bản minor version có thể khác nhau, nên chỉ định rõ trong file cấu hình thay vì phụ thuộc vào hành vi mặc định.
+- **`query_cache_type`:** Thiết lập loại Query Cache, mặc định là ON. Đặt giá trị GLOBAL có thể thiết lập loại cho các client connection tiếp theo. Client có thể đặt giá trị SESSION để ảnh hưởng đến việc sử dụng Query Cache của chính mình.
 - **`query_cache_wlock_invalidate`:** Khi một table bị lock, có trả về dữ liệu trong cache hay không. Mặc định đang tắt, trong môi trường production thường nên giữ cấu hình mặc định này.
 
 Các giá trị khả dụng của `query_cache_type` (`query_cache_type` là dynamic variable trong MySQL 5.6/5.7, **nhưng có điều kiện tiên quyết**: nếu instance khởi động với `query_cache_type=0`, server sẽ bỏ qua việc cấp phát exclusive lock của Query Cache. Khi đó, sửa động bằng `SET GLOBAL` sẽ báo lỗi, bắt buộc phải sửa file cấu hình và restart; nếu lúc khởi động giá trị khác 0 thì có thể dùng `SET GLOBAL query_cache_type=N` để có hiệu lực online mà không cần restart):
@@ -117,14 +117,14 @@ Có thể dùng ba câu SQL sau để dọn cache thủ công:
 
 - Query Cache lưu câu truy vấn và result set vào memory (thường dưới dạng key-value; trong đó Key là giá trị Hash được tính từ text của câu truy vấn, Database hiện tại, charset của client, protocol version và các tham số môi trường khác, còn Value là result set của truy vấn), lần sau sẽ lấy trực tiếp từ memory.
 - Kết quả cache được chia sẻ giữa các session, nên một client có thể sử dụng kết quả cache của client khác.
-- SQL phải hoàn toàn giống nhau thì mới cache hit (chữ hoa chữ thường, khoảng trắng, Database được sử dụng, protocol version, charset và các yếu tố khác đều phải giống nhau). Khi kiểm tra Query Cache, MySQL Server không xử lý SQL theo bất kỳ cách nào mà sử dụng chính xác câu truy vấn do client truyền đến.
+- SQL phải hoàn toàn giống nhau thì mới đạt cache hit (chữ hoa, chữ thường, khoảng trắng, Database được sử dụng, protocol version, charset và các yếu tố khác đều phải giống nhau). Khi kiểm tra Query Cache, MySQL Server không xử lý SQL theo bất kỳ cách nào mà sử dụng chính xác câu truy vấn do client truyền đến.
 - Không cache result set của subquery trong truy vấn, chỉ cache result set cuối cùng của truy vấn.
-- Các function không xác định sẽ không bao giờ được cache, chẳng hạn `now()`, `curdate()`, `last_insert_id()`, `rand()` và các function khác.
-- Không cache các truy vấn tạo ra warning (Warnings).
+- Các function không deterministic sẽ không bao giờ được cache, chẳng hạn `now()`, `curdate()`, `last_insert_id()`, `rand()` và các function khác.
+- Không cache các truy vấn tạo ra warning.
 - Khi result set vượt quá `query_cache_limit` (mặc định 1 MB), nó sẽ không được cache.
 - Nếu truy vấn chứa bất kỳ user-defined function, stored function, user variable, temporary table hoặc system table trong MySQL nào, kết quả truy vấn cũng sẽ không được cache.
 - Sau khi cache được tạo, hệ thống Query Cache của MySQL sẽ theo dõi từng table liên quan trong truy vấn. Nếu các table này (dữ liệu hoặc cấu trúc) thay đổi, toàn bộ dữ liệu cache liên quan đến table đó sẽ mất hiệu lực.
-- Query Cache của MySQL gần như không có tác dụng trong môi trường sharding. Nguyên nhân là truy vấn thường được middleware (như ShardingSphere, MyCat) route đến các MySQL instance khác nhau, mỗi instance duy trì Query Cache độc lập. Khi route, middleware thường rewrite SQL (thêm điều kiện shard key và các điều kiện khác), khiến giá trị Hash của câu truy vấn sau khi rewrite không giống câu truy vấn ban đầu, nên cache không thể hit.
+- Query Cache của MySQL gần như không có tác dụng trong môi trường sharding. Nguyên nhân là truy vấn thường được middleware (như ShardingSphere, MyCat) route đến các MySQL instance khác nhau, mỗi instance duy trì Query Cache độc lập. Khi route, middleware thường rewrite SQL (thêm điều kiện shard key và các điều kiện khác), khiến giá trị Hash của câu truy vấn sau khi rewrite khác với giá trị Hash của câu truy vấn ban đầu, nên cache không thể hit.
 - Không cache các truy vấn sử dụng `SQL_NO_CACHE`.
 - ……
 
@@ -137,7 +137,7 @@ SELECT SQL_NO_CACHE id, name FROM customer;# sẽ không được cache
 
 ### Quản lý memory trong cơ chế cache
 
-Query Cache được lưu hoàn toàn trong memory, nên trước khi cấu hình và sử dụng, chúng ta cần hiểu cách nó sử dụng memory.
+Query Cache được lưu hoàn toàn trong memory, nên trước khi cấu hình và sử dụng, cần hiểu cách nó sử dụng memory.
 
 Query Cache của MySQL sử dụng kỹ thuật memory pool để tự quản lý việc giải phóng và cấp phát memory, thay vì thông qua hệ điều hành. Đơn vị cơ bản mà memory pool sử dụng là block có độ dài thay đổi, dùng để lưu thông tin như type, size, data. Các block của một result set được nối với nhau bằng linked list. Độ dài ngắn nhất của block là `query_cache_min_res_unit`.
 
@@ -156,14 +156,14 @@ Khi việc đọc ghi concurrent diễn ra, các cache block có kích thước 
 
 **Nhược điểm:**
 
-- MySQL sẽ tính Hash cho mọi truy vấn loại SELECT nhận được, sau đó tìm xem kết quả cache của truy vấn này có tồn tại hay không. Dù chi phí CPU của việc tính Hash và tìm kiếm bản thân không đáng kể, Query Cache ở tầng dưới phụ thuộc vào một global mutex duy nhất (`LOCK_query_cache`) để bảo đảm an toàn khi concurrent. Khi có high concurrency, hàng nghìn hàng vạn câu truy vấn đồng thời tranh mutex để kiểm tra hoặc ghi cache, khiến lock conflict và chi phí thread context switch cực kỳ nghiêm trọng trở thành performance bottleneck chí mạng.
+- MySQL sẽ tính Hash cho mọi truy vấn loại SELECT nhận được, sau đó tìm xem kết quả cache của truy vấn này có tồn tại hay không. Dù chi phí CPU của việc tính Hash và tìm kiếm bản thân không đáng kể, Query Cache ở tầng dưới phụ thuộc vào một global mutex duy nhất (`LOCK_query_cache`) để bảo đảm an toàn khi concurrent. Khi có high concurrency, hàng nghìn hàng vạn câu truy vấn đồng thời tranh mutex để kiểm tra hoặc ghi cache, khiến lock conflict và chi phí thread context switch trở thành performance bottleneck nghiêm trọng.
 - Vấn đề cache invalidation của Query Cache. Nếu table thay đổi thường xuyên, tỷ lệ cache invalidation sẽ rất cao. Việc table thay đổi không chỉ là dữ liệu trong table thay đổi, mà còn bao gồm mọi thay đổi về cấu trúc table hoặc index.
 - Các truy vấn khác nhau nhưng có cùng kết quả đều được cache, dẫn đến tiêu thụ quá mức tài nguyên memory. Query Cache coi việc khác nhau về chữ hoa chữ thường, khoảng trắng hoặc comment trong câu truy vấn là các truy vấn khác nhau (vì giá trị Hash của chúng khác nhau).
 - Việc thiết lập các system variable liên quan không hợp lý sẽ tạo ra nhiều memory fragment, từ đó khiến Query Cache thường xuyên phải dọn memory.
 
 ## Ảnh hưởng của Query Cache MySQL đến hiệu năng
 
-Bật Query Cache trong MySQL Server sẽ tạo thêm chi phí cho cả thao tác đọc và ghi của database:
+Bật Query Cache trong MySQL Server sẽ tạo thêm chi phí cho cả thao tác đọc và ghi trên database:
 
 - **Thao tác đọc cần giữ lock để kiểm tra**: trước khi bắt đầu truy vấn đọc, phải kiểm tra cache hit, việc này cần lấy shared lock `LOCK_query_cache`. Khi high concurrency, nhiều read request đồng thời tranh lock sẽ phải xếp hàng.
 - **Chi phí ghi cache**: nếu read query có thể được cache, sau khi thực thi cần ghi kết quả vào cache, bao gồm thao tác cấp phát memory và nối linked list, đồng thời cũng cần giữ lock.
@@ -211,20 +211,20 @@ Với một hệ thống cập nhật thường xuyên, Query Cache có tác d�
 Tóm tắt các scenario không phù hợp với Query Cache:
 
 - Dữ liệu, cấu trúc table hoặc index thay đổi thường xuyên.
-- Có ít query lặp lại.
+- Ít query được lặp lại.
 - Result set của query lớn.
 
 《High Performance MySQL》 viết như sau:
 
 > Theo kinh nghiệm của chúng tôi, trong môi trường chịu tải high concurrency, Query Cache sẽ khiến hiệu năng hệ thống giảm, thậm chí bị treo. Nếu bạn nhất định phải sử dụng Query Cache, đừng đặt memory quá lớn và chỉ sử dụng khi đã xác định rõ lợi ích (database ít thay đổi nội dung).
 
-**Đúng là như vậy! Trong project thực tế, thường nên sử dụng local cache (chẳng hạn Caffeine) hoặc distributed cache (chẳng hạn Redis), hiệu năng tốt hơn và cũng phổ dụng hơn.**
+**Đúng là như vậy! Trong project thực tế, thường nên sử dụng local cache (chẳng hạn Caffeine) hoặc distributed cache (chẳng hạn Redis), hiệu năng tốt hơn và cũng phổ biến hơn.**
 
 ## Tài liệu tham khảo
 
 - 《High Performance MySQL》
 - Cơ chế cache MySQL: <https://zhuanlan.zhihu.com/p/55947158>
-- Cấu hình và sử dụng Query Cache của RDS MySQL - Tài liệu Alibaba Cloud RDS:<https://help.aliyun.com/document_detail/41717.html>
-- 8.10.3 The MySQL Query Cache - Tài liệu chính thức MySQL:<https://dev.mysql.com/doc/refman/5.7/en/query-cache.html>
+- Cấu hình và sử dụng Query Cache của RDS MySQL - Tài liệu Alibaba Cloud RDS: <https://help.aliyun.com/document_detail/41717.html>
+- 8.10.3 The MySQL Query Cache - Tài liệu chính thức MySQL: <https://dev.mysql.com/doc/refman/5.7/en/query-cache.html>
 
 <!-- @include: @article-footer.snippet.md -->

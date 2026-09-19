@@ -69,9 +69,9 @@ Trong tập kết quả điểm đã truy vấn, để loại bỏ điểm cao n
 
 Trước hết viết phần chính: `select tag, difficulty, round(avg(score), 1) clip_avg_score from examination_info info INNER JOIN exam_record record`
 
-**Mẹo nhỏ**: Hàm `ROUND()` của MYSQL: `ROUND(X)` trả về số nguyên gần X nhất; `ROUND(X,D)` trả về X với giá trị được giữ đến D chữ số sau dấu thập phân, chữ số thứ D được làm tròn.
+**Mẹo nhỏ**: Hàm `ROUND()` của MySQL: `ROUND(X)` trả về số nguyên gần X nhất; `ROUND(X,D)` trả về X với giá trị được giữ đến D chữ số sau dấu thập phân, chữ số thứ D được làm tròn.
 
-Sau đó ghép các câu lệnh "rời rạc" ở trên là được. Lưu ý, trong NOT IN cần dùng UNION ALL để liên kết hai truy vấn con; dùng union để đưa kết quả của max và min vào cùng một tập, tạo thành hiệu ứng một cột nhiều dòng.
+Sau đó ghép các câu lệnh "rời rạc" ở trên là được. Lưu ý, trong NOT IN cần dùng `UNION ALL` để liên kết hai truy vấn con; dùng `UNION` để đưa kết quả của max và min vào cùng một tập, tạo thành hiệu ứng một cột nhiều dòng.
 
 **Đáp án 1:**
 
@@ -150,11 +150,11 @@ Mệnh đề `WITH` gồm các phần sau:
 - `AS`: Bắt buộc, biểu thị bắt đầu định nghĩa bảng tạm.
 - `Thân truy vấn CTE`: Câu lệnh truy vấn thực tế dùng để định nghĩa dữ liệu trong bảng tạm.
 
-Một trong các mục đích chính của mệnh đề `WITH` là tăng khả năng đọc và bảo trì truy vấn, đặc biệt khi có nhiều truy vấn con lồng nhau hoặc cần dùng lại cùng logic truy vấn. Bằng cách đặt các logic này trong một bảng tạm có tên, ta có thể tổ chức rõ ràng hơn và loại bỏ code trùng lặp.
+Một trong các mục đích chính của mệnh đề `WITH` là tăng khả năng đọc và bảo trì truy vấn, đặc biệt khi có nhiều truy vấn con lồng nhau hoặc cần dùng lại cùng logic truy vấn. Bằng cách đặt logic này trong một bảng tạm có tên, ta có thể tổ chức rõ ràng hơn và loại bỏ code trùng lặp.
 
 Ngoài ra, mệnh đề `WITH` còn có thể thực hiện truy vấn đệ quy trong các truy vấn phức tạp. Truy vấn đệ quy cho phép thực hiện nhiều lần lặp trên cùng một bảng trong một truy vấn duy nhất, từng bước xây dựng tập kết quả. Điều này hữu ích khi xử lý dữ liệu phân cấp, cơ cấu tổ chức và cấu trúc cây.
 
-**Chi tiết nhỏ**: MySQL phiên bản 5.7 trở về trước không hỗ trợ dùng alias trực tiếp trong mệnh đề `WITH`.
+**Chi tiết nhỏ**: MySQL phiên bản 5.7 trở về trước không hỗ trợ sử dụng alias trực tiếp trong mệnh đề `WITH`.
 
 Đáp án cải tiến:
 
@@ -280,9 +280,9 @@ FROM
 \texam_record
 ```
 
-Ở đây cần giải thích kỹ câu `COUNT( DISTINCT exam_id, score IS NOT NULL OR NULL)`: kiểm tra score có null hay không, nếu có thì là true, nếu không thì trả về null. Lưu ý, nếu không thêm `or null`, khi khác null chỉ trả về false, tức là trả về 0.
+Ở đây cần giải thích kỹ câu `COUNT( DISTINCT exam_id, score IS NOT NULL OR NULL)`: biểu thức `score IS NOT NULL OR NULL` trả về TRUE khi score khác NULL và trả về NULL khi score là NULL. Lưu ý, nếu không thêm `OR NULL`, phần điều kiện sẽ trả về TRUE/FALSE; giá trị FALSE tương ứng với 0.
 
-Bản thân `COUNT` không thể đếm số dòng trên nhiều cột. Việc thêm `distinct` khiến nhiều cột trở thành một thể thống nhất để có thể đếm số dòng xuất hiện; khi tính `count distinct`, chỉ các dòng khác null mới được trả về, cũng cần chú ý điều này.
+Bản thân `COUNT` không thể đếm số dòng trên nhiều cột. Việc thêm `DISTINCT` khiến nhiều cột được xem như một tổ hợp duy nhất để có thể đếm số dòng xuất hiện; khi tính `COUNT(DISTINCT ...)`, chỉ các dòng có giá trị khác NULL mới được tính, cũng cần chú ý điều này.
 
 Ngoài ra, qua bài này có thể biết được mẫu thường dùng để thêm điều kiện cho count: `count( điều kiện cột or null)`.
 
@@ -384,7 +384,7 @@ Bảng `exam_record` (uid ID người dùng, `exam_id` ID bài thi, `start_time`
 | 12  | 1006 | 9002    | 2021-09-02 12:11:01 | 2021-09-02 12:31:01 | 89     |
 | 13  | 1007 | 9002    | 2020-09-02 12:11:01 | 2020-09-02 12:31:01 | 89     |
 
-Hãy tính số ngày hoạt động trung bình hàng tháng `avg_active_days` và số người hoạt động hàng tháng `mau` trong khu vực làm bài của người dùng ở mỗi tháng năm 2021. Kết quả mẫu của dữ liệu trên:
+Hãy tính số ngày hoạt động trung bình hàng tháng `avg_active_days` và số người hoạt động hàng tháng `mau` trong khu vực làm bài thi ở mỗi tháng năm 2021. Kết quả mẫu của dữ liệu trên:
 
 | month  | avg_active_days | mau |
 | ------ | --------------- | --- |
@@ -439,7 +439,7 @@ Hãy thống kê tổng số lượt luyện câu hỏi theo tháng `month_q_cnt
 
 **Giải thích**: Tháng 8 năm 2021 có tổng cộng 2 lượt luyện, trung bình mỗi ngày là 2/31=0.065 (giữ 3 chữ số thập phân); tháng 9 năm 2021 có tổng cộng 3 lượt luyện, trung bình mỗi ngày là 3/30=0.100; năm 2021 có tổng cộng 5 lượt luyện (trung bình tổng hợp của năm không có ý nghĩa thực tế, ở đây tính theo 31 ngày: 5/31=0.161).
 
-> Nowcoder đã dùng phiên bản Mysql mới nhất. Nếu khi chạy xuất hiện lỗi `ONLY_FULL_GROUP_BY`, nghĩa là trong phép tổng hợp GROUP BY, nếu cột trong SELECT không xuất hiện trong GROUP BY thì SQL đó không hợp lệ. Vì cột không nằm trong mệnh đề group by, các cột được truy vấn phải xuất hiện sau group by nếu không sẽ báo lỗi, hoặc trường đó phải nằm trong hàm tổng hợp.
+> Nowcoder đã dùng phiên bản MySQL mới nhất. Nếu khi chạy xuất hiện lỗi `ONLY_FULL_GROUP_BY`, nghĩa là trong phép tổng hợp GROUP BY, nếu cột trong SELECT không xuất hiện trong GROUP BY thì SQL đó không hợp lệ. Vì cột không nằm trong mệnh đề GROUP BY, các cột được truy vấn phải xuất hiện trong GROUP BY nếu không sẽ báo lỗi, hoặc trường đó phải nằm trong hàm tổng hợp.
 
 **Cách làm:**
 
@@ -464,7 +464,7 @@ SELECT DAY(LAST_DAY('2023-07-08')) AS days_in_month;
 -- Kết quả: 31
 
 SELECT DAY(LAST_DAY('2023-02-01')) AS days_in_month;
--- Kết quả: 28 (tháng 2 trong năm nhuận)
+-- Kết quả: 28 (tháng 2 của năm không nhuận)
 
 SELECT DAY(LAST_DAY(NOW())) AS days_in_current_month;
 -- Kết quả: 31 (số ngày của tháng hiện tại)
@@ -549,7 +549,7 @@ Nhóm theo uid, sau đó kiểm tra điều kiện với từng người dùng. 
 
 Vậy khi viết SQL, điều kiện phải là: `chưa hoàn thành > 1 and đã hoàn thành >=1 and chưa hoàn thành < 5`.
 
-Vì cuối cùng cần nối chuỗi và nối theo tổ hợp, có thể dùng hàm `GROUP_CONCAT`. Dưới đây là giới thiệu ngắn về cách dùng hàm này:
+Vì cuối cùng cần nối chuỗi và ghép các thành phần, có thể dùng hàm `GROUP_CONCAT`. Dưới đây là giới thiệu ngắn về cách dùng hàm này:
 
 Cú pháp cơ bản:
 
@@ -588,11 +588,11 @@ ORDER BY incomplete_cnt DESC
 
 - `SUM(CASE WHEN a.submit_time IS NULL THEN 1 END)` thống kê số bản ghi chưa hoàn thành của mỗi người dùng.
 - `SUM(CASE WHEN a.submit_time IS NOT NULL THEN 1 END)` thống kê số bản ghi đã hoàn thành của mỗi người dùng.
-- `GROUP_CONCAT(DISTINCT CONCAT(DATE_FORMAT(a.start_time, '%Y-%m-%d'), ':', b.tag) ORDER BY a.start_time SEPARATOR ';')` nối ngày thi và nhãn của mỗi người dùng thành một chuỗi phân cách bằng dấu phẩy, đồng thời sắp xếp theo thời gian bắt đầu thi.
+- `GROUP_CONCAT(DISTINCT CONCAT(DATE_FORMAT(a.start_time, '%Y-%m-%d'), ':', b.tag) ORDER BY a.start_time SEPARATOR ';')` nối ngày thi và nhãn của mỗi người dùng thành một chuỗi phân cách bằng dấu chấm phẩy, đồng thời sắp xếp theo thời gian bắt đầu thi.
 
 ## Truy vấn con lồng nhau
 
-### Nhóm người dùng thường làm và số lượt làm của nhóm có số bài thi hoàn thành trung bình mỗi tháng không nhỏ hơn 3 (khá khó)
+### Các nhóm bài thi người dùng có số bài thi hoàn thành trung bình mỗi tháng không nhỏ hơn 3 thường làm (khá khó)
 
 **Mô tả**: Có bảng ghi lại lượt làm bài `exam_record` (`uid`: ID người dùng, `exam_id`: ID bài thi, `start_time`: thời gian bắt đầu làm bài, `submit_time`: thời gian nộp bài, nếu không nộp thì là NULL, `score`: điểm), dữ liệu mẫu như sau:
 
@@ -620,7 +620,7 @@ Bảng thông tin bài thi `examination_info` (`exam_id`: ID bài thi, `tag`: nh
 | 2   | 9002    | C++        | easy       | 60       | 2020-02-01 10:00:00 |
 | 3   | 9003    | Thuật toán | medium     | 80       | 2020-08-02 10:00:00 |
 
-Hãy thống kê các nhóm mà những người dùng có “số bài thi hoàn thành trung bình mỗi tháng” không nhỏ hơn 3 thường làm và số lượt làm bài, xuất giảm dần theo số lượt. Kết quả mẫu:
+Hãy thống kê các nhóm bài thi mà những người dùng có “số bài thi hoàn thành trung bình mỗi tháng” không nhỏ hơn 3 thường làm, cùng số lượt làm bài; xuất kết quả giảm dần theo số lượt. Kết quả mẫu:
 
 | tag        | tag_cnt |
 | ---------- | ------- |
@@ -630,9 +630,9 @@ Hãy thống kê các nhóm mà những người dùng có “số bài thi hoà
 
 **Giải thích**: Người dùng 1002 và 1005 đều có 3 bài thi hoàn thành trong tháng 09 năm 2021, các người dùng khác đều nhỏ hơn 3. Sau đó phân bố `tag` của các bài thi mà 1002 và 1005 đã làm, sắp xếp số lượt giảm dần, lần lượt là C++, SQL, Thuật toán.
 
-**Cách làm**: Bài này kiểm tra truy vấn con kết hợp, trọng tâm là `trung bình mỗi tháng >=3`. Tuy nhiên theo ý kiến cá nhân, cách diễn đạt chưa thật rõ; nếu nói trực tiếp là truy vấn tháng 9 thì sẽ dễ hiểu hơn. Không phải tháng nào cũng cần >=3, cũng không phải tổng số lượt trả lời chia cho số tháng trả lời. Đừng hiểu sai.
+**Cách làm**: Bài này kiểm tra truy vấn con kết hợp, trọng tâm là `số bài thi hoàn thành trung bình mỗi tháng >= 3`. Tuy nhiên theo ý kiến cá nhân, cách diễn đạt chưa thật rõ; nếu nói trực tiếp là truy vấn tháng 9 thì sẽ dễ hiểu hơn. Không phải tháng nào cũng cần >= 3, cũng không phải tổng số lượt làm bài chia cho số tháng làm bài. Đừng hiểu sai.
 
-Trước tiên truy vấn những người dùng có số lượt trả lời trung bình mỗi tháng lớn hơn ba:
+Trước tiên truy vấn những người dùng có ít nhất ba lượt làm bài mỗi tháng:
 
 ```sql
 SELECT UID
@@ -703,13 +703,13 @@ Bảng ghi lại lượt làm bài `exam_record` (`uid` ID người dùng, `exam
 | 15  | 1005 | 9002    | 2021-09-01 12:01:01 | 2021-09-01 12:31:01 | 88     |
 | 16  | 1005 | 9002    | 2021-09-02 12:11:01 | 2021-09-02 12:31:01 | 89     |
 
-Hãy tính số người dùng cấp độ từ 5 trở lên làm bài `uv` và điểm trung bình `avg_score` trong ngày phát hành của mỗi bài thi thuộc nhóm SQL. Sắp xếp giảm dần theo số người, nếu bằng nhau thì tăng dần theo điểm trung bình. Kết quả mẫu:
+Hãy tính số người dùng trên cấp độ 5 làm bài `uv` và điểm trung bình `avg_score` trong ngày phát hành của mỗi bài thi thuộc nhóm SQL. Sắp xếp giảm dần theo số người, nếu bằng nhau thì tăng dần theo điểm trung bình. Kết quả mẫu:
 
 | exam_id | uv  | avg_score |
 | ------- | --- | --------- |
 | 9001    | 3   | 81.3      |
 
-Giải thích: Chỉ có một bài thi thuộc nhóm SQL, ID bài thi là 9001. Trong ngày phát hành (2021-09-01), 1001, 1002, 1003, 1005 đều đã làm bài, nhưng 1003 là người dùng cấp độ 5, ba người còn lại từ cấp độ 5 trở lên. Điểm của họ là [70,80,85,90], điểm trung bình là 81.3 (giữ một chữ số thập phân).
+Giải thích: Chỉ có một bài thi thuộc nhóm SQL, ID bài thi là 9001. Trong ngày phát hành (2021-09-01), 1001, 1002, 1003, 1005 đều đã làm bài, nhưng 1003 là người dùng cấp độ 5, ba người còn lại trên cấp độ 5. Điểm của họ là [70,80,85,90], điểm trung bình là 81.3 (giữ một chữ số thập phân).
 
 **Cách làm**: Bài này nhìn có vẻ phức tạp, nhưng chỉ cần lần lượt tách các điều kiện “bên ngoài”, rồi gộp lại là có đáp án. Với truy vấn nhiều bảng, hãy nhớ: đi từ ngoài vào trong, gỡ từng lớp.
 
@@ -725,7 +725,7 @@ WHERE e_info.exam_id = record.exam_id
   AND u_info.LEVEL > 5
 ```
 
-Tiếp theo chú ý yêu cầu: `người dùng làm bài trong ngày sau khi mỗi bài thi thuộc nhóm SQL được phát hành`. Từ khóa ==trong ngày== khiến ta cần nghĩ ngay đến so sánh thời gian.
+Tiếp theo chú ý yêu cầu: `người dùng làm bài trong ngày phát hành của từng bài thi thuộc nhóm SQL`. Từ khóa ==trong ngày== khiến ta cần nghĩ ngay đến so sánh thời gian.
 
 So sánh ngày phát hành bài thi với ngày bắt đầu thi: `DATE(e_info.release_time) = DATE(record.start_time)`. Không cần lo `submit_time` là null, vì sẽ lọc trong where sau đó.
 
@@ -1063,7 +1063,7 @@ Bảng ghi lại việc luyện câu hỏi `practice_record` (uid ID người d�
 | 11  | 1004 | 8003        | 2021-08-02 19:48:01 | 90    |
 | 12  | 1004 | 8003        | 2021-08-01 19:38:01 | 80    |
 
-Hãy tìm những người dùng cấp độ 7 có thành tích cao, có điểm trung bình bài thi SQL độ khó cao lớn hơn 80; thống kê tổng số lượt hoàn thành bài thi và tổng số lượt luyện câu hỏi trong năm 2021 của họ, chỉ giữ những người có bản ghi hoàn thành bài thi trong năm 2021. Kết quả sắp xếp tăng dần theo số bài thi hoàn thành, giảm dần theo số câu hỏi luyện tập.
+Hãy tìm những người dùng nổi bật cấp độ 7, có điểm trung bình bài thi SQL độ khó cao lớn hơn 80; thống kê tổng số lượt hoàn thành bài thi và tổng số lượt luyện câu hỏi trong năm 2021 của họ, chỉ giữ những người có bản ghi hoàn thành bài thi trong năm 2021. Kết quả sắp xếp tăng dần theo số bài thi hoàn thành, giảm dần theo số câu hỏi luyện tập.
 
 Dữ liệu đầu ra mẫu:
 
@@ -1072,7 +1072,7 @@ Dữ liệu đầu ra mẫu:
 | 1001 | 1        | 2            |
 | 1003 | 2        | 0            |
 
-Giải thích: Người dùng 1001, 1003, 1004, 1006 thỏa điểm trung bình bài thi SQL độ khó cao lớn hơn 80, nhưng chỉ 1001 và 1003 là người dùng cấp độ 7 có thành tích cao. 1001 hoàn thành 1 lượt bài thi 1001 và luyện 2 lượt câu hỏi; 1003 hoàn thành 2 lượt bài thi 9001, 9002 nhưng không luyện câu hỏi nào (vì vậy số đếm là 0).
+Giải thích: Người dùng 1001, 1003, 1004, 1006 thỏa điểm trung bình bài thi SQL độ khó cao lớn hơn 80, nhưng chỉ 1001 và 1003 là người dùng nổi bật cấp độ 7. 1001 hoàn thành 1 lượt bài thi 9001 và luyện 2 lượt câu hỏi; 1003 hoàn thành 2 lượt bài thi 9001, 9002 nhưng không luyện câu hỏi nào (vì vậy số đếm là 0).
 
 **Cách làm:**
 

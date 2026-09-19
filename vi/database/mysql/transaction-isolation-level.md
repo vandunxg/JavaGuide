@@ -16,12 +16,12 @@ head:
 
 ## Tổng hợp transaction isolation level
 
-SQL standard định nghĩa bốn transaction isolation level để cân bằng giữa tính isolation (Isolation) của transaction và performance concurrency. Level càng cao thì data consistency càng tốt, nhưng performance concurrency có thể càng thấp. Bốn level này là:
+SQL standard định nghĩa bốn transaction isolation level để cân bằng giữa tính isolation (Isolation) của transaction và hiệu năng khi concurrency. Level càng cao thì data consistency càng tốt, nhưng hiệu năng khi concurrency có thể càng thấp. Bốn level này là:
 
-- **READ-UNCOMMITTED (đọc dữ liệu chưa commit)**: isolation level thấp nhất, cho phép đọc các thay đổi dữ liệu chưa được commit, có thể dẫn đến dirty read, phantom read hoặc non-repeatable read. Level này hiếm khi được sử dụng trong thực tế vì khả năng bảo đảm data consistency quá yếu.
-- **READ-COMMITTED (đọc dữ liệu đã commit)**: cho phép đọc dữ liệu đã được commit bởi transaction concurrency, có thể ngăn dirty read, nhưng phantom read hoặc non-repeatable read vẫn có thể xảy ra. Đây là isolation level mặc định của phần lớn database (như Oracle, SQL Server).
+- **READ-UNCOMMITTED (đọc dữ liệu chưa commit)**: isolation level thấp nhất, cho phép đọc các thay đổi dữ liệu chưa được commit, có thể dẫn đến dirty read, phantom read hoặc non-repeatable read. Level này hiếm khi được sử dụng trong thực tế vì khả năng đảm bảo data consistency quá yếu.
+- **READ-COMMITTED (đọc dữ liệu đã commit)**: cho phép đọc dữ liệu đã được commit bởi transaction chạy đồng thời, có thể ngăn dirty read, nhưng phantom read hoặc non-repeatable read vẫn có thể xảy ra. Đây là isolation level mặc định của phần lớn database (như Oracle, SQL Server).
 - **REPEATABLE-READ (đọc lặp lại)**: kết quả của nhiều lần đọc cùng một field đều nhất quán, trừ khi dữ liệu được chính transaction hiện tại sửa đổi; có thể ngăn dirty read và non-repeatable read, nhưng phantom read vẫn có thể xảy ra. Isolation level mặc định của storage engine InnoDB trong MySQL chính là REPEATABLE READ. Ngoài ra, ở level này, InnoDB dùng cơ chế MVCC (multi-version concurrency control) và Next-Key Locks (gap lock + row lock) để giải quyết phantom read ở mức độ lớn.
-- **SERIALIZABLE (có thể tuần tự hóa)**: isolation level cao nhất, tuân thủ đầy đủ yêu cầu isolation của ACID. Tất cả transaction lần lượt thực thi từng cái một, vì vậy giữa các transaction hoàn toàn không thể xảy ra can thiệp; nói cách khác, level này có thể ngăn dirty read, non-repeatable read và phantom read.
+- **SERIALIZABLE (có thể tuần tự hóa)**: isolation level cao nhất, đáp ứng đầy đủ yêu cầu isolation của ACID. Tất cả transaction lần lượt thực thi, vì vậy các transaction hoàn toàn không thể ảnh hưởng lẫn nhau; nói cách khác, level này có thể ngăn dirty read, non-repeatable read và phantom read.
 
 | Transaction isolation level | Dirty Read | Non-Repeatable Read | Phantom Read               |
 | --------------------------- | ---------- | ------------------- | -------------------------- |
@@ -48,24 +48,24 @@ mysql> SELECT @@transaction_isolation;
 
 **Cách InnoDB xử lý phantom read ở REPEATABLE READ:**
 
-Theo định nghĩa của SQL standard về isolation level, REPEATABLE READ không thể ngăn phantom read. Tuy nhiên, implementation của InnoDB tránh phantom read ở mức độ lớn thông qua các cơ chế sau:
+Theo định nghĩa của SQL standard về isolation level, REPEATABLE READ không thể ngăn phantom read. Tuy nhiên, cách triển khai của InnoDB tránh phantom read ở mức độ lớn thông qua các cơ chế sau:
 
 - **Snapshot Read**: các câu lệnh **SELECT** thông thường được thực hiện thông qua cơ chế **MVCC**. Khi transaction bắt đầu, một snapshot dữ liệu được tạo; các snapshot read tiếp theo đều đọc version dữ liệu này, nhờ đó tránh nhìn thấy các row mới được transaction khác insert (phantom read) hoặc các row bị transaction khác sửa đổi (non-repeatable read).
-- **Current Read**: các thao tác như `SELECT ... FOR UPDATE`, `SELECT ... LOCK IN SHARE MODE`, `INSERT`, `UPDATE`, `DELETE`. InnoDB dùng **Next-Key Lock** để lock các index record được quét và range giữa chúng (gap), ngăn transaction khác insert record mới trong range này, từ đó tránh phantom read. Next-Key Lock là sự kết hợp giữa row lock (Record Lock) và gap lock (Gap Lock).
+- **Current Read**: các thao tác như `SELECT ... FOR UPDATE`, `SELECT ... LOCK IN SHARE MODE`, `INSERT`, `UPDATE`, `DELETE`. InnoDB dùng **Next-Key Lock** để lock các index record được quét và range (gap) giữa chúng, ngăn transaction khác insert record mới trong range này, từ đó tránh phantom read. Next-Key Lock là sự kết hợp giữa row lock (Record Lock) và gap lock (Gap Lock).
 
-Cần lưu ý rằng mặc dù thường cho rằng isolation level càng cao thì concurrency càng kém, storage engine InnoDB đã tối ưu level REPEATABLE READ thông qua cơ chế MVCC. Trong nhiều trường hợp chỉ đọc hoặc đọc nhiều ghi ít, performance của nó **có thể không khác biệt đáng kể so với READ COMMITTED**. Tuy nhiên, trong trường hợp ghi nhiều và xung đột concurrency cao, cơ chế gap lock của RR có thể tạo ra nhiều lock wait hơn RC.
+Cần lưu ý rằng mặc dù thường cho rằng isolation level càng cao thì concurrency càng kém, storage engine InnoDB đã tối ưu level REPEATABLE READ thông qua cơ chế MVCC. Trong nhiều trường hợp chỉ đọc hoặc đọc nhiều, ghi ít, performance của nó **có thể không khác biệt đáng kể so với READ COMMITTED**. Tuy nhiên, trong trường hợp ghi nhiều và xung đột concurrency cao, cơ chế gap lock của RR có thể tạo ra nhiều lock wait hơn RC.
 
 Ngoài ra, trong một số trường hợp cụ thể, chẳng hạn distributed transaction yêu cầu consistency nghiêm ngặt (XA Transactions), InnoDB có thể yêu cầu hoặc khuyến nghị sử dụng isolation level SERIALIZABLE để bảo đảm data consistency toàn cục.
 
-> Sách 《Bên trong kỹ thuật MySQL: Storage engine InnoDB (ấn bản 2)》, chương 7.7, viết như sau:
+Sách 《Chuyên sâu về MySQL: Storage engine InnoDB (ấn bản 2)》, chương 7.7, viết như sau:
 
-> Storage engine InnoDB hỗ trợ XA transaction và dùng XA transaction để hỗ trợ triển khai distributed transaction. Distributed transaction là transaction cho phép nhiều transactional resources độc lập tham gia vào một global transaction. Transaction resource thường là relational database system, nhưng cũng có thể là các loại resource khác. Global transaction yêu cầu mọi transaction tham gia bên trong hoặc cùng commit, hoặc cùng rollback; đây là yêu cầu cao hơn so với yêu cầu ACID ban đầu của transaction. Ngoài ra, khi sử dụng distributed transaction, transaction isolation level của storage engine InnoDB phải được đặt thành SERIALIZABLE.
+> Storage engine InnoDB hỗ trợ XA transaction và dùng XA transaction để hỗ trợ triển khai distributed transaction. Distributed transaction là transaction cho phép nhiều transactional resources độc lập tham gia vào một global transaction. Transaction resource thường là relational database system, nhưng cũng có thể là các loại resource khác. Global transaction yêu cầu mọi transaction tham gia hoặc cùng commit, hoặc cùng rollback; đây là yêu cầu cao hơn so với yêu cầu ACID ban đầu của transaction. Ngoài ra, khi sử dụng distributed transaction, transaction isolation level của storage engine InnoDB phải được đặt thành SERIALIZABLE.
 
 ## Minh họa thực tế
 
-Trong phần dưới đây, tôi sẽ sử dụng 2 command line MySQL để mô phỏng vấn đề dirty read khi nhiều thread (nhiều transaction) thao tác trên cùng một phần dữ liệu.
+Trong phần dưới đây, tôi sẽ sử dụng 2 phiên command line MySQL để mô phỏng vấn đề dirty read khi nhiều thread (nhiều transaction) thao tác trên cùng một phần dữ liệu.
 
-Trong cấu hình mặc định của command line MySQL, các transaction đều tự động commit, nghĩa là sau khi thực thi câu lệnh SQL, thao tác COMMIT sẽ được thực hiện ngay. Nếu muốn bật transaction một cách tường minh, cần sử dụng lệnh: `START TRANSACTION`.
+Trong cấu hình mặc định của command line MySQL, các transaction đều được tự động commit, nghĩa là sau khi thực thi câu lệnh SQL, thao tác COMMIT sẽ được thực hiện ngay. Nếu muốn bật transaction một cách tường minh, cần sử dụng lệnh: `START TRANSACTION`.
 
 Có thể thiết lập isolation level bằng lệnh sau.
 
@@ -73,11 +73,11 @@ Có thể thiết lập isolation level bằng lệnh sau.
 SET [SESSION|GLOBAL] TRANSACTION ISOLATION LEVEL [READ UNCOMMITTED|READ COMMITTED|REPEATABLE READ|SERIALIZABLE]
 ```
 
-Tiếp theo, hãy xem một số câu lệnh điều khiển concurrency được sử dụng trong phần thao tác thực tế bên dưới:
+Tiếp theo, hãy xem một số câu lệnh điều khiển concurrency được sử dụng trong phần thực hành bên dưới:
 
 - `START TRANSACTION` |`BEGIN`: bật transaction một cách tường minh.
 - `COMMIT`: commit transaction, khiến mọi thay đổi đối với database trở thành vĩnh viễn.
-- `ROLLBACK`: kết thúc transaction của user và hoàn tác mọi thay đổi chưa commit đang được thực hiện.
+- `ROLLBACK`: kết thúc transaction của user và hoàn tác mọi thay đổi chưa commit.
 
 ### Dirty read (đọc chưa commit)
 
@@ -103,9 +103,9 @@ Vẫn là hình minh họa cho READ COMMITTED ở trên. Mặc dù đã tránh �
 
 ![](https://oss.javaguide.cn/github/javaguide/phantom_read.png)
 
-Ở lần đầu truy vấn các record có salary bằng 500, SQL script 1 chỉ có một record. SQL script 2 insert một record có salary bằng 500 và commit; sau đó, trong cùng transaction, SQL script 1 lại dùng current read để truy vấn và phát hiện có hai record có salary bằng 500. Đây chính là phantom read.
+Ở lần truy vấn đầu tiên các record có salary bằng 500, SQL script 1 chỉ có một record. SQL script 2 insert một record có salary bằng 500 và commit; sau đó, trong cùng transaction, SQL script 1 lại dùng current read để truy vấn và phát hiện có hai record có salary bằng 500. Đây chính là phantom read.
 
-Lưu ý: về bản chất, ví dụ này cho thấy ngữ nghĩa đọc của snapshot read lần đầu và current read lần hai khác nhau. Ở RR, MVCC có thể bảo đảm snapshot read không xuất hiện phantom read, còn Next-Key Lock có thể ràng buộc current read; nhưng khi trộn snapshot read và current read trong cùng một transaction, kết quả của hai lần đọc có thể khác nhau.
+Lưu ý: về bản chất, ví dụ này cho thấy ngữ nghĩa của snapshot read lần đầu và current read lần hai khác nhau. Ở RR, MVCC có thể bảo đảm snapshot read không xuất hiện phantom read, còn Next-Key Lock có thể ràng buộc current read; nhưng khi trộn snapshot read và current read trong cùng một transaction, kết quả của hai lần đọc có thể khác nhau.
 
 #### Cách giải quyết phantom read
 
@@ -113,13 +113,13 @@ Có nhiều cách giải quyết phantom read, nhưng tư tưởng cốt lõi l�
 
 1. Điều chỉnh transaction isolation level thành `SERIALIZABLE`.
 2. Ở transaction isolation level repeatable read, thêm table lock cho table mà transaction thao tác.
-3. Ở transaction isolation level repeatable read, thêm `Next-key Lock (Record Lock+Gap Lock)` cho table mà transaction thao tác.
+3. Ở transaction isolation level repeatable read, thêm `Next-key Lock（Record Lock+Gap Lock）` cho table mà transaction thao tác.
 
 ### Tham khảo
 
-- 《Bên trong kỹ thuật MySQL: Storage engine InnoDB》
+- 《Chuyên sâu về MySQL: Storage engine InnoDB》
 - <https://dev.MySQL.com/doc/refman/5.7/en/>
-- [MySQL lock: Bảy câu hỏi đi vào bản chất](https://tech.youzan.com/seven-questions-about-the-lock-of-MySQL/)
+- [MySQL lock: Bảy câu hỏi đào sâu bản chất](https://tech.youzan.com/seven-questions-about-the-lock-of-MySQL/)
 - [Mối quan hệ giữa transaction isolation level và lock trong InnoDB](https://tech.meituan.com/2014/08/20/innodb-lock.html)
 
 <!-- @include: @article-footer.snippet.md -->

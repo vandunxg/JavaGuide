@@ -1,6 +1,6 @@
 ---
 title: Giải thích chi tiết về đồ thị (DFS, BFS, đường đi ngắn nhất)
-description: Giới thiệu các khái niệm cơ bản và cách biểu diễn thường dùng của đồ thị, kết hợp với các thuật toán cốt lõi như DFS/BFS và các trường hợp sử dụng, nắm vững kiến thức nhập môn cần thiết về lý thuyết đồ thị.
+description: Giới thiệu các khái niệm cơ bản và cách biểu diễn phổ biến của đồ thị, kết hợp các thuật toán cốt lõi như DFS/BFS và các trường hợp sử dụng, giúp nắm vững kiến thức nhập môn cần thiết về lý thuyết đồ thị.
 category: Computer Basics
 tag:
   - Data Structures
@@ -12,28 +12,28 @@ head:
 
 # Đồ thị
 
-Đồ thị là một cấu trúc phi tuyến tương đối phức tạp. **Tại sao nói nó tương đối phức tạp?**
+Đồ thị là một cấu trúc phi tuyến tương đối phức tạp. **Tại sao nói đồ thị tương đối phức tạp?**
 
-Dựa trên nội dung trước đó, chúng ta biết rằng:
+Dựa trên nội dung trước đó, chúng ta biết:
 
 - Các phần tử của cấu trúc dữ liệu tuyến tính thỏa mãn quan hệ tuyến tính duy nhất, mỗi phần tử (trừ phần tử đầu tiên và cuối cùng) chỉ có một phần tử đứng trước trực tiếp và một phần tử đứng sau trực tiếp.
 - Giữa các phần tử của cấu trúc dữ liệu dạng cây có quan hệ phân cấp rõ ràng.
 
 Tuy nhiên, quan hệ giữa các phần tử của cấu trúc đồ thị là tùy ý.
 
-**Đồ thị là gì?** Nói đơn giản, đồ thị là tập hợp gồm một tập hữu hạn khác rỗng các đỉnh và các cạnh giữa các đỉnh. Thường được biểu diễn là: **G(V,E)**, trong đó G biểu thị một đồ thị, V biểu thị tập hợp các đỉnh, E biểu thị tập hợp các cạnh.
+**Đồ thị là gì?** Nói đơn giản, đồ thị là tập hợp gồm một tập đỉnh hữu hạn khác rỗng và các cạnh giữa các đỉnh. Thường được biểu diễn là: **G(V,E)**, trong đó G biểu thị một đồ thị, V biểu thị tập hợp các đỉnh, E biểu thị tập hợp các cạnh.
 
 Hình dưới đây biểu diễn cấu trúc dữ liệu đồ thị, đồng thời đây cũng là một đồ thị có hướng.
 
 ![Đồ thị có hướng](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/directed-graph.png)
 
-Có rất nhiều ví dụ về đồ thị trong cuộc sống hằng ngày! Chẳng hạn, quan hệ bạn bè trên phần mềm mạng xã hội có thể được biểu diễn bằng đồ thị.
+Có rất nhiều ví dụ về đồ thị trong cuộc sống hằng ngày! Chẳng hạn, quan hệ bạn bè trên mạng xã hội có thể được biểu diễn bằng đồ thị.
 
 ## Khái niệm cơ bản về đồ thị
 
 ### Đỉnh
 
-Các phần tử dữ liệu trong đồ thị được gọi là đỉnh. Đồ thị có ít nhất một đỉnh (tập hữu hạn khác rỗng).
+Các phần tử dữ liệu trong đồ thị được gọi là đỉnh. Đồ thị có ít nhất một đỉnh, tạo thành một tập hữu hạn khác rỗng.
 
 Trong đồ thị quan hệ bạn bè, mỗi người dùng đại diện cho một đỉnh.
 
@@ -45,7 +45,7 @@ Trong đồ thị quan hệ bạn bè, nếu hai người dùng là bạn bè th
 
 ### Bậc
 
-Bậc biểu thị một đỉnh chứa bao nhiêu cạnh. Trong đồ thị có hướng, bậc còn được chia thành out-degree và in-degree: out-degree biểu thị số cạnh đi ra từ đỉnh đó, in-degree biểu thị số cạnh đi vào đỉnh đó.
+Bậc cho biết số cạnh liên kết với một đỉnh. Trong đồ thị có hướng, bậc còn được chia thành out-degree và in-degree: out-degree biểu thị số cạnh đi ra từ đỉnh đó, in-degree biểu thị số cạnh đi vào đỉnh đó.
 
 Trong đồ thị quan hệ bạn bè, bậc biểu thị số lượng bạn bè của một người.
 
@@ -85,9 +85,9 @@ Trong đồ thị vô hướng, ta chỉ quan tâm quan hệ có tồn tại hay
 
 ### Lưu trữ bằng danh sách kề
 
-Để giải quyết vấn đề ma trận kề ở trên khá lãng phí không gian bộ nhớ, một phương pháp lưu trữ đồ thị khác ra đời: **danh sách kề**.
+Do ma trận kề ở trên khá lãng phí không gian bộ nhớ, một phương pháp lưu trữ đồ thị khác ra đời: **danh sách kề**.
 
-Danh sách liên kết kề dùng một linked list để lưu trữ tất cả các đỉnh kề kế tiếp của một đỉnh. Với mỗi đỉnh Vi trong đồ thị, tất cả các đỉnh Vj kề với Vi được nối thành một singly linked list. Singly linked list này được gọi là **danh sách kề** của đỉnh Vi. Như hình dưới đây:
+Danh sách liên kết kề dùng một linked list để lưu trữ tất cả các đỉnh kề của một đỉnh. Với mỗi đỉnh Vi trong đồ thị, tất cả các đỉnh Vj kề với Vi được nối thành một singly linked list. Singly linked list này được gọi là **danh sách kề** của đỉnh Vi. Như hình dưới đây:
 
 ![Lưu trữ đồ thị vô hướng bằng danh sách kề](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/adjacency-list-representation-of-undirected-graph.png)
 
@@ -102,11 +102,11 @@ Bạn có thể đếm số phần tử được lưu trữ trong danh sách k�
 
 ### Breadth-first search
 
-Breadth-first search mở rộng từng lớp ra ngoài như những gợn sóng trên mặt nước, như hình dưới đây:
+Breadth-first search mở rộng ra ngoài theo từng lớp, giống như những gợn sóng trên mặt nước, như hình dưới đây:
 
 ![Minh họa breadth-first search](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/breadth-first-search.png)
 
-**Cách triển khai cụ thể của breadth-first search sử dụng cấu trúc dữ liệu tuyến tính đã học trước đó: Queue.** Quy trình cụ thể như hình dưới đây:
+**Cách triển khai cụ thể của Breadth-first search sử dụng cấu trúc dữ liệu tuyến tính đã học trước đó: Queue.** Quy trình cụ thể như hình dưới đây:
 
 **Bước 1:**
 
@@ -134,11 +134,11 @@ Breadth-first search mở rộng từng lớp ra ngoài như những gợn sóng
 
 ### Depth-first search
 
-Depth-first search là “đi đến cùng một con đường”: bắt đầu từ đỉnh nguồn, đi liên tục cho đến khi không còn node kế tiếp thì quay lui về đỉnh trước đó, sau đó tiếp tục “đi đến cùng một con đường”, như hình dưới đây:
+Depth-first search là “đi đến cùng”: bắt đầu từ đỉnh nguồn, đi liên tục cho đến khi không còn đỉnh kề thì quay lui về đỉnh trước đó, sau đó tiếp tục “đi đến cùng”, như hình dưới đây:
 
 ![Minh họa depth-first search](https://oss.javaguide.cn/github/javaguide/cs-basics/data-structure/depth-first-search.png)
 
-**Tương tự breadth-first search, cách triển khai cụ thể của depth-first search sử dụng một cấu trúc dữ liệu tuyến tính khác: Stack.** Quy trình cụ thể như hình dưới đây:
+**Tương tự Breadth-first search, cách triển khai cụ thể của Depth-first search sử dụng một cấu trúc dữ liệu tuyến tính khác: Stack.** Quy trình cụ thể như hình dưới đây:
 
 **Bước 1:**
 
@@ -168,10 +168,10 @@ Depth-first search là “đi đến cùng một con đường”: bắt đầu 
 
 Với bài toán đồ thị, trước tiên chọn cách lưu trữ, sau đó chọn cách duyệt. Trong phỏng vấn, 4 loại bài toán đồ thị thường gặp nhất là: thành phần liên thông, số bước ngắn nhất, quan hệ phụ thuộc và phát hiện chu trình.
 
-| Cách lưu trữ | Độ phức tạp không gian | Kiểm tra hai điểm có kề nhau không | Duyệt các lân cận của một điểm | Trường hợp phù hợp                                 |
-| ------------ | ---------------------- | ---------------------------------- | ------------------------------ | -------------------------------------------------- |
-| Ma trận kề   | `O(V^2)`               | `O(1)`                             | `O(V)`                         | Đồ thị dày, số node ít                             |
-| Danh sách kề | `O(V + E)`             | Tùy thuộc cấu trúc danh sách kề    | Liên quan đến bậc              | Đồ thị thưa, thường dùng trong bài toán thuật toán |
+| Cách lưu trữ | Độ phức tạp không gian | Kiểm tra hai đỉnh có kề nhau không | Duyệt các đỉnh kề của một đỉnh | Trường hợp phù hợp                          |
+| ------------ | ---------------------- | ---------------------------------- | ------------------------------ | ------------------------------------------- |
+| Ma trận kề   | `O(V^2)`               | `O(1)`                             | `O(V)`                         | Đồ thị dày, số node ít                      |
+| Danh sách kề | `O(V + E)`             | Tùy thuộc cấu trúc danh sách kề    | Phụ thuộc vào bậc              | Đồ thị thưa, thường dùng trong các bài toán |
 
 Có thể tham khảo template DFS/BFS tại [Tổng hợp câu hỏi phỏng vấn về DFS và BFS](../algorithms/dfs-bfs.md). Dưới đây là một số điểm cần bổ sung khi trả lời phỏng vấn:
 
@@ -181,9 +181,9 @@ Có thể tham khảo template DFS/BFS tại [Tổng hợp câu hỏi phỏng v�
 - Tính liên thông và phát hiện chu trình trong đồ thị vô hướng có thể dùng DFS/BFS hoặc Union-Find.
 - Đường đi ngắn nhất có trọng số không phải là BFS thông thường. Các thuật toán thường gặp gồm Dijkstra, Bellman-Ford và Floyd; khi phỏng vấn, lựa chọn theo phạm vi của đề bài.
 
-## Template code Java
+## Mẫu code Java
 
-Trong các bài toán thuật toán, danh sách kề được dùng phổ biến nhất. Chỉ số node thường từ `0` đến `n - 1`, có thể dùng `List<Integer>[]` để biểu diễn.
+Trong các bài toán, danh sách kề được dùng phổ biến nhất. Chỉ số đỉnh thường từ `0` đến `n - 1`, có thể dùng `List<Integer>[]` để biểu diễn.
 
 ```java
 List<Integer>[] buildGraph(int n, int[][] edges) {
@@ -237,10 +237,10 @@ Lấy đường đi ngắn nhất trong đồ thị không trọng số làm ví
 
 ```text
 Lớp 0: start
-Lớp 1: tất cả lân cận chưa được truy cập của start
-Lớp 2: tất cả lân cận chưa được truy cập của các node lớp 1
+Lớp 1: tất cả các đỉnh kề chưa được truy cập của start
+Lớp 2: tất cả các đỉnh kề chưa được truy cập của các đỉnh lớp 1
 ...
-Lần đầu gặp target, số lớp hiện tại chính là số bước ngắn nhất
+Lần đầu gặp target, chỉ số lớp hiện tại chính là số bước ngắn nhất
 ```
 
 Một số trường hợp biên nên kiểm tra trước:
@@ -254,7 +254,7 @@ Một số trường hợp biên nên kiểm tra trước:
 
 - [200. Số lượng đảo](https://leetcode.cn/problems/number-of-islands/)
 - [695. Diện tích lớn nhất của đảo](https://leetcode.cn/problems/max-area-of-island/)
-- [994. Cam thối](https://leetcode.cn/problems/rotting-oranges/)
+- [994. Cam thối rữa](https://leetcode.cn/problems/rotting-oranges/)
 - [207. Course Schedule](https://leetcode.cn/problems/course-schedule/)
 - [547. Số lượng tỉnh](https://leetcode.cn/problems/number-of-provinces/)
 

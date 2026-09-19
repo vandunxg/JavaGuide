@@ -12,7 +12,7 @@ head:
 
 Ngoài 5 kiểu dữ liệu cơ bản, Redis còn hỗ trợ 3 kiểu dữ liệu đặc biệt: Bitmap, HyperLogLog và GEO.
 
-## Bitmap (Bitmap)
+## Bitmap (bit map)
 
 ### Giới thiệu
 
@@ -20,9 +20,9 @@ Theo giới thiệu trên trang web chính thức:
 
 > Bitmaps are not an actual data type, but a set of bit-oriented operations defined on the String type which is treated like a bit vector. Since strings are binary safe blobs and their maximum length is 512 MB, they are suitable to set up to 2^32 different bits.
 >
-> Bitmap không phải là một kiểu dữ liệu thực tế trong Redis, mà là một tập hợp các thao tác hướng bit được định nghĩa trên kiểu String và được xem như một vector bit. Vì string là các blob an toàn nhị phân, có độ dài tối đa 512 MB, chúng phù hợp để thiết lập tối đa 2^32 bit khác nhau.
+> Bitmap không phải là một kiểu dữ liệu thực tế trong Redis, mà là một tập hợp các thao tác hướng bit được định nghĩa trên kiểu String và được xem như một vector bit. Vì String là các blob binary-safe, có độ dài tối đa 512 MB, chúng phù hợp để thiết lập tối đa 2^32 bit khác nhau.
 
-Bitmap lưu trữ các số nhị phân liên tiếp (0 và 1). Với Bitmap, chỉ cần một bit để biểu diễn giá trị hoặc trạng thái tương ứng của một phần tử, còn key chính là phần tử đó. 8 bit có thể tạo thành một byte, vì vậy bản thân Bitmap tiết kiệm đáng kể không gian lưu trữ.
+Bitmap lưu trữ các số nhị phân liên tiếp (0 và 1). Với Bitmap, chỉ cần một bit để biểu diễn giá trị hoặc trạng thái tương ứng của một phần tử, còn key là phần tử tương ứng. 8 bit có thể tạo thành một byte, vì vậy bản thân Bitmap tiết kiệm đáng kể không gian lưu trữ.
 
 Bạn có thể xem Bitmap như một array lưu trữ các số nhị phân (0 và 1), chỉ số của mỗi phần tử trong array được gọi là offset.
 
@@ -35,7 +35,7 @@ Bạn có thể xem Bitmap như một array lưu trữ các số nhị phân (0 
 | SETBIT key offset value               | Thiết lập giá trị tại vị trí offset được chỉ định                       |
 | GETBIT key offset                     | Lấy giá trị tại vị trí offset được chỉ định                             |
 | BITCOUNT key start end                | Lấy số phần tử có giá trị bằng 1 giữa start và end                      |
-| BITOP operation destkey key1 key2 ... | Thực hiện phép tính trên một hoặc nhiều Bitmap, gồm AND, OR, XOR và NOT |
+| BITOP operation destkey key1 key2 ... | Thực hiện phép toán trên một hoặc nhiều Bitmap, gồm AND, OR, XOR và NOT |
 
 **Minh họa thao tác cơ bản với Bitmap**:
 
@@ -60,29 +60,31 @@ Bạn có thể xem Bitmap như một array lưu trữ các số nhị phân (0 
 
 **Các trường hợp cần lưu thông tin trạng thái (0/1 là đủ để biểu diễn)**
 
-- Ví dụ: tình trạng check-in của người dùng, tình trạng người dùng hoạt động, thống kê hành vi người dùng (chẳng hạn đã thích một video nào đó hay chưa).
+- Ví dụ: tình trạng check-in của người dùng, trạng thái hoạt động của người dùng, thống kê hành vi người dùng (chẳng hạn đã thích một video nào đó hay chưa).
 - Lệnh liên quan: `SETBIT`, `GETBIT`, `BITCOUNT`, `BITOP`.
 
-## HyperLogLog (thống kê cardinality)
+## HyperLogLog (đếm cardinality)
 
 ### Giới thiệu
 
-HyperLogLog là một thuật toán xác suất đếm cardinality nổi tiếng, được tối ưu và cải tiến từ LogLog Counting (LLC), không phải tính năng riêng của Redis. Redis chỉ triển khai thuật toán này và cung cấp một số API có thể dùng ngay.
+HyperLogLog là một thuật toán xác suất đếm cardinality nổi tiếng, được tối ưu hóa và cải tiến từ LogLog Counting (LLC), không phải tính năng riêng của Redis. Redis chỉ triển khai thuật toán này và cung cấp một số API có thể dùng ngay.
 
 HyperLogLog do Redis cung cấp chiếm không gian cực kỳ nhỏ, chỉ cần 12k không gian là có thể lưu gần `2^64` phần tử khác nhau. Điều này thực sự ấn tượng, đây chính là sức hấp dẫn của toán học! Ngoài ra, Redis đã tối ưu cấu trúc lưu trữ của HyperLogLog và sử dụng hai cách đếm:
 
 - **Ma trận thưa**: chiếm rất ít không gian khi số lượng phần tử được đếm còn nhỏ.
 - **Ma trận dày**: chiếm 12k không gian khi số lượng phần tử được đếm đạt đến một ngưỡng nhất định.
 
+Tài liệu chính thức của Redis có phần giải thích chi tiết tương ứng:
+
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220721091424563.png)
 
-Để tiết kiệm bộ nhớ, thuật toán xác suất đếm cardinality không lưu trực tiếp metadata, mà ước tính giá trị cardinality (số phần tử trong tập hợp) thông qua một phương pháp thống kê xác suất nhất định. Vì vậy, kết quả đếm của HyperLogLog không phải là giá trị chính xác và có sai số nhất định (sai số chuẩn là `0.81%`).
+Để tiết kiệm bộ nhớ, thuật toán xác suất đếm cardinality không lưu trực tiếp metadata, mà ước tính giá trị cardinality (số phần tử trong tập hợp) thông qua một phương pháp thống kê xác suất. Vì vậy, kết quả đếm của HyperLogLog không phải là giá trị chính xác và có sai số nhất định (sai số chuẩn là `0.81%`).
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220720194154133.png)
 
 Cách sử dụng HyperLogLog rất đơn giản, nhưng nguyên lý lại rất phức tạp. Bạn có thể xem nguyên lý của HyperLogLog và cách triển khai trong Redis tại bài viết này: [Giải thích nguyên lý của thuật toán HyperLogLog và cách Redis áp dụng nó](https://juejin.cn/post/6844903785744056333).
 
-Tiếp theo là một công cụ giúp hiểu nguyên lý của HyperLogLog: [Sketch of the Day: HyperLogLog — Cornerstone of a Big Data Infrastructure](http://content.research.neustar.biz/blog/hll.html).
+Ngoài ra, đây là một công cụ giúp hiểu nguyên lý của HyperLogLog: [Sketch of the Day: HyperLogLog — Cornerstone of a Big Data Infrastructure](http://content.research.neustar.biz/blog/hll.html).
 
 Ngoài HyperLogLog, Redis còn cung cấp các cấu trúc dữ liệu xác suất khác. Địa chỉ tài liệu chính thức tương ứng: <https://redis.io/docs/data-types/probabilistic/>.
 
@@ -90,11 +92,11 @@ Ngoài HyperLogLog, Redis còn cung cấp các cấu trúc dữ liệu xác su�
 
 Các lệnh liên quan đến HyperLogLog rất ít, thường dùng nhất chỉ có 3 lệnh.
 
-| Lệnh                                      | Giới thiệu                                                                                       |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| PFADD key element1 element2 ...           | Thêm một hoặc nhiều phần tử vào HyperLogLog                                                      |
-| PFCOUNT key1 key2                         | Lấy số lượng duy nhất của một hoặc nhiều HyperLogLog                                             |
-| PFMERGE destkey sourcekey1 sourcekey2 ... | Gộp nhiều HyperLogLog vào destkey; destkey kết hợp các nguồn để tính số lượng duy nhất tương ứng |
+| Lệnh                                      | Giới thiệu                                                                                               |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| PFADD key element1 element2 ...           | Thêm một hoặc nhiều phần tử vào HyperLogLog                                                              |
+| PFCOUNT key1 key2                         | Lấy số lượng phần tử duy nhất của một hoặc nhiều HyperLogLog                                             |
+| PFMERGE destkey sourcekey1 sourcekey2 ... | Gộp nhiều HyperLogLog vào destkey; destkey kết hợp các nguồn để tính số lượng phần tử duy nhất tương ứng |
 
 **Minh họa thao tác cơ bản với HyperLogLog**:
 
@@ -130,7 +132,7 @@ Các lệnh liên quan đến HyperLogLog rất ít, thường dùng nhất ch�
 
 Geospatial index (chỉ mục không gian địa lý, gọi tắt là GEO) chủ yếu được dùng để lưu trữ thông tin vị trí địa lý và được triển khai dựa trên Sorted Set.
 
-Với GEO, chúng ta có thể dễ dàng tính khoảng cách giữa hai vị trí, lấy các phần tử ở gần một vị trí được chỉ định và thực hiện các chức năng khác.
+Với GEO, bạn có thể dễ dàng tính khoảng cách giữa hai vị trí, lấy các phần tử ở gần một vị trí được chỉ định và thực hiện các chức năng khác.
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220720194359494.png)
 
@@ -158,11 +160,11 @@ Với GEO, chúng ta có thể dễ dàng tính khoảng cách giữa hai vị t
 
 Khi dùng công cụ trực quan hóa Redis để xem `personLocation`, đúng như dự đoán, cấu trúc bên dưới chính là Sorted Set.
 
-Dữ liệu kinh độ, vĩ độ của thông tin vị trí địa lý được lưu trong GEO được chuyển đổi thành một số nguyên thông qua thuật toán GeoHash. Số nguyên này được dùng làm score (tham số trọng số) của Sorted Set.
+Dữ liệu kinh độ và vĩ độ được lưu trong GEO được chuyển đổi thành một số nguyên thông qua thuật toán GeoHash. Số nguyên này được dùng làm score (tham số trọng số) của Sorted Set.
 
 ![](https://oss.javaguide.cn/github/javaguide/database/redis/image-20220721201545147.png)
 
-**Lấy các phần tử khác trong phạm vi của vị trí được chỉ định**:
+**Lấy các phần tử khác trong phạm vi quanh vị trí được chỉ định**:
 
 ```bash
 > GEORADIUS personLocation 116.33 39.87 3 km
@@ -186,7 +188,7 @@ Bạn có thể xem bài viết của Alibaba này để tìm hiểu nguyên lý
 
 **Xóa phần tử**:
 
-GEO được triển khai dựa trên Sorted Set, nên bạn có thể dùng các lệnh liên quan đến Sorted Set cho GEO.
+GEO sử dụng Sorted Set ở tầng dưới, nên bạn có thể dùng các lệnh liên quan đến Sorted Set cho GEO.
 
 ```bash
 > ZREM personLocation user1
@@ -207,11 +209,11 @@ user2
 
 ## Tổng kết
 
-| Kiểu dữ liệu     | Mô tả                                                                                                                                                                                                                                                                                                                                               |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bitmap           | Bạn có thể xem Bitmap như một array lưu trữ các số nhị phân (0 và 1), chỉ số của mỗi phần tử trong array được gọi là offset. Với Bitmap, chỉ cần một bit để biểu diễn giá trị hoặc trạng thái tương ứng của một phần tử, còn key chính là phần tử đó. 8 bit có thể tạo thành một byte, vì vậy bản thân Bitmap tiết kiệm đáng kể không gian lưu trữ. |
-| HyperLogLog      | HyperLogLog do Redis cung cấp chiếm không gian cực kỳ nhỏ, chỉ cần 12k không gian là có thể lưu gần `2^64` phần tử khác nhau. Tuy nhiên, kết quả đếm của HyperLogLog không phải là giá trị chính xác và có sai số nhất định (sai số chuẩn là `0.81%`).                                                                                              |
-| Geospatial index | Geospatial index (chỉ mục không gian địa lý, gọi tắt là GEO) chủ yếu được dùng để lưu trữ thông tin vị trí địa lý và được triển khai dựa trên Sorted Set.                                                                                                                                                                                           |
+| Kiểu dữ liệu     | Mô tả                                                                                                                                                                                                                                                                                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bitmap           | Bạn có thể xem Bitmap như một array lưu trữ các số nhị phân (0 và 1), chỉ số của mỗi phần tử trong array được gọi là offset. Với Bitmap, chỉ cần một bit để biểu diễn giá trị hoặc trạng thái tương ứng của một phần tử, còn key là phần tử tương ứng. 8 bit có thể tạo thành một byte, vì vậy bản thân Bitmap tiết kiệm đáng kể không gian lưu trữ. |
+| HyperLogLog      | HyperLogLog do Redis cung cấp chiếm không gian cực kỳ nhỏ, chỉ cần 12k không gian là có thể lưu gần `2^64` phần tử khác nhau. Tuy nhiên, kết quả đếm của HyperLogLog không phải là giá trị chính xác và có sai số nhất định (sai số chuẩn là `0.81%`).                                                                                               |
+| Geospatial index | Geospatial index (chỉ mục không gian địa lý, gọi tắt là GEO) chủ yếu được dùng để lưu trữ thông tin vị trí địa lý và được triển khai dựa trên Sorted Set.                                                                                                                                                                                            |
 
 ## Tham khảo
 

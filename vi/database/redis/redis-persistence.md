@@ -1,6 +1,6 @@
 ---
 title: Giải thích chi tiết cơ chế persistence của Redis
-description: Phân tích chuyên sâu nguyên lý hoạt động, cách cấu hình và so sánh ưu nhược điểm của ba cơ chế persistence của Redis gồm RDB snapshot, AOF log và persistence hỗn hợp, giúp bạn chọn chiến lược persistence phù hợp với business scenario.
+description: Phân tích nguyên lý hoạt động, cách cấu hình và ưu nhược điểm của ba cơ chế persistence Redis gồm RDB snapshot, AOF log và persistence hỗn hợp, giúp bạn chọn chiến lược persistence phù hợp với business scenario.
 category: Database
 tag:
   - Redis
@@ -10,9 +10,9 @@ head:
       content: Redis persistence,RDB,AOF,persistence hỗn hợp,bgsave,khôi phục dữ liệu,Redis backup,fork child process
 ---
 
-Khi sử dụng cache, chúng ta thường cần persistence dữ liệu trong memory, tức là ghi dữ liệu trong memory vào disk. Phần lớn là để tái sử dụng dữ liệu sau này (chẳng hạn restart máy, khôi phục dữ liệu sau khi máy gặp sự cố), hoặc để đồng bộ dữ liệu (chẳng hạn master và replica trong Redis cluster đồng bộ dữ liệu qua file RDB).
+Khi sử dụng cache, thường cần persistence dữ liệu trong memory, tức là ghi dữ liệu trong memory vào disk. Mục đích chủ yếu là tái sử dụng dữ liệu sau này (chẳng hạn restart máy, khôi phục dữ liệu sau khi máy gặp sự cố), hoặc đồng bộ dữ liệu (chẳng hạn master và replica trong Redis cluster đồng bộ dữ liệu qua file RDB).
 
-Một điểm rất quan trọng khiến Redis khác Memcached là Redis hỗ trợ persistence, đồng thời hỗ trợ 3 phương thức persistence:
+Một điểm rất quan trọng khiến Redis khác Memcached là Redis hỗ trợ persistence, đồng thời hỗ trợ 3 phương thức:
 
 - Snapshot (snapshotting, RDB)
 - Append-only file (AOF)
@@ -24,16 +24,16 @@ Một điểm rất quan trọng khiến Redis khác Memcached là Redis hỗ tr
 
 **Bài viết này dựa trên Redis phiên bản 7.0+**. Cơ chế persistence giữa các phiên bản có khác biệt quan trọng, hãy xác nhận phiên bản Redis trước khi sử dụng:
 
-| Phiên bản      | Phương thức persistence mặc định | Tính năng quan trọng                    |
-| -------------- | -------------------------------- | --------------------------------------- |
-| **Redis 4.0**  | RDB                              | Đưa vào persistence hỗn hợp RDB+AOF     |
-| **Redis 6.0**  | RDB                              | AOF vẫn cần bật thủ công                |
-| **Redis 7.0**  | RDB                              | Đưa vào Multi-Part AOF                  |
-| **Redis 7.2+** | RDB                              | Tiếp tục tối ưu performance persistence |
+| Phiên bản      | Phương thức persistence mặc định | Tính năng quan trọng                        |
+| -------------- | -------------------------------- | ------------------------------------------- |
+| **Redis 4.0**  | RDB                              | Đưa vào persistence hỗn hợp RDB+AOF         |
+| **Redis 6.0**  | RDB                              | AOF vẫn cần bật thủ công                    |
+| **Redis 7.0**  | RDB                              | Đưa vào Multi-Part AOF                      |
+| **Redis 7.2+** | RDB                              | Tiếp tục tối ưu performance của persistence |
 
-**Khác biệt behavior quan trọng**:
+**Khác biệt hành vi quan trọng**:
 
-- **Memory sử dụng bởi AOF rewrite**: trước Redis 7.0, dữ liệu tăng thêm trong thời gian rewrite cần được giữ trong memory; từ 7.0+ đã giải quyết bằng Multi-Part AOF.
+- **Memory sử dụng bởi AOF rewrite**: trước Redis 7.0, dữ liệu tăng thêm trong thời gian rewrite cần được giữ trong memory; từ 7.0+ vấn đề này được giải quyết bằng Multi-Part AOF.
 - **Persistence hỗn hợp**: Redis 4.0-6.x cần bật thủ công, Redis 7.0+ bật mặc định.
 
 Kiểm tra phiên bản Redis:
@@ -43,15 +43,15 @@ redis-cli INFO server | grep redis_version
 # Ví dụ output: redis_version:7.0.12
 ```
 
-Hình dưới đây thể hiện flow đầy đủ của cơ chế persistence Redis, bao gồm nội dung cốt lõi của bài viết:
+Hình dưới đây thể hiện quy trình đầy đủ của cơ chế persistence Redis, bao gồm nội dung cốt lõi của bài viết:
 
-![Flow đầy đủ của cơ chế persistence Redis](https://oss.javaguide.cn/github/javaguide/database/redis/redis-persistence-flow.png)
+![Quy trình đầy đủ của cơ chế persistence Redis](https://oss.javaguide.cn/github/javaguide/database/redis/redis-persistence-flow.png)
 
 ## RDB persistence
 
 ### RDB persistence là gì?
 
-Redis có thể tạo snapshot để lấy bản sao dữ liệu được lưu trong memory tại **một thời điểm nhất định**. Sau khi tạo snapshot, Redis có thể backup snapshot, copy snapshot sang server khác để tạo replica server có cùng dữ liệu (cấu trúc master-replica của Redis, chủ yếu dùng để nâng cao performance Redis), hoặc giữ snapshot tại chỗ để sử dụng khi restart server.
+Redis có thể tạo snapshot để lấy bản sao dữ liệu được lưu trong memory tại **một thời điểm nhất định**. Sau khi tạo snapshot, Redis có thể backup snapshot, copy snapshot sang server khác để tạo replica có cùng dữ liệu (cấu trúc master-replica của Redis, chủ yếu dùng để nâng cao performance Redis), hoặc giữ snapshot tại chỗ để sử dụng khi restart server.
 
 Snapshot persistence là phương thức persistence mặc định của Redis. Trong file cấu hình `redis.conf` mặc định có cấu hình sau:
 
@@ -81,7 +81,7 @@ Redis cung cấp hai command để tạo file RDB snapshot:
 
 #### Phân tích chi phí performance của fork
 
-Mặc dù `bgsave` được thực thi trong child process, không block main thread xử lý command request, nhưng **bản thân thao tác fork là blocking**, đồng thời tạo thêm memory overhead (các giá trị trong bảng dưới chỉ mang tính tham khảo; số thực tế chịu ảnh hưởng của performance CPU, mức fragmentation của memory, system load và các yếu tố khác):
+Mặc dù `bgsave` được thực thi trong child process và không block main thread xử lý command request, nhưng **bản thân thao tác fork là blocking**, đồng thời tạo thêm memory overhead (các giá trị trong bảng dưới chỉ mang tính tham khảo; số thực tế chịu ảnh hưởng của performance CPU, mức fragmentation của memory, system load và các yếu tố khác):
 
 | Kích thước dataset | Độ trễ fork | Memory sử dụng thêm     | Mức độ rủi ro |
 | ------------------ | ----------- | ----------------------- | ------------- |
@@ -100,11 +100,11 @@ Mặc dù `bgsave` được thực thi trong child process, không block main th
 
 #### Vấn đề memory avalanche do THP (Transparent Huge Pages)
 
-Các Linux distribution mặc định bật **THP (Transparent Huge Pages, huge page trong suốt)**, kích thước là 2MB. THP làm tăng xác suất huge page bị COW, **trong trường hợp xấu nhất**, nếu memory được gộp thành huge page 2MB, dù client chỉ sửa 10 byte dữ liệu, kernel vẫn copy toàn bộ memory page 2MB, khiến COW memory overhead **phóng đại 512 lần** (2MB / 4KB = 512).
+Các Linux distribution mặc định bật **THP (Transparent Huge Pages, huge page trong suốt)** với kích thước 2MB. THP làm tăng xác suất huge page bị COW, **trong trường hợp xấu nhất**, nếu memory được gộp thành huge page 2MB, dù client chỉ sửa 10 byte dữ liệu, kernel vẫn copy toàn bộ memory page 2MB, khiến COW memory overhead **phóng đại 512 lần** (2MB / 4KB = 512).
 
-**Behavior thực tế**: kernel không bắt buộc toàn bộ memory sử dụng huge page 2MB, mà sẽ quyết định động có gộp hay không tùy tình huống. Chỉ sau khi THP gộp thành công thành huge page, thao tác sửa mới trigger COW 2MB. Tuy nhiên, trong scenario ghi đồng thời cao, điều này vẫn làm tăng đáng kể memory consumption, có thể hút cạn memory của host trong chốc lát và trigger **OOM Killer buộc dừng process Redis**.
+**Hành vi thực tế**: kernel không bắt buộc toàn bộ memory sử dụng huge page 2MB, mà sẽ quyết định động có gộp hay không tùy tình huống. Chỉ sau khi THP gộp thành công thành huge page, thao tác sửa mới trigger COW 2MB. Tuy nhiên, trong tình huống tải ghi đồng thời cao, điều này vẫn làm tăng đáng kể memory consumption, có thể làm cạn memory của host trong chốc lát và trigger **OOM Killer buộc dừng process Redis**.
 
-**Cách verify**:
+**Cách kiểm tra**:
 
 ```bash
 cat /sys/kernel/mm/transparent_hugepage/enabled
@@ -114,7 +114,7 @@ cat /sys/kernel/mm/transparent_hugepage/enabled
 
 **Giải pháp**: thêm `echo never > /sys/kernel/mm/transparent_hugepage/enabled` vào Redis startup script, hoặc dùng `redis-server --disable-thp yes` (Redis 6.0+ hỗ trợ).
 
-**Cảnh báo khi khởi động**: khi Redis phát hiện THP đang bật, startup log sẽ in `WARNING you have Transparent Huge Pages (THP) support enabled in your kernel`, cần xử lý ngay.
+**Cảnh báo khi khởi động**: khi Redis phát hiện THP đang bật, startup log sẽ ghi `WARNING you have Transparent Huge Pages (THP) support enabled in your kernel`, cần xử lý ngay.
 
 #### Khuyến nghị cho môi trường production
 
@@ -142,7 +142,7 @@ redis-cli INFO memory | grep -E "(used_memory|used_memory_rss)"
 # Chuyển thao tác persistence sang replica để tránh fork overhead trên master
 ```
 
-**Monitoring alert**:
+**Cảnh báo giám sát**:
 
 - `rdb_last_bgsave_time_sec`: thời gian bgsave lần trước, nên < 5s
 - `rdb_last_cow_size`: kích thước COW memory của fork lần trước, nên < 10% `used_memory`
@@ -151,7 +151,7 @@ redis-cli INFO memory | grep -E "(used_memory|used_memory_rss)"
 
 ### AOF persistence là gì?
 
-So với snapshot persistence, AOF persistence có tính realtime tốt hơn. Mặc định Redis chưa bật persistence theo phương thức AOF (append only file), có thể bật bằng parameter `appendonly`:
+So với snapshot persistence, AOF persistence có tính real-time tốt hơn. Mặc định Redis chưa bật persistence theo phương thức AOF (append only file), có thể bật bằng parameter `appendonly`:
 
 > **Mô tả phiên bản**: Redis mặc định dùng RDB persistence. Nếu cần dùng AOF, phải đặt thủ công `appendonly yes`. Redis 7.0 đưa vào cơ chế Multi-Part AOF để tối ưu AOF performance, nhưng không thay đổi phương thức persistence mặc định.
 
@@ -159,19 +159,19 @@ So với snapshot persistence, AOF persistence có tính realtime tốt hơn. M�
 appendonly yes
 ```
 
-Sau khi bật AOF persistence, mỗi khi thực thi một command làm thay đổi dữ liệu trong Redis, Redis sẽ ghi command đó vào AOF buffer `server.aof_buf`, sau đó ghi vào AOF file (lúc này vẫn nằm trong system kernel buffer, chưa sync xuống disk), cuối cùng dựa vào cấu hình strategy persistence (`fsync`) để quyết định khi nào đồng bộ dữ liệu trong system kernel buffer xuống disk.
+Sau khi bật AOF persistence, mỗi khi thực thi một command làm thay đổi dữ liệu trong Redis, Redis sẽ ghi command đó vào AOF buffer `server.aof_buf`, sau đó ghi vào AOF file (lúc này vẫn nằm trong system kernel buffer, chưa sync xuống disk), cuối cùng dựa vào cấu hình `fsync` để quyết định khi nào đồng bộ dữ liệu trong system kernel buffer xuống disk.
 
-Chỉ khi đã sync xuống disk mới được xem là persistence hoàn tất; nếu không vẫn tồn tại rủi ro mất dữ liệu. Chẳng hạn dữ liệu trong system kernel buffer chưa sync mà disk machine đã crash, phần dữ liệu đó sẽ bị mất.
+Chỉ khi đã sync xuống disk mới được xem là persistence hoàn tất; nếu không vẫn tồn tại rủi ro mất dữ liệu. Chẳng hạn dữ liệu trong system kernel buffer chưa sync mà máy lưu trữ đã crash, phần dữ liệu đó sẽ bị mất.
 
 Vị trí lưu AOF file giống vị trí RDB file, đều được đặt bằng parameter `dir`; tên file mặc định là `appendonly.aof`.
 
-### Flow cơ bản của AOF hoạt động như thế nào?
+### Quy trình cơ bản của AOF là gì?
 
 Chức năng AOF persistence có thể chia đơn giản thành 5 bước:
 
-1. **Append command (append)**: mọi write command được append vào AOF buffer.
+1. **Append command (append)**: mọi write command được nối vào AOF buffer.
 2. **Ghi file (write)**: ghi dữ liệu trong AOF buffer vào AOF file. Bước này cần gọi function `write` (system call); sau khi `write` ghi dữ liệu vào system kernel buffer thì return trực tiếp (delayed write). Chú ý!!! Lúc này dữ liệu chưa được sync xuống disk.
-3. **Sync file (fsync)**: đây mới là phần cốt lõi của persistence! Dựa trên strategy cấu hình `appendfsync` trong file `redis.conf`, Redis gọi function `fsync` (system call) vào các thời điểm khác nhau. `fsync` thao tác trên một file, force sync file xuống disk (ghi dữ liệu trong kernel buffer của file vào disk), `fsync` block cho tới khi ghi xong disk mới return, bảo đảm dữ liệu được persistence.
+3. **Sync file (fsync)**: đây mới là phần cốt lõi của persistence! Dựa trên strategy `appendfsync` trong file `redis.conf`, Redis gọi function `fsync` (system call) vào các thời điểm khác nhau. `fsync` thao tác trên một file, force sync file xuống disk (ghi dữ liệu trong kernel buffer của file vào disk), `fsync` block cho tới khi ghi xong disk mới return, bảo đảm persistence hoàn tất.
 4. **Rewrite file (rewrite)**: khi AOF file ngày càng lớn, cần định kỳ rewrite AOF file để nén.
 5. **Load khi restart (load)**: khi Redis restart, có thể load AOF file để khôi phục dữ liệu.
 
@@ -203,15 +203,15 @@ Trong file cấu hình Redis có ba phương thức AOF persistence khác nhau (
 >
 > Vì vậy, **trong trường hợp crash cực đoan, có thể mất tối đa 2 giây dữ liệu**, đồng thời disk jitter sẽ trực tiếp làm P99 latency của Redis tăng vọt.
 >
-> **Metric bắt buộc phải monitor**: `redis-cli INFO persistence | grep aof_delayed_fsync` (ghi lại số lần tích lũy main thread bị fsync block; chỉ có field này khi đã bật AOF).
+> **Metric bắt buộc phải theo dõi**: `redis-cli INFO persistence | grep aof_delayed_fsync` (ghi lại số lần tích lũy main thread bị fsync block; chỉ có field này khi đã bật AOF).
 
 3. `appendfsync no`: sau khi main thread gọi `write` để ghi thì return ngay, để operating system quyết định khi nào sync; trên Linux thường là mỗi 30 giây (`write` nhưng không `fsync`, thời điểm `fsync` do operating system quyết định). Cách này có performance tốt nhất vì tránh block do `fsync`. Nhưng data safety kém nhất; khi crash lượng dữ liệu mất không kiểm soát, phụ thuộc thời điểm operating system sync lần trước.
 
 Có thể thấy: **khác biệt chính của 3 phương thức persistence này nằm ở thời điểm `fsync` sync AOF file (flush xuống disk)**.
 
-Để cân bằng data safety và write performance, có thể cân nhắc option `appendfsync everysec`, để Redis sync AOF file mỗi giây một lần, ảnh hưởng tới performance Redis tương đối nhỏ. Thông thường, ngay cả khi system crash, user nhiều nhất chỉ mất dữ liệu phát sinh trong một giây. Khi disk bận ghi, Redis cũng sẽ giảm tốc độ một cách graceful để thích ứng với write speed tối đa của disk.
+Để cân bằng data safety và write performance, có thể cân nhắc option `appendfsync everysec`, để Redis sync AOF file mỗi giây một lần, ảnh hưởng tới performance Redis tương đối nhỏ. Thông thường, ngay cả khi system crash, user nhiều nhất chỉ mất dữ liệu phát sinh trong một giây. Khi disk bận ghi, Redis cũng sẽ giảm tốc độ một cách phù hợp để thích ứng với write speed tối đa của disk.
 
-> ⚠️ **Lưu ý**: khi disk I/O bottleneck nghiêm trọng, main thread Redis có thể block tới 2 giây do chờ fsync; trong thời gian đó data loss window tăng lên 2 giây. Môi trường production nên monitor metric `aof_delayed_fsync` để đánh giá disk health.
+> ⚠️ **Lưu ý**: khi disk I/O bottleneck nghiêm trọng, main thread Redis có thể block tới 2 giây do chờ fsync; trong thời gian đó data loss window tăng lên 2 giây. Môi trường production nên theo dõi metric `aof_delayed_fsync` để đánh giá disk health.
 
 Từ Redis 7.0.0, Redis sử dụng cơ chế **Multi-Part AOF**. Như tên gọi, Multi-Part AOF chia AOF file ban đầu thành nhiều AOF file. Trong Multi-Part AOF, AOF file được chia thành ba loại:
 
@@ -225,11 +225,11 @@ Multi-Part AOF không phải trọng tâm, chỉ cần hiểu; có thể xem bà
 
 ### Tại sao AOF ghi log sau khi thực thi command?
 
-Relational database (chẳng hạn MySQL) thường ghi log trước khi thực thi command (thuận tiện cho failure recovery), còn AOF persistence của Redis ghi log sau khi thực thi command.
+Cơ sở dữ liệu quan hệ (chẳng hạn MySQL) thường ghi log trước khi thực thi command (thuận tiện cho việc recovery khi xảy ra lỗi), còn AOF persistence của Redis ghi log sau khi thực thi command.
 
-![Flow ghi log của AOF](https://oss.javaguide.cn/github/javaguide/database/redis/redis-aof-write-log-disc.png)
+![Quy trình ghi log của AOF](https://oss.javaguide.cn/github/javaguide/database/redis/redis-aof-write-log-disc.png)
 
-**Tại sao ghi sau khi thực thi command?**
+**Tại sao ghi log sau khi thực thi command?**
 
 - Tránh check overhead bổ sung, AOF log không syntax check command;
 - Ghi sau khi command thực thi xong sẽ không block command execution hiện tại.
@@ -239,13 +239,13 @@ Cách này cũng mang đến rủi ro (phần giới thiệu AOF persistence ph�
 - Nếu Redis crash ngay sau khi thực thi command, thay đổi tương ứng có thể bị mất;
 - Có thể block việc thực thi các command khác tiếp theo (AOF log được ghi trong main thread Redis).
 
-### Bạn hiểu AOF rewrite không?
+### Bạn biết gì về AOF rewrite?
 
 Khi AOF quá lớn, Redis có thể tự động rewrite AOF trong background để tạo AOF file mới. AOF file mới này có database state giống AOF file cũ nhưng kích thước nhỏ hơn.
 
 ![AOF rewrite](https://oss.javaguide.cn/github/javaguide/database/redis/aof-rewrite.png)
 
-> AOF rewrite là một tên gọi dễ gây nhầm lẫn. Chức năng này được thực hiện bằng cách đọc key-value trong database; program không cần read, analyze hay write AOF file hiện tại.
+> AOF rewrite là một tên gọi dễ gây nhầm lẫn. Chức năng này được thực hiện bằng cách đọc key-value trong database; program không cần đọc, phân tích hay ghi AOF file hiện tại.
 
 Vì AOF rewrite thực hiện rất nhiều write operation, để tránh ảnh hưởng việc Redis xử lý command request bình thường, Redis đặt AOF rewrite program vào child process.
 
@@ -254,9 +254,9 @@ Trong thời gian AOF file rewrite, Redis còn duy trì một **AOF rewrite buff
 Để bật AOF rewrite, có thể gọi command `BGREWRITEAOF` để thực thi thủ công, hoặc đặt hai configuration item dưới đây để program tự quyết định thời điểm trigger:
 
 - `auto-aof-rewrite-min-size`: nếu kích thước AOF file nhỏ hơn giá trị này thì không trigger AOF rewrite. Giá trị mặc định là 64 MB;
-- `auto-aof-rewrite-percentage`: tỷ lệ giữa kích thước AOF hiện tại (`aof_current_size`) và kích thước AOF ở lần rewrite trước (`aof_base_size`) khi thực thi AOF rewrite. Nếu AOF file hiện tại tăng tới tỷ lệ phần trăm này thì trigger AOF rewrite. Đặt giá trị này thành 0 sẽ disable AOF rewrite tự động. Giá trị mặc định là 100.
+- `auto-aof-rewrite-percentage`: tỷ lệ giữa kích thước AOF hiện tại (`aof_current_size`) và kích thước AOF ở lần rewrite trước (`aof_base_size`) khi thực thi AOF rewrite. Nếu AOF file hiện tại tăng thêm tới tỷ lệ phần trăm này thì trigger AOF rewrite. Đặt giá trị này thành 0 sẽ disable AOF rewrite tự động. Giá trị mặc định là 100.
 
-**Ranh giới failure và scenario rủi ro của AOF rewrite**:
+**Ranh giới thất bại và các tình huống rủi ro của AOF rewrite**:
 
 Mặc dù AOF rewrite được thực thi trong child process, vẫn có các rủi ro sau cần biết:
 
@@ -280,6 +280,7 @@ redis-cli INFO persistence | grep aof_base_size
 
 # Kiểm tra disk và inode usage
 df -h /var/lib/redis
+df -i /var/lib/redis
 
 # Đặt incremental fsync strategy trong thời gian AOF rewrite (Redis 7.0+)
 # aof-rewrite-incremental-sync yes
@@ -295,11 +296,11 @@ Sau Redis 7.0, cơ chế AOF rewrite đã được tối ưu. Phần nội dung 
 
 **Issue liên quan**: [Mô tả AOF rewrite không chính xác #1439](https://github.com/Snailclimb/JavaGuide/issues/1439).
 
-### Làm thế nào để verify data integrity của AOF file?
+### Làm thế nào để kiểm tra data integrity của AOF file?
 
 **Kết luận cốt lõi**: AOF file thuần **không có checksum**, chỉ verify bằng cách parse từng command; CRC64 checksum chỉ tồn tại trong **phần RDB** của hybrid persistence file.
 
-#### Pure AOF mode: không checksum, chỉ syntax parsing
+#### Pure AOF mode: không checksum, chỉ parse syntax
 
 Pure AOF file không tính CRC64 checksum cho toàn file hay từng command, mà verify validity bằng cách parse lần lượt các command trong file.
 
@@ -311,14 +312,14 @@ Nếu phát hiện syntax error trong quá trình parse (chẳng hạn command k
 
 > **Disaster recovery khi file bị truncate ở cuối (tự động recovery)**:
 >
-> Khi mất điện đột ngột hoặc bị terminate bằng `kill -9`, command cuối cùng của AOF file rất dễ ghi không đầy đủ (chỉ ghi một nửa). Behavior recovery lúc này do configuration `aof-load-truncated` quyết định:
+> Khi mất điện đột ngột hoặc bị terminate bằng `kill -9`, command cuối cùng của AOF file rất dễ ghi không đầy đủ (chỉ ghi một nửa). Hành vi recovery lúc này do configuration `aof-load-truncated` quyết định:
 >
-> | Giá trị config   | Behavior                                                                                                     | Scenario phù hợp                                                            |
+> | Giá trị config   | Hành vi                                                                                                      | Tình huống phù hợp                                                          |
 > | ---------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
 > | `yes` (mặc định) | Redis tự động bỏ command không đầy đủ ở cuối file, tiếp tục startup và in warning trong log                  | Khuyến nghị cho production, cho phép mất ít dữ liệu để đổi lấy availability |
-> | `no`             | Redis từ chối startup và báo error ngay, buộc phải dùng tool `redis-check-aof` để xác nhận và repair dữ liệu | Scenario như finance yêu cầu data integrity rất cao                         |
+> | `no`             | Redis từ chối startup và báo error ngay, buộc phải dùng tool `redis-check-aof` để xác nhận và repair dữ liệu | Tình huống như tài chính yêu cầu data integrity rất cao                     |
 >
-> **Verify truncate recovery**:
+> **Kiểm tra khả năng recovery khi bị truncate**:
 >
 > ```bash
 > # Mô phỏng scenario mất điện: append garbage data vô nghĩa vào AOF file
@@ -329,7 +330,7 @@ Nếu phát hiện syntax error trong quá trình parse (chẳng hạn command k
 > # Log output: # Bad file format reading the append only file: make a backup of your AOF file, then use ./redis-check-aof --fix <filename>
 > ```
 
-**Failure mode**: nếu phần giữa AOF file (không phải phần cuối) bị ghi garbage do disk silent corruption, cơ chế tự động truncate không có tác dụng; Redis sẽ crash trực tiếp và từ chối service. Khi đó cần dùng tool `redis-check-aof --fix` để repair.
+**Failure mode**: nếu phần giữa AOF file (không phải phần cuối) bị ghi garbage do disk silent corruption, cơ chế tự động truncate không có tác dụng; Redis sẽ crash trực tiếp và từ chối phục vụ. Khi đó cần dùng tool `redis-check-aof --fix` để repair.
 
 **Nguyên lý hoạt động của `redis-check-aof`**:
 
@@ -338,7 +339,7 @@ Nếu phát hiện syntax error trong quá trình parse (chẳng hạn command k
 
 #### Hybrid persistence mode: strategy checksum theo từng phần
 
-Trong **hybrid persistence mode** (được đưa vào từ Redis 4.0), AOF file dùng strategy checksum "quản trị theo từng phần":
+Trong **hybrid persistence mode** (được đưa vào từ Redis 4.0), AOF file dùng strategy checksum "theo từng phần":
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -359,7 +360,7 @@ Trong **hybrid persistence mode** (được đưa vào từ Redis 4.0), AOF file
 - **Phần RDB snapshot**: bắt đầu bằng chuỗi cố định `REDIS`, lưu snapshot dữ liệu memory tại một thời điểm, kèm CRC64 checksum ở cuối snapshot data. Checksum này **nằm chính xác ở cuối RDB data block**, chỉ bảo đảm integrity của binary snapshot này.
 - **Phần AOF incremental**: nối ngay sau RDB snapshot, ghi lại incremental write command. Phần này **vẫn không có checksum**, dùng cách parse syntax từng command giống pure AOF.
 
-**Flow verify khi load**:
+**Quy trình kiểm tra khi load**:
 
 1. Redis trước hết verify phần RDB snapshot: tính CRC64 checksum của data phần này rồi so sánh với checksum đã lưu. Nếu không khớp, Redis từ chối startup.
 2. Sau khi verify phần RDB thành công, lần lượt parse AOF incremental command. Nếu parse lỗi thì dừng load các command tiếp theo (nhưng lúc này RDB snapshot data đã load thành công).
@@ -371,17 +372,17 @@ Trong **hybrid persistence mode** (được đưa vào từ Redis 4.0), AOF file
 | `rdbchecksum`        | RDB file, phần RDB của hybrid persistence                  | Kiểm soát có tính CRC64 checksum hay không; không có tác dụng với pure AOF incremental |
 | `aof-load-truncated` | Pure AOF file, phần AOF incremental của hybrid persistence | Kiểm soát có tự động bỏ phần truncate ở cuối và tiếp tục startup hay không             |
 
-**Manual patch** (advanced user):
+**Manual patch** (dành cho advanced user):
 
 - Nếu không muốn repair AOF file bằng cách truncate, có thể thử manual patch
 - Dùng text editor mở AOF file (plain text), thủ công xóa hoặc sửa command lỗi
-- Phù hợp với scenario cụ thể khi đã biết rõ vị trí lỗi
+- Phù hợp với tình huống cụ thể khi đã biết rõ vị trí lỗi
 
 ## Tối ưu trong phiên bản mới
 
 ### Redis 4.0 đã tối ưu cơ chế persistence như thế nào?
 
-Vì RDB và AOF đều có ưu điểm riêng, từ Redis 4.0 Redis bắt đầu hỗ trợ hybrid persistence giữa RDB và AOF.
+Vì RDB và AOF đều có ưu điểm riêng, từ Redis 4.0, Redis bắt đầu hỗ trợ hybrid persistence giữa RDB và AOF.
 
 #### Mô tả cấu hình
 
@@ -404,7 +405,7 @@ auto-aof-rewrite-min-size 64mb    # Chỉ trigger rewrite khi AOF file đạt í
 
 #### Nguyên lý hoạt động
 
-Nếu bật hybrid persistence, khi AOF rewrite, Redis ghi trực tiếp RDB content vào đầu AOF file. Ưu điểm là kết hợp được ưu điểm của RDB và AOF, load nhanh đồng thời tránh mất quá nhiều dữ liệu.
+Nếu bật hybrid persistence, khi AOF rewrite, Redis ghi trực tiếp dữ liệu RDB vào đầu AOF file. Ưu điểm là kết hợp được ưu điểm của RDB và AOF, load nhanh đồng thời tránh mất quá nhiều dữ liệu.
 
 **Cấu trúc hybrid persistence file**:
 
@@ -421,7 +422,7 @@ Nếu bật hybrid persistence, khi AOF rewrite, Redis ghi trực tiếp RDB con
 └───────────────────┘
 ```
 
-**Flow hoạt động cốt lõi**:
+**Quy trình hoạt động cốt lõi**:
 
 1. **Giai đoạn xử lý write**:
 
@@ -441,18 +442,18 @@ Nếu bật hybrid persistence, khi AOF rewrite, Redis ghi trực tiếp RDB con
    - Sau khi rewrite xong, append incremental command trong rewrite buffer vào cuối AOF file mới
 
 4. **Giai đoạn recovery data**:
-   - Khi Redis startup, ưu tiên load phần RDB (recovery data cơ sở nhanh)
-   - Sau đó lần lượt replay AOF incremental command (recovery data mới nhất)
+   - Khi Redis startup, ưu tiên load phần RDB (nhanh chóng recovery dữ liệu cơ sở)
+   - Sau đó lần lượt replay AOF incremental command (recovery dữ liệu mới nhất)
 
-#### So sánh ưu điểm
+#### So sánh
 
-| Metric               | Pure RDB         | Pure AOF        | Hybrid persistence |
-| -------------------- | ---------------- | --------------- | ------------------ |
-| **Recovery speed**   | Nhanh (cấp giây) | Chậm (cấp phút) | Nhanh (cấp giây)   |
-| **Data loss window** | Cấp phút         | ≤2 giây         | ≤2 giây            |
-| **File size**        | Nhỏ (nén)        | Lớn (text log)  | Trung bình         |
-| **Ảnh hưởng write**  | Thấp             | Cao             | Trung bình         |
-| **Readability**      | Kém (binary)     | Tốt (text)      | Kém (phần RDB)     |
+| Metric               | Pure RDB               | Pure AOF              | Hybrid persistence     |
+| -------------------- | ---------------------- | --------------------- | ---------------------- |
+| **Recovery speed**   | Nhanh (tính bằng giây) | Chậm (tính bằng phút) | Nhanh (tính bằng giây) |
+| **Data loss window** | Tính bằng phút         | ≤2 giây               | ≤2 giây                |
+| **File size**        | Nhỏ (nén)              | Lớn (text log)        | Trung bình             |
+| **Ảnh hưởng write**  | Thấp                   | Cao                   | Trung bình             |
+| **Readability**      | Kém (binary)           | Tốt (text)            | Kém (phần RDB)         |
 
 **Benchmark data** (dataset 1GB, SSD):
 
@@ -461,18 +462,18 @@ Nếu bật hybrid persistence, khi AOF rewrite, Redis ghi trực tiếp RDB con
 
 **Nhược điểm của hybrid persistence**:
 
-- Phần RDB trong AOF file là compressed format, không còn là AOF format nên readability kém.
+- Phần RDB trong AOF file là định dạng nén, không còn là AOF format nên readability kém.
 - Cần thêm CPU để compress và decompress RDB.
 
-#### Câu hỏi thường gặp và giải pháp
+#### Vấn đề thường gặp và giải pháp
 
-**1. Verify configuration**:
+**1. Kiểm tra cấu hình**:
 
 ```bash
 # Cách 1: kiểm tra file header (output REDIS cho biết đã bật hybrid persistence)
 head -c 5 appendonly.aof
 
-# Cách 2: verify bằng CLI
+# Cách 2: kiểm tra bằng CLI
 redis-cli CONFIG GET aof-use-rdb-preamble
 # Output: 1) "aof-use-rdb-preamble"
 #         2) "yes"
@@ -521,8 +522,10 @@ redis-server --appendonly yes --appendfilename appendonly.aof
 ```bash
 # Ví dụ production config đầy đủ
 appendonly yes
+aof-use-rdb-preamble yes
 
 # Tối ưu performance
+aof-rewrite-incremental-fsync yes   # Incremental fsync, giảm peak disk I/O
 # Scenario nhạy với latency (khuyến nghị yes)
 no-appendfsync-on-rewrite yes       # Tạm dừng fsync trong rewrite để tránh block
 # Scenario ưu tiên data safety (khuyến nghị no)
@@ -540,7 +543,7 @@ no-appendfsync-on-rewrite no        # Vẫn thực thi fsync trong rewrite, có 
 
 ### Redis 7.0 đã tối ưu cơ chế persistence như thế nào?
 
-Vì trong quá trình AOF rewrite tồn tại vấn đề incremental data được buffer trong memory và double write xuống disk, từ Redis 7.0 Redis bắt đầu hỗ trợ Multi-Part AOF (bật mặc định, có thể chỉ định directory bằng configuration item `appenddirname`).
+Vì trong quá trình AOF rewrite tồn tại vấn đề incremental data được buffer trong memory và double write xuống disk, từ Redis 7.0, Redis bắt đầu hỗ trợ Multi-Part AOF (bật mặc định, có thể chỉ định directory bằng configuration item `appenddirname`).
 
 Nếu bật Multi-Part AOF, AOF file được chia thành base file (tối đa một file, initial full snapshot, có thể ở RDB hoặc AOF format) và nhiều incr file (incremental command log), mọi part được manifest file track. Ưu điểm là loại bỏ memory buffer overhead và double I/O write trong rewrite, nâng cao performance và giảm nguy cơ fsync block. Do file structure tách biệt, INCR file giữ read-only trước rewrite, copy từng file tương đối an toàn; nhưng backup cross-file vẫn cần pause rewrite, flow backup tổng thể phức tạp hơn single-file AOF, đồng thời với dataset cực lớn vẫn có thể cần monitor resource.
 
@@ -566,9 +569,9 @@ Nếu bật Multi-Part AOF, AOF file được chia thành base file (tối đa m
 > redis-check-aof /var/lib/redis/appendonlydir/appendonly.aof.manifest
 > ```
 >
-> **Official chưa cung cấp tool repair tự động**, môi trường production bắt buộc đưa manifest file vào backup strategy; mức độ quan trọng tương đương chính RDB/AOF data file.
+> **Redis chưa cung cấp tool repair tự động**, môi trường production bắt buộc đưa manifest file vào backup strategy; mức độ quan trọng tương đương chính RDB/AOF data file.
 
-## Production environment monitoring metric
+## Các metric giám sát môi trường production
 
 ### Persistence performance metric
 
@@ -689,9 +692,9 @@ alert_rules:
         3. Mở rộng disk hoặc migrate data directory sang partition lớn hơn.
 ```
 
-## Chọn RDB và AOF như thế nào?
+## Chọn RDB hay AOF như thế nào?
 
-Về ưu nhược điểm của RDB và AOF, trên official website cũng có phần mô tả khá chi tiết [Redis persistence](https://redis.io/docs/manual/persistence/). Ở đây kết hợp với cách hiểu của bản thân để tổng hợp ngắn gọn.
+Về ưu nhược điểm của RDB và AOF, trên website chính thức cũng có phần mô tả khá chi tiết [Redis persistence](https://redis.io/docs/manual/persistence/). Dưới đây là phần tổng hợp ngắn gọn, kết hợp với cách hiểu cá nhân.
 
 **Điểm RDB tốt hơn AOF**:
 
@@ -704,10 +707,10 @@ Về ưu nhược điểm của RDB và AOF, trên official website cũng có ph
 
 - **Data safety cao hơn, hỗ trợ persistence cấp giây**: data safety của RDB không bằng AOF, không thể persistence data realtime hoặc theo giây. Quá trình tạo RDB file khá nặng; dù child process BGSAVE ghi RDB file không block main thread, nó vẫn ảnh hưởng CPU và memory resource của machine, trường hợp nghiêm trọng thậm chí có thể làm Redis service crash. AOF hỗ trợ data loss cấp giây (phụ thuộc `fsync` strategy; nếu là `everysec`, thông thường tối đa mất 1 giây data; nhưng khi disk I/O bận có thể mất 2 giây và main thread bị block), chỉ append command vào AOF file nên nhẹ hơn.
 - **Version compatibility tốt**: RDB file được lưu theo binary format cụ thể, và có nhiều phiên bản RDB trong quá trình Redis phát triển, vì vậy Redis service phiên bản cũ có thể không tương thích với RDB format của phiên bản mới.
-- **Readability và khả năng thao tác cao**: AOF chứa log của mọi operation theo format dễ hiểu và parse. Bạn có thể dễ dàng export AOF file để analyze, cũng có thể trực tiếp thao tác AOF file để xử lý một số vấn đề. Chẳng hạn nếu vô tình thực thi command `FLUSHALL` làm refresh toàn bộ content, chỉ cần AOF file chưa rewrite, xóa command mới nhất rồi restart là có thể recovery state trước đó.
+- **Readability và khả năng thao tác cao**: AOF chứa log của mọi operation theo format dễ hiểu và parse. Bạn có thể dễ dàng export AOF file để phân tích, cũng có thể trực tiếp thao tác AOF file để xử lý một số vấn đề. Chẳng hạn nếu vô tình thực thi command `FLUSHALL` làm xóa toàn bộ dữ liệu, chỉ cần AOF file chưa rewrite, xóa command mới nhất rồi restart là có thể recovery state trước đó.
 - **Append log không có rủi ro corruption**: AOF log là append log, không seek, cũng không có vấn đề corruption do mất điện. Ngay cả khi log kết thúc bằng một command ghi dở dang vì lý do nào đó (disk đầy hoặc nguyên nhân khác), tool `redis-check-aof` vẫn có thể repair dễ dàng.
 
-**Ảnh hưởng của version evolution tới việc lựa chọn**:
+**Ảnh hưởng của sự phát triển phiên bản tới việc lựa chọn**:
 
 | Phiên bản     | Cải tiến chính                                      | Ảnh hưởng tới AOF                                                             | Ý nghĩa với việc lựa chọn                                                                  |
 | ------------- | --------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
