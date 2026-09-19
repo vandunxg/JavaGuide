@@ -1,6 +1,6 @@
 ---
 title: Giải thích chi tiết AQS
-description: "Phân tích chuyên sâu về AbstractQueuedSynchronizer của AQS: giải thích chi tiết nguyên lý cốt lõi của AQS, cấu trúc queue CLH, triển khai exclusive lock và shared lock, ứng dụng của các synchronizer như ReentrantLock/Semaphore, cơ chế blocking và wake-up thread."
+description: "Phân tích chuyên sâu về AQS (AbstractQueuedSynchronizer): nguyên lý cốt lõi, cấu trúc CLH queue, triển khai exclusive lock và shared lock, ứng dụng của các synchronizer như ReentrantLock/Semaphore và cơ chế block/wake-up thread."
 category: Java
 tag:
   - Java Concurrency
@@ -39,7 +39,7 @@ Trước khi thực sự giải thích source code AQS, cần có nhận thức 
 
 #### AQS có tác dụng gì?
 
-AQS giải quyết vấn đề phức tạp khi developer triển khai synchronizer. Nó cung cấp một framework dùng chung để triển khai nhiều synchronizer, ví dụ **reentrant lock** (`ReentrantLock`), **semaphore** (`Semaphore`) và **countdown timer** (`CountDownLatch`). Bằng cách đóng gói cơ chế synchronization của thread ở tầng dưới, AQS ẩn logic quản lý thread phức tạp, để developer chỉ cần tập trung vào logic synchronization cụ thể.
+AQS giải quyết vấn đề phức tạp khi developer triển khai synchronizer. Nó cung cấp một framework dùng chung để triển khai nhiều synchronizer, ví dụ **reentrant lock** (`ReentrantLock`), **semaphore** (`Semaphore`) và **countdown latch** (`CountDownLatch`). Bằng cách đóng gói cơ chế synchronization của thread ở tầng dưới, AQS ẩn logic quản lý thread phức tạp, để developer chỉ cần tập trung vào logic synchronization cụ thể.
 
 Nói đơn giản, AQS là một abstract class, cung cấp **execution framework** dùng chung cho synchronizer. Nó định nghĩa **quy trình dùng chung để acquire và release resource**, còn logic acquire resource cụ thể do synchronizer cụ thể triển khai bằng cách override template method. Vì vậy, có thể xem AQS là **“nền móng” cơ bản** của synchronizer, còn synchronizer là **“ứng dụng” cụ thể** được xây dựng trên AQS.
 
@@ -65,9 +65,9 @@ AQS (AbstractQueuedSynchronizer) tiếp tục tối ưu trên nền CLH lock, t�
 
 Vì bên trong AQS sử dụng rất nhiều thao tác `CAS`.
 
-Bên trong AQS dùng queue để lưu các node thread đang waiting. Vì queue là shared resource, trong môi trường multi-thread cần bảo đảm truy cập queue được synchronize.
+Bên trong AQS dùng queue để lưu các node thread đang waiting. Vì queue là shared resource, trong môi trường multi-thread cần bảo đảm truy cập queue được đồng bộ hóa.
 
-Bên trong AQS dùng thao tác `CAS` để kiểm soát truy cập queue được synchronize. Thao tác `CAS` chủ yếu dùng để bảo đảm concurrency safety cho hai thao tác `queue initialization` và `thread node enqueue`. Dù dùng `CAS` để kiểm soát concurrency safety có thể bảo đảm performance khá tốt, nó đồng thời cũng mang đến **độ phức tạp khi coding** khá cao.
+Bên trong AQS dùng thao tác `CAS` để đồng bộ hóa quyền truy cập queue. Thao tác `CAS` chủ yếu dùng để bảo đảm concurrency safety cho hai thao tác khởi tạo queue và enqueue thread node. Dù dùng `CAS` để kiểm soát concurrency safety có thể bảo đảm performance khá tốt, nó đồng thời cũng mang đến **độ phức tạp khi coding** khá cao.
 
 #### Vì sao Node trong AQS cần các trạng thái khác nhau?
 
@@ -81,7 +81,7 @@ Trạng thái `waitStatus` trong AQS tương tự một **state machine**, dùng
 
 ### Tư tưởng cốt lõi của AQS
 
-Tư tưởng cốt lõi của AQS là: nếu shared resource được request đang rảnh, thread request resource hiện tại sẽ được đặt thành thread đang làm việc hợp lệ và shared resource được đặt sang trạng thái locked. Nếu shared resource đang bị chiếm dụng, cần có cơ chế để thread blocking và waiting, cũng như phân phối lock khi được wake-up. AQS triển khai cơ chế này trên cơ sở **CLH lock** (Craig, Landin, and Hagersten locks) sau khi tiếp tục tối ưu.
+Tư tưởng cốt lõi của AQS là: nếu shared resource được request đang rảnh, thread hiện tại yêu cầu resource sẽ được chỉ định là thread đang làm việc hợp lệ và shared resource được đặt sang trạng thái locked. Nếu shared resource đang bị chiếm dụng, cần có cơ chế để thread blocking và waiting, cũng như phân phối lock khi được wake-up. AQS triển khai cơ chế này trên cơ sở **CLH lock** (Craig, Landin, and Hagersten locks) sau khi tiếp tục tối ưu.
 
 **CLH lock** cải tiến spin lock, là spin lock dựa trên singly linked list. Trong môi trường multi-thread, các thread request acquire lock được tổ chức thành queue một chiều; mỗi thread waiting spin để truy cập trạng thái của node phía trước, chỉ khi node phía trước release lock thì node hiện tại mới có thể acquire lock. Cấu trúc queue của **CLH lock** như hình dưới.
 
@@ -100,22 +100,22 @@ Cấu trúc CLH variant queue trong AQS như hình dưới:
 
 ![Cấu trúc CLH variant queue](https://oss.javaguide.cn/github/javaguide/java/concurrent/clh-queue-structure-bianti.png)
 
-Để đọc chi tiết về cấu trúc data cốt lõi của AQS - CLH lock, bạn nên xem bài [Cấu trúc data cốt lõi của Java AQS - CLH lock - Qunar Technical Salon](https://mp.weixin.qq.com/s/jEx-4XhNGOFdCo4Nou5tqg).
+Để đọc chi tiết về cấu trúc dữ liệu cốt lõi của AQS - CLH lock, bạn nên xem bài [Cấu trúc dữ liệu cốt lõi của Java AQS - CLH lock - Qunar Technical Salon](https://mp.weixin.qq.com/s/jEx-4XhNGOFdCo4Nou5tqg).
 
 Sơ đồ nguyên lý cốt lõi của AQS (`AbstractQueuedSynchronizer`):
 
 ![CLH variant queue](https://oss.javaguide.cn/github/javaguide/java/concurrent/clh-queue-state.png)
 
-AQS sử dụng **int member variable `state` để biểu thị synchronization state**, đồng thời dùng **FIFO thread waiting/waiting queue** tích hợp sẵn để xếp hàng các thread acquire resource.
+AQS sử dụng **member variable `state` kiểu int để biểu thị synchronization state**, đồng thời dùng **FIFO waiting queue của thread** tích hợp sẵn để xếp hàng các thread acquire resource.
 
-Variable `state` được đánh dấu bằng `volatile`, dùng để hiển thị tình trạng acquire của resource trong critical section hiện tại. Tác dụng của `volatile` ở đây không chỉ là bảo đảm visibility, quan trọng hơn là thông qua quy tắc happens-before (write operation của volatile variable xảy ra trước read operation tiếp theo) để ngăn compiler và processor reorder instruction, từ đó bảo đảm tính đúng đắn của lock semantics.
+Variable `state` được đánh dấu bằng `volatile`, dùng để biểu thị tình trạng acquire của resource trong critical section hiện tại. Tác dụng của `volatile` ở đây không chỉ là bảo đảm visibility, quan trọng hơn là thông qua quy tắc happens-before (write operation của volatile variable xảy ra trước read operation tiếp theo) để ngăn compiler và processor reorder instruction, từ đó bảo đảm tính đúng đắn của lock semantics.
 
 ```java
 // Shared variable, dùng volatile để bảo đảm thread visibility và ngăn instruction reordering
 private volatile int state;
 ```
 
-Ngoài ra, thông tin state `state` có thể được thao tác thông qua `getState()`, `setState()` và `compareAndSetState()` có modifier `protected`. Các method này đều có modifier `final`, nên không thể bị override trong subclass.
+Ngoài ra, `state` có thể được thao tác thông qua `getState()`, `setState()` và `compareAndSetState()` có modifier `protected`. Các method này đều có modifier `final`, nên không thể bị override trong subclass.
 
 ```java
 // Trả về giá trị hiện tại của synchronization state
@@ -126,13 +126,13 @@ protected final int getState() {
 protected final void setState(int newState) {
      state = newState;
 }
-// Atomically (thao tác CAS) đặt synchronization state thành giá trị đã cho update nếu giá trị hiện tại bằng expect (expected value)
+// Đặt synchronization state một cách nguyên tử (thao tác CAS) thành update nếu giá trị hiện tại bằng expect (giá trị kỳ vọng)
 protected final boolean compareAndSetState(int expect, int update) {
       return unsafe.compareAndSwapInt(this, stateOffset, expect, update);
 }
 ```
 
-Lấy reentrant mutex lock `ReentrantLock` làm ví dụ, bên trong nó duy trì một variable `state` để biểu thị trạng thái lock đang được chiếm dụng. Giá trị ban đầu của `state` là 0, biểu thị lock đang unlocked. Khi thread A gọi method `lock()`, nó sẽ thử acquire lock theo exclusive mode thông qua method `tryAcquire()` và tăng giá trị `state` lên 1. Nếu thành công, thread A acquire được lock. Nếu thất bại, thread A sẽ được thêm vào waiting queue (CLH variant queue) cho đến khi thread khác release lock. Giả sử thread A acquire lock thành công, trước khi release lock, chính thread A có thể tiếp tục acquire lock này ( `state` sẽ tăng dần). Đây là biểu hiện của reentrancy: một thread có thể acquire cùng một lock nhiều lần mà không bị block. Tuy nhiên, điều đó cũng có nghĩa là thread phải release lock với số lần bằng số lần acquire thì `state` mới trở về 0, tức lock mới trở lại trạng thái unlocked. Chỉ khi đó các thread khác đang waiting mới có cơ hội acquire lock.
+Lấy reentrant mutex lock `ReentrantLock` làm ví dụ, bên trong nó duy trì một variable `state` để biểu thị trạng thái lock đang được chiếm dụng. Giá trị ban đầu của `state` là 0, biểu thị lock đang unlocked. Khi thread A gọi method `lock()`, nó sẽ thử acquire lock theo exclusive mode thông qua method `tryAcquire()` và tăng giá trị `state` lên 1. Nếu thành công, thread A acquire được lock. Nếu thất bại, thread A sẽ được thêm vào waiting queue (CLH variant queue) cho đến khi thread khác release lock. Giả sử thread A acquire lock thành công, trước khi release lock, chính thread A có thể tiếp tục acquire lock này (`state` sẽ tăng dần). Đây là biểu hiện của reentrancy: một thread có thể acquire cùng một lock nhiều lần mà không bị block. Tuy nhiên, điều đó cũng có nghĩa là thread phải release lock với số lần bằng số lần acquire thì `state` mới trở về 0, tức lock mới trở lại trạng thái unlocked. Chỉ khi đó các thread khác đang waiting mới có cơ hội acquire lock.
 
 Quá trình thread A thử acquire lock như hình dưới (nguồn hình [Xem nguyên lý và ứng dụng của AQS từ triển khai ReentrantLock - Meituan Technical Team](./reentrantlock.md)):
 
@@ -174,7 +174,7 @@ Có thể triển khai custom synchronizer dựa trên AQS. AQS cung cấp 5 tem
 1. Custom synchronizer kế thừa `AbstractQueuedSynchronizer`.
 2. Override các template method mà AQS expose.
 
-**AQS sử dụng template method pattern. Khi custom synchronizer, cần override các hook method dưới đây do AQS cung cấp:**
+**AQS sử dụng template method pattern. Khi tạo custom synchronizer, cần override các hook method dưới đây do AQS cung cấp:**
 
 ```java
 // Exclusive mode. Thử acquire resource, thành công trả về true, thất bại trả về false.
@@ -185,7 +185,7 @@ protected boolean tryRelease(int)
 protected int tryAcquireShared(int)
 // Shared mode. Thử release resource, thành công trả về true, thất bại trả về false.
 protected boolean tryReleaseShared(int)
-// Thread hiện tại có đang exclusive resource không. Chỉ cần triển khai khi dùng condition.
+// Thread hiện tại có đang nắm giữ resource ở exclusive mode không. Chỉ cần triển khai khi dùng condition.
 protected boolean isHeldExclusively()
 ```
 
@@ -219,11 +219,11 @@ Phần trên đã giới thiệu sơ lược hai mode chia sẻ resource của A
 
 #### Ý nghĩa của `state` trong các synchronizer khác nhau
 
-`state` trong AQS là một synchronization state variable dùng chung. Mỗi synchronizer khác nhau gán cho nó một ý nghĩa khác nhau:
+`state` trong AQS là một synchronization state variable dùng chung. Mỗi synchronizer gán cho nó một ý nghĩa khác nhau:
 
 | Synchronizer             | Mode               | Ý nghĩa của `state`                                                                                                                        |
 | ------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ReentrantLock`          | Exclusive          | Biểu thị số lần reentrant của lock. `state == 0` biểu thị lock idle; `state > 0` biểu thị lock đang được hold, giá trị là số lần reentrant |
+| `ReentrantLock`          | Exclusive          | Biểu thị số lần reentrant của lock. `state == 0` biểu thị lock rảnh; `state > 0` biểu thị lock đang được hold, giá trị là số lần reentrant |
 | `ReentrantReadWriteLock` | Exclusive + shared | 16 bit cao biểu thị số read lock đang được hold (shared), 16 bit thấp biểu thị số lần reentrant của write lock (exclusive)                 |
 | `Semaphore`              | Shared             | Biểu thị số permit khả dụng. Mỗi `acquire()` giảm, `release()` tăng                                                                        |
 | `CountDownLatch`         | Shared             | Biểu thị count cần waiting. Mỗi `countDown()` giảm 1, khi về 0 thì wake-up mọi thread waiting                                              |
@@ -304,7 +304,7 @@ public final void acquire(int arg) {
 }
 ```
 
-Trong `acquire()`, thread trước tiên thử acquire shared resource; nếu thất bại, đóng gói thread thành Node rồi thêm vào waiting queue của AQS; sau khi enqueue, thread trong waiting queue sẽ thử acquire resource và bị block. Ba thao tác này tương ứng với các method sau:
+Trong `acquire()`, thread trước tiên thử acquire resource; nếu thất bại, đóng gói thread thành Node rồi thêm vào waiting queue của AQS; sau khi enqueue, thread trong waiting queue sẽ thử acquire resource và bị block. Ba thao tác này tương ứng với các method sau:
 
 - `tryAcquire()`: thử acquire lock (template method), `AQS` không cung cấp triển khai cụ thể mà do subclass triển khai.
 - `addWaiter()`: nếu acquire lock thất bại, đóng gói thread hiện tại thành Node rồi thêm vào CLH variant queue của AQS để chờ acquire lock.
@@ -345,7 +345,7 @@ final boolean nonfairTryAcquire(int acquires) {
         int nextc = c + acquires;
         if (nextc < 0) // overflow
             throw new Error("Maximum lock count exceeded");
-        // 3.1. Tăng số lần reentrant lock lên 1
+        // 3.1. Tăng số lần reentrant của lock
         setState(nextc);
         return true;
     }
@@ -371,7 +371,7 @@ private Node addWaiter(Node mode) {
     // 1. Đóng gói thread hiện tại thành Node.
     Node node = new Node(Thread.currentThread(), mode);
     Node pred = tail;
-    // 2. Nếu pred != null, chứng tỏ tail node đã được initialize, có thể trực tiếp thêm Node vào queue.
+    // 2. Nếu pred != null, chứng tỏ tail node đã được khởi tạo, có thể trực tiếp thêm Node vào queue.
     if (pred != null) {
         node.prev = pred;
         // 2.1. Dùng CAS để bảo đảm concurrency safety.
@@ -380,7 +380,7 @@ private Node addWaiter(Node mode) {
             return node;
         }
     }
-    // 3. Initialize queue và thêm Node mới tạo vào queue.
+    // 3. Khởi tạo queue và thêm Node mới tạo vào queue.
     enq(node);
     return node;
 }
@@ -392,9 +392,9 @@ Trong method `addWaiter()`, cần thực hiện thao tác **enqueue** Node. Vì 
 
 Dùng thao tác `CAS` update pointer `tail` trỏ tới Node mới enqueue. `CAS` bảo đảm chỉ một thread có thể sửa pointer `tail` thành công, từ đó bảo đảm concurrency safety khi enqueue Node.
 
-**Initialize queue bên trong AQS:**
+**Khởi tạo queue bên trong AQS:**
 
-Khi thực thi `addWaiter()`, nếu phát hiện `pred == null`, tức pointer `tail` là null, điều đó chứng tỏ queue chưa được initialize. Cần gọi method `enq()` để initialize queue và thêm Node vào queue sau khi initialize. Code như sau:
+Khi thực thi `addWaiter()`, nếu phát hiện `pred == null`, tức pointer `tail` là null, điều đó chứng tỏ queue chưa được khởi tạo. Cần gọi method `enq()` để khởi tạo queue và thêm Node vào queue sau đó. Code như sau:
 
 ```JAVA
 // AQS
@@ -417,11 +417,11 @@ private Node enq(final Node node) {
 }
 ```
 
-Trong method `enq()`, queue được initialize; trong quá trình initialize cũng cần dùng `CAS` để bảo đảm concurrency safety.
+Trong method `enq()`, queue được khởi tạo; trong quá trình này cũng cần dùng `CAS` để bảo đảm concurrency safety.
 
-Initialize queue gồm hai bước: initialize node `head`, rồi để `tail` trỏ tới node `head`.
+Khởi tạo queue gồm hai bước: khởi tạo node `head`, rồi để `tail` trỏ tới node `head`.
 
-**Queue sau khi initialize như hình dưới:**
+**Queue sau khi khởi tạo như hình dưới:**
 
 ![](https://oss.javaguide.cn/github/javaguide/java/concurrent/clh-queue-structure-init.png)
 
@@ -481,16 +481,16 @@ Trong method `acquireQueued()`, thử acquire resource gồm 2 bước:
 - `p == head`: biểu thị predecessor của node hiện tại là node `head`. Lúc này node hiện tại là node waiting đầu tiên trong AQS queue.
 - `tryAcquire(arg) == true`: biểu thị thread hiện tại thử acquire resource thành công.
 
-Sau khi acquire resource thành công, cần **remove node của thread hiện tại khỏi waiting queue**. Thao tác remove là đặt node thread đang waiting hiện tại thành node `head` (`head` là virtual node, không tham gia xếp hàng acquire resource).
+Sau khi acquire resource thành công, cần **đưa node của thread hiện tại ra khỏi waiting queue**. Thao tác này là đặt node hiện tại thành node `head` (`head` là virtual node, không tham gia xếp hàng acquire resource).
 
 **2. Block thread hiện tại**
 
 Trong `AQS`, việc wake-up node hiện tại phụ thuộc vào node trước đó. Nếu node trước đó hủy acquire lock, trạng thái sẽ chuyển thành `CANCELLED`; node ở trạng thái `CANCELLED` chưa acquire được lock nên cũng không thể thực hiện unlock để wake-up node hiện tại. Vì vậy trước khi block thread hiện tại, cần bỏ qua các node ở trạng thái `CANCELLED`.
 
-Dùng method `shouldParkAfterFailedAcquire()` để phán đoán node thread hiện tại có thể block hay không:
+Dùng method `shouldParkAfterFailedAcquire()` để kiểm tra node thread hiện tại có thể block hay không:
 
 ```JAVA
-// AQS: phán đoán node thread hiện tại có thể block hay không.
+// AQS: kiểm tra node thread hiện tại có thể block hay không.
 private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
     int ws = pred.waitStatus;
     // 1. Trạng thái predecessor bình thường, trực tiếp trả về true.
@@ -516,7 +516,7 @@ Logic kiểm tra trong method `shouldParkAfterFailedAcquire()`:
 - Nếu phát hiện trạng thái predecessor là `CANCELLED`, cần bỏ qua node ở trạng thái `CANCELLED`.
 - Nếu phát hiện trạng thái predecessor không phải `SIGNAL` và cũng không phải `CANCELLED`, chứng tỏ predecessor đang ở trạng thái waiting resource bình thường, nên đặt trạng thái predecessor thành `SIGNAL`, biểu thị predecessor cần wake-up successor.
 
-Sau khi xác định thread hiện tại có thể block, gọi method `parkAndCheckInterrupt()` để block thread hiện tại. Bên trong sử dụng `LockSupport` để triển khai blocking. Tầng dưới của `LockSupport` dựa trên class `Unsafe` để block thread, code như sau:
+Sau khi xác định thread hiện tại có thể block, gọi method `parkAndCheckInterrupt()` để block thread hiện tại. Bên trong sử dụng `LockSupport` để triển khai blocking. Ở tầng dưới, `LockSupport` dựa trên class `Unsafe` để block thread, code như sau:
 
 ```JAVA
 // AQS
@@ -900,7 +900,7 @@ Trong method `doReleaseShared()`, kiểm tra trạng thái `waitStatus` của no
 
 #### Vì sao cần trạng thái `PROPAGATE`?
 
-Trong AQS, `PROPAGATE` của Node dùng để xử lý vấn đề thread node có thể không được wake-up trong môi trường concurrency. `PROPAGATE` chỉ được dùng một lần trong method `doReleaseShared()`.
+Trong AQS, `PROPAGATE` của Node dùng để xử lý vấn đề thread node có thể không được wake-up trong môi trường concurrency. `PROPAGATE` chỉ được dùng trong method `doReleaseShared()`.
 
 **Tiếp theo phân tích qua ví dụ vì sao cần trạng thái `PROPAGATE`.**
 
@@ -1015,7 +1015,7 @@ protected final boolean tryReleaseShared(int releases) {
 }
 ```
 
-Trong method `tryReleaseShared()` do `Semaphore` triển khai, liên tục thử release resource trong infinite loop, tức dùng thao tác `CAS` để update giá trị `state`.
+Trong method `tryReleaseShared()` do `Semaphore` triển khai, liên tục thử release resource trong vòng lặp vô hạn, tức dùng thao tác `CAS` để update giá trị `state`.
 
 Nếu update thành công, chứng tỏ release resource thành công và sẽ đi vào method `doReleaseShared()`.
 
@@ -1085,7 +1085,7 @@ public class SimpleBlockingQueue<T> {
     }
 
     /**
-     * Thêm element vào queue, nếu queue đầy thì waiting.
+     * Thêm phần tử vào queue, nếu queue đầy thì waiting.
      */
     public void put(T item) throws InterruptedException {
         lock.lock();
@@ -1095,7 +1095,7 @@ public class SimpleBlockingQueue<T> {
                 notFull.await();
             }
             queue.offer(item);
-            // Sau khi thêm element, notify consumer thread đang waiting trên condition notEmpty
+             // Sau khi thêm phần tử, signal consumer thread đang waiting trên condition notEmpty
             notEmpty.signal();
         } finally {
             lock.unlock();
@@ -1103,7 +1103,7 @@ public class SimpleBlockingQueue<T> {
     }
 
     /**
-     * Lấy element khỏi queue, nếu queue rỗng thì waiting.
+     * Lấy phần tử khỏi queue, nếu queue rỗng thì waiting.
      */
     public T take() throws InterruptedException {
         lock.lock();
@@ -1113,7 +1113,7 @@ public class SimpleBlockingQueue<T> {
                 notEmpty.await();
             }
             T item = queue.poll();
-            // Sau khi lấy element, notify producer thread đang waiting trên condition notFull
+             // Sau khi lấy phần tử, signal producer thread đang waiting trên condition notFull
             notFull.signal();
             return item;
         } finally {
@@ -1154,7 +1154,7 @@ public class SimpleBlockingQueue<T> {
 }
 ```
 
-Trong ví dụ trên, `notFull` và `notEmpty` là hai instance `Condition` độc lập, lần lượt duy trì Condition queue riêng. Producer waiting trên `notFull` khi queue đầy, consumer waiting trên `notEmpty` khi queue rỗng. Thiết kế tách biệt các condition waiting này tránh wake-up thread không cần thiết và hiệu quả hơn `synchronized` + `wait/notifyAll`.
+Trong ví dụ trên, `notFull` và `notEmpty` là hai instance `Condition` độc lập, lần lượt duy trì Condition queue riêng. Producer waiting trên `notFull` khi queue đầy, consumer waiting trên `notEmpty` khi queue rỗng. Thiết kế tách biệt các điều kiện chờ này tránh wake-up thread không cần thiết và hiệu quả hơn `synchronized` + `wait/notifyAll`.
 
 #### Phân tích source code cốt lõi của `await()`
 
@@ -1260,7 +1260,7 @@ Non-fair lock không có kiểm tra này. Khi lock vừa được release, threa
 
 Nguyên nhân cốt lõi là **giảm số lần context switch của thread**. Sau khi thread A đang hold lock release lock:
 
-- **Non-fair lock**: nếu vừa lúc thread B đang thử acquire lock (chưa vào synchronization queue), thread B có thể trực tiếp dùng CAS acquire lock và thực thi ngay, bỏ qua overhead wake-up thread trong queue. Thread đang waiting trong queue sau khi được wake-up phát hiện lock đã bị chiếm sẽ block lại; dù nhìn như “lãng phí” một lần wake-up, tổng thể vẫn giảm số lần thread switch.
+- **Non-fair lock**: nếu vừa lúc thread B đang thử acquire lock (chưa vào synchronization queue), thread B có thể trực tiếp dùng CAS acquire lock và thực thi ngay, bỏ qua overhead wake-up thread trong queue. Thread đang waiting trong queue sau khi được wake-up phát hiện lock đã bị chiếm sẽ block lại; dù nhìn như “lãng phí” một lần wake-up, tổng thể vẫn giảm số lần context switch.
 - **Fair lock**: thread B phải xếp ở cuối queue, sau đó wake-up thread ở đầu queue. Từ lúc thread được wake-up đến lúc thực sự bắt đầu execute tồn tại một khoảng **scheduling latency** (thread chuyển từ blocking sang running); trong khoảng latency đó lock ở trạng thái idle, làm giảm hiệu suất sử dụng lock.
 
 Doug Lea chỉ ra trong document của `ReentrantLock` rằng: trong môi trường multi-thread, throughput tổng thể của chương trình dùng fair lock thường thấp hơn chương trình dùng non-fair lock (tức chậm hơn), vì vậy `ReentrantLock` mặc định dùng non-fair mode. Tuy nhiên trong tình huống cần bảo đảm thứ tự xử lý request hoặc tránh thread starvation (như phân phối connection pool), fair lock là lựa chọn tốt hơn.
@@ -1310,7 +1310,7 @@ public class FairVsUnfairLockDemo {
 
 Chạy code trên thường có thể quan sát thấy: ở non-fair lock mode, cùng một thread dễ acquire lock liên tiếp nhiều lần hơn (vì sau khi release lock nó lập tức cạnh tranh lại, có cơ hội giành lock trước khi thread trong queue được wake-up); khi có thread waiting, fair lock có xu hướng phân phối lock theo thứ tự queue. Tuy nhiên fairness không đồng nghĩa OS scheduling công bằng; nếu thread khác chưa chạy đến điểm waiting, cùng một thread vẫn có thể liên tiếp acquire lock.
 
-## Các class synchronization tool thường gặp
+## Các synchronizer thường gặp
 
 ### Semaphore (semaphore)
 
@@ -1412,7 +1412,7 @@ final int nonfairTryAcquireShared(int acquires) {
 }
 ```
 
-Lấy method `release` không argument làm ví dụ: khi gọi `semaphore.release()`, thread thử release permit và dùng CAS sửa giá trị `state` thành `state=state+1`. Sau khi release permit thành công, đồng thời wake-up một thread trong waiting queue. Thread được wake-up sẽ thử sửa lại `state` thành `state=state-1`; nếu `state > 0` thì acquire token thành công, nếu không thì vào lại waiting queue và suspend thread.
+Lấy method `release` không argument làm ví dụ: khi gọi `semaphore.release()`, thread thử release permit và dùng CAS sửa giá trị `state` thành `state=state+1`. Sau khi release permit thành công, đồng thời wake-up một thread trong waiting queue. Thread được wake-up sẽ thử sửa lại `state` thành `state=state-1`; nếu `state > 0` thì acquire permit thành công, nếu không thì vào lại waiting queue và block.
 
 ```java
 // Release 1 permit
@@ -1515,7 +1515,7 @@ public class SemaphoreExample {
 }
 ```
 
-Method `acquire()` sẽ block cho đến khi có permit để lấy rồi lấy đi một permit; mỗi method `release` tăng một permit, thao tác này có thể release một method `acquire()` đang block. Tuy nhiên thực tế không có object permit cụ thể; `Semaphore` chỉ duy trì số lượng permit có thể lấy. `Semaphore` thường dùng để giới hạn số thread acquire một loại resource nào đó.
+Method `acquire()` sẽ block cho đến khi có permit để lấy rồi lấy đi một permit; mỗi method `release` tăng một permit, thao tác này có thể đánh thức một lần gọi `acquire()` đang block. Tuy nhiên thực tế không có object permit cụ thể; `Semaphore` chỉ duy trì số lượng permit có thể lấy. `Semaphore` thường dùng để giới hạn số thread acquire một loại resource nào đó.
 
 Đương nhiên cũng có thể lấy và release nhiều permit cùng lúc, nhưng thường không cần làm vậy:
 
@@ -1531,13 +1531,13 @@ Ngoài method `acquire()`, một method tương ứng khác cũng thường đư
 
 > `Semaphore` được triển khai dựa trên AQS, dùng để kiểm soát số thread truy cập đồng thời, nhưng khái niệm này khác với shared lock. Constructor của `Semaphore` dùng parameter `permits` để initialize variable `state` của AQS; variable này biểu thị số permit khả dụng. Khi thread gọi method `acquire()` để thử acquire permit, `state` sẽ nguyên tử giảm 1. Nếu sau khi giảm 1, `state` lớn hơn hoặc bằng 0, `acquire()` return thành công và thread có thể tiếp tục thực thi. Nếu sau khi giảm 1, `state` nhỏ hơn 0, biểu thị số thread truy cập đồng thời đã đạt giới hạn `permits`; thread đó sẽ được đưa vào waiting queue của AQS và bị block, **không phải spin waiting**. Khi thread khác hoàn thành task và gọi method `release()`, `state` sẽ nguyên tử tăng 1. Thao tác `release()` sẽ wake-up một hoặc nhiều thread đang block trong waiting queue của AQS. Các thread được wake-up sẽ lại thử thao tác `acquire()` để cạnh tranh permit khả dụng. Vì vậy, `Semaphore` giới hạn số thread truy cập đồng thời bằng cách kiểm soát số permit, chứ không phải bằng spin và cơ chế shared lock.
 
-### CountDownLatch (countdown timer)
+### CountDownLatch (countdown latch)
 
 #### Giới thiệu
 
-`CountDownLatch` cho phép `count` thread block tại một điểm cho đến khi task của tất cả thread thực thi xong.
+`CountDownLatch` cho phép `count` thread block tại một điểm cho đến khi đủ số lần `countDown()` được gọi.
 
-`CountDownLatch` chỉ dùng một lần. Giá trị counter chỉ có thể initialize một lần trong constructor và sau đó không có cơ chế nào set lại; sau khi dùng xong `CountDownLatch`, không thể sử dụng lại.
+`CountDownLatch` chỉ dùng một lần. Giá trị counter chỉ có thể khởi tạo một lần trong constructor và sau đó không có cơ chế nào set lại; sau khi dùng xong `CountDownLatch`, không thể sử dụng lại.
 
 #### Nguyên lý
 
@@ -1557,7 +1557,7 @@ private static final class Sync extends AbstractQueuedSynchronizer {
 }
 ```
 
-Khi thread gọi `countDown()`, thực tế method `tryReleaseShared` được dùng để giảm `state` bằng thao tác CAS cho đến khi `state` bằng 0. Khi `state` bằng 0, biểu thị mọi thread đã gọi method `countDown`, các thread waiting trên `CountDownLatch` sẽ được wake-up và tiếp tục thực thi.
+Khi thread gọi `countDown()`, thực tế method `tryReleaseShared` được dùng để giảm `state` bằng thao tác CAS cho đến khi `state` bằng 0. Khi `state` bằng 0, biểu thị đã đủ số lần gọi `countDown()`, các thread waiting trên `CountDownLatch` sẽ được wake-up và tiếp tục thực thi.
 
 ```java
 public void countDown() {
@@ -1603,7 +1603,7 @@ protected boolean tryReleaseShared(int releases) {
 }
 ```
 
-Lấy method `await` không argument làm ví dụ. Khi gọi `await()`, nếu `state` khác 0 thì chứng tỏ task chưa hoàn thành, `await()` sẽ block liên tục, tức các câu lệnh sau `await()` chưa được thực thi (main thread được thêm vào waiting queue, cũng chính là CLH variant queue). Sau đó `CountDownLatch` spin và dùng CAS kiểm tra `state == 0`; nếu `state == 0`, mọi thread waiting sẽ được release và các câu lệnh sau `await()` được thực thi.
+Lấy method `await` không argument làm ví dụ. Khi gọi `await()`, nếu `state` khác 0 thì chứng tỏ task chưa hoàn thành, `await()` sẽ block, tức các câu lệnh sau `await()` chưa được thực thi (main thread được thêm vào waiting queue, cũng chính là CLH variant queue). Sau đó AQS tiếp tục kiểm tra `state == 0`; nếu `state == 0`, mọi thread waiting sẽ được release và các câu lệnh sau `await()` được thực thi.
 
 ```java
 // Waiting (cũng có thể gọi là acquire lock)
@@ -1690,7 +1690,7 @@ Trong code trên, số request được định nghĩa là 550. Chỉ sau khi 55
 
 Lần tương tác đầu tiên với `CountDownLatch` là main thread waiting các thread khác. Main thread phải gọi method `CountDownLatch.await()` ngay sau khi start các thread khác. Khi đó thao tác của main thread sẽ block tại method này cho đến khi các thread khác hoàn thành task tương ứng.
 
-N thread khác phải reference object latch, vì chúng cần thông báo cho object `CountDownLatch` rằng task tương ứng đã hoàn thành. Cơ chế thông báo này được thực hiện qua method `CountDownLatch.countDown()`; mỗi lần gọi method này, giá trị count initialize trong constructor giảm 1. Vì vậy sau khi N thread đều gọi method này, giá trị count bằng 0, main thread có thể khôi phục thực thi task của mình thông qua method `await()`.
+N thread khác phải reference object latch, vì chúng cần thông báo cho object `CountDownLatch` rằng task tương ứng đã hoàn thành. Cơ chế thông báo này được thực hiện qua method `CountDownLatch.countDown()`; mỗi lần gọi method này, giá trị count initialize trong constructor giảm 1. Vì vậy sau khi đủ N lần gọi method này, giá trị count bằng 0, main thread có thể tiếp tục thực thi task của mình thông qua method `await()`.
 
 Nói thêm: dùng không đúng method `await()` của `CountDownLatch` rất dễ gây deadlock. Ví dụ nếu đổi vòng lặp `for` trong code trên thành:
 
@@ -1706,11 +1706,11 @@ Khi đó giá trị `count` không thể bằng 0, dẫn đến waiting liên t�
 
 #### Giới thiệu
 
-`CyclicBarrier` rất giống `CountDownLatch`. Nó cũng có thể thực hiện thread waiting lẫn nhau, nhưng chức năng phức tạp và mạnh hơn `CountDownLatch`. Tình huống ứng dụng chủ yếu tương tự `CountDownLatch`.
+`CyclicBarrier` rất giống `CountDownLatch`. Nó cũng hỗ trợ cơ chế chờ đồng bộ giữa các thread, nhưng chức năng phức tạp và mạnh hơn `CountDownLatch`. Tình huống ứng dụng chủ yếu tương tự `CountDownLatch`.
 
 > `CountDownLatch` được triển khai dựa trên AQS, còn `CyclicBarrier` dựa trên `ReentrantLock` (`ReentrantLock` cũng là AQS synchronizer) và `Condition`.
 
-Ý nghĩa literal của `CyclicBarrier` là barrier (Barrier) có thể sử dụng lại (Cyclic). Việc nó cần làm là: khi một nhóm thread đến barrier (cũng có thể gọi là synchronization point), các thread bị block cho đến khi thread cuối cùng đến barrier; lúc đó barrier mở và mọi thread bị barrier chặn mới tiếp tục thực thi.
+Nghĩa đen của `CyclicBarrier` là barrier (Barrier) có thể sử dụng lại (Cyclic). Việc nó cần làm là: khi một nhóm thread đến barrier (cũng có thể gọi là synchronization point), các thread bị block cho đến khi thread cuối cùng đến barrier; lúc đó barrier mở và mọi thread bị barrier chặn mới tiếp tục thực thi.
 
 #### Nguyên lý
 
@@ -1872,7 +1872,7 @@ public class CyclicBarrierExample1 {
   public static void test(int threadnum) throws InterruptedException, BrokenBarrierException {
     System.out.println("threadnum:" + threadnum + "is ready");
     try {
-      /** Waiting 60 giây, bảo đảm child thread thực thi xong hoàn toàn */
+       /** Chờ 60 giây, bảo đảm các thread con thực thi xong hoàn toàn */
       cyclicBarrier.await(60, TimeUnit.SECONDS);
     } catch (Exception e) {
       System.out.println("-----CyclicBarrierException------");

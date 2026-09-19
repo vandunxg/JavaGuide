@@ -13,12 +13,12 @@ head:
 
 ## Giới thiệu về IO stream
 
-IO là viết tắt của `Input/Output`, nghĩa là input và output. Quá trình dữ liệu được đưa vào memory của máy tính là input; ngược lại, quá trình dữ liệu được output ra external storage (chẳng hạn database, file, remote host) là output. Quá trình truyền dữ liệu tương tự dòng nước, vì vậy được gọi là IO stream. Trong Java, IO stream được chia thành input stream và output stream; dựa theo cách xử lý dữ liệu lại được chia thành byte stream và character stream.
+IO là viết tắt của `Input/Output`, nghĩa là input và output. Quá trình đưa dữ liệu vào memory của máy tính là input; ngược lại, quá trình đưa dữ liệu ra external storage (chẳng hạn database, file, remote host) là output. Quá trình truyền dữ liệu tương tự dòng nước, vì vậy được gọi là IO stream. Trong Java, IO stream được chia thành input stream và output stream; dựa theo cách xử lý dữ liệu, chúng lại được chia thành byte stream và character stream.
 
-Hơn 40 class của Java IO đều được kế thừa từ 4 abstract class cơ sở sau.
+Hơn 40 class của Java IO đều được phát sinh từ 4 abstract class cơ sở sau.
 
-- `InputStream`/`Reader`: base class của mọi input stream; class trước là byte input stream, class sau là character input stream.
-- `OutputStream`/`Writer`: base class của mọi output stream; class trước là byte output stream, class sau là character output stream.
+- `InputStream`/`Reader`: base class của mọi input stream; class đầu là byte input stream, class sau là character input stream.
+- `OutputStream`/`Writer`: base class của mọi output stream; class đầu là byte output stream, class sau là character output stream.
 
 ## Byte stream
 
@@ -28,8 +28,8 @@ Hơn 40 class của Java IO đều được kế thừa từ 4 abstract class c�
 
 Các method thường dùng của `InputStream`:
 
-- `read()`: trả về dữ liệu của byte tiếp theo trong input stream. Giá trị nằm trong khoảng từ 0 đến 255. Nếu không đọc được byte nào, code trả về `-1`, biểu thị end of file.
-- `read(byte b[ ])`: đọc một số byte từ input stream và lưu vào array `b`. Nếu độ dài array `b` bằng 0 thì không đọc. Nếu không có byte khả dụng để đọc thì trả về `-1`. Nếu có byte khả dụng thì số byte đọc nhiều nhất bằng `b.length`, trả về số byte đã đọc. Method này tương đương `read(b, 0, b.length)`.
+- `read()`: trả về dữ liệu của byte tiếp theo trong input stream. Giá trị nằm trong khoảng từ 0 đến 255. Nếu không đọc được byte nào, method trả về `-1`, biểu thị end of file.
+- `read(byte b[ ])`: đọc một số byte từ input stream và lưu vào array `b`. Nếu độ dài array `b` bằng 0 thì không đọc. Nếu không có byte khả dụng để đọc thì trả về `-1`. Nếu có byte khả dụng thì đọc nhiều nhất `b.length` byte và trả về số byte đã đọc. Method này tương đương `read(b, 0, b.length)`.
 - `read(byte b[], int off, int len)`: bổ sung tham số `off` (offset) và tham số `len` (số byte tối đa cần đọc) trên cơ sở method `read(byte b[ ])`.
 - `skip(long n)`: bỏ qua n byte của input stream, trả về số byte thực tế đã bỏ qua.
 - `available()`: trả về giá trị ước lượng số byte có thể đọc (hoặc bỏ qua) mà không blocking; không thể dùng nó để xác định tổng độ dài của input stream.
@@ -41,7 +41,7 @@ Từ Java 9, `InputStream` bổ sung một số method hữu ích:
 - `readNBytes(byte[] b, int off, int len)`: cố gắng đọc nhiều nhất `len` byte, trả về khi đọc đủ độ dài chỉ định hoặc gặp cuối stream; trong quá trình đọc có thể bị blocking hoặc ném exception.
 - `transferTo(OutputStream out)`: truyền toàn bộ byte từ một input stream sang một output stream.
 
-`FileInputStream` là một byte input stream object khá thường dùng, có thể chỉ định trực tiếp file path, đọc trực tiếp dữ liệu single byte hoặc đọc vào byte array.
+`FileInputStream` là một byte input stream object khá thường dùng, có thể chỉ định trực tiếp file path, đọc trực tiếp một byte hoặc đọc vào byte array.
 
 Ví dụ code của `FileInputStream`:
 
@@ -73,9 +73,9 @@ The actual number of bytes skipped:2
 The content read from file:JavaGuide
 ```
 
-Tuy nhiên, thông thường chúng ta sẽ không dùng riêng `FileInputStream` mà thường kết hợp nó với `BufferedInputStream` (byte buffered input stream, sẽ trình bày ở phần sau).
+Tuy nhiên, thông thường `FileInputStream` không được dùng riêng mà được kết hợp với `BufferedInputStream` (byte buffered input stream, sẽ trình bày ở phần sau).
 
-Đoạn code dưới đây khá thường gặp trong project: dùng `readAllBytes()` để đọc toàn bộ byte của input stream rồi gán trực tiếp cho một object `String`.
+Đoạn code dưới đây khá thường gặp trong project: dùng `readAllBytes()` để đọc toàn bộ byte của input stream rồi gán trực tiếp cho object `String`.
 
 ```java
 // Tạo một object BufferedInputStream
@@ -85,7 +85,7 @@ String result = new String(bufferedInputStream.readAllBytes());
 System.out.println(result);
 ```
 
-`DataInputStream` dùng để đọc dữ liệu của type chỉ định, không thể sử dụng độc lập mà phải kết hợp với stream khác, chẳng hạn `FileInputStream`.
+`DataInputStream` dùng để đọc dữ liệu thuộc type chỉ định, không thể sử dụng độc lập mà phải kết hợp với stream khác, chẳng hạn `FileInputStream`.
 
 ```java
 FileInputStream fileInputStream = new FileInputStream("input.txt");
@@ -105,7 +105,7 @@ MyClass object = (MyClass) input.readObject();
 input.close();
 ```
 
-Ngoài ra, class dùng cho serialization và deserialization phải implement interface `Serializable`. Nếu object có property không muốn serialize, dùng `transient` để modifier.
+Ngoài ra, class dùng cho serialization và deserialization phải implement interface `Serializable`. Nếu object có property không muốn serialize, dùng modifier `transient`.
 
 ### OutputStream (byte output stream)
 
@@ -115,11 +115,11 @@ Các method thường dùng của `OutputStream`:
 
 - `write(int b)`: ghi byte cụ thể vào output stream.
 - `write(byte b[ ])`: ghi array `b` vào output stream, tương đương `write(b, 0, b.length)`.
-- `write(byte[] b, int off, int len)`: bổ sung tham số `off` (offset) và tham số `len` (số byte tối đa cần đọc) trên cơ sở `write(byte b[ ])`.
-- `flush()`: flush output stream này và buộc ghi ra toàn bộ output byte đang buffered.
+- `write(byte[] b, int off, int len)`: bổ sung tham số `off` (offset) và tham số `len` (số byte tối đa cần ghi) trên cơ sở `write(byte b[ ])`.
+- `flush()`: flush output stream và buộc ghi ra toàn bộ byte output đang buffered.
 - `close()`: đóng output stream và giải phóng các system resource liên quan.
 
-`FileOutputStream` là byte output stream object được dùng phổ biến nhất, có thể chỉ định trực tiếp file path, output trực tiếp dữ liệu single byte hoặc byte array chỉ định.
+`FileOutputStream` là byte output stream object được dùng phổ biến nhất, có thể chỉ định trực tiếp file path, ghi trực tiếp một byte hoặc byte array chỉ định.
 
 Ví dụ code của `FileOutputStream`:
 
@@ -143,7 +143,7 @@ FileOutputStream fileOutputStream = new FileOutputStream("output.txt");
 BufferedOutputStream bos = new BufferedOutputStream(fileOutputStream);
 ```
 
-**`DataOutputStream`** dùng để ghi dữ liệu của type chỉ định, không thể sử dụng độc lập mà phải kết hợp với stream khác, chẳng hạn `FileOutputStream`.
+**`DataOutputStream`** dùng để ghi dữ liệu thuộc type chỉ định, không thể sử dụng độc lập mà phải kết hợp với stream khác, chẳng hạn `FileOutputStream`.
 
 ```java
 // Output stream
@@ -168,10 +168,10 @@ Dù là đọc ghi file hay gửi nhận qua network, đơn vị lưu trữ nh�
 
 Theo tôi, chủ yếu có hai nguyên nhân:
 
-- Character stream do Java Virtual Machine chuyển đổi từ byte tạo thành, quá trình này tương đối tốn thời gian.
-- Nếu không biết encoding type thì rất dễ xuất hiện vấn đề mojibake.
+- Character stream được Java Virtual Machine chuyển đổi từ byte, quá trình này tương đối tốn thời gian.
+- Nếu không biết encoding thì rất dễ xuất hiện mojibake.
 
-Vấn đề mojibake rất dễ tái hiện: chỉ cần đổi nội dung file `input.txt` trong ví dụ code `FileInputStream` ở trên thành tiếng Trung, không cần sửa code gốc.
+Mojibake rất dễ tái hiện: chỉ cần đổi nội dung file `input.txt` trong ví dụ code `FileInputStream` ở trên thành tiếng Trung, không cần sửa code gốc.
 
 ![](https://oss.javaguide.cn/github/javaguide/java/image-20220419154632551.png)
 
@@ -185,11 +185,11 @@ The content read from file:§å®¶å¥½
 
 Có thể thấy rõ nội dung đọc được đã trở thành mojibake.
 
-Vì vậy, I/O stream cung cấp luôn một interface thao tác trực tiếp với character, thuận tiện cho việc xử lý character bằng stream. Với media file như audio file và image thì byte stream phù hợp hơn; nếu liên quan đến character thì character stream phù hợp hơn.
+Vì vậy, I/O stream cung cấp một interface thao tác trực tiếp với character, thuận tiện cho việc xử lý character bằng stream. Với media file như audio file và image, byte stream phù hợp hơn; nếu liên quan đến character, character stream phù hợp hơn.
 
-`Reader` và `Writer` dùng để thao tác với character; khi chuyển đổi giữa byte stream và character stream, cần chỉ định encoding thông qua `Charset`. Class chuyển đổi không chỉ định encoding tường minh sẽ dùng charset mặc định của JVM.
+`Reader` và `Writer` dùng để thao tác với character; khi chuyển đổi giữa byte stream và character stream, cần chỉ định encoding thông qua `Charset`. Các class chuyển đổi không chỉ định encoding tường minh sẽ dùng charset mặc định của JVM.
 
-Unicode bản thân chỉ là một character set, gán một số duy nhất cho mỗi character nhưng không quy định cách lưu trữ cụ thể. UTF-8, UTF-16 và UTF-32 đều là encoding method của Unicode, dùng số byte khác nhau để biểu diễn Unicode character. Ví dụ, UTF-8: English dùng 1 byte, tiếng Trung dùng 3 byte.
+Unicode bản thân chỉ là một character set, gán một số duy nhất cho mỗi character nhưng không quy định cách lưu trữ cụ thể. UTF-8, UTF-16 và UTF-32 đều là encoding method của Unicode, dùng số byte khác nhau để biểu diễn Unicode character. Ví dụ, UTF-8: tiếng Anh dùng 1 byte, tiếng Trung dùng 3 byte.
 
 ### Reader (character input stream)
 
@@ -205,13 +205,13 @@ Các method thường dùng của `Reader`:
 - `skip(long n)`: bỏ qua n character của input stream, trả về số character thực tế đã bỏ qua.
 - `close()`: đóng input stream và giải phóng các system resource liên quan.
 
-`InputStreamReader` là bridge chuyển byte stream thành character stream; subclass `FileReader` là wrapper dựa trên class này, có thể thao tác trực tiếp với character file.
+`InputStreamReader` là bridge chuyển byte stream thành character stream; subclass `FileReader` là wrapper dựa trên class này, có thể thao tác trực tiếp với file văn bản.
 
 ```java
 // Bridge chuyển byte stream thành character stream
 public class InputStreamReader extends Reader {
 }
-// Dùng để đọc character file
+// Dùng để đọc file văn bản
 public class FileReader extends InputStreamReader {
 }
 ```
@@ -251,12 +251,12 @@ Các method thường dùng của `Writer`:
 
 - `write(int c)`: ghi một character.
 - `write(char[] cbuf)`: ghi character array `cbuf`, tương đương `write(cbuf, 0, cbuf.length)`.
-- `write(char[] cbuf, int off, int len)`: bổ sung tham số `off` (offset) và tham số `len` (số character tối đa cần đọc) trên cơ sở `write(char[] cbuf)`.
+- `write(char[] cbuf, int off, int len)`: bổ sung tham số `off` (offset) và tham số `len` (số character tối đa cần ghi) trên cơ sở `write(char[] cbuf)`.
 - `write(String str)`: ghi string, tương đương `write(str, 0, str.length())`.
-- `write(String str, int off, int len)`: bổ sung tham số `off` (offset) và tham số `len` (số character tối đa cần đọc) trên cơ sở `write(String str)`.
+- `write(String str, int off, int len)`: bổ sung tham số `off` (offset) và tham số `len` (số character tối đa cần ghi) trên cơ sở `write(String str)`.
 - `append(CharSequence csq)`: append character sequence chỉ định vào `Writer` chỉ định và trả về `Writer` đó.
 - `append(char c)`: append character chỉ định vào `Writer` chỉ định và trả về `Writer` đó.
-- `flush()`: flush output stream này và buộc ghi ra toàn bộ output character đang buffered.
+- `flush()`: flush output stream và buộc ghi ra toàn bộ character output đang buffered.
 - `close()`: đóng output stream và giải phóng các system resource liên quan.
 
 `OutputStreamWriter` là bridge chuyển character stream thành byte stream; subclass `FileWriter` là wrapper dựa trên class này, có thể ghi character trực tiếp vào file.
@@ -286,27 +286,27 @@ Kết quả output:
 
 ## Byte buffered stream
 
-Thao tác IO rất tốn performance. Buffered stream load dữ liệu vào buffer, đọc/ghi nhiều byte trong một lần, từ đó tránh thao tác IO thường xuyên và nâng cao throughput của stream.
+Thao tác IO rất tốn performance. Buffered stream nạp dữ liệu vào buffer, đọc/ghi nhiều byte trong một lần, từ đó tránh thao tác IO thường xuyên và nâng cao throughput của stream.
 
-Byte buffered stream sử dụng decorator pattern để enhance chức năng của các subclass `InputStream` và `OutputStream`.
+Byte buffered stream sử dụng decorator pattern để bổ sung chức năng cho các subclass `InputStream` và `OutputStream`.
 
-Ví dụ, có thể dùng `BufferedInputStream` (byte buffered input stream) để enhance chức năng của `FileInputStream`.
+Ví dụ, có thể dùng `BufferedInputStream` (byte buffered input stream) để bổ sung chức năng cho `FileInputStream`.
 
 ```java
 // Tạo một object BufferedInputStream
 BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream("input.txt"));
 ```
 
-Chênh lệch performance giữa byte stream và byte buffered stream chủ yếu thể hiện khi sử dụng cả hai với hai method mỗi lần chỉ đọc một byte là `write(int b)` và `read()`. Vì byte buffered stream có buffer (byte array) bên trong, byte buffered stream trước hết lưu byte đã đọc vào buffer, giảm đáng kể số lần IO và nâng cao hiệu suất đọc.
+Chênh lệch performance giữa byte stream và byte buffered stream chủ yếu thể hiện khi sử dụng cả hai với hai method mỗi lần chỉ xử lý một byte là `write(int b)` và `read()`. Vì byte buffered stream có buffer (byte array) bên trong, nó trước hết lưu byte đã đọc vào buffer, giảm đáng kể số lần IO và nâng cao hiệu suất đọc.
 
-Tôi dùng các method `write(int b)` và `read()` để copy một PDF file `524.9 mb`, lần lượt qua byte stream và byte buffered stream, thời gian tiêu tốn như sau:
+Tôi dùng các method `write(int b)` và `read()` để copy một PDF file `524.9 mb`, lần lượt qua byte stream và byte buffered stream; thời gian tiêu tốn như sau:
 
 ```plain
 Tổng thời gian copy PDF file bằng buffered stream:15428 milliseconds
 Tổng thời gian copy PDF file bằng byte stream thông thường:2555062 milliseconds
 ```
 
-Chênh lệch thời gian của hai bên rất lớn; thời gian của buffered stream bằng 1/165 byte stream.
+Chênh lệch thời gian của hai bên rất lớn; thời gian của buffered stream chỉ bằng 1/165 thời gian của byte stream.
 
 Code test như sau:
 
@@ -348,9 +348,9 @@ void copy_pdf_to_another_pdf_stream() {
 }
 ```
 
-Nếu gọi hai method ghi vào một byte array là `read(byte b[])` và `write(byte b[], int off, int len)`, chỉ cần kích thước byte array phù hợp thì chênh lệch performance giữa hai bên thực ra không lớn, về cơ bản có thể bỏ qua.
+Nếu dùng hai method làm việc với byte array là `read(byte b[])` và `write(byte b[], int off, int len)`, chỉ cần kích thước byte array phù hợp thì chênh lệch performance giữa hai bên thực ra không lớn, về cơ bản có thể bỏ qua.
 
-Lần này chúng ta dùng các method `read(byte b[])` và `write(byte b[], int off, int len)`, lần lượt qua byte stream và byte buffered stream để copy một PDF file 524.9 mb; thời gian tiêu tốn như sau:
+Lần này chúng ta dùng các method `read(byte b[])` và `write(byte b[], int off, int len)`, lần lượt qua byte stream và byte buffered stream để copy một PDF file `524.9 mb`; thời gian tiêu tốn như sau:
 
 ```plain
 Tổng thời gian copy PDF file bằng buffered stream:695 milliseconds
@@ -410,7 +410,7 @@ Trong quá trình `BufferedInputStream` đọc dữ liệu (thông tin dạng by
 ```java
 public
 class BufferedInputStream extends FilterInputStream {
-    // Internal buffer array
+    // Array làm internal buffer
     protected volatile byte buf[];
     // Kích thước mặc định của buffer
     private static int DEFAULT_BUFFER_SIZE = 8192;
@@ -433,7 +433,7 @@ Kích thước buffer mặc định là **8192** byte. Dĩ nhiên, có thể dù
 
 ### BufferedOutputStream (byte buffered output stream)
 
-Trong quá trình `BufferedOutputStream` ghi dữ liệu (thông tin dạng byte) vào destination (thường là file), nó không ghi từng byte một mà trước hết lưu byte cần ghi vào buffer, rồi ghi riêng từng byte từ internal buffer. Nhờ đó giảm đáng kể số lần IO và nâng cao hiệu suất.
+Trong quá trình `BufferedOutputStream` ghi dữ liệu (thông tin dạng byte) vào destination (thường là file), nó không ghi từng byte một mà trước hết lưu byte cần ghi vào buffer, rồi ghi dữ liệu từ internal buffer. Nhờ đó giảm đáng kể số lần IO và nâng cao hiệu suất.
 
 ```java
 try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream("output.txt"))) {
@@ -448,7 +448,7 @@ Tương tự `BufferedInputStream`, bên trong `BufferedOutputStream` cũng duy 
 
 ## Character buffered stream
 
-`BufferedReader` (character buffered input stream) và `BufferedWriter` (character buffered output stream) tương tự `BufferedInputStream` (byte buffered input stream) và `BufferedOutputStream` (byte buffered output stream), nhưng class trước duy trì character buffer bên trong để thao tác với thông tin dạng character.
+`BufferedReader` (character buffered input stream) và `BufferedWriter` (character buffered output stream) tương tự `BufferedInputStream` (byte buffered input stream) và `BufferedOutputStream` (byte buffered output stream), nhưng hai class này duy trì character buffer bên trong để thao tác với thông tin dạng character.
 
 ## Print stream
 
@@ -459,7 +459,7 @@ System.out.print("Hello!");
 System.out.println("Hello!");
 ```
 
-`System.out` thực tế dùng để lấy một object `PrintStream`; method `print` thực tế gọi method `write` của object `PrintStream`.
+`System.out` thực chất là một object `PrintStream`; method `print` thực tế gọi method `write` của object `PrintStream`.
 
 `PrintStream` là byte print stream, class tương ứng là `PrintWriter` (character print stream). `PrintStream` là subclass của `OutputStream`, còn `PrintWriter` là subclass của `Writer`.
 
@@ -473,7 +473,7 @@ public class PrintWriter extends Writer {
 
 ## Random access stream
 
-Random access stream được giới thiệu ở đây là `RandomAccessFile`, hỗ trợ tùy ý jump đến mọi vị trí trong file để đọc ghi.
+Random access stream được giới thiệu ở đây là `RandomAccessFile`, hỗ trợ nhảy tùy ý đến mọi vị trí trong file để đọc và ghi.
 
 Constructor của `RandomAccessFile` như sau; có thể chỉ định `mode` (read/write mode).
 
@@ -493,10 +493,10 @@ Có bốn read/write mode chính:
 
 - `r`: read-only mode.
 - `rw`: read/write mode.
-- `rws`: so với `rw`, `rws` đồng bộ cập nhật thay đổi đối với "file content" hoặc "metadata" vào external storage device.
-- `rwd`: so với `rw`, `rwd` đồng bộ cập nhật thay đổi đối với "file content" vào external storage device.
+- `rws`: so với `rw`, `rws` đồng bộ các thay đổi đối với "file content" hoặc "metadata" với external storage device.
+- `rwd`: so với `rw`, `rwd` đồng bộ các thay đổi đối với "file content" với external storage device.
 
-File content là dữ liệu thực tế được lưu trong file; metadata dùng để mô tả thuộc tính file, chẳng hạn kích thước, thời điểm tạo và sửa đổi.
+Nội dung file là dữ liệu thực tế được lưu trong file; metadata dùng để mô tả thuộc tính file, chẳng hạn kích thước, thời điểm tạo và sửa đổi.
 
 Trong `RandomAccessFile` có một file pointer biểu thị vị trí của byte tiếp theo sẽ được ghi hoặc đọc. Có thể dùng method `seek(long pos)` của `RandomAccessFile` để đặt offset của file pointer (vị trí cách đầu file `pos` byte). Nếu muốn lấy vị trí hiện tại của file pointer, có thể dùng method `getFilePointer()`.
 
@@ -529,7 +529,7 @@ Offset trước khi đọc: 0, character đọc được hiện tại: A, offset
 
 Nội dung `input.txt` trở thành `ABCDEFGHIJK`.
 
-Method `write` của `RandomAccessFile` sẽ overwrite dữ liệu nếu vị trí tương ứng đã có data khi ghi object.
+Method `write` của `RandomAccessFile` sẽ overwrite dữ liệu tại vị trí tương ứng nếu vị trí đó đã có data.
 
 ```java
 RandomAccessFile randomAccessFile = new RandomAccessFile(new File("input.txt"), "rw");
@@ -538,7 +538,7 @@ randomAccessFile.write(new byte[]{'H', 'I', 'J', 'K'});
 
 Giả sử trước khi chạy chương trình trên, nội dung file `input.txt` là `ABCD`; sau khi chạy, nội dung sẽ trở thành `HIJK`.
 
-Một application khá phổ biến của `RandomAccessFile` là implement **resumable upload** cho file lớn. Resumable upload là gì? Nói đơn giản, sau khi upload file bị pause hoặc fail giữa chừng (chẳng hạn gặp vấn đề network), không cần upload lại từ đầu mà chỉ cần upload các file chunk chưa upload thành công. Upload theo chunk (trước hết chia file thành nhiều file chunk) là nền tảng của resumable upload.
+Một application khá phổ biến của `RandomAccessFile` là implement **resumable upload** cho file lớn. Resumable upload là gì? Nói đơn giản, sau khi upload file bị pause hoặc fail giữa chừng (chẳng hạn gặp vấn đề network), không cần upload lại từ đầu mà chỉ cần upload các chunk chưa upload thành công. Upload theo chunk (trước hết chia file thành nhiều chunk) là nền tảng của resumable upload.
 
 `RandomAccessFile` có thể giúp merge các file chunk; code ví dụ như sau:
 
@@ -548,6 +548,6 @@ Tôi đã giới thiệu chi tiết vấn đề upload file lớn trong [《Java
 
 ![](https://oss.javaguide.cn/github/javaguide/java/image-20220428104115362.png)
 
-Implementation của `RandomAccessFile` phụ thuộc vào `FileDescriptor` (file descriptor) và `FileChannel` (memory-mapped file).
+Implementation của `RandomAccessFile` phụ thuộc vào `FileDescriptor` (file descriptor) và `FileChannel` (file mapping).
 
 <!-- @include: @article-footer.snippet.md -->

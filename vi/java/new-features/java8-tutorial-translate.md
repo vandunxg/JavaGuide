@@ -54,7 +54,7 @@ interface Formula{
 }
 ```
 
-Ngoài abstract method `calculate` dùng để tính công thức của interface, interface `Formula` còn định nghĩa default method `sqrt`. Class triển khai interface này chỉ cần triển khai abstract method `calculate`. Có thể sử dụng trực tiếp default method `sqrt`. Bạn cũng có thể trực tiếp tạo đối tượng thông qua interface rồi triển khai các default method trong interface. Hãy xem cách này qua code:
+Ngoài abstract method `calculate` dùng để tính công thức của interface, interface `Formula` còn định nghĩa default method `sqrt`. Class triển khai interface này chỉ cần triển khai abstract method `calculate`. Có thể sử dụng trực tiếp default method `sqrt`. Bạn cũng có thể dùng interface để tạo một anonymous object rồi triển khai các method cần thiết. Hãy xem cách này qua code:
 
 ```java
 public class Main {
@@ -76,9 +76,9 @@ public class Main {
 }
 ```
 
-`formula` được triển khai dưới dạng anonymous object. Code này rất dễ hiểu: chỉ 6 dòng code đã thực hiện phép tính `sqrt(a * 100)`. Ở phần tiếp theo, chúng ta sẽ thấy trong Java 8 có một cách tốt và tiện lợi hơn để triển khai object chỉ có một method.
+`formula` được triển khai dưới dạng anonymous object. Code này rất dễ hiểu: chỉ 6 dòng code đã thực hiện phép tính `sqrt(a * 100)`. Ở phần tiếp theo, chúng ta sẽ thấy trong Java 8 có một cách tốt và tiện lợi hơn để triển khai một object chỉ cần một method.
 
-**Ghi chú của người dịch:** Dù là abstract class hay interface, bạn đều có thể truy cập thông qua anonymous inner class. Không thể trực tiếp tạo object từ abstract class hoặc interface. Với cách truy cập interface thông qua anonymous inner class ở trên, có thể hiểu như sau: một inner class triển khai abstract method trong interface và trả về một object của inner class, sau đó reference của interface trỏ đến object này.
+**Ghi chú của người dịch:** Dù là abstract class hay interface, bạn đều có thể tạo object thông qua anonymous inner class. Không thể trực tiếp tạo object từ abstract class hoặc interface. Với cách dùng interface thông qua anonymous inner class ở trên, có thể hiểu như sau: một inner class triển khai abstract method trong interface và trả về một object của inner class, sau đó reference của interface trỏ đến object này.
 
 ## Lambda expression (Lambda expressions)
 
@@ -123,7 +123,7 @@ Bản thân class List đã có method `sort`. Ngoài ra, Java compiler có th�
 
 **Ghi chú của người dịch:** Phần giải thích trong bản gốc chưa thật rõ ràng nên đã được chỉnh sửa!
 
-Các nhà thiết kế ngôn ngữ Java đã dành nhiều công sức để tìm cách hỗ trợ Lambda thân thiện cho các function hiện có. Cuối cùng, họ đưa ra khái niệm functional interface. **Functional interface là interface chỉ chứa duy nhất một abstract method, nhưng có thể có nhiều method không abstract (tức default method được nói ở trên).** Những interface như vậy có thể làm target type của lambda expression. `java.lang.Runnable` và `java.util.concurrent.Callable` là hai ví dụ điển hình về functional interface. Java 8 bổ sung annotation đặc biệt `@FunctionalInterface`, nhưng annotation này thường không bắt buộc. Chỉ cần interface thỏa định nghĩa functional interface, Java compiler có thể dùng nó làm target type của lambda expression. Thông thường nên khai báo annotation `@FunctionalInterface` trên interface. Khi compiler phát hiện interface được đánh dấu không đáp ứng yêu cầu của functional interface, compiler sẽ báo lỗi như hình dưới đây.
+Các nhà thiết kế ngôn ngữ Java đã dành nhiều công sức để tìm cách hỗ trợ Lambda cho các hàm hiện có một cách thuận tiện. Cuối cùng, họ đưa ra khái niệm functional interface. **Functional interface là interface chỉ chứa duy nhất một abstract method, nhưng có thể có nhiều method không abstract (tức default method được nói ở trên).** Những interface như vậy có thể làm target type của lambda expression. `java.lang.Runnable` và `java.util.concurrent.Callable` là hai ví dụ điển hình về functional interface. Java 8 bổ sung annotation đặc biệt `@FunctionalInterface`, nhưng annotation này thường không bắt buộc. Chỉ cần interface thỏa định nghĩa functional interface, Java compiler có thể dùng nó làm target type của lambda expression. Thông thường nên khai báo annotation `@FunctionalInterface` trên interface. Khi compiler phát hiện interface được đánh dấu không đáp ứng yêu cầu của functional interface, compiler sẽ báo lỗi như hình dưới đây.
 
 ![Annotation @FunctionalInterface](https://oss.javaguide.cn/github/javaguide/java/@FunctionalInterface.png)
 
@@ -196,7 +196,7 @@ interface PersonFactory<P extends Person> {
 }
 ```
 
-Thay vì tự triển khai một factory hoàn chỉnh, ta liên kết chúng bằng constructor reference:
+Thay vì tự triển khai một factory hoàn chỉnh, ta liên kết factory interface với constructor bằng constructor reference:
 
 ```java
 PersonFactory<Person> personFactory = Person::new;
@@ -205,7 +205,7 @@ Person person = personFactory.create("Peter", "Parker");
 
 Chỉ cần dùng `Person::new` để lấy reference đến constructor của class Person. Java compiler sẽ tự chọn constructor phù hợp dựa trên kiểu tham số của method `PersonFactory.create`.
 
-## Scope của lambda expression (Lambda Scopes)
+## Phạm vi của lambda expression (Lambda Scopes)
 
 ### Truy cập local variable
 
@@ -229,13 +229,13 @@ Converter<Integer, String> stringConverter =
 stringConverter.convert(2);     // 3
 ```
 
-Tuy vậy, `num` không được sửa bởi code phía sau (tức là ngầm mang ngữ nghĩa `final`). Ví dụ dưới đây sẽ không compile:
+Tuy vậy, `num` không được sửa trong phần code sau đó (tức là ngầm mang ngữ nghĩa `final`). Ví dụ dưới đây sẽ không compile:
 
 ```java
 int num = 1;
 Converter<Integer, String> stringConverter =
         (from) -> String.valueOf(from + num);
-num = 3;//Không được phép cố sửa num trong lambda expression.
+num = 3;//Không được phép sửa num sau khi lambda expression đã sử dụng biến này.
 ```
 
 ### Truy cập field và static variable
@@ -273,7 +273,7 @@ Formula formula = (a) -> sqrt(a * 100);
 
 ## Functional interface tích hợp sẵn (Built-in Functional Interfaces)
 
-API JDK 1.8 chứa nhiều functional interface tích hợp sẵn. Một số interface vốn đã phổ biến trong các phiên bản Java cũ như `Comparator` hoặc `Runnable` cũng được bổ sung annotation `@FunctionalInterface` để có thể dùng trong lambda expression.
+API JDK 1.8 chứa nhiều functional interface tích hợp sẵn. Một số interface vốn đã phổ biến trong các phiên bản Java cũ như `Comparator` hoặc `Runnable` cũng phù hợp để dùng với lambda expression và được bổ sung annotation `@FunctionalInterface`.
 
 Tuy nhiên, Java 8 API cũng cung cấp nhiều functional interface hoàn toàn mới để giúp công việc lập trình thuận tiện hơn. Một số interface bắt nguồn từ thư viện [Google Guava](https://code.google.com/p/guava-libraries/). Dù đã quen thuộc với các interface này, bạn vẫn nên xem cách chúng được mở rộng để dùng với lambda.
 
@@ -290,7 +290,7 @@ import java.util.Objects;
 @FunctionalInterface
 public interface Predicate<T> {
 
-    // Method này nhận một kiểu đầu vào và trả về giá trị boolean, dùng để đánh giá.
+    // Method này nhận một giá trị đầu vào và trả về giá trị boolean, dùng để đánh giá.
     boolean test(T t);
 
     // Method and tương tự toán tử quan hệ "&&", chỉ trả về true khi cả hai vế đều đúng.
@@ -307,7 +307,7 @@ public interface Predicate<T> {
         Objects.requireNonNull(other);
         return (t) -> test(t) || other.test(t);
     }
-   // Method này nhận một object Object và trả về kiểu Predicate, dùng để kiểm tra method test thứ nhất có giống (equal) method test thứ hai hay không.
+   // Method này nhận một object và trả về Predicate để kiểm tra object đầu vào có bằng targetRef hay không.
     static <T> Predicate<T> isEqual(Object targetRef) {
         return (null == targetRef)
                 ? Objects::isNull
@@ -447,7 +447,7 @@ Java 8 mở rộng các collection class, cho phép tạo Stream thông qua `Col
 
 ### Filter (lọc)
 
-Filter lọc thông qua một interface predicate và chỉ giữ lại các phần tử thỏa điều kiện. Đây là **intermediate operation**, vì vậy có thể áp dụng các thao tác Stream khác lên kết quả sau khi lọc (chẳng hạn `forEach`). `forEach` cần một function để thực hiện lần lượt trên các phần tử đã lọc. `forEach` là terminal operation, nên không thể thực hiện thao tác Stream khác sau `forEach`.
+Filter lọc thông qua một `Predicate` interface và chỉ giữ lại các phần tử thỏa điều kiện. Đây là **intermediate operation**, vì vậy có thể áp dụng các thao tác Stream khác lên kết quả sau khi lọc (chẳng hạn `forEach`). `forEach` cần một function để thực hiện lần lượt trên các phần tử đã lọc. `forEach` là terminal operation, nên không thể thực hiện thao tác Stream khác sau `forEach`.
 
 ```java
         // Kiểm thử Filter (lọc)
@@ -536,7 +536,7 @@ Stream cung cấp nhiều thao tác match, cho phép kiểm tra Predicate đã c
 
 ### Reduce (rút gọn)
 
-Đây là một **terminal operation**, cho phép rút gọn nhiều phần tử trong stream thành một phần tử thông qua function được chỉ định. Kết quả sau khi rút gọn được biểu diễn bằng interface Optional:
+Đây là một **terminal operation**, cho phép rút gọn nhiều phần tử trong Stream thành một phần tử thông qua function được chỉ định. Kết quả sau khi rút gọn được biểu diễn bằng interface Optional:
 
 ```java
         Optional<String> reduced =
@@ -630,7 +630,7 @@ Hai đoạn code trên gần như giống nhau, nhưng phiên bản song song nh
 
 ## Map
 
-Như đã nói ở trên, kiểu Map không hỗ trợ stream, nhưng Map cung cấp một số method mới hữu ích để xử lý các tác vụ thường ngày. Bản thân interface Map không có method `stream()` để sử dụng, nhưng bạn có thể tạo stream riêng trên key, value hoặc thông qua `map.keySet().stream()`, `map.values().stream()` và `map.entrySet().stream()`.
+Như đã nói ở trên, kiểu Map không hỗ trợ stream trực tiếp, nhưng Map cung cấp một số method mới hữu ích để xử lý các tác vụ thường ngày. Bản thân interface Map không có method `stream()` để sử dụng, nhưng bạn có thể tạo stream riêng trên key, value hoặc thông qua `map.keySet().stream()`, `map.values().stream()` và `map.entrySet().stream()`.
 
 Ngoài ra, Map hỗ trợ nhiều method mới và hữu ích để thực hiện các tác vụ phổ biến.
 
@@ -644,7 +644,7 @@ for (int i = 0; i < 10; i++) {
 map.forEach((id, val) -> System.out.println(val));//val0 val1 val2 val3 val4 val5 val6 val7 val8 val9
 ```
 
-`putIfAbsent` ngăn chúng ta phải viết thêm code khi kiểm tra null; `forEach` nhận một consumer để thao tác trên từng phần tử trong map.
+`putIfAbsent` ngăn chúng ta phải viết thêm code khi kiểm tra null; `forEach` nhận một `Consumer` để thao tác trên từng phần tử trong map.
 
 Ví dụ này cho thấy cách dùng function để tính toán trên map:
 
@@ -688,9 +688,9 @@ map.get(9);             // val9concat
 
 `merge` sẽ chèn nếu key chưa tồn tại; nếu đã tồn tại, method thực hiện merge trên value tương ứng với key cũ rồi chèn lại vào map.
 
-## Date API (API liên quan đến ngày tháng)
+## Date/Time API (API liên quan đến ngày tháng)
 
-Java 8 chứa một Date và Time API hoàn toàn mới trong package `java.time`. Date API mới tương tự thư viện Joda-Time, nhưng hai bên không giống nhau. Các ví dụ sau bao quát những phần quan trọng nhất của API mới. Người dịch đã tham khảo các tài liệu liên quan và chỉnh sửa phần lớn nội dung này.
+Java 8 chứa một Date/Time API hoàn toàn mới trong package `java.time`. Date/Time API mới tương tự thư viện Joda-Time, nhưng hai bên không giống nhau. Các ví dụ sau bao quát những phần quan trọng nhất của API mới. Người dịch đã tham khảo các tài liệu liên quan và chỉnh sửa phần lớn nội dung này.
 
 **Ghi chú của người dịch (tổng hợp):**
 
@@ -698,7 +698,7 @@ Java 8 chứa một Date và Time API hoàn toàn mới trong package `java.time
 
 - Trong API mới, timezone được biểu diễn bằng ZoneId. Có thể dễ dàng lấy timezone bằng static method `of`. Abstract class `ZoneId` (trong package `java.time`) biểu diễn một zone identifier. Class này có static method `getAvailableZoneIds`, trả về tất cả zone identifier.
 
-- JDK 1.8 bổ sung các class như LocalDate và LocalDateTime để xử lý ngày tháng, đồng thời bổ sung class mới DateTimeFormatter để giải quyết vấn đề format ngày tháng. Có thể dùng Instant thay cho Date, LocalDateTime thay cho Calendar và DateTimeFormatter thay cho SimpleDateFormat.
+- JDK 1.8 bổ sung các class như LocalDate và LocalDateTime để xử lý ngày tháng, đồng thời bổ sung class mới DateTimeFormatter để giải quyết vấn đề định dạng ngày tháng. Có thể dùng Instant thay cho Date, LocalDateTime thay cho Calendar và DateTimeFormatter thay cho SimpleDateFormat.
 
 ### Clock
 
@@ -714,7 +714,7 @@ Date legacyDate = Date.from(instant); //2019-03-12T08:46:42.588Z
 System.out.println(legacyDate);//Tue Mar 12 16:32:59 CST 2019
 ```
 
-### Timezone (timezone)
+### Timezones (múi giờ)
 
 Trong API mới, timezone được biểu diễn bằng ZoneId. Có thể dễ dàng lấy timezone bằng static method `of`. Abstract class `ZoneId` (trong package `java.time`) biểu diễn một zone identifier. Class này có static method `getAvailableZoneIds`, trả về tất cả zone identifier.
 
@@ -744,7 +744,7 @@ System.out.println(hoursBetween);       // -3
 System.out.println(minutesBetween);     // -239
 ```
 
-LocalTime cung cấp nhiều factory method để đơn giản hóa việc tạo object, bao gồm parse chuỗi thời gian.
+LocalTime cung cấp nhiều factory method để đơn giản hóa việc tạo object, bao gồm việc parse chuỗi thời gian.
 
 ```java
 LocalTime late = LocalTime.of(23, 59, 59);
@@ -760,40 +760,40 @@ System.out.println(leetTime);   // 13:37
 
 ### LocalDate (ngày địa phương)
 
-LocalDate biểu diễn một ngày cụ thể, chẳng hạn 2014-03-11. Giá trị của object này là immutable và cách sử dụng gần giống LocalTime. Ví dụ dưới đây cho thấy cách cộng trừ ngày, tháng và năm cho object Date. Cũng cần lưu ý rằng các object này immutable, thao tác luôn trả về một instance mới.
+LocalDate biểu diễn một ngày cụ thể, chẳng hạn 2014-03-11. Giá trị của object này là immutable và cách sử dụng gần giống LocalTime. Ví dụ dưới đây cho thấy cách cộng trừ ngày, tháng và năm cho object LocalDate. Cũng cần lưu ý rằng các object này immutable, thao tác luôn trả về một instance mới.
 
 ```java
 LocalDate today = LocalDate.now();// Lấy ngày hiện tại
-System.out.println("Today's date: " + today);//2019-03-12
+System.out.println("Ngày hôm nay: " + today);//2019-03-12
 LocalDate tomorrow = today.plus(1, ChronoUnit.DAYS);
-System.out.println("Tomorrow's date: " + tomorrow);//2019-03-13
+System.out.println("Ngày mai: " + tomorrow);//2019-03-13
 LocalDate yesterday = tomorrow.minusDays(2);
-System.out.println("Yesterday's date: " + yesterday);//2019-03-11
+System.out.println("Ngày hôm qua: " + yesterday);//2019-03-11
 LocalDate independenceDay = LocalDate.of(2019, Month.MARCH, 12);
 DayOfWeek dayOfWeek = independenceDay.getDayOfWeek();
-System.out.println("Today's day of week: " + dayOfWeek);//TUESDAY
+System.out.println("Hôm nay là thứ: " + dayOfWeek);//TUESDAY
 ```
 
-Parse một LocalDate từ chuỗi cũng đơn giản như parse LocalTime. Dưới đây là ví dụ dùng `DateTimeFormatter` để parse chuỗi:
+Việc parse một LocalDate từ chuỗi cũng đơn giản như parse LocalTime. Dưới đây là ví dụ dùng `DateTimeFormatter` để parse chuỗi:
 
 ```java
-    String str1 = "2014==04==12 01 giờ 06 phút 09 giây";
+    String str1 = "2014==04==12 01h06m09s";
         // Định nghĩa formatter dùng để parse theo chuỗi ngày và giờ cần parse
         DateTimeFormatter fomatter1 = DateTimeFormatter
-                .ofPattern("yyyy==MM==dd HH giờ mm phút ss giây");
+                .ofPattern("yyyy==MM==dd HH'h'mm'm'ss's'");
 
         LocalDateTime dt1 = LocalDateTime.parse(str1, fomatter1);
         System.out.println(dt1); // In 2014-04-12T01:06:09
 
-        String str2 = "2014$$$Tháng tư$$$13 20 giờ";
+        String str2 = "2014$$$Apr$$$13 20h";
         DateTimeFormatter fomatter2 = DateTimeFormatter
-                .ofPattern("yyy$$$MMM$$$dd HH giờ");
+                .ofPattern("yyy$$$MMM$$$dd HH'h'", Locale.ENGLISH);
         LocalDateTime dt2 = LocalDateTime.parse(str2, fomatter2);
         System.out.println(dt2); // In 2014-04-13T20:00
 
 ```
 
-Tiếp theo là một ví dụ sử dụng `DateTimeFormatter` để format ngày:
+Tiếp theo là một ví dụ sử dụng `DateTimeFormatter` để định dạng ngày:
 
 ```java
 LocalDateTime rightNow=LocalDateTime.now();
@@ -853,7 +853,7 @@ Date legacyDate = Date.from(instant);
 System.out.println(legacyDate);     // Wed Dec 31 23:59:59 CET 2014
 ```
 
-Format LocalDateTime cũng giống format thời gian và ngày tháng. Ngoài các format được định nghĩa sẵn, chúng ta cũng có thể tự định nghĩa format:
+Định dạng LocalDateTime cũng giống định dạng thời gian và ngày tháng. Ngoài các format được định nghĩa sẵn, chúng ta cũng có thể tự định nghĩa format:
 
 ```java
 DateTimeFormatter formatter =

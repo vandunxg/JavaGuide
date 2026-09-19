@@ -1,6 +1,6 @@
 ---
 title: "Tổng quan tính năng mới của Java 26"
-description: "Tổng quan các tính năng mới quan trọng và thay đổi preview của JDK 26, tập trung vào HTTP/3, tối ưu performance của GC, AOT cache và cải tiến ngôn ngữ/nền tảng."
+description: "Tổng quan các tính năng mới quan trọng và thay đổi đang ở preview của JDK 26, tập trung vào HTTP/3, tối ưu performance GC, AOT cache và cải tiến ngôn ngữ/nền tảng."
 category: Java
 tag:
   - Java New Features
@@ -15,14 +15,14 @@ JDK 26 được phát hành vào ngày 17 tháng 3 năm 2026, đây là một ph
 JDK 26 có tổng cộng 10 tính năng mới. Bài viết này sẽ chọn một số tính năng mới quan trọng để giới thiệu chi tiết:
 
 - [JEP 517: HTTP/3 for the HTTP Client API (Thêm hỗ trợ HTTP/3 cho HTTP Client API)](https://openjdk.org/jeps/517)
-- [JEP 522: G1 GC: Improve Throughput by Reducing Synchronization (Tối ưu throughput của G1 GC)](https://openjdk.org/jeps/522)
+- [JEP 522: G1 GC: Improve Throughput by Reducing Synchronization (Tăng throughput của G1 GC bằng cách giảm synchronization)](https://openjdk.org/jeps/522)
 - [JEP 516: Ahead-of-Time Object Caching with Any GC (AOT object cache hỗ trợ mọi GC)](https://openjdk.org/jeps/516)
 - [JEP 500: Prepare to Make Final Mean Final (Chuẩn bị làm cho final thực sự immutable)](https://openjdk.org/jeps/500)
 - [JEP 526: Lazy Constants (Lazy Constants, preview lần hai)](https://openjdk.org/jeps/526)
 - [JEP 525: Structured Concurrency (Structured Concurrency, preview lần sáu)](https://openjdk.org/jeps/525)
 - [JEP 530: Primitive Types in Patterns, instanceof, and switch (Pattern matching hỗ trợ primitive type, preview lần bốn)](https://openjdk.org/jeps/530)
 - [JEP 524: PEM Encodings of Cryptographic Objects (PEM encoding cho cryptographic object, preview lần hai)](https://openjdk.org/jeps/524)
-- [JEP 529: Vector API (Vector API, incubator lần mười một)](https://openjdk.org/jeps/529)
+- [JEP 529: Vector API (Vector API, incubator lần thứ mười một)](https://openjdk.org/jeps/529)
 - [JEP 504: Remove the Applet API (Loại bỏ Applet API)](https://openjdk.org/jeps/504)
 
 Hình dưới đây cho biết số lượng tính năng mới và thời điểm cập nhật của từng phiên bản từ JDK 8 đến JDK 25:
@@ -36,7 +36,7 @@ JDK 26 chính thức thêm hỗ trợ **HTTP/3** cho API `java.net.http.HttpClie
 **Ưu điểm của HTTP/3**:
 
 - **Dựa trên giao thức QUIC**: HTTP/2 được triển khai dựa trên giao thức TCP, còn HTTP/3 bổ sung giao thức QUIC (Quick UDP Internet Connections) để truyền dữ liệu đáng tin cậy, cung cấp mức bảo mật tương đương TLS/SSL và có latency kết nối, truyền tải thấp hơn. Có thể xem QUIC là phiên bản nâng cấp của UDP, bổ sung nhiều tính năng như encryption, retransmission, v.v.
-- **Loại bỏ head-of-line blocking**: HTTP/2 multiplex nhiều request trên một kết nối TCP. Khi xảy ra mất gói, tất cả HTTP request sẽ bị block. Nhờ đặc tính của QUIC, HTTP/3 giải quyết được phần nào vấn đề head-of-line blocking (Head-of-Line blocking, viết tắt: HOL blocking): một kết nối tạo nhiều data stream khác nhau, khi một data stream mất gói thì các data stream khác không bị ảnh hưởng.
+- **Loại bỏ head-of-line blocking**: HTTP/2 multiplex nhiều request trên một kết nối TCP. Khi xảy ra mất gói, tất cả HTTP request sẽ bị block. Nhờ đặc tính của QUIC, HTTP/3 giải quyết được phần nào vấn đề head-of-line blocking (Head-of-Line blocking, viết tắt: HOL blocking): một kết nối có thể thiết lập nhiều data stream độc lập; khi một data stream mất gói, các data stream khác không bị ảnh hưởng.
 - **Thiết lập kết nối nhanh hơn**: HTTP/2 cần trải qua quy trình TCP three-way handshake kinh điển (do thiết lập kết nối HTTPS an toàn còn cần TLS handshake, tổng cộng cần khoảng 3 RTT). Nhờ đặc tính của QUIC (TLS 1.3 hỗ trợ handshake 1 RTT và 0 RTT), việc thiết lập kết nối chỉ cần 0-RTT hoặc 1-RTT. Điều này có nghĩa là trong trường hợp tốt nhất, QUIC không cần thêm round trip time nào để thiết lập kết nối mới.
 - **Trải nghiệm mobile tốt hơn**: HTTP/3 hỗ trợ connection migration dựa trên kết nối QUIC. QUIC dùng connection ID có độ dài thay đổi do endpoint chọn để định danh và route kết nối, connection ID cũng có thể thay đổi trong khi kết nối; sau khi xử lý path validation, thay đổi địa chỉ mạng (chẳng hạn chuyển từ Wi-Fi sang mobile data) không cần thiết lập lại toàn bộ kết nối như khi TCP four-tuple thay đổi.
 
@@ -76,40 +76,40 @@ HttpRequest request = HttpRequest.newBuilder(URI.create("https://javaguide.cn/")
                          .GET().build();
 ```
 
-## JEP 522: Tối ưu throughput của G1 GC
+## JEP 522: Tăng throughput của G1 GC bằng cách giảm synchronization
 
-**Từ JDK 9, G1 garbage collector trở thành garbage collector mặc định.** Nó tìm cách cân bằng giữa latency và throughput. Tuy nhiên, sự cân bằng này đôi khi ảnh hưởng đến performance của application. So với Parallel GC hướng tới throughput, G1 làm việc concurrent với application nhiều hơn để giảm thời gian GC pause. Điều này có nghĩa là application thread phải chia sẻ CPU và phối hợp với GC thread, sự synchronization này làm giảm throughput và tăng latency.
+**Từ JDK 9, G1 trở thành garbage collector mặc định.** Nó tìm cách cân bằng giữa latency và throughput. Tuy nhiên, sự cân bằng này đôi khi ảnh hưởng đến performance của application. So với Parallel GC hướng tới throughput, G1 làm việc concurrent với application nhiều hơn để giảm thời gian GC pause. Điều này có nghĩa là application thread phải chia sẻ CPU và phối hợp với GC thread, việc synchronization này làm giảm throughput và tăng latency.
 
-JEP 522 giới thiệu cơ chế **double card table (Card Table)**:
+JEP 522 giới thiệu cơ chế **hai card table (Card Table)**:
 
 1. **Card table thứ nhất**: write barrier của application thread không cần synchronization khi cập nhật card table này, giúp code của write barrier đơn giản và nhanh hơn.
-2. **Card table thứ hai**: optimizer thread xử lý song song card table ban đầu rỗng này ở background.
+2. **Card table thứ hai**: optimizer thread xử lý song song card table ban đầu rỗng này trong background.
 
-Khi G1 phát hiện việc scan card table thứ nhất có thể vượt quá mục tiêu pause time, nó sẽ atomically swap hai card table. Application thread tiếp tục cập nhật card table rỗng, vốn là card table thứ hai ban đầu; optimizer thread xử lý card table đầy, vốn là card table thứ nhất ban đầu, mà không cần synchronization thêm.
+Khi G1 phát hiện việc scan card table thứ nhất có thể vượt quá mục tiêu pause time, nó sẽ atomically swap hai card table. Application thread tiếp tục cập nhật card table rỗng (card table thứ hai ban đầu), còn optimizer thread xử lý card table đầy (card table thứ nhất ban đầu), không cần synchronization thêm.
 
-**Hiệu quả performance**:
+**Cải thiện performance**:
 
 - Trong application **thường xuyên sửa object reference field**, throughput tăng **5-15%**
 - Ngay cả application không thường xuyên sửa reference field cũng có thể tăng throughput tối đa **5%** nhờ write barrier được đơn giản hóa (trên x64 giảm từ khoảng 50 instruction xuống chỉ còn 12)
 - GC pause time cũng **giảm nhẹ**
 
-**Memory overhead**:
+**Overhead bộ nhớ**:
 
-Card table thứ hai có cùng capacity với card table thứ nhất. Mỗi card table cần 0,2% dung lượng Java heap, tức mỗi 1GB heap sẽ dùng thêm khoảng 2MB native memory.
+Card table thứ hai có cùng kích thước với card table thứ nhất. Mỗi card table cần 0,2% dung lượng Java heap, tức mỗi 1GB heap sẽ dùng thêm khoảng 2MB native memory.
 
 ## JEP 516: AOT object cache hỗ trợ mọi GC
 
-Đây là một milestone quan trọng của **Project Leyden**, cho phép AOT object cache hoạt động với **mọi garbage collector**.
+Đây là một cột mốc quan trọng của **Project Leyden**, cho phép AOT object cache hoạt động với **mọi garbage collector**.
 
 AOT class data sharing (JEP 483) được giới thiệu trước đó trong JDK 24 chỉ hỗ trợ G1 garbage collector, không thể kết hợp với các GC khác như ZGC. Nguyên nhân là object reference được lưu trong AOT cache sử dụng physical memory address, trong khi memory layout và chiến lược di chuyển object của các GC khác nhau.
 
 JEP 516 thay đổi cách lưu object reference từ **physical memory address** sang **logical index**:
 
-- Lưu cache bằng streaming format không phụ thuộc GC
-- Cache có thể được bất kỳ GC nào load và parse tại runtime
+- Lưu cache ở streaming format không phụ thuộc GC
+- Bất kỳ GC nào cũng có thể load và parse cache tại runtime
 - JVM chuyển logical index thành memory address thực tế khi load
 
-**Lợi ích performance**:
+**Lợi ích về performance**:
 
 - **Tối ưu startup time**: giảm đáng kể cold start time của Java application
 - **Hỗ trợ ZGC**: ZGC có latency thấp giờ đây cũng có thể hưởng lợi từ việc tăng tốc startup nhờ AOT cache
@@ -144,21 +144,21 @@ field.set(example, "Modified");  // Mặc định JDK 26 sẽ thành công và p
 System.out.println(example.getName());  // In ra "Modified"
 ```
 
-Mặc dù capability này được một số framework sử dụng (chẳng hạn serialization library, dependency injection framework và test tool), nó phá vỡ guarantee về tính immutable của `final` và cản trở compiler optimization.
+Mặc dù khả năng này được một số framework sử dụng (chẳng hạn serialization library, dependency injection framework và test tool), nó phá vỡ bảo đảm về tính immutable của `final` và cản trở compiler optimization.
 
 Trong JDK 26, khi sửa field `final` thông qua deep reflection, JVM sẽ **phát cảnh báo**. Đây là bước chuẩn bị cho việc mặc định cấm thao tác này trong các phiên bản tương lai.
 
-Với các trường hợp thực sự cần sửa field `final`, JDK 26 cung cấp cơ chế lựa chọn tường minh, cho phép developer tiếp tục sử dụng capability này trong giai đoạn chuyển tiếp, đồng thời chuẩn bị cho strict mode trong tương lai.
+Với các trường hợp thực sự cần sửa field `final`, JDK 26 cung cấp cơ chế lựa chọn rõ ràng, cho phép developer tiếp tục sử dụng khả năng này trong giai đoạn chuyển tiếp, đồng thời chuẩn bị cho strict mode trong tương lai.
 
 ## JEP 526: Lazy Constants (preview lần hai)
 
-Tính năng này lần đầu được preview trong JDK 25 với [JEP 502: Stable Values (preview)](https://openjdk.org/jeps/502); JEP 526 của JDK 26 đổi tên API thành Lazy Constants và preview lần thứ hai.
+Tính năng này được preview lần đầu trong JDK 25 với [JEP 502: Stable Values (preview)](https://openjdk.org/jeps/502); JEP 526 của JDK 26 đổi tên API thành Lazy Constants và tiến hành preview lần thứ hai.
 
 Field `static final` truyền thống thường được khởi tạo ngay khi class initialization, điều này sẽ:
 
 - Tăng startup time.
 - Lãng phí memory nếu constant đó chưa từng được sử dụng.
-- Cần các lazy initialization pattern phức tạp (chẳng hạn double-checked locking, Holder class pattern).
+- Cần các pattern lazy initialization phức tạp (chẳng hạn double-checked locking, Holder class pattern).
 
 JEP 526 giới thiệu `LazyConstant<T>`, một object chứa immutable data. JVM xem object này như một constant thực sự để đạt performance tương đương field khai báo là `final`.
 
@@ -177,7 +177,7 @@ ExpensiveObject obj = LAZY.get();  // Lúc này mới khởi tạo
 **Ưu điểm**:
 
 - **Khởi tạo theo nhu cầu**: chỉ khởi tạo khi truy cập lần đầu, cải thiện startup performance.
-- **Thread-safe**: tích hợp sẵn guarantee về thread safety, không cần tự synchronization.
+- **Thread-safe**: có sẵn guarantee về thread safety, không cần tự synchronization.
 - **JVM optimization**: JVM có thể tối ưu lazy constant như field `final`.
 - **Đơn giản hóa code**: loại bỏ các lazy initialization pattern phức tạp như double-checked locking.
 
@@ -185,9 +185,9 @@ ExpensiveObject obj = LAZY.get();  // Lúc này mới khởi tạo
 
 JDK 19 giới thiệu Structured Concurrency dưới dạng incubator API. Trong JDK 26, API này ở preview lần thứ sáu, nhằm đơn giản hóa lập trình multi-thread, không nhằm thay thế `java.util.concurrent`.
 
-Structured Concurrency xem nhiều task chạy trong các thread khác nhau như một work unit duy nhất, từ đó đơn giản hóa error handling, tăng reliability và cải thiện observability. Nói cách khác, Structured Concurrency giữ lại readability, maintainability và observability của code single-thread.
+Structured Concurrency xem nhiều task chạy trong các thread khác nhau như một work unit, từ đó đơn giản hóa error handling, tăng reliability và cải thiện observability. Nói cách khác, Structured Concurrency giữ lại readability, maintainability và observability của code single-thread.
 
-API cơ bản của Structured Concurrency là `StructuredTaskScope`. API này hỗ trợ chia task thành nhiều concurrent subtask, thực thi chúng trong thread riêng, và subtask phải hoàn thành trước khi main/parent task tiếp tục hoặc bị cancel khi main/parent task fail.
+API cơ bản của Structured Concurrency là `StructuredTaskScope`. API này hỗ trợ chia task thành nhiều concurrent subtask, thực thi chúng trong thread riêng. Các subtask phải hoàn thành trước khi main/parent task tiếp tục và sẽ bị cancel nếu main/parent task fail.
 
 Cách sử dụng cơ bản của `StructuredTaskScope`:
 
@@ -231,7 +231,7 @@ JDK 26 tiếp tục cải tiến tính năng này:
 - Cải tiến định nghĩa về unconditional exactness.
 - Áp dụng kiểm tra dominance nghiêm ngặt hơn trong cấu trúc `switch`, giúp compiler nhận biết và giảm nhiều lỗi code hơn.
 
-Nhờ đó, có thể type matching và conversion primitive type an toàn, ngắn gọn hơn như với object type, tiếp tục loại bỏ boilerplate code trong Java.
+Nhờ đó, có thể thực hiện type matching và conversion đối với primitive type an toàn, ngắn gọn hơn như với object type, tiếp tục loại bỏ boilerplate code trong Java.
 
 ## JEP 524: PEM encoding cho cryptographic object (preview lần hai)
 
@@ -254,7 +254,7 @@ PrivateKey decodedKey = PEMDecoder.of().decode(pemEncoded, PrivateKey.class);
 
 API này giảm rủi ro lỗi, đơn giản hóa yêu cầu compliance, đồng thời cải thiện portability và interoperability của Java application an toàn bằng cách đơn giản hóa việc thiết lập và tích hợp encryption cho nhu cầu enterprise, cloud và regulatory.
 
-## JEP 529: Vector API (Vector API, incubator lần mười một)
+## JEP 529: Vector API (incubator lần thứ mười một)
 
 Vector computation gồm một chuỗi operation trên vector. Vector API dùng để biểu đạt vector computation. Tại runtime, computation này có thể được compile đáng tin cậy thành vector instruction tối ưu trên CPU architecture được hỗ trợ, từ đó đạt performance tốt hơn scalar computation tương đương.
 
@@ -297,7 +297,7 @@ Dù vẫn đang ở giai đoạn incubator, iteration lần thứ mười một 
 
 ## JEP 504: Loại bỏ Applet API
 
-Applet API được đánh dấu deprecated trong JDK 9 và được đánh dấu sắp bị loại bỏ trong JDK 17. Trong JDK 26, Applet API cuối cùng đã được **loại bỏ hoàn toàn**.
+Applet API được đánh dấu deprecated trong JDK 9 và được đánh dấu sắp bị loại bỏ trong JDK 17. Trong JDK 26, Applet API cuối cùng đã được **loại bỏ hoàn toàn**. Đây là một thay đổi đáng mừng!
 
 Điều này có nghĩa là:
 
@@ -316,8 +316,8 @@ Dù JDK 26 là một phiên bản không phải LTS, nó vẫn có một số t�
 | **Network**     | Hỗ trợ HTTP/3                                                                              |
 | **Performance** | Tối ưu throughput của G1 GC, AOT cache hỗ trợ mọi GC                                       |
 | **Language**    | Pattern matching hỗ trợ primitive type (preview lần bốn), Lazy Constants (preview lần hai) |
-| **Concurrency** | Structured Concurrency (preview lần sáu), Vector API (incubator lần mười một)              |
+| **Concurrency** | Structured Concurrency (preview lần sáu), Vector API (incubator lần thứ mười một)          |
 | **Security**    | Làm cho final thực sự immutable, hỗ trợ PEM encoding                                       |
 | **Cleanup**     | Loại bỏ Applet API                                                                         |
 
-Oracle sẽ cung cấp update đến tháng 9 năm 2026, sau đó phiên bản này sẽ được thay thế bởi Oracle JDK 27.
+Oracle sẽ cung cấp các bản cập nhật đến tháng 9 năm 2026, sau đó phiên bản này sẽ được thay thế bởi Oracle JDK 27.

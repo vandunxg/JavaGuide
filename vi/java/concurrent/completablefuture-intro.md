@@ -208,7 +208,7 @@ CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> "hello!"
 assertEquals("hello!", future2.get());
 ```
 
-### Xử lý kết quả hoàn tất bất đồng bộ
+### Xử lý kết quả của task bất đồng bộ
 
 Sau khi lấy được kết quả tính toán bất đồng bộ, ta còn có thể xử lý tiếp. Một số method thường dùng:
 
@@ -220,7 +220,7 @@ Sau khi lấy được kết quả tính toán bất đồng bộ, ta còn có t
 Method `thenApply()` nhận một instance `Function` để xử lý kết quả.
 
 ```java
-// Callback không bất đồng bộ: có thể do thread hoàn tất stage trước đó thực thi; nếu stage đã hoàn tất, cũng có thể do thread đang gọi hiện tại thực thi
+// Callback đồng bộ: có thể do thread hoàn tất stage trước đó thực thi; nếu stage đã hoàn tất, cũng có thể do thread đang gọi hiện tại thực thi
 public <U> CompletableFuture<U> thenApply(
     Function<? super T,? extends U> fn) {
     return uniApplyStage(null, fn);
@@ -249,7 +249,7 @@ future.thenApply(s -> s + "nice!");
 assertEquals("hello!world!", future.get());
 ```
 
-Bạn cũng có thể gọi **theo chain**:
+Bạn cũng có thể gọi **theo chuỗi**:
 
 ```java
 CompletableFuture<String> future = CompletableFuture.completedFuture("hello!")
@@ -257,7 +257,7 @@ CompletableFuture<String> future = CompletableFuture.completedFuture("hello!")
 assertEquals("hello!world!nice!", future.get());
 ```
 
-**Nếu không cần lấy kết quả trả về từ callback function, bạn có thể dùng `thenAccept()` hoặc `thenRun()`. Điểm khác nhau giữa hai method này là `thenRun()` không thể truy cập kết quả tính toán bất đồng bộ.**
+**Nếu không cần lấy kết quả trả về từ callback, bạn có thể dùng `thenAccept()` hoặc `thenRun()`. Điểm khác nhau giữa hai method này là `thenRun()` không thể truy cập kết quả tính toán bất đồng bộ.**
 
 Tham số của method `thenAccept()` là `Consumer<? super T>`.
 
@@ -276,7 +276,7 @@ public CompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action,
 }
 ```
 
-Đúng như tên gọi, `Consumer` là interface kiểu consumer, có thể nhận một object input rồi thực hiện "tiêu thụ" object đó.
+Đúng như tên gọi, `Consumer` là interface dùng để xử lý dữ liệu: nó có thể nhận một input object rồi xử lý object đó.
 
 ```java
 @FunctionalInterface
@@ -338,7 +338,7 @@ public CompletableFuture<T> whenCompleteAsync(
 }
 ```
 
-So với `Consumer`, `BiConsumer` có thể nhận 2 object input rồi thực hiện "tiêu thụ" chúng.
+So với `Consumer`, `BiConsumer` có thể nhận 2 input object rồi xử lý chúng.
 
 ```java
 @FunctionalInterface
@@ -372,7 +372,7 @@ assertEquals("hello!", future.get());
 
 ### Xử lý exception
 
-Bạn có thể dùng method `handle()` để xử lý trường hợp có thể phát sinh exception trong quá trình thực thi task.
+Bạn có thể dùng method `handle()` để xử lý exception phát sinh trong quá trình thực thi task.
 
 ```java
 public <U> CompletableFuture<U> handle(
@@ -424,7 +424,7 @@ CompletableFuture<String> future
 assertEquals("world!", future.get());
 ```
 
-Nếu muốn kết quả của `CompletableFuture` chính là exception, bạn có thể dùng method `completeExceptionally()` để gán giá trị cho nó.
+Nếu muốn `CompletableFuture` hoàn tất bất thường, bạn có thể dùng method `completeExceptionally()` để hoàn tất nó với exception.
 
 ```java
 CompletableFuture<String> completableFuture = new CompletableFuture<>();
@@ -484,7 +484,7 @@ assertEquals("hello!world!nice!", completableFuture.get());
 - `thenCompose()` có thể nối hai object `CompletableFuture` và dùng kết quả trả về của task trước làm tham số cho task sau, giữa chúng tồn tại thứ tự trước sau.
 - `thenCombine()` sẽ hợp nhất kết quả của hai stage sau khi cả hai stage đều hoàn tất bình thường. Hai stage có thể độc lập với nhau, nhưng có thực thi song song hay không phụ thuộc vào cách tạo chúng và executor được sử dụng; bản thân `thenCombine()` không chịu trách nhiệm khởi động task.
 
-Ngoài `thenCompose()` và `thenCombine()`, còn có một số method khác để kết hợp `CompletableFuture` nhằm tạo ra các hiệu quả khác nhau, đáp ứng các nhu cầu nghiệp vụ khác nhau.
+Ngoài `thenCompose()` và `thenCombine()`, còn có một số method khác để kết hợp `CompletableFuture` nhằm đạt các hiệu quả khác nhau, đáp ứng các nhu cầu nghiệp vụ khác nhau.
 
 Ví dụ, khi task1 và task2 đều hoàn tất bình thường, có thể dùng `acceptEither()` để task3 nhận kết quả của task hoàn tất trước trong hai task. Cần lưu ý rằng method này không phải selector đáng tin cậy cho "kết quả thành công đầu tiên": chỉ cần một trong hai stage hoàn tất bất thường, kết quả của stage trả về sẽ tuân theo quy tắc exception của `CompletionStage` đối với tổ hợp either.
 
@@ -500,7 +500,7 @@ public CompletableFuture<Void> acceptEitherAsync(
 }
 ```
 
-Một ví dụ đơn giản:
+Ví dụ đơn giản:
 
 ```java
 CompletableFuture<String> task = CompletableFuture.supplyAsync(() -> {
@@ -538,7 +538,7 @@ try {
 }
 ```
 
-Output:
+Kết quả:
 
 ```plain
 Task 1 bắt đầu thực thi, thời gian hiện tại: 1695088058520
@@ -559,7 +559,7 @@ Trong dự án thực tế, ta thường cần chạy song song nhiều task kh�
 
 Ví dụ, ta cần đọc và xử lý 6 file. 6 task này không có sự phụ thuộc về thứ tự thực thi, nhưng khi trả về cho người dùng, ta cần thống kê và tổng hợp kết quả xử lý của các file. Trong trường hợp này, ta có thể dùng nhiều `CompletableFuture` chạy song song để xử lý.
 
-Code ví dụ:
+Ví dụ:
 
 ```java
 CompletableFuture<Void> task1 =
@@ -582,7 +582,7 @@ CompletableFuture<Void> task6 =
 System.out.println("all done. ");
 ```
 
-Method thường được đem ra so sánh với `allOf()` là `anyOf()`.
+Method thường được so sánh với `allOf()` là `anyOf()`.
 
 **Method `allOf()` sẽ chờ tất cả `CompletableFuture` thực thi xong rồi mới trả về.**
 
@@ -634,7 +634,7 @@ CompletableFuture<Object> f = CompletableFuture.anyOf(future1, future2);
 System.out.println(f.get());
 ```
 
-Output có thể là:
+Kết quả có thể là:
 
 ```plain
 future2 hoàn tất...
@@ -662,7 +662,7 @@ Mặc dù `ForkJoinPool` có hiệu suất rất cao, khi đồng thời submit 
 
 - **Tính cô lập**: phân bổ thread pool riêng cho các task khác nhau, tránh tranh chấp tài nguyên của thread pool toàn cục.
 - **Kiểm soát tài nguyên**: điều chỉnh kích thước thread pool và kiểu queue theo đặc tính của task để tối ưu performance.
-- **Xử lý exception**: xử lý tốt hơn các exception trong thread thông qua custom `ThreadFactory`.
+- **Xử lý exception**: xử lý tốt hơn các exception trong thread thông qua `ThreadFactory` tùy chỉnh.
 
 ```java
 private ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 10,
@@ -726,7 +726,7 @@ Trong thực tế sử dụng, ta cũng có thể sử dụng hoặc tham khảo
 Bài viết này chỉ giới thiệu đơn giản các khái niệm cốt lõi và một số API thường dùng của `CompletableFuture`. Nếu muốn học sâu hơn, bạn cũng có thể tìm đọc thêm một số sách và blog; chẳng hạn, một vài bài viết dưới đây khá hữu ích:
 
 - [Nguyên lý và thực tiễn CompletableFuture - Bất đồng bộ hóa API phía merchant giao đồ ăn - Đội ngũ kỹ thuật Meituan](https://tech.meituan.com/2022/05/12/principles-and-practices-of-completablefuture.html): bài viết này giới thiệu chi tiết việc sử dụng `CompletableFuture` trong dự án thực tế. Tham khảo bài viết này, bạn có thể tối ưu các trường hợp tương tự trong dự án, đây cũng có thể xem là một điểm cộng nhỏ. Cách tối ưu performance này tương đối đơn giản mà hiệu quả cũng khá tốt!
-- [Đọc source code RocketMQ, học ba công cụ lớn của lập trình concurrent - Chia sẻ thực chiến Java của Yong Ge](https://mp.weixin.qq.com/s/32Ak-WFLynQfpn0Cg0N-0A): bài viết này giới thiệu ứng dụng `CompletableFuture` trong RocketMQ. Cụ thể, từ RocketMQ 4.7, RocketMQ đã đưa `CompletableFuture` vào để thực hiện xử lý message bất đồng bộ.
+- [Đọc source code RocketMQ, học ba công cụ đắc lực trong lập trình concurrent - Chia sẻ thực chiến Java của Yong Ge](https://mp.weixin.qq.com/s/32Ak-WFLynQfpn0Cg0N-0A): bài viết này giới thiệu ứng dụng `CompletableFuture` trong RocketMQ. Cụ thể, từ RocketMQ 4.7, RocketMQ đã đưa `CompletableFuture` vào để thực hiện xử lý message bất đồng bộ.
 
 Ngoài ra, các bạn G cũng nên xem framework concurrent [asyncTool](https://gitee.com/jd-platform-opensource/asyncTool) của JD, trong đó sử dụng rất nhiều `CompletableFuture`.
 

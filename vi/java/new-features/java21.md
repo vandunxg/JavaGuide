@@ -1,6 +1,6 @@
 ---
-title: "Tính năng mới trong Java 21 (JDK 21): virtual thread, Generational ZGC và Sequenced Collections"
-description: "Giải thích chi tiết các tính năng mới trong Java 21 (JDK 21), bao gồm virtual thread, Generational ZGC, Sequenced Collections, record pattern, pattern matching cho switch và chu kỳ hỗ trợ LTS, đồng thời giới thiệu tính năng String Templates dạng preview đã bị rút lại."
+title: "Tính năng mới của Java 21 (JDK 21): virtual thread, Generational ZGC và Sequenced Collections"
+description: "Giải thích chi tiết các tính năng mới của Java 21 (JDK 21), bao gồm virtual thread, Generational ZGC, Sequenced Collections, record pattern, pattern matching cho switch và chu kỳ hỗ trợ LTS, đồng thời giải thích về tính năng String Templates dạng preview đã bị rút lại."
 category: Java
 tag:
   - Java New Features
@@ -16,9 +16,9 @@ Theo lộ trình hỗ trợ Java SE được Oracle cập nhật vào tháng 4 n
 
 JDK 21 có tổng cộng 15 tính năng mới. Bài viết này sẽ chọn một số tính năng mới quan trọng để giới thiệu chi tiết:
 
-- [JEP 430: String Templates](https://openjdk.org/jeps/430) (String Templates) (preview)
-- [JEP 431: Sequenced Collections](https://openjdk.org/jeps/431) (Sequenced Collections)
-- [JEP 439: Generational ZGC](https://openjdk.org/jeps/439) (Generational ZGC)
+- [JEP 430: String Templates](https://openjdk.org/jeps/430) (preview)
+- [JEP 431: Sequenced Collections](https://openjdk.org/jeps/431)
+- [JEP 439: Generational ZGC](https://openjdk.org/jeps/439)
 - [JEP 440: Record Patterns](https://openjdk.org/jeps/440) (record pattern)
 - [JEP 441: Pattern Matching for switch](https://openjdk.org/jeps/441) (pattern matching cho switch)
 - [JEP 442: Foreign Function & Memory API](https://openjdk.org/jeps/442) (Foreign Function & Memory API) (preview lần thứ ba)
@@ -36,7 +36,7 @@ Hình dưới đây cho biết số lượng tính năng mới và thời điể
 
 String Templates là tính năng preview trong JDK 21. Tính năng này được preview lần thứ hai trong JDK 22, sau đó bị rút lại, vì vậy JDK hiện tại không còn cung cấp API và syntax này.
 
-String Templates cung cấp một cách ngắn gọn, trực quan hơn để xây dựng string động. Syntax preview của JDK 21 sử dụng `\{expression}` làm embedded expression và để template processor xử lý template. Expression hỗ trợ local variable, field static hoặc non-static, method call và kết quả tính toán.
+String Templates cung cấp một cách ngắn gọn, trực quan hơn để xây dựng string động. Syntax preview của JDK 21 sử dụng `\{expression}` làm expression nhúng và để template processor xử lý template. Expression hỗ trợ local variable, field static hoặc non-static, method call và kết quả tính toán.
 
 Trên thực tế, String Templates tồn tại trong hầu hết ngôn ngữ lập trình:
 
@@ -47,7 +47,7 @@ $"Greetings { name }!"    //Visual basic
 f"Greetings { name }!"    //Python
 ```
 
-Trước khi Java có String Templates, chúng ta thường dùng string concatenation hoặc phương thức format để xây dựng string:
+Trước khi Java có String Templates, chúng ta thường dùng phép nối string hoặc phương thức format để xây dựng string:
 
 ```java
 //concatenation
@@ -71,7 +71,7 @@ Java sử dụng String Templates để nối string, cho phép nhúng expressio
 String message = STR."Greetings \{name}!";
 ```
 
-Trong template expression ở trên:
+Trong template expression trên:
 
 - STR là template processor.
 - `\{name}` là expression; khi runtime, các expression này sẽ được thay thế bằng giá trị của variable tương ứng.
@@ -96,9 +96,9 @@ StringTemplate st = RAW."Greetings \{name}.";
 String message = STR.process(st);
 ```
 
-Ngoài ba template processor có sẵn trong JDK, bạn còn có thể triển khai interface `StringTemplate.Processor` để tạo template processor riêng, chỉ cần kế thừa interface `StringTemplate.Processor`, sau đó triển khai method `process`.
+Ngoài ba template processor có sẵn trong JDK, bạn còn có thể triển khai interface `StringTemplate.Processor` để tạo template processor riêng bằng cách triển khai method `process`.
 
-Chúng ta có thể dùng local variable, field static/non-static hoặc thậm chí method làm embedded expression:
+Chúng ta có thể dùng local variable, field static/non-static hoặc thậm chí method làm expression nhúng:
 
 ```java
 //variable
@@ -118,7 +118,7 @@ int x = 10, y = 20;
 String s = STR."\{x} + \{y} = \{x + y}";  //"10 + 20 = 30"
 ```
 
-Để tăng khả năng đọc, chúng ta có thể tách embedded expression thành nhiều dòng:
+Để tăng khả năng đọc, chúng ta có thể tách expression nhúng thành nhiều dòng:
 
 ```java
 String time = STR."The current time is \{
@@ -129,9 +129,9 @@ String time = STR."The current time is \{
   }.";
 ```
 
-## JEP 431: Sequenced Collections (Sequenced Collections)
+## JEP 431: Sequenced Collections (collection có thứ tự)
 
-JDK 21 giới thiệu một nhóm interface collection mới: **Sequenced Collections**. Các collection này có thứ tự duyệt xác định (encounter order), đồng thời cung cấp method truy cập phần tử đầu và cuối collection cũng như lấy reverse view.
+JDK 21 giới thiệu một nhóm interface collection mới: **Sequenced Collections**. Các collection này có thứ tự duyệt xác định (encounter order), đồng thời cung cấp method để truy cập phần tử ở đầu và cuối collection cũng như lấy reverse view.
 
 Sequenced Collections gồm ba interface sau:
 
@@ -163,7 +163,7 @@ interface SequencedCollection<E> extends Collection<E> {
 
 Interface `List` và `Deque` kế thừa interface `SequencedCollection`.
 
-Dưới đây dùng `ArrayList` để minh họa hiệu quả sử dụng thực tế:
+Dưới đây dùng `ArrayList` để minh họa cách sử dụng thực tế:
 
 ```java
 ArrayList<Integer> arrayList = new ArrayList<>();
@@ -191,7 +191,7 @@ interface SequencedSet<E> extends SequencedCollection<E>, Set<E> {
 
 Interface `SortedSet` kế thừa interface `SequencedSet`, còn `LinkedHashSet` triển khai interface `SequencedSet`.
 
-Dưới đây dùng `LinkedHashSet` để minh họa hiệu quả sử dụng thực tế:
+Dưới đây dùng `LinkedHashSet` để minh họa cách sử dụng thực tế:
 
 ```java
 LinkedHashSet<Integer> linkedHashSet = new LinkedHashSet<>(List.of(1, 2, 3));
@@ -234,7 +234,7 @@ interface SequencedMap<K,V> extends Map<K,V> {
 
 Interface `SortedMap` kế thừa interface `SequencedMap`, còn `LinkedHashMap` triển khai interface `SequencedMap`.
 
-Dưới đây dùng `LinkedHashMap` để minh họa hiệu quả sử dụng thực tế:
+Dưới đây dùng `LinkedHashMap` để minh họa cách sử dụng thực tế:
 
 ```java
 LinkedHashMap<Integer, String> map = new LinkedHashMap<>();
@@ -262,32 +262,32 @@ System.out.println(map.reversed());   //{3=Three, 2=Two, 1=One}
 
 ## JEP 439: Generational ZGC (Generational ZGC)
 
-Trong JDK 21, ZGC được mở rộng tính năng và bổ sung chức năng Generational GC. Tuy nhiên, chức năng này mặc định bị tắt và cần được bật bằng cấu hình:
+Trong JDK 21, ZGC được mở rộng và bổ sung tính năng Generational GC. Tuy nhiên, tính năng này mặc định bị tắt và cần được bật bằng cấu hình:
 
 ```bash
 // Bật Generational ZGC
 java -XX:+UseZGC -XX:+ZGenerational ...
 ```
 
-Trong các phiên bản tương lai, official sẽ đặt ZGenerational làm giá trị mặc định, tức mặc định bật Generational GC của ZGC. Ở các phiên bản xa hơn, non-generational ZGC sẽ bị loại bỏ.
+Trong các phiên bản tương lai, ZGenerational sẽ được đặt làm giá trị mặc định, tức Generational GC của ZGC sẽ được bật mặc định. Ở các phiên bản xa hơn, non-generational ZGC sẽ bị loại bỏ.
 
 > In a future release we intend to make Generational ZGC the default, at which point -XX:-ZGenerational will select non-generational ZGC. In an even later release we intend to remove non-generational ZGC, at which point the ZGenerational option will become obsolete.
 >
-> Trong một phiên bản tương lai, chúng tôi dự định đặt Generational ZGC làm tùy chọn mặc định. Khi đó, -XX:-ZGenerational sẽ chọn non-generational ZGC. Ở một phiên bản xa hơn, chúng tôi dự định loại bỏ non-generational ZGC. Khi đó, tùy chọn ZGenerational sẽ trở nên obsolete.
+> Trong một phiên bản tương lai, chúng tôi dự định đặt Generational ZGC làm tùy chọn mặc định. Khi đó, -XX:-ZGenerational sẽ chọn non-generational ZGC. Ở một phiên bản xa hơn, chúng tôi dự định loại bỏ non-generational ZGC. Khi đó, tùy chọn ZGenerational sẽ không còn cần thiết.
 
-Trong khi vẫn duy trì mục tiêu pause thấp của ZGC, Generational ZGC chủ yếu giảm rủi ro pause do allocation, giảm heap memory cần thiết và tăng throughput bằng cách thu hồi young object thường xuyên hơn.
+Trong khi vẫn duy trì mục tiêu thời gian pause ngắn của ZGC, Generational ZGC chủ yếu giảm rủi ro bị pause khi allocation, giảm lượng heap memory cần thiết và tăng throughput bằng cách thu hồi young object thường xuyên hơn.
 
 ## JEP 440: Record Patterns (record pattern)
 
-Record pattern được preview lần đầu trong Java 19, do [JEP 405](https://openjdk.org/jeps/405) đề xuất. Trong JDK 20, đây là preview lần thứ hai, do [JEP 432](https://openjdk.org/jeps/432) đề xuất. Cuối cùng, record pattern đã chính thức trở thành tính năng trong JDK 21.
+Record pattern được preview lần đầu trong Java 19, do [JEP 405](https://openjdk.org/jeps/405) đề xuất. Trong JDK 20, đây là preview lần thứ hai, do [JEP 432](https://openjdk.org/jeps/432) đề xuất. Cuối cùng, record pattern đã trở thành tính năng chính thức trong JDK 21.
 
 [Tổng quan tính năng mới trong Java 20](./java20.md) đã giới thiệu chi tiết về record pattern, nên phần này không lặp lại.
 
 ## JEP 441: Pattern Matching for switch (pattern matching cho switch)
 
-Tăng cường expression và statement `switch` trong Java, cho phép sử dụng pattern trong case label. Khi pattern match, code tương ứng với case label sẽ được thực thi.
+JEP này mở rộng expression và statement `switch` trong Java, cho phép sử dụng pattern trong case label. Khi pattern match, code tương ứng với case label sẽ được thực thi.
 
-Trong code dưới đây, expression `switch` sử dụng type pattern để match.
+Trong code dưới đây, expression `switch` sử dụng type pattern để thực hiện matching.
 
 ```java
 static String formatterPatternSwitch(Object obj) {
@@ -301,17 +301,17 @@ static String formatterPatternSwitch(Object obj) {
 }
 ```
 
-## JEP 442: Foreign Function & Memory API (Foreign Function & Memory API, preview lần thứ ba)
+## JEP 442: Foreign Function & Memory API (preview lần thứ ba)
 
-Java program có thể sử dụng API này để tương tác với code và data bên ngoài Java runtime. Bằng cách gọi hiệu quả external function (tức code bên ngoài JVM) và truy cập an toàn external memory (tức memory không do JVM quản lý), API này cho phép Java program gọi native library và xử lý native data mà không nguy hiểm và mong manh như JNI.
+Chương trình Java có thể sử dụng API này để tương tác với code và data bên ngoài Java runtime. Bằng cách gọi hiệu quả external function (tức code bên ngoài JVM) và truy cập an toàn external memory (tức memory không do JVM quản lý), API này cho phép chương trình Java gọi native library và xử lý native data mà không gặp những rủi ro và hạn chế về độ ổn định như JNI.
 
 Foreign Function & Memory API trải qua vòng incubator đầu tiên trong Java 17, do [JEP 412](https://openjdk.java.net/jeps/412) đề xuất. Trong Java 18, API trải qua vòng incubator thứ hai, do [JEP 419](https://openjdk.org/jeps/419) đề xuất. Trong Java 19, đây là preview lần đầu, do [JEP 424](https://openjdk.org/jeps/424) đề xuất. Trong JDK 20, đây là preview lần thứ hai, do [JEP 434](https://openjdk.org/jeps/434) đề xuất. Trong JDK 21, đây là preview lần thứ ba, do [JEP 442](https://openjdk.org/jeps/442) đề xuất.
 
-Trong [Tổng quan tính năng mới trong Java 19](./java19.md), tôi đã giới thiệu chi tiết về Foreign Function & Memory API, nên phần này không giới thiệu thêm.
+Trong [Tổng quan tính năng mới trong Java 19](./java19.md) đã giới thiệu chi tiết về Foreign Function & Memory API, nên phần này không giới thiệu thêm.
 
 ## JEP 443: Unnamed Patterns and Variables (unnamed pattern và variable, preview)
 
-Unnamed pattern và variable cho phép dùng dấu gạch dưới `_` để biểu thị variable không tên và component không được sử dụng trong pattern matching, nhằm tăng khả năng đọc và bảo trì code.
+Unnamed pattern và variable cho phép dùng dấu gạch dưới `_` để biểu thị variable không được đặt tên và component không được sử dụng trong pattern matching, nhằm tăng khả năng đọc và bảo trì code.
 
 Trường hợp điển hình của unnamed variable là statement `try-with-resources`, exception variable trong mệnh đề `catch` và vòng lặp `for`. Khi không cần sử dụng variable, có thể dùng dấu gạch dưới `_` thay thế để biểu thị rõ variable không được sử dụng.
 
@@ -342,15 +342,15 @@ switch (b) {
 
 ## JEP 444: Virtual Threads (virtual thread)
 
-Virtual thread là một cập nhật lớn, cần đặc biệt chú ý!
+Virtual thread là một cập nhật quan trọng, cần đặc biệt chú ý!
 
-Virtual thread được preview lần đầu trong Java 19, do [JEP 425](https://openjdk.org/jeps/425) đề xuất. Trong JDK 20, đây là preview lần thứ hai. Cuối cùng, virtual thread đã chính thức trở thành tính năng trong JDK 21.
+Virtual thread được preview lần đầu trong Java 19, do [JEP 425](https://openjdk.org/jeps/425) đề xuất. Trong JDK 20, đây là preview lần thứ hai. Cuối cùng, virtual thread đã trở thành tính năng chính thức trong JDK 21.
 
 [Tổng quan tính năng mới trong Java 20](./java20.md) đã giới thiệu chi tiết về virtual thread, nên phần này không lặp lại.
 
 ## JEP 445: Unnamed Classes and Instance Main Methods (unnamed class và instance main method, preview)
 
-Tính năng này chủ yếu đơn giản hóa khai báo method `main`. Với người mới học Java, khai báo method `main` này đưa vào quá nhiều khái niệm syntax của Java, không thuận lợi cho việc nhanh chóng làm quen.
+Tính năng này chủ yếu đơn giản hóa khai báo method `main`. Với người mới học Java, khai báo method `main` này đòi hỏi phải nắm quá nhiều khái niệm syntax của Java, không thuận lợi cho việc nhanh chóng làm quen.
 
 Định nghĩa method `main` trước khi sử dụng tính năng này:
 
@@ -372,7 +372,7 @@ class HelloWorld {
 }
 ```
 
-Tinh giản hơn nữa (unnamed class cho phép không định nghĩa tên class):
+Tinh giản hơn nữa (unnamed class cho phép không cần khai báo tên class):
 
 ```java
 void main() {

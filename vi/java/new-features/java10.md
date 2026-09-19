@@ -19,14 +19,14 @@ Hình dưới đây thể hiện số lượng tính năng mới và thời đi�
 Bài viết này sẽ chọn một số tính năng mới quan trọng để giới thiệu chi tiết:
 
 - [JEP 286: Local-Variable Type Inference (Suy luận kiểu biến cục bộ)](https://openjdk.org/jeps/286)
-- [JEP 304: Garbage-Collector Interface (Interface garbage collector)](https://openjdk.org/jeps/304)
+- [JEP 304: Garbage-Collector Interface (Interface cho garbage collector)](https://openjdk.org/jeps/304)
 - [JEP 307: Parallel Full GC for G1 (Full GC song song cho G1)](https://openjdk.org/jeps/307)
-- [JEP 310: Application Class-Data Sharing (Chia sẻ dữ liệu class của ứng dụng)](https://openjdk.org/jeps/310)
+- [JEP 310: Application Class-Data Sharing (Chia sẻ dữ liệu class ứng dụng)](https://openjdk.org/jeps/310)
 - [JEP 317: Experimental Java-Based JIT Compiler (JIT compiler thử nghiệm dựa trên Java)](https://openjdk.org/jeps/317)
 
 ## JEP 286: Local-Variable Type Inference
 
-Vì quá nhiều Java developer mong muốn Java hỗ trợ suy luận kiểu biến cục bộ, nên tính năng này đã xuất hiện trong Java 10, có thể nói là đáp ứng mong đợi của số đông!
+Do nhiều Java developer mong muốn Java hỗ trợ suy luận kiểu biến cục bộ, tính năng này đã xuất hiện trong Java 10, có thể nói là đáp ứng mong đợi của số đông!
 
 Java 10 cung cấp keyword `var` để khai báo biến cục bộ.
 
@@ -52,23 +52,23 @@ var array = {1, 2, 3};//❌Không thể biên dịch, không thể khai báo arr
 
 `var` không làm thay đổi sự thật rằng Java là một ngôn ngữ kiểu tĩnh; compiler chịu trách nhiệm suy luận kiểu.
 
-Ngoài ra, Scala và Kotlin đã có keyword `val` (`final var`, một tổ hợp keyword).
+Ngoài ra, Scala và Kotlin đã có keyword `val` (một tổ hợp tương đương `final var`).
 
 ## JEP 304: Garbage-Collector Interface
 
-Trong cấu trúc JDK thời kỳ đầu, các component tạo nên implementation của garbage collector (GC) nằm rải rác ở nhiều phần trong codebase. Java 10 đã tách source code của các garbage collector khác nhau bằng cách giới thiệu một interface garbage collector thuần túy.
+Trong cấu trúc JDK thời kỳ đầu, các component tạo nên implementation của garbage collector (GC) nằm rải rác ở nhiều phần trong codebase. Java 10 đã tách source code của các garbage collector khác nhau bằng cách giới thiệu một interface thuần túy cho garbage collector.
 
 ## JEP 307: Parallel Full GC for G1
 
-Từ Java 9, G1 đã trở thành garbage collector mặc định. G1 được thiết kế như một garbage collector có latency thấp, nhằm tránh thực hiện Full GC. Tuy nhiên, Full GC của G1 trong Java 9 vẫn dùng một thread để hoàn tất thuật toán mark-sweep, điều này có thể khiến garbage collector trigger Full GC khi không thể thu hồi memory.
+Từ Java 9, G1 đã trở thành garbage collector mặc định. G1 được thiết kế là một garbage collector có latency thấp, nhằm tránh thực hiện Full GC. Tuy nhiên, Full GC của G1 trong Java 9 vẫn dùng một thread để hoàn tất thuật toán mark-sweep, điều này có thể khiến garbage collector trigger Full GC khi không thể thu hồi memory.
 
-Để giảm thời gian ứng dụng bị tạm dừng do Full GC, từ Java 10, Full GC của G1 chuyển sang dùng nhiều thread worker song song để thực hiện mark, sweep và compact. Thay đổi này rút ngắn thời gian tạm dừng của Full GC, nhưng không trực tiếp làm giảm số lần trigger Full GC.
+Để giảm thời gian pause của ứng dụng do Full GC, từ Java 10, Full GC của G1 chuyển sang dùng nhiều thread worker song song để thực hiện mark, sweep và compact. Thay đổi này rút ngắn thời gian pause của Full GC, nhưng không trực tiếp làm giảm số lần trigger Full GC.
 
-## JEP 310: **Chia sẻ dữ liệu class của ứng dụng (mở rộng tính năng CDS)**
+## JEP 310: **Chia sẻ dữ liệu class ứng dụng (mở rộng tính năng CDS)**
 
 Java 5 đã giới thiệu cơ chế chia sẻ dữ liệu class (Class Data Sharing, viết tắt là CDS), cho phép tiền xử lý một nhóm system class thành shared archive để memory mapping trong runtime, từ đó giảm thời gian khởi động của chương trình Java và memory usage của nhiều JVM. AppCDS, cho phép thêm application class vào shared archive, trước đây chỉ được cung cấp như một tính năng thương mại trong Oracle JDK.
 
-Trên cơ sở tính năng CDS hiện có, Java 10 tiếp tục mở rộng và mở AppCDS, cho phép đưa application class vào shared archive. Quy trình điển hình là trước tiên tạo danh sách application class, sau đó tạo shared archive dựa trên danh sách class; khi khởi động lần sau, archive được load thông qua memory mapping. Bản thân text của danh sách class không phải là cache được JVM load trực tiếp trong các lần khởi động sau.
+Trên cơ sở tính năng CDS hiện có, Java 10 tiếp tục mở rộng và mở AppCDS, cho phép đưa application class vào shared archive. Quy trình điển hình là trước tiên tạo danh sách application class, sau đó tạo shared archive dựa trên danh sách class; khi khởi động lần sau, archive được load thông qua memory mapping. Bản thân văn bản chứa danh sách class không phải là cache được JVM load trực tiếp trong các lần khởi động sau.
 
 ## JEP 317: **JIT compiler thử nghiệm dựa trên Java**
 
@@ -80,7 +80,7 @@ Oracle HotSpot VM đi kèm hai JIT compiler được triển khai bằng C++: C1
 
 Không phải mọi thay đổi API đều được phát hành thông qua JEP (Java Enhancement Proposal).
 
-Trong quy trình phát triển JDK, **JEP** thường được dùng cho các thay đổi lớn, chẳng hạn như giới thiệu language feature mới (như `var`), cơ chế JVM mới (như ZGC) hoặc refactor library quy mô lớn. Những thay đổi như thêm một vài static method vào class hiện có, chẳng hạn `List.copyOf()`, thường được xem là bảo trì library thông thường. Chúng được JDK developer trực tiếp submit và review thông qua ticket (Ticket) của **JBS (JDK Bug System)**, sau đó được phát hành trực tiếp cùng phiên bản.
+Trong quy trình phát triển JDK, **JEP** thường được dùng cho các thay đổi lớn, chẳng hạn như giới thiệu tính năng ngôn ngữ mới (như `var`), cơ chế JVM mới (như ZGC) hoặc refactor library quy mô lớn. Những thay đổi như thêm một vài static method vào class hiện có, chẳng hạn `List.copyOf()`, thường được xem là bảo trì library thông thường. Chúng được JDK developer trực tiếp submit và review thông qua ticket của **JBS (JDK Bug System)**, sau đó được phát hành trực tiếp cùng phiên bản.
 
 ### Cải tiến Collection
 
@@ -92,7 +92,7 @@ static <E> List<E> copyOf(Collection<? extends E> coll) {
 }
 ```
 
-Collection được tạo bằng `copyOf()` là immutable collection, không thể thực hiện các thao tác thêm, xoá, thay thế, sort..., nếu không sẽ phát sinh exception `java.lang.UnsupportedOperationException`. IDEA cũng sẽ hiển thị cảnh báo tương ứng.
+Collection được tạo bằng `copyOf()` là immutable collection, không thể thực hiện các thao tác thêm, xoá, thay thế, sort và các thao tác khác, nếu không sẽ phát sinh exception `java.lang.UnsupportedOperationException`. IDEA cũng sẽ hiển thị gợi ý tương ứng.
 
 ![Collection được tạo bằng `copyOf()` là immutable collection](https://oss.javaguide.cn/java-guide-blog/image-20210816154125579.png)
 
@@ -115,8 +115,8 @@ String result = optional.orElseThrow();
 
 ## Khác
 
-- **Quản lý cục bộ theo thread**: Trong Java 10, việc quản lý thread đưa vào khái niệm safepoint của JVM, cho phép thực hiện callback của thread mà không cần chạy safepoint toàn cục của JVM. Callback có thể được thực hiện bởi chính thread hoặc JVM thread, đồng thời thread vẫn ở trạng thái blocking. Cách này giúp có thể stop một thread riêng lẻ, thay vì chỉ có thể enable hoặc stop toàn bộ thread.
-- **Phân bổ heap trên thiết bị lưu trữ thay thế**: Java 10 cho phép JVM sử dụng heap phù hợp với các loại cơ chế lưu trữ khác nhau và phân bổ heap memory trên thiết bị memory tùy chọn.
+- **Thread-local handshake**: Trong Java 10, cơ chế quản lý thread đưa vào khái niệm safepoint của JVM, cho phép thực hiện callback của thread mà không cần chạy safepoint toàn cục của JVM. Callback có thể được thực hiện bởi chính thread hoặc JVM thread, đồng thời thread vẫn ở trạng thái blocking. Cách này giúp có thể stop một thread riêng lẻ, thay vì chỉ có thể bật hoặc stop toàn bộ thread.
+- **Phân bổ heap trên thiết bị lưu trữ thay thế**: Java 10 cho phép JVM sử dụng heap phù hợp với các loại cơ chế lưu trữ khác nhau và phân bổ heap memory trên các thiết bị memory tùy chọn.
 - ……
 
 ## Tham khảo

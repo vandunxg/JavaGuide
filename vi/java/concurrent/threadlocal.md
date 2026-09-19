@@ -1,6 +1,6 @@
 ---
-title: Giải thích chi tiết về ThreadLocal
-description: "Phân tích chuyên sâu ThreadLocal: giải thích chi tiết nguyên lý biến cục bộ của thread trong ThreadLocal, cơ chế triển khai ThreadLocalMap, vấn đề weak reference và memory leak, các trường hợp sử dụng và best practice."
+title: Giải thích chi tiết ThreadLocal
+description: "Phân tích chuyên sâu ThreadLocal: nguyên lý biến cục bộ theo thread, cơ chế triển khai ThreadLocalMap, vấn đề weak reference và memory leak, các trường hợp sử dụng và best practices."
 category: Java
 tag:
   - Java Concurrency
@@ -16,9 +16,9 @@ head:
 
 ![](./images/thread-local/1.png)
 
-**Bài viết có hơn 10.000 chữ và 31 hình, cũng đã tốn không ít thời gian và công sức để hoàn thành. Viết bài gốc không dễ, hãy theo dõi và nhấn thích, cảm ơn mọi người.**
+**Bài viết dài hơn 10.000 từ, gồm 31 hình, cũng đã tốn không ít thời gian và công sức để hoàn thành. Viết bài gốc không dễ, hãy theo dõi và nhấn thích, cảm ơn mọi người.**
 
-Đối với `ThreadLocal`, phản ứng đầu tiên của bạn có thể là: khá đơn giản, đó là bản sao biến của thread, mỗi thread được cô lập. Vậy bạn có thể suy nghĩ về một số câu hỏi sau:
+Đối với `ThreadLocal`, phản ứng đầu tiên của bạn có thể là: khá đơn giản, đó là bản sao biến theo thread, mỗi thread độc lập với nhau. Vậy bạn có thể suy nghĩ về một số câu hỏi sau:
 
 - Key của `ThreadLocal` là **weak reference**, vậy khi gọi `ThreadLocal.get()`, sau khi xảy ra **GC**, key có phải là `null` không?
 - **Cấu trúc dữ liệu** của `ThreadLocalMap` trong `ThreadLocal` là gì?
@@ -31,7 +31,7 @@ head:
 - Tình hình sử dụng `ThreadLocal` trong dự án? Đã gặp vấn đề gì?
 - ………
 
-Bạn đã nắm rõ tất cả các vấn đề trên chưa? Bài viết này sẽ phân tích **từng khía cạnh** của `ThreadLocal` bằng hình ảnh và nội dung xoay quanh các câu hỏi đó.
+Bạn đã nắm rõ tất cả các vấn đề trên chưa? Bài viết này sẽ phân tích **từng khía cạnh** của `ThreadLocal` bằng hình ảnh, xoay quanh các câu hỏi đó.
 
 ### Mục lục
 
@@ -96,14 +96,14 @@ Quay lại câu hỏi ở phần đầu: `key` của `ThreadLocal` là weak refe
 
 Để làm rõ vấn đề này, trước hết cần hiểu **bốn kiểu reference** của `Java`:
 
-- **Strong reference**: Các đối tượng được tạo bằng `new` thường là strong reference. Chỉ cần strong reference còn tồn tại, garbage collector sẽ không bao giờ thu hồi đối tượng được tham chiếu, kể cả khi thiếu memory.
-- **Soft reference**: Đối tượng được sửa bởi `SoftReference` được gọi là soft reference. Đối tượng mà soft reference trỏ đến sẽ được thu hồi khi memory sắp tràn.
+- **Strong reference**: Các object được tạo bằng `new` thường được tham chiếu bằng strong reference. Chỉ cần strong reference còn tồn tại, garbage collector sẽ không bao giờ thu hồi đối tượng được tham chiếu, kể cả khi thiếu memory.
+- **Soft reference**: Đối tượng được tham chiếu bằng `SoftReference` được gọi là soft reference. Đối tượng mà soft reference trỏ đến sẽ được thu hồi khi memory sắp tràn.
 - **Weak reference**: Nếu đối tượng được `WeakReference` tham chiếu không còn strong reference hoặc soft reference, nó là weakly reachable object. Khi garbage collector xử lý loại đối tượng này, nó sẽ xóa weak reference tương ứng. Một lần garbage collection cụ thể không đảm bảo lập tức xử lý tất cả đối tượng đủ điều kiện.
 - **Phantom reference**: Phantom reference là loại reference yếu nhất, được định nghĩa bằng `PhantomReference` trong Java. Tác dụng duy nhất của phantom reference là dùng queue để nhận thông báo đối tượng sắp bị hủy.
 
 Tiếp theo hãy xem code. Ta dùng reflection để kiểm tra dữ liệu trong `ThreadLocal` sau `GC` (code dưới đây lấy từ: <https://blog.csdn.net/thewindkee/article/details/103726942>, chạy local để minh họa tình huống GC thu hồi):
 
-> `System.gc()` chỉ đề xuất với JVM thực hiện garbage collection. Kết quả dưới đây phù hợp để giải thích nguyên lý, nhưng không thể xem là hành vi chắc chắn xảy ra trong mọi lần chạy.
+> `System.gc()` chỉ gửi đề xuất thực hiện garbage collection tới JVM. Kết quả dưới đây phù hợp để giải thích nguyên lý, nhưng không thể xem là hành vi chắc chắn xảy ra trong mọi lần chạy.
 
 ```java
 public class ThreadLocalDemo {
@@ -171,13 +171,13 @@ Trong lần chạy ví dụ này, garbage collector đã xử lý `ThreadLocal` 
 
 ![](./images/thread-local/4.png)
 
-Thoạt nhìn vấn đề này, nếu không suy nghĩ quá nhiều, thấy **weak reference** và **garbage collection** thì chắc chắn sẽ cho rằng kết quả là `null`.
+Thoạt nhìn, nếu không suy nghĩ kỹ, chỉ cần thấy **weak reference** và **garbage collection** là chắc chắn sẽ cho rằng kết quả là `null`.
 
 Thực ra không đúng, vì đề bài nói đang thực hiện thao tác `ThreadLocal.get()`, điều đó chứng minh vẫn còn **strong reference**, nên `key` không phải `null`. Như hình dưới đây, **strong reference** của `ThreadLocal` vẫn tồn tại.
 
 ![](./images/thread-local/5.png)
 
-Nếu **strong reference** của chúng ta không còn tồn tại, garbage collector có thể xóa `key` trong weak reference. Lúc này `Entry` vẫn giữ **strong reference** đến `value`, cho đến khi entry hết hạn đó được các thao tác tiếp theo của `ThreadLocalMap` dọn dẹp, hoặc thread sở hữu kết thúc, toàn bộ Map không còn reachable; trong các thread có vòng đời dài như thread pool, thời gian lưu lại này có thể rất lâu, vì vậy tồn tại rủi ro memory leak.
+Nếu **strong reference** của chúng ta không còn tồn tại, garbage collector có thể xóa `key` trong weak reference. Lúc này `Entry` vẫn giữ **strong reference** đến `value`, cho đến khi các thao tác tiếp theo của `ThreadLocalMap` dọn dẹp entry đã hết hiệu lực này, hoặc thread sở hữu kết thúc, toàn bộ Map không còn được tham chiếu; trong các thread có vòng đời dài như thread pool, thời gian lưu lại này có thể rất lâu, vì vậy tồn tại rủi ro memory leak.
 
 ### Giải thích chi tiết source code phương thức `ThreadLocal.set()`
 
@@ -212,7 +212,7 @@ Vì là cấu trúc `Map`, đương nhiên `ThreadLocalMap` cũng phải triển
 int i = key.threadLocalHashCode & (len-1);
 ```
 
-Thuật toán `hash` trong `ThreadLocalMap` rất đơn giản. `i` là vị trí index của array tương ứng với key hiện tại trong hash table.
+Thuật toán `hash` trong `ThreadLocalMap` rất đơn giản. `i` là chỉ số trong array tương ứng với key hiện tại trong hash table.
 
 Điểm then chốt ở đây là cách tính giá trị `threadLocalHashCode`. `ThreadLocal` có một thuộc tính `HASH_INCREMENT = 0x61c88647`.
 
@@ -243,19 +243,19 @@ public class ThreadLocal<T> {
 
 Mỗi khi tạo một đối tượng `ThreadLocal`, giá trị `ThreadLocal.nextHashCode` sẽ tăng thêm `0x61c88647`.
 
-Hằng số này không phải số Fibonacci, mà là hash increment 32-bit được suy ra từ tỷ lệ vàng. Các `ThreadLocal` được tạo liên tiếp sử dụng increment này để sinh hash code, sau đó lấy các bit thấp theo array có độ dài là lũy thừa của 2, nhờ đó các slot được phân bố khá đều.
+Hằng số này không phải số Fibonacci, mà là mức tăng hash 32-bit được suy ra từ tỷ lệ vàng. Các `ThreadLocal` được tạo liên tiếp sử dụng mức tăng này để sinh hash code, sau đó lấy các bit thấp theo array có độ dài là lũy thừa của 2, nhờ đó các slot được phân bố khá đều.
 
 Ta có thể tự thử:
 
 ![](./images/thread-local/8.png)
 
-Có thể thấy hash code sinh ra được phân bố khá đều. Nếu quan tâm, bạn có thể tìm hiểu thêm về multiplication hash dựa trên tỷ lệ vàng.
+Có thể thấy hash code sinh ra được phân bố khá đều. Nếu quan tâm, bạn có thể tìm hiểu thêm về multiplicative hashing dựa trên tỷ lệ vàng.
 
 ### Hash collision trong `ThreadLocalMap`
 
-> **Lưu ý:** Trong tất cả hình minh họa bên dưới, block **màu xanh lá** `Entry` đại diện cho **dữ liệu bình thường**, block **màu xám** đại diện cho `key` của `Entry` là `null`, **đã bị garbage collection**. Block **màu trắng** biểu thị `Entry` là `null`.
+> **Lưu ý:** Trong tất cả hình minh họa bên dưới, block **màu xanh lá** `Entry` đại diện cho **dữ liệu bình thường**, block **màu xám** đại diện cho `key` của `Entry` là `null`, **đã bị garbage collector thu hồi**. Block **màu trắng** biểu thị `Entry` là `null`.
 
-Mặc dù `ThreadLocalMap` dùng **số tỷ lệ vàng** làm hệ số tính `hash`, giúp giảm đáng kể xác suất **Hash collision**, xung đột vẫn có thể xảy ra.
+Mặc dù `ThreadLocalMap` dùng **hệ số tỷ lệ vàng** để tính `hash`, giúp giảm đáng kể xác suất **Hash collision**, xung đột vẫn có thể xảy ra.
 
 Trong `HashMap`, cách giải quyết xung đột là xây dựng cấu trúc **linked list** trên array, gắn dữ liệu xung đột vào linked list; nếu độ dài linked list vượt quá một mức nhất định thì chuyển thành **red-black tree**.
 
@@ -317,7 +317,7 @@ Tiếp theo bắt đầu lặp về phía sau từ vị trí `staleSlot` (`index
 
 ![](./images/thread-local/14.png)
 
-Tìm `Entry` có giá trị `key` bằng nhau về phía sau từ node hiện tại `staleSlot`. Sau khi tìm thấy, cập nhật value của `Entry` và đổi vị trí phần tử `staleSlot` (`staleSlot` là phần tử hết hạn), cập nhật dữ liệu `Entry`, rồi bắt đầu dọn dẹp `Entry` hết hạn, như hình dưới đây:
+Tìm `Entry` có giá trị `key` bằng nhau về phía sau từ node hiện tại `staleSlot`. Sau khi tìm thấy, cập nhật value của `Entry` và hoán đổi vị trí phần tử tại `staleSlot` (`staleSlot` là phần tử hết hạn), cập nhật dữ liệu `Entry`, rồi bắt đầu dọn dẹp `Entry` hết hạn, như hình dưới đây:
 
 ![](https://oss.javaguide.cn/java-guide-blog/view.png) Trong quá trình duyệt về phía sau, nếu không tìm thấy `Entry` có cùng giá trị key:
 
@@ -396,14 +396,14 @@ private static int prevIndex(int i, int len) {
 
 Tiếp theo xem logic còn lại trong vòng lặp `for`:
 
-1. Duyệt dữ liệu `Entry` trong bucket tương ứng với `key` hiện tại nhưng dữ liệu rỗng. Điều này cho biết không có xung đột dữ liệu ở vị trí này của hash array, thoát vòng lặp `for` và `set` dữ liệu trực tiếp vào bucket tương ứng.
+1. Duyệt đến bucket tương ứng với `key` hiện tại nhưng `Entry` là `null`. Điều này cho biết không có xung đột dữ liệu ở vị trí này của hash array, thoát vòng lặp `for` và `set` dữ liệu trực tiếp vào bucket tương ứng.
 2. Nếu dữ liệu `Entry` trong bucket tương ứng với `key` không rỗng:
    2.1 Nếu `k = key`, thao tác `set` hiện tại là thay thế, thực hiện logic thay thế rồi return trực tiếp.
    2.2 Nếu `key = null`, `Entry` tại vị trí bucket hiện tại là dữ liệu hết hạn, thực thi phương thức `replaceStaleEntry()` (phương thức cốt lõi), rồi return.
 3. Vòng lặp `for` kết thúc, tiếp tục thực thi bên dưới nghĩa là trong quá trình lặp về phía sau đã gặp `entry` là `null`:
    3.1 Tạo một đối tượng `Entry` mới trong bucket có `Entry` là `null`.
    3.2 Thực hiện thao tác `++size`.
-4. Gọi `cleanSomeSlots()` để thực hiện một lượt dọn dẹp heuristic, dọn dữ liệu có `key` hết hạn trong `Entry` của hash array.
+4. Gọi `cleanSomeSlots()` để thực hiện một lượt dọn dẹp theo heuristic, dọn dữ liệu có `key` hết hạn trong `Entry` của hash array.
    4.1 Nếu sau khi dọn dẹp không dọn được dữ liệu nào và `size` vượt ngưỡng (2/3 độ dài array), thực hiện `rehash()`.
    4.2 `rehash()` trước tiên thực hiện một lượt dọn dẹp thăm dò để dọn `key` hết hạn. Sau khi dọn xong, nếu **size >= threshold - threshold / 4** thì thực hiện logic mở rộng thực sự (xem logic mở rộng ở phần sau).
 
@@ -613,7 +613,7 @@ if (h != i) {
 
 ### Cơ chế mở rộng của `ThreadLocalMap`
 
-Ở cuối phương thức `ThreadLocalMap.set()`, nếu sau khi thực hiện dọn dẹp heuristic mà không dọn được dữ liệu nào và số lượng `Entry` trong hash array hiện tại đã đạt ngưỡng mở rộng của list `(len*2/3)`, logic `rehash()` sẽ được thực hiện:
+Ở cuối phương thức `ThreadLocalMap.set()`, nếu sau khi thực hiện dọn dẹp heuristic mà không dọn được dữ liệu nào và số lượng `Entry` trong hash array hiện tại đã đạt ngưỡng mở rộng `(len*2/3)`, logic `rehash()` sẽ được thực hiện:
 
 ```java
 if (!cleanSomeSlots(i, sz) && sz >= threshold)
@@ -699,7 +699,7 @@ private void resize() {
 
 Lấy `get(ThreadLocal1)` làm ví dụ. Sau khi tính `hash`, vị trí `slot` đúng phải là 4, nhưng bucket tại `index=4` đã có dữ liệu và giá trị `key` không bằng `ThreadLocal1`, nên cần tiếp tục lặp tìm về phía sau.
 
-Khi lặp đến dữ liệu tại `index=5`, `Entry.key=null`, kích hoạt một lượt thu hồi dữ liệu thăm dò và thực thi phương thức `expungeStaleEntry()`. Sau khi thực thi, dữ liệu tại `index 5,8` đều được thu hồi, còn dữ liệu tại `index 6,7` được chuyển lên phía trước. Sau khi `index 6,7` dịch chuyển, tiếp tục lặp về phía sau từ `index=5`, nhờ đó tìm thấy `Entry` có giá trị `key` bằng nhau tại `index=6`, như hình dưới đây:
+Khi lặp đến dữ liệu tại `index=5`, `Entry.key=null`, kích hoạt một lượt dọn dẹp thăm dò và thực thi phương thức `expungeStaleEntry()`. Sau khi thực thi, dữ liệu tại `index 5,8` đều được dọn, còn dữ liệu tại `index 6,7` được chuyển lên phía trước. Sau khi `index 6,7` dịch chuyển, tiếp tục lặp về phía sau từ `index=5`, nhờ đó tìm thấy `Entry` có giá trị `key` bằng nhau tại `index=6`, như hình dưới đây:
 
 ![](./images/thread-local/28.png)
 
@@ -767,7 +767,7 @@ private boolean cleanSomeSlots(int i, int n) {
 
 ### `InheritableThreadLocal`
 
-Khi sử dụng `ThreadLocal`, trong tình huống bất đồng bộ, không thể chia sẻ dữ liệu bản sao thread được tạo trong thread cha cho thread con.
+Khi sử dụng `ThreadLocal`, trong tình huống bất đồng bộ, không thể chia sẻ bản sao biến của thread được tạo trong thread cha với thread con.
 
 Để giải quyết vấn đề này, JDK còn có lớp `InheritableThreadLocal`. Hãy xem một ví dụ:
 
@@ -815,7 +815,7 @@ private void init(ThreadGroup g, Runnable target, String name,
 }
 ```
 
-Tuy nhiên `InheritableThreadLocal` vẫn có hạn chế. Thông thường xử lý bất đồng bộ đều dùng thread pool, còn `InheritableThreadLocal` được gán giá trị trong phương thức `init()` của `new Thread`, trong khi thread pool hoạt động theo cơ chế tái sử dụng thread, nên sẽ phát sinh vấn đề.
+Tuy nhiên `InheritableThreadLocal` vẫn có hạn chế. Thông thường xử lý bất đồng bộ đều dùng thread pool, còn `InheritableThreadLocal` được khởi tạo trong phương thức `init()` khi `new Thread` được gọi, trong khi thread pool hoạt động theo cơ chế tái sử dụng thread, nên sẽ phát sinh vấn đề.
 
 Tất nhiên, khi có vấn đề sẽ có giải pháp. Alibaba đã open source một component `TransmittableThreadLocal` có thể giải quyết vấn đề này. Phần này không mở rộng thêm; nếu quan tâm, bạn có thể tự tra cứu tài liệu.
 
@@ -833,7 +833,7 @@ Khi frontend gửi request đến **service A**, **service A** tạo một chu�
 
 ![](./images/thread-local/30.png)
 
-`requestId` trong hình chính là `traceId` dùng để liên kết toàn bộ chain của các hệ thống. Khi các hệ thống gọi lẫn nhau, có thể tìm chain tương ứng bằng `requestId`. Ngoài ra còn một số trường hợp khác:
+`requestId` trong hình chính là `traceId` dùng để liên kết toàn bộ call chain của các hệ thống. Khi các hệ thống gọi lẫn nhau, có thể tìm call chain tương ứng bằng `requestId`. Ngoài ra còn một số trường hợp khác:
 
 ![](./images/thread-local/31.png)
 

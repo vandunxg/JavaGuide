@@ -16,7 +16,7 @@ head:
 
 JDK 8 được phát hành vào ngày 18 tháng 3 năm 2014. Đây là một phiên bản LTS (Long-Term Support), đồng thời cũng là một trong những phiên bản được sử dụng rộng rãi trong hệ sinh thái Java trong thời gian dài. Các phiên bản LTS hiện được Oracle liệt kê gồm JDK 8, JDK 11, JDK 17, JDK 21 và JDK 25.
 
-JDK 8 đưa vào nhiều tính năng mới quan trọng. Bài viết này sẽ chọn một số tính năng mới tương đối quan trọng để giới thiệu chi tiết:
+JDK 8 giới thiệu nhiều tính năng mới quan trọng. Bài viết này sẽ chọn một số tính năng tiêu biểu để giới thiệu chi tiết:
 
 - Lambda expression
 - Stream API
@@ -31,7 +31,7 @@ Hình dưới đây thể hiện số lượng tính năng mới và thời đi�
 
 Oracle phát hành Java 8 (JDK 1.8) vào năm 2014. Kể từ đó, phiên bản này được sử dụng rộng rãi trong hệ sinh thái Java trong thời gian dài. Nhiều lập trình viên vẫn chưa hiểu đầy đủ một số tính năng mới của nó, đặc biệt là những developer đã quen với các phiên bản trước Java 8, chẳng hạn như tôi.
 
-Để không bị tụt lại quá xa, việc tổng hợp và hệ thống hóa các tính năng mới này vẫn cần thiết. So với jdk.7, nó có nhiều thay đổi hoặc có thể nói là tối ưu hóa, chẳng hạn như `interface` có thể có static method và có method body, điều này đã đảo ngược nhận thức trước đây; cấu trúc dữ liệu của `java.util.HashMap` được bổ sung red-black tree; cùng với Lambda expression đã quá quen thuộc. Bài viết này không thể chia sẻ lần lượt tất cả tính năng mới, mà chỉ liệt kê những tính năng mới thường dùng để giải thích chi tiết. Xem thêm phần giới thiệu về [các tính năng mới của Java 8 trên trang chính thức](https://www.oracle.com/java/technologies/javase/8-whats-new.html).
+Để không bị tụt lại quá xa, việc tổng hợp và hệ thống hóa các tính năng mới này vẫn cần thiết. So với jdk.7, nó có nhiều thay đổi hoặc có thể nói là tối ưu hóa, chẳng hạn như `interface` có thể có static method và có method body, điều này đã thay đổi nhận thức trước đây; cấu trúc dữ liệu của `java.util.HashMap` được bổ sung red-black tree; cùng với Lambda expression đã quá quen thuộc. Bài viết này không thể chia sẻ lần lượt tất cả tính năng mới, mà chỉ liệt kê những tính năng mới thường dùng để giải thích chi tiết. Xem thêm phần giới thiệu về [các tính năng mới của Java 8 trên trang chính thức](https://www.oracle.com/java/technologies/javase/8-whats-new.html).
 
 ## Interface
 
@@ -41,8 +41,8 @@ Mục đích ban đầu của `interface` là hướng tới abstraction và nâ
 
 Một `interface` có thể có nhiều method được khai báo như vậy. Sự khác biệt giữa hai modifier này chủ yếu cũng là sự khác biệt giữa method thông thường và static method.
 
-1. Method được khai báo bằng `default` là instance method thông thường, có thể gọi bằng `this`, đồng thời có thể được subclass inheritance và override.
-2. Method được khai báo bằng `static` được sử dụng giống static method của class thông thường. Tuy nhiên, nó không thể được subclass inheritance mà chỉ có thể gọi bằng `Interface`.
+1. Method được khai báo bằng `default` là instance method thông thường, có thể gọi bằng `this`, đồng thời có thể được subclass kế thừa và override.
+2. Method được khai báo bằng `static` được sử dụng giống static method của class thông thường. Tuy nhiên, nó không thể được subclass kế thừa mà chỉ có thể gọi bằng `Interface`.
 
 Hãy xem một ví dụ thực tế.
 
@@ -72,7 +72,7 @@ public interface InterfaceNew1 {
 }
 ```
 
-Nếu một class vừa triển khai interface `InterfaceNew` vừa triển khai interface `InterfaceNew1`, cả hai interface đều có `def()`, đồng thời `InterfaceNew` và `InterfaceNew1` không có quan hệ inheritance, thì class đó bắt buộc phải override `def()`. Nếu không, compiler sẽ báo lỗi.
+Nếu một class vừa triển khai interface `InterfaceNew` vừa triển khai interface `InterfaceNew1`, cả hai interface đều có `def()`, đồng thời `InterfaceNew` và `InterfaceNew1` không có quan hệ kế thừa, thì class đó bắt buộc phải override `def()`. Nếu không, compiler sẽ báo lỗi.
 
 ```java
 public class InterfaceNewImpl implements InterfaceNew , InterfaceNew1{
@@ -94,16 +94,16 @@ public class InterfaceNewImpl implements InterfaceNew , InterfaceNew1{
 
 **Trong Java 8, interface và abstract class khác nhau như thế nào?**
 
-Nhiều bạn cho rằng: “Nếu `interface` cũng có thể có implementation method riêng thì dường như không khác `abstract class` là bao.”
+Nhiều bạn cho rằng: “Nếu `interface` cũng có thể có implementation riêng cho method thì dường như không khác `abstract class` là bao.”
 
 Thực ra chúng vẫn có khác biệt:
 
 1. Sự khác biệt giữa `interface` và `class`, chủ yếu gồm:
 
-   - Interface hỗ trợ multiple inheritance, class chỉ single inheritance
+   - Interface hỗ trợ multiple implementation, class chỉ single inheritance
    - Instance method không có body trong interface mặc định là `public abstract`, field mặc định là `public static final`; ngoài ra interface còn có thể khai báo các method như `default`, `static`. Member của abstract class có thể sử dụng nhiều modifier hơn
 
-2. Method của `interface` giống một extension plugin hơn, còn method của `abstract class` được dùng để inheritance.
+2. Method của `interface` giống một extension plugin hơn, còn method của `abstract class` được dùng để kế thừa.
 
 Như đã đề cập ở đầu, các method có modifier `default` và `static` được bổ sung vào `interface` nhằm giải quyết vấn đề việc sửa interface không tương thích với các implementation hiện có, chứ không nhằm thay thế `abstract class`. Khi sử dụng, nơi nào nên dùng abstract class thì vẫn dùng abstract class, không nên thay thế nó chỉ vì các tính năng mới của interface.
 
@@ -119,7 +119,7 @@ Trong các package khác cũng có functional interface. Một số interface kh
 
 ## Lambda expression
 
-Tiếp theo là Lambda expression quen thuộc. Đây là tính năng mới quan trọng nhất thúc đẩy việc phát hành Java 8. Kể từ sau generic (`Generics`) và annotation (`Annotation`), đây là thay đổi lớn nhất.
+Tiếp theo là Lambda expression quen thuộc. Đây là tính năng mới quan trọng nhất thúc đẩy việc phát hành Java 8. Đây là thay đổi lớn nhất kể từ generic (`Generics`) và annotation (`Annotation`).
 
 Lambda expression giúp code trở nên ngắn gọn và súc tích hơn, đồng thời cho phép Java hỗ trợ functional programming đơn giản.
 
@@ -138,7 +138,7 @@ Hãy dùng các ví dụ thường gặp để cảm nhận sự tiện lợi m�
 
 #### Thay thế anonymous inner class
 
-Trước đây, cách duy nhất để truyền parameter động vào method là sử dụng inner class. Ví dụ:
+Trước đây, cách duy nhất để truyền tham số động vào method là sử dụng inner class. Ví dụ:
 
 **1. Interface `Runnable`**
 
@@ -187,7 +187,7 @@ button.addItemListener(e -> e.getItem());
 
 **4. Interface tự định nghĩa**
 
-Ba ví dụ trên là những trường hợp thường gặp nhất trong quá trình phát triển. Qua đó cũng có thể cảm nhận sự tiện lợi và gọn gàng mà Lambda mang lại. Nó chỉ giữ lại code thực sự được sử dụng và lược bỏ toàn bộ code không cần thiết. Vậy nó có yêu cầu gì đối với interface không? Ta nhận thấy các anonymous inner class này chỉ override một method của interface, dĩ nhiên cũng chỉ có một method cần override. Đây chính là **functional interface** đã đề cập ở trên. Nói cách khác, chỉ cần parameter của method là functional interface thì có thể dùng Lambda expression.
+Ba ví dụ trên là những trường hợp thường gặp nhất trong quá trình phát triển. Qua đó cũng có thể cảm nhận sự tiện lợi và gọn gàng mà Lambda mang lại. Nó chỉ giữ lại code thực sự được sử dụng và lược bỏ toàn bộ code không cần thiết. Vậy nó có yêu cầu gì đối với interface không? Ta nhận thấy các anonymous inner class này chỉ override một method của interface, dĩ nhiên cũng chỉ có một method cần override. Đây chính là **functional interface** đã đề cập ở trên. Nói cách khác, chỉ cần kiểu của parameter của method là functional interface thì có thể dùng Lambda expression.
 
 ```java
 @FunctionalInterface
@@ -220,7 +220,7 @@ public class LambdaClass {
 }
 ```
 
-#### Lặp collection
+#### Duyệt collection
 
 ```java
 void lamndaFor() {
@@ -241,7 +241,7 @@ void lamndaFor() {
 
 #### Method reference
 
-Java 8 cho phép sử dụng keyword `::` để truyền method hoặc constructor reference. Dù thế nào, kiểu trả về của expression cũng phải là functional-interface.
+Java 8 cho phép sử dụng keyword `::` để truyền method hoặc constructor reference. Dù thế nào, kiểu đích của expression phải là functional interface.
 
 ```java
 public class LambdaClassSuper {
@@ -260,7 +260,7 @@ public class LambdaClass extends LambdaClassSuper {
     }
 
     void show() {
-        // 1. Gọi static function, kiểu trả về phải là functional-interface
+        // 1. Gọi static method, kiểu đích của expression phải là functional interface
         LambdaInterface t = LambdaClass::staticF;
 
         // 2. Gọi instance method
@@ -288,11 +288,11 @@ Lambda expression có thể tham chiếu đến local variable bên ngoài, như
 
 ## Stream
 
-Java bổ sung package `java.util.stream`, có nhiều điểm tương tự với các loại stream trước đây. Loại stream được tiếp xúc nhiều nhất trước đây là resource stream, chẳng hạn `java.io.FileInputStream`, dùng stream để input file từ nơi này sang nơi khác. Nó chỉ là công cụ vận chuyển nội dung và không thực hiện _CRUD_ nào trên nội dung file.
+Java bổ sung package `java.util.stream`, có nhiều điểm tương tự với các loại stream trước đây. Loại stream được tiếp xúc nhiều nhất trước đây là resource stream, chẳng hạn `java.io.FileInputStream`, dùng stream để đưa file từ nơi này sang nơi khác. Nó chỉ là công cụ vận chuyển nội dung và không thực hiện _CRUD_ nào trên nội dung file.
 
-`Stream` vẫn không lưu trữ dữ liệu, nhưng khác ở chỗ nó có thể retrieve và xử lý logic dữ liệu collection, bao gồm filter, sort, thống kê, count, v.v. Có thể hình dung nó giống câu lệnh SQL.
+`Stream` vẫn không lưu trữ dữ liệu, nhưng khác ở chỗ nó có thể truy xuất và xử lý dữ liệu trong collection, bao gồm filter, sort, thống kê, count, v.v. Có thể hình dung nó giống câu lệnh SQL.
 
-Source data của nó có thể là `Collection`, `Array`, v.v. Vì parameter của các method đều là functional interface type nên thường được sử dụng cùng Lambda.
+Dữ liệu nguồn của nó có thể là `Collection`, `Array`, v.v. Vì parameter của các method đều có kiểu functional interface nên thường được sử dụng cùng Lambda.
 
 ### Loại stream
 
@@ -320,7 +320,7 @@ default Stream<E> parallelStream()
 public static<T> Stream<T> of(T t)
 
 /**
- * Trả về một ordered stream có các element là những value được chỉ định.
+ * Trả về một stream tuần tự gồm các element được chỉ định.
  */
 public static<T> Stream<T> of(T... values) {
     return Arrays.stream(values);
@@ -328,7 +328,7 @@ public static<T> Stream<T> of(T... values) {
 
 
 /**
- * Filter, trả về stream gồm các element của stream này khớp với predicate đã cho
+ * Lọc, trả về stream gồm các element của stream này khớp với predicate đã cho
  */
 Stream<T> filter(Predicate<? super T> predicate);
 
@@ -368,7 +368,7 @@ Stream<T> distinct();
 void forEach(Consumer<? super T> action);
 
 /**
- * Dùng để lấy stream với số lượng được chỉ định, độ dài bị cắt không vượt quá maxSize.
+ * Giới hạn stream ở số lượng element được chỉ định; độ dài không vượt quá maxSize.
  */
 Stream<T> limit(long maxSize);
 
@@ -378,7 +378,7 @@ Stream<T> limit(long maxSize);
 <R> Stream<R> map(Function<? super T, ? extends R> mapper);
 
 /**
- * Sort theo Comparator được cung cấp.
+ * Sắp xếp theo Comparator được cung cấp.
  */
 Stream<T> sorted(Comparator<? super T> comparator);
 
@@ -393,7 +393,7 @@ Stream<T> skip(long n);
 Object[] toArray();
 
 /**
- * Dùng generator được cung cấp để trả về một array chứa các element của stream này, nhằm cấp phát array trả về và các array khác cần thiết cho việc thực thi theo partition hoặc resize.
+ * Dùng generator được cung cấp để tạo array chứa các element của stream này, đồng thời cấp phát array trả về và các array khác cần cho việc thực thi phân vùng hoặc thay đổi kích thước.
  */
 <A> A[] toArray(IntFunction<A[]> generator);
 
@@ -411,7 +411,7 @@ Bài viết liệt kê cách sử dụng các method tiêu biểu của `Stream`
 @Test
 public void test() {
   List<String> strings = Arrays.asList("abc", "def", "gkh", "abc");
-    // Trả về stream thỏa điều kiện
+     // Trả về stream gồm các element thỏa điều kiện
     Stream<String> stringStream = strings.stream().filter(s -> "abc".equals(s));
     // Tính số lượng element trong stream thỏa điều kiện
     long count = stringStream.count();
@@ -419,7 +419,7 @@ public void test() {
     // forEach lặp qua -> in element
     strings.stream().forEach(System.out::println);
 
-    // limit lấy stream có 1 element
+     // limit lấy stream gồm 1 element
     Stream<String> limit = strings.stream().limit(1);
     // toArray: ví dụ muốn xem limitStream bên trong, chẳng hạn chuyển thành String[], hoặc lặp qua
     String[] array = limit.toArray(String[]::new);
@@ -427,7 +427,7 @@ public void test() {
     // map thao tác trên mỗi element và trả về stream mới
     Stream<String> map = strings.stream().map(s -> s + "22");
 
-    // sorted sort và in
+     // sorted: sắp xếp và in
     strings.stream().sorted().forEach(System.out::println);
 
     // Collectors collect đưa abc vào container
@@ -463,7 +463,7 @@ public void test() {
 
 ### Thực thi lazy
 
-Khi thực thi method trả về `Stream`, method không được thực thi ngay mà chỉ thực thi sau khi có một method không trả về `Stream`. Vì lấy được `Stream` chưa có nghĩa là có thể sử dụng trực tiếp, mà cần xử lý nó thành một type thông thường. Có thể hình dung `Stream` ở đây giống binary stream (hai thứ hoàn toàn khác nhau), lấy được cũng không thể đọc hiểu.
+Khi thực thi method trả về `Stream`, method không được thực thi ngay mà chỉ thực thi sau khi có một method không trả về `Stream`. Vì lấy được `Stream` chưa có nghĩa là có thể sử dụng trực tiếp, mà cần xử lý nó thành một kiểu thông thường. Có thể hình dung `Stream` ở đây giống binary stream (hai thứ hoàn toàn khác nhau), lấy được cũng không thể đọc hiểu.
 
 Hãy phân tích method `filter` bên dưới.
 
@@ -492,7 +492,7 @@ Thực thi Predicate.test
 
 Theo thứ tự thực thi, lẽ ra phải in `Thực thi Predicate.test` 4 lần trước, sau đó mới in `Thực thi count`. Kết quả thực tế hoàn toàn ngược lại. Điều này cho thấy method trong `filter` không được thực thi ngay mà chỉ thực thi sau khi gọi method `count()`.
 
-Các ví dụ trên đều là instance của `Stream` tuần tự. `parallelStream` song song có cách sử dụng giống stream tuần tự. Khác biệt chính là `parallelStream` có thể thực thi bằng nhiều thread, được triển khai dựa trên framework ForkJoin. Khi có thời gian, bạn có thể tìm hiểu framework `ForkJoin` và `ForkJoinPool`. Có thể hiểu đơn giản rằng nó được thực hiện thông qua thread pool, từ đó liên quan đến các vấn đề như thread safety và mức tiêu hao thread. Tiếp theo, hãy trải nghiệm việc thực thi bằng nhiều thread của parallel stream qua code.
+Các ví dụ trên đều là instance của `Stream` tuần tự. `parallelStream` song song có cách sử dụng giống stream tuần tự. Khác biệt chính là `parallelStream` có thể thực thi bằng nhiều thread, được triển khai dựa trên framework ForkJoin. Khi có thời gian, bạn có thể tìm hiểu framework `ForkJoin` và `ForkJoinPool`. Có thể hiểu đơn giản rằng nó được thực hiện thông qua thread pool, từ đó liên quan đến các vấn đề như thread safety và mức tiêu thụ tài nguyên của thread. Tiếp theo, hãy trải nghiệm việc thực thi bằng nhiều thread của parallel stream qua code.
 
 ```java
 @Test
@@ -511,12 +511,12 @@ Từ kết quả có thể thấy `for-each` sử dụng nhiều thread.
 
 ### Tóm tắt
 
-Từ source code và các instance, có thể tổng kết một số đặc điểm của stream:
+Từ source code và các ví dụ, có thể tổng kết một số đặc điểm của stream:
 
-1. Thông qua chain programming đơn giản, nó có thể dễ dàng xử lý tiếp dữ liệu sau khi lặp.
-2. Parameter của các method đều là functional interface type
+1. Thông qua lập trình chuỗi đơn giản, nó có thể dễ dàng xử lý tiếp dữ liệu sau khi lặp.
+2. Parameter của các method đều có kiểu functional interface
 3. Một Stream chỉ có thể thao tác một lần, thao tác xong sẽ đóng; tiếp tục sử dụng stream này sẽ báo lỗi.
-4. Stream không lưu dữ liệu và không thay đổi source data
+4. Stream không lưu dữ liệu và không thay đổi dữ liệu nguồn
 
 ## Optional
 
@@ -526,12 +526,12 @@ Trong [phần giới thiệu Optional của Sổ tay phát triển Alibaba](http
 >
 > 1. Khi return type là primitive type nhưng return object của wrapper type, việc unboxing tự động có thể gây NPE.
 >
-> Ví dụ sai: `public int f() { return object Integer }`, nếu là `null` thì unboxing tự động ném NPE.
+> Ví dụ sai: `public int f() { return object kiểu Integer }`, nếu là `null` thì unboxing tự động ném NPE.
 >
 > 2. Kết quả query database có thể là `null`.
 > 3. Dù element trong collection `isNotEmpty`, data element lấy ra vẫn có thể là `null`.
 > 4. Khi remote call trả về object, luôn phải kiểm tra null để ngăn NPE.
-> 5. Với data lấy từ Session, nên kiểm tra NPE để tránh null pointer.
+> 5. Với data lấy từ Session, nên kiểm tra null để tránh null pointer.
 > 6. Chained call `obj.getA().getB().getC()`; chuỗi call liên tiếp dễ phát sinh NPE.
 >
 > Ví dụ đúng: dùng class `Optional` của JDK 8 để ngăn vấn đề NPE.
@@ -563,7 +563,7 @@ if(zoo != null){
 }
 ```
 
-Kiểm tra object không null từng lớp. Có người cho rằng cách này xấu và không thanh lịch, nhưng tôi không nghĩ vậy. Ngược lại, tôi thấy nó gọn gàng, dễ đọc và dễ hiểu. Bạn nghĩ sao?
+Kiểm tra object khác null theo từng lớp. Có người cho rằng cách này xấu và không thanh lịch, nhưng tôi không nghĩ vậy. Ngược lại, tôi thấy nó gọn gàng, dễ đọc và dễ hiểu. Bạn nghĩ sao?
 
 Cách triển khai bằng `Optional` như sau:
 
@@ -581,12 +581,12 @@ Trong ví dụ trên, `Optional.ofNullable` là một trong các cách tạo Opt
 
 ```java
 /**
- * Common instance for {@code empty()}. Object EMPTY toàn cục
+  * Common instance for {@code empty()}. Object EMPTY dùng chung toàn cục
  */
 private static final Optional<?> EMPTY = new Optional<>();
 
 /**
- * Giá trị được Optional duy trì
+  * Giá trị được Optional lưu giữ
  */
 private final T value;
 
@@ -610,7 +610,7 @@ public static <T> Optional<T> of(T value) {
     return new Optional<>(value);
 }
 /**
- * Constructor private, gán giá trị cho value
+  * Constructor private, gán value
  */
 private Optional(T value) {
   this.value = Objects.requireNonNull(value);
@@ -625,7 +625,7 @@ public static <T> T requireNonNull(T obj) {
 }
 ```
 
-Khác biệt chính giữa method `ofNullable` và method `of` là: khi value là `null`, `ofNullable` trả về Optional rỗng, còn `of` sẽ ném `NullPointerException`. Khi `null` biểu thị “không có giá trị” hợp lệ thì dùng `ofNullable`; khi parameter theo quy ước bắt buộc khác `null` thì có thể dùng `of` để phát hiện lỗi sớm.
+Khác biệt chính giữa method `ofNullable` và method `of` là: khi value là `null`, `ofNullable` trả về Optional rỗng, còn `of` sẽ ném `NullPointerException`. Khi `null` biểu thị “không có giá trị” hợp lệ thì dùng `ofNullable`; khi parameter theo quy ước bắt buộc không được `null` thì có thể dùng `of` để phát hiện lỗi sớm.
 
 **`map()` và `flatMap()` khác nhau như thế nào?**
 
@@ -670,7 +670,7 @@ Using flatMap:
 [APPLE, BANANA, CHERRY, ORANGE, GRAPE, PEAR, KIWI, MELON, PINEAPPLE]
 ```
 
-Cách hiểu đơn giản nhất là `flatMap()` có thể mở rộng kết quả của `map()`.
+Cách hiểu đơn giản nhất là `flatMap()` có thể làm phẳng kết quả của `map()`.
 
 Trong `Optional`, khi dùng `map()`, nếu mapping function trả về một giá trị thông thường thì giá trị đó được bọc trong một `Optional` mới. Khi dùng `flatMap`, nếu mapping function trả về một `Optional`, `Optional` được trả về sẽ được flatten và không bị bọc thành `Optional` lồng nhau.
 
@@ -721,7 +721,7 @@ public boolean isPresent() {
     return value != null;
 }
 /**
- * Nếu value khác null thì thực thi consumer.accept
+ * Nếu value không phải null thì thực thi consumer.accept
  */
 public void ifPresent(Consumer<? super T> consumer) {
    if (value != null)
@@ -749,7 +749,7 @@ public T orElse(T other) {
 }
 
 /**
- * Nếu value != null thì trả về value, nếu không thì ném exception do parameter trả về
+ * Nếu value != null thì trả về value, nếu không thì ném exception do parameter cung cấp
  */
 public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
         if (value != null) {
@@ -769,7 +769,7 @@ public T get() {
 }
 ```
 
-### Filter value
+### Lọc value
 
 ```java
 /**
@@ -858,7 +858,7 @@ public void newFormat(){
 }
 ```
 
-### Chuyển string thành date
+### Chuyển string sang date
 
 **Trước Java 8:**
 
@@ -942,7 +942,7 @@ public void pushWeek(){
 }
 ```
 
-### Lấy date được chỉ định
+### Lấy date cụ thể
 
 Ngoài việc tính date rườm rà, việc lấy một date cụ thể cũng rất bất tiện, chẳng hạn lấy ngày đầu tiên hoặc ngày cuối cùng của tháng hiện tại.
 
@@ -997,13 +997,13 @@ Trong `java.time.temporal.TemporalAdjusters` còn nhiều thuật toán tiện l
 
 ### JDBC và Java 8
 
-Hiện tại quan hệ tương ứng giữa các type thời gian của JDBC và type thời gian của Java 8 là:
+Hiện tại mối tương ứng giữa các type thời gian của JDBC và type thời gian của Java 8 là:
 
 1. `Date` ---> `LocalDate`
 2. `Time` ---> `LocalTime`
 3. `Timestamp` ---> `LocalDateTime`
 
-Trước JDBC 4.2, thường dùng `java.sql.Date`, `java.sql.Time` và `java.sql.Timestamp` để lần lượt biểu diễn các SQL time type này.
+Trước JDBC 4.2, thường dùng `java.sql.Date`, `java.sql.Time` và `java.sql.Timestamp` để lần lượt biểu diễn các SQL time type tương ứng.
 
 ### Timezone
 
@@ -1059,7 +1059,7 @@ Thời gian của timezone địa phương: 2021-01-27T15:43:58.735+08:00[Asia/S
 
 ### Tóm tắt
 
-Qua so sánh Date cũ và mới ở trên, dĩ nhiên đây chỉ là một phần khác biệt về chức năng; các chức năng khác cần tự tìm hiểu thêm. Tóm lại, date-time-api mang lại nhiều lợi ích cho việc thao tác date. Khi gặp thao tác với date trong công việc hằng ngày, ưu tiên đầu tiên là date-time-api; chỉ cân nhắc Date cũ nếu thực sự không giải quyết được.
+Qua so sánh Date cũ và mới ở trên, dĩ nhiên đây chỉ là một phần khác biệt về chức năng; các chức năng khác cần tự tìm hiểu thêm. Tóm lại, `Date-Time API` mang lại nhiều lợi ích cho việc thao tác với date. Khi gặp thao tác với date trong công việc hằng ngày, ưu tiên đầu tiên là `Date-Time API`; chỉ cân nhắc Date cũ nếu thực sự không giải quyết được.
 
 ## Tổng kết
 
@@ -1069,7 +1069,7 @@ Các tính năng mới của Java 8 đã được tổng hợp gồm:
 - Lambda
 - Stream
 - Optional
-- Date time-api
+- Date-Time API
 
 Đây đều là những tính năng thường dùng trong quá trình phát triển. Sau khi hệ thống hóa, có thể thấy chúng thực sự hữu ích, nhưng tôi lại chưa áp dụng sớm hơn. Tôi luôn cảm thấy việc học các tính năng mới của Java 8 khá rắc rối nên vẫn sử dụng cách triển khai cũ. Thực ra chỉ cần vài ngày là có thể nắm được các tính năng mới này; một khi đã nắm được, hiệu suất sẽ tăng đáng kể. Việc tăng lương thực ra cũng là tiền trả cho việc học tập; nếu không học, cuối cùng sẽ bị đào thải và khủng hoảng tuổi 35 sẽ đến sớm hơn.
 

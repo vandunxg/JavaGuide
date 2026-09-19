@@ -1,6 +1,6 @@
 ---
 title: Giải thích JVM bằng ngôn ngữ đời thường
-description: Giới thiệu JVM, các thành phần cơ bản và quy trình class loading, thực thi theo cách dễ hiểu để nhanh chóng nhập môn nguyên lý virtual machine.
+description: Giới thiệu JVM, các thành phần cơ bản và quy trình class loading, thực thi theo cách dễ hiểu để nhanh chóng làm quen với nguyên lý của virtual machine.
 category: Java
 tag:
   - JVM
@@ -18,7 +18,7 @@ Nếu có vấn đề về cách dùng từ hoặc cách hiểu trong bài viế
 
 ## I. Giới thiệu cơ bản về JVM
 
-JVM là viết tắt của Java Virtual Machine, một máy tính được mô phỏng và một specification. Nó mô phỏng các chức năng máy tính khác nhau trên máy tính thực tế để thực hiện···
+JVM là viết tắt của Java Virtual Machine, một máy tính tưởng tượng, đồng thời là một specification. Nó mô phỏng các chức năng máy tính khác nhau trên máy tính thực tế để thực hiện···
 
 Được rồi, tạm gác câu nói quá chuyên môn này sang một bên: chỉ cần biết JVM thực chất giống một máy tính nhỏ chạy trên môi trường hệ điều hành như Windows hoặc Linux. Nó tương tác trực tiếp với hệ điều hành, không tương tác trực tiếp với phần cứng; còn hệ điều hành có thể giúp chúng ta thực hiện công việc tương tác với phần cứng.
 
@@ -38,31 +38,31 @@ Nếu **JVM** muốn thực thi file **`.class`**, chúng ta cần nạp file đ
 
 #### ② Method area
 
-**Method area** dùng để lưu các dữ liệu như metadata, chẳng hạn thông tin class, constant, static variable, code sau khi compile···
+**Method area** dùng để lưu các dữ liệu như metadata, chẳng hạn thông tin class, constant, static variable, compiled code···
 
 Class loader sẽ đưa file `.class` vào khu vực này trước.
 
 #### ③ Heap
 
-**Heap** chủ yếu lưu object instance, array và các dữ liệu khác. Heap và method area đều thuộc **khu vực thread shared**. Thread shared chỉ có nghĩa là nhiều thread có thể truy cập các khu vực này, không có nghĩa bản thân khu vực đó “không thread-safe”; có xảy ra data race hay không phụ thuộc vào cách chương trình truy cập dữ liệu bên trong.
+**Heap** chủ yếu lưu object instance, array và các dữ liệu khác. Heap và method area đều thuộc **khu vực shared giữa các thread**. Thread shared chỉ có nghĩa là nhiều thread có thể truy cập các khu vực này, không có nghĩa bản thân khu vực đó “không thread-safe”; có xảy ra data race hay không phụ thuộc vào cách chương trình truy cập dữ liệu bên trong.
 
 #### ④ Stack
 
 **Stack** là không gian chạy code. Mỗi method chúng ta viết đều được đưa vào **stack** để chạy.
 
-Chúng ta thường nghe đến hai thuật ngữ local method stack và Java Native Interface (JNI). Native method được triển khai bằng code native bên ngoài Java, ngôn ngữ triển khai phổ biến là C hoặc C++; cách triển khai cụ thể phụ thuộc vào virtual machine và native library.
+Chúng ta thường nghe đến hai thuật ngữ native method stack và Java Native Interface (JNI). Native method được triển khai bằng code native bên ngoài Java, ngôn ngữ triển khai phổ biến là C hoặc C++; cách triển khai cụ thể phụ thuộc vào virtual machine và native library.
 
 #### ⑤ Program counter
 
-Program counter ghi lại địa chỉ của JVM instruction mà thread hiện tại đang thực thi; sau khi thực thi branch, loop, xử lý exception hoặc chuyển thread, virtual machine dựa vào nó để tiếp tục thực thi. Giống stack, nó thuộc **khu vực thread private**. Khi thực thi native method, specification không quy định giá trị của nó.
+Program counter ghi lại địa chỉ của JVM instruction mà thread hiện tại đang thực thi; sau khi thực thi branch, loop, xử lý exception hoặc chuyển thread, virtual machine dựa vào nó để tiếp tục thực thi. Giống stack, nó thuộc **khu vực private của thread**. Khi thực thi native method, specification không quy định giá trị của nó.
 
 ![](https://static001.geekbang.org/infoq/c6/c602f57ea9297f50bbc265f1821d6263.png)
 
 #### Tóm tắt
 
 1. Sau khi compile, file Java trở thành file bytecode `.class`.
-2. File bytecode được class loader đưa vào JVM virtual machine.
-3. Trong runtime data area của virtual machine, method area và heap là khu vực thread shared; virtual machine stack, local method stack và program counter là khu vực thread private. Việc shared hay không chỉ là phạm vi visibility của memory area, không đồng nghĩa trực tiếp với thread-safe hay không thread-safe.
+2. File bytecode được class loader đưa vào JVM.
+3. Trong runtime data area của virtual machine, method area và heap là khu vực thread shared; virtual machine stack, native method stack và program counter là khu vực thread private. Việc shared hay không chỉ là phạm vi visibility của memory area, không đồng nghĩa trực tiếp với thread-safe hay không thread-safe.
 
 ### 1.2 Ví dụ code đơn giản
 
@@ -80,14 +80,14 @@ Các bước thực thi method `main` như sau:
 2. JVM tìm entry point của chương trình `App` và thực thi method `main`.
 3. Câu lệnh đầu tiên trong `main` là `Student student = new Student("tellUrDream")`, yêu cầu JVM tạo một object `Student`. Tuy nhiên lúc này method area chưa có thông tin class `Student`, nên JVM lập tức load class `Student` và đưa thông tin class `Student` vào method area.
 4. Sau khi load class `Student`, JVM cấp phát memory cho một instance `Student` mới trên heap, sau đó gọi constructor để khởi tạo instance `Student`. Instance `Student` này giữ một reference **trỏ đến type information của class Student trong method area**.
-5. Khi thực thi `student.sayName();`, JVM dựa vào reference của `student` để tìm object `student`, sau đó dựa vào reference mà object `student` giữ để định vị method table của type information class `student` trong method area và lấy địa chỉ bytecode của `sayName()`.
+5. Khi thực thi `student.sayName();`, JVM dựa vào reference của `student` để tìm object `student`, sau đó dựa vào reference mà object `student` giữ để định vị method table của type information class `Student` trong method area và lấy địa chỉ bytecode của `sayName()`.
 6. Thực thi `sayName()`.
 
 Thực ra không cần quan tâm quá nhiều; chỉ cần biết khi khởi tạo object instance, JVM sẽ tìm thông tin class trong method area, sau đó chạy method ở stack. Việc tìm method được thực hiện trong method table.
 
 ## II. Giới thiệu class loader
 
-Như đã đề cập, class loader chịu trách nhiệm load file `.class`. Các file này có file marker cụ thể ở phần đầu; class loader load nội dung bytecode của file class vào memory và chuyển nội dung đó thành runtime data structure trong method area. ClassLoader chỉ chịu trách nhiệm load file class, còn file có thể chạy được hay không do Execution Engine quyết định.
+Như đã đề cập, class loader chịu trách nhiệm load file `.class`. Các file này có chữ ký file cụ thể ở phần đầu; class loader load nội dung bytecode của file class vào memory và chuyển nội dung đó thành runtime data structure trong method area. ClassLoader chỉ chịu trách nhiệm load file class, còn file có thể chạy được hay không do Execution Engine quyết định.
 
 ### 2.1 Quy trình của class loader
 
@@ -107,9 +107,9 @@ Từ khi class được load vào memory của virtual machine đến khi giải
 
 #### 2.1.3 Initialization
 
-Initialization thực chất là quá trình thực thi class constructor method `<clinit>()`, đồng thời phải bảo đảm method `<clinit>()` của superclass đã thực thi xong trước đó. Method này do compiler tổng hợp, tuần tự thực thi explicit initialization của toàn bộ class variable (member variable có modifier `static`) và các câu lệnh trong static code block. Lúc này `static int a` ở giai đoạn preparation chuyển từ giá trị mặc định `0` thành giá trị explicit initialization `3`. Do thứ tự thực thi, nếu class variable được thay đổi lần nữa trong static code block ở giai đoạn initialization thì giá trị explicit initialization sẽ bị ghi đè; giá trị cuối cùng là giá trị được gán trong static code block.
+Initialization thực chất là quá trình thực thi class initialization method `<clinit>()`, đồng thời phải bảo đảm method `<clinit>()` của superclass đã thực thi xong trước đó. Method này do compiler tổng hợp, tuần tự thực thi explicit initialization của toàn bộ class variable (member variable có modifier `static`) và các câu lệnh trong static code block. Lúc này `static int a` ở giai đoạn preparation chuyển từ giá trị mặc định `0` thành giá trị explicit initialization `3`. Do thứ tự thực thi, nếu class variable được thay đổi lần nữa trong static code block ở giai đoạn initialization thì giá trị explicit initialization sẽ bị ghi đè; giá trị cuối cùng sẽ là giá trị được gán trong static code block.
 
-> Lưu ý: trong bytecode file có hai loại initialization method: `<init>` cho non-static resource và `<clinit>` cho static resource. Class constructor method `<clinit>()` khác với constructor của class; các method này là những special method trong bytecode file chỉ JVM có thể nhận biết.
+> Lưu ý: trong bytecode file có hai loại initialization method: `<init>` cho non-static resource và `<clinit>` cho static resource. Class initialization method `<clinit>()` khác với constructor của class; các method này là những special method trong bytecode file chỉ JVM có thể nhận biết.
 
 #### 2.1.4 Unloading
 
@@ -120,8 +120,8 @@ Class unloading là việc virtual machine thu hồi class metadata không còn 
 Lấy HotSpot của JDK 8 làm ví dụ, hierarchy của class loader thường gặp như sau. Sau khi module hóa ở JDK 9, Extension ClassLoader được thay thế bởi Platform ClassLoader và `rt.jar` không còn tồn tại:
 
 1. BootStrap ClassLoader: `rt.jar`
-2. Extension ClassLoader: load các package jar mở rộng.
-3. App ClassLoader: các package jar bên dưới classpath được chỉ định.
+2. Extension ClassLoader: load các file JAR mở rộng.
+3. App ClassLoader: các file JAR trong classpath được chỉ định.
 4. Custom ClassLoader: class loader tùy chỉnh.
 
 ### 2.3 Cơ chế parent delegation
@@ -130,7 +130,7 @@ Khi một class nhận được yêu cầu load, class đó không tự thử lo
 
 Ưu điểm của cách này là khi load class nằm trong package `rt.jar`, bất kể loader nào thực hiện load, cuối cùng yêu cầu cũng được ủy thác cho BootStrap ClassLoader. Nhờ đó, sử dụng các class loader khác nhau vẫn nhận được cùng một kết quả.
 
-Đây cũng có tác dụng isolation, tránh để code của chúng ta ảnh hưởng đến code của JDK. Ví dụ, nếu tự định nghĩa một `java.lang.String`:
+Đây cũng có tác dụng cô lập, tránh để code của chúng ta ảnh hưởng đến code của JDK. Ví dụ, nếu tự định nghĩa một `java.lang.String`:
 
 ```java
 package java.lang;
@@ -145,11 +145,11 @@ Khi thử chạy hàm `main` của class hiện tại, code chắc chắn sẽ b
 
 ## III. Runtime data area
 
-### 3.1 Local method stack và program counter
+### 3.1 Native method stack và program counter
 
-Ví dụ, khi mở source code của class `Thread`, chúng ta sẽ thấy method `start0` có modifier keyword `native` và không có Java method body. Loại method này được triển khai bằng code native bên ngoài Java, ngôn ngữ triển khai phổ biến là C hoặc C++; virtual machine sử dụng local method stack để hỗ trợ thực thi native method.
+Ví dụ, khi mở source code của class `Thread`, chúng ta sẽ thấy method `start0` có modifier keyword `native` và không có Java method body. Loại method này được triển khai bằng code native bên ngoài Java, ngôn ngữ triển khai phổ biến là C hoặc C++; virtual machine sử dụng native method stack để hỗ trợ thực thi native method.
 
-Program counter ghi lại địa chỉ JVM instruction mà thread hiện tại đang thực thi. Đây cũng là runtime data area duy nhất mà 《Java Virtual Machine Specification》 không quy định bất kỳ trường hợp `OutOfMemoryError` nào. Bytecode interpreter chọn bytecode instruction tiếp theo cần thực thi bằng cách thay đổi giá trị program counter.
+Program counter ghi lại địa chỉ JVM instruction mà thread hiện tại đang thực thi. Đây cũng là runtime data area duy nhất mà Java Virtual Machine Specification không quy định bất kỳ trường hợp `OutOfMemoryError` nào. Bytecode interpreter chọn bytecode instruction tiếp theo cần thực thi bằng cách thay đổi giá trị program counter.
 
 Nếu đang thực thi native method, specification không quy định giá trị của program counter.
 
@@ -212,7 +212,7 @@ Sau khi loại bỏ permanent generation, sẽ không còn `java.lang.OutOfMemor
 
 #### 3.3.7 Giới thiệu young generation Eden
 
-Sau khi `new` một object, object sẽ trước tiên được đặt vào vùng memory được tách ra từ Eden làm storage. Tuy nhiên, heap memory là thread shared, nên có thể xuất hiện tình huống hai object dùng chung một vùng memory. Cách JVM xử lý là request trước cho mỗi thread một vùng memory liên tục và quy định vị trí lưu object; nếu không đủ space thì request thêm nhiều vùng memory. Thao tác này gọi là TLAB, bạn có thể tìm hiểu thêm nếu quan tâm.
+Sau khi `new` một object, object sẽ trước tiên được đặt vào vùng memory được tách ra từ Eden làm storage. Tuy nhiên, heap memory là thread shared, nên có thể xuất hiện tình huống hai object dùng chung một vùng memory. Cách JVM xử lý là cấp trước cho mỗi thread một vùng memory liên tục và quy định vị trí lưu object; nếu không đủ space thì cấp phát thêm các vùng memory. Thao tác này gọi là TLAB, bạn có thể tìm hiểu thêm nếu quan tâm.
 
 Khi không gian Eden không đủ để tiếp tục cấp phát object, Minor GC thường được trigger (tức GC xảy ra trong young generation); object còn sống có thể được copy sang Survivor hoặc promote thẳng lên old generation. Sau khi copy xong, hai Survivor from và to đổi vai trò cho nhau. Khi object đạt promotion threshold, object có thể đi vào old generation; trong các generational collector phổ biến của HotSpot, default của `-XX:MaxTenuringThreshold` thường là 15, nhưng promotion age thực tế còn chịu ảnh hưởng của dynamic age judgment, capacity của Survivor và strategy của collector, không phải mọi object đều cố định trải qua 15 lần Minor GC.
 
@@ -234,7 +234,7 @@ Bổ sung về parameter `-XX:TargetSurvivorRatio`: không nhất thiết phải
 
 ![](https://static001.geekbang.org/infoq/1b/1ba7f3cff6e07c6e9c6765cc4ef74997.png)
 
-Trong hình, program counter, virtual machine stack và local method stack tồn tại cùng vòng đời của thread. Việc cấp phát và thu hồi memory đều xác định được. Khi thread kết thúc, memory tự nhiên được thu hồi, nên không cần quan tâm đến garbage collection. Java heap và method area thì khác: chúng được các thread shared, việc cấp phát và thu hồi memory đều là động. Vì vậy garbage collector chủ yếu quan tâm đến memory thuộc heap và method area.
+Trong hình, program counter, virtual machine stack và native method stack tồn tại cùng vòng đời của thread. Việc cấp phát và thu hồi memory đều xác định được. Khi thread kết thúc, memory tự nhiên được thu hồi, nên không cần quan tâm đến garbage collection. Java heap và method area thì khác: chúng là vùng shared giữa các thread, việc cấp phát và thu hồi memory đều là động. Vì vậy garbage collector chủ yếu quan tâm đến memory thuộc heap và method area.
 
 Trước khi thu hồi, cần xác định object nào còn sống và object nào đã chết. Dưới đây là hai phương pháp tính toán cơ bản.
 
@@ -247,16 +247,16 @@ Trước khi thu hồi, cần xác định object nào còn sống và object n�
 1. Object được reference trong virtual machine stack (local variable table trong stack frame) (local variable).
 2. Object được reference bởi static variable trong method area (static variable).
 3. Object được reference bởi constant trong method area.
-4. Object được reference bởi JNI trong local method stack (tức method có modifier `native`) (JNI là cách Java virtual machine gọi function C tương ứng; thông qua JNI function cũng có thể tạo Java object mới. Ngoài ra, local reference hoặc global reference của object trong JNI đều khiến object mà chúng trỏ đến được đánh dấu là không thể thu hồi).
+4. Object được reference bởi JNI trong native method stack (tức method có modifier `native`) (JNI là cách Java virtual machine gọi function C tương ứng; thông qua JNI function cũng có thể tạo Java object mới. Ngoài ra, local reference hoặc global reference của object trong JNI đều khiến object mà chúng trỏ đến được đánh dấu là không thể thu hồi).
 5. Java thread đã start nhưng chưa terminate.
 
-Ưu điểm của phương pháp này là giải quyết được vấn đề circular reference. Collector cần có được quan hệ reference nhất quán giữa các object ở một số giai đoạn, thường tạo ra pause Stop-The-World; concurrent collector hiện đại có thể thực hiện phần lớn công việc marking đồng thời với application thread, không phải toàn bộ quá trình reachability analysis đều cần “dừng tất cả process”.
+Ưu điểm của phương pháp này là giải quyết được vấn đề circular reference. Collector cần có được quan hệ reference nhất quán giữa các object ở một số giai đoạn, thường gây ra pause Stop-The-World; concurrent collector hiện đại có thể thực hiện phần lớn công việc marking đồng thời với application thread, không phải toàn bộ quá trình reachability analysis đều cần “dừng tất cả process”.
 
 #### 3.3.9 Cách tuyên bố object đã thực sự chết
 
 Trước hết phải đề cập đến một method tên là **`finalize()`**.
 
-`finalize()` là một method của class `Object`. Method `finalize()` của một object nhiều nhất được hệ thống tự động gọi một lần; nếu object thiết lập lại quan hệ reachable thông qua method này, lần tiếp theo bị xác định là unreachable sẽ không được gọi lại.
+`finalize()` là một method của class `Object`. Method `finalize()` của một object nhiều nhất được hệ thống tự động gọi một lần; nếu object khôi phục khả năng reachable thông qua method này, lần tiếp theo bị xác định là unreachable sẽ không được gọi lại.
 
 Bổ sung: không khuyến khích gọi `finalize()` trong chương trình để tự cứu object. Thời điểm thực thi không xác định, thậm chí không bảo đảm chắc chắn sẽ thực thi; chi phí chạy cao và không thể bảo đảm thứ tự gọi của các object. `finalize()` bị deprecated trong Java 9 và được đánh dấu chờ loại bỏ trong Java 18. Khi cần quản lý resource ngoài heap, có thể tùy trường hợp dùng `try-with-resources` hoặc `java.lang.ref.Cleaner`; bản thân `Cleaner` không phải tên gọi chung của strong, soft, weak và phantom reference.
 
@@ -271,7 +271,7 @@ Nếu đã xác định object thực sự chết, chúng ta thu hồi rác như
 
 ### 3.4 Garbage collection algorithm
 
-Để tìm hiểu chi tiết về các garbage collection algorithm phổ biến, nên đọc bài viết này: [JVM Garbage Collection giải thích chi tiết (trọng tâm)](https://javaguide.cn/java/jvm/jvm-garbage-collection.html).
+Để tìm hiểu chi tiết về các garbage collection algorithm phổ biến, nên đọc bài viết này: [Giải thích chi tiết về garbage collection của JVM (trọng tâm)](https://javaguide.cn/java/jvm/jvm-garbage-collection.html).
 
 ### 3.5 (Chỉ cần biết) Các garbage collector khác nhau
 
@@ -285,7 +285,7 @@ JDK 9 đặt G1 làm garbage collector mặc định của Server HotSpot. Các 
 
 ### 3.6 (Chỉ cần biết) Các parameter thường dùng của JVM
 
-JVM có rất nhiều parameter. Ở đây chỉ liệt kê một số parameter quan trọng; bạn cũng có thể biết các thông tin này qua nhiều search engine khác nhau.
+JVM có rất nhiều parameter. Ở đây chỉ liệt kê một số parameter quan trọng; bạn cũng có thể tra cứu thêm bằng các search engine.
 
 | Tên parameter                | Ý nghĩa                                                | Mô tả                                                                                                                         |
 | ---------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -310,11 +310,11 @@ Ngoài ra còn có một số parameter về logging và CMS, nhưng ở đây k
 
 Dựa trên các kiến thức JVM vừa đề cập, chúng ta có thể thử tuning JVM, chủ yếu là phần heap memory.
 
-Đối với collector dùng layout generational cố định, Java heap có thể được xem gần đúng là tổng của young generation và old generation; permanent generation hoặc Metaspace không thuộc Java heap. Khi tổng heap size cố định, tăng young generation sẽ làm giảm không gian old generation, nhưng không có “giá trị tối ưu chính thức” áp dụng cho mọi application; cần test dựa trên object allocation, tình trạng sống và collector được sử dụng.
+Đối với collector dùng layout generational cố định, Java heap có thể được xem gần đúng là tổng của young generation và old generation; permanent generation hoặc Metaspace không thuộc Java heap. Khi tổng heap size cố định, tăng young generation sẽ làm giảm không gian old generation, nhưng không có “giá trị tối ưu chính thức” áp dụng cho mọi application; cần test dựa trên object allocation, thời gian sống và collector được sử dụng.
 
 ### 4.1 Điều chỉnh max heap memory và min heap memory
 
-`-Xmx` và `-Xms` lần lượt chỉ định max value và initial value của Java heap. Nếu không thiết lập rõ, default được HotSpot tính adaptive dựa trên JVM version, memory khả dụng, container limit và môi trường chạy; không nên ước tính theo một tỷ lệ cố định của physical memory.
+`-Xmx` và `-Xms` lần lượt chỉ định giá trị tối đa và giá trị ban đầu của Java heap. Nếu không thiết lập rõ, default được HotSpot tính adaptive dựa trên JVM version, memory khả dụng, container limit và môi trường chạy; không nên ước tính theo một tỷ lệ cố định của physical memory.
 
 HotSpot có thể điều chỉnh committed heap space trong khoảng `-Xms` đến `-Xmx`. `MinHeapFreeRatio` và `MaxHeapFreeRatio` là các parameter được một số collector dùng để điều khiển tỷ lệ free sau GC. Hành vi scale up/down và tỷ lệ mặc định phụ thuộc collector, JDK version và adaptive strategy, không thể khái quát thống nhất thành 40% và 70% cố định.
 
@@ -323,9 +323,9 @@ HotSpot có thể điều chỉnh committed heap space trong khoảng `-Xms` đ�
 Chúng ta thực thi code sau:
 
 ```java
-System.out.println("Xmx=" + Runtime.getRuntime().maxMemory() / 1024.0 / 1024 + "M");    // Maximum memory of the system
-System.out.println("free mem=" + Runtime.getRuntime().freeMemory() / 1024.0 / 1024 + "M");  // Free memory of the system
-System.out.println("total mem=" + Runtime.getRuntime().totalMemory() / 1024.0 / 1024 + "M");  // Total currently available memory
+System.out.println("Xmx=" + Runtime.getRuntime().maxMemory() / 1024.0 / 1024 + "M");    // Dung lượng tối đa của hệ thống
+System.out.println("free mem=" + Runtime.getRuntime().freeMemory() / 1024.0 / 1024 + "M");  // Dung lượng trống của hệ thống
+System.out.println("total mem=" + Runtime.getRuntime().totalMemory() / 1024.0 / 1024 + "M");  // Tổng dung lượng hiện có
 ```
 
 Lưu ý: kích thước được thiết lập ở đây là Java heap size, tức young generation size + old generation size.
@@ -344,43 +344,43 @@ Khởi động lại method `main`.
 
 ![](https://static001.geekbang.org/infoq/c8/c89edbd0a147a791cfabdc37923c6836.png)
 
-Ở đây GC hiển thị một Allocation Failure, tức allocation failure; sự việc xảy ra trong PSYoungGen, nghĩa là trong young generation.
+Ở đây GC báo Allocation Failure (cấp phát thất bại); sự việc xảy ra trong PSYoungGen, nghĩa là trong young generation.
 
-Lúc này memory đã request là 18M, free memory là 4.214195251464844M.
+Lúc này memory được cấp phát là 18M, free memory là 4.214195251464844M.
 
 Bây giờ chúng ta tạo một byte array để xem, thực thi code sau:
 
 ```java
 byte[] b = new byte[1 * 1024 * 1024];
 System.out.println("Allocated 1M to the array");
-System.out.println("Xmx=" + Runtime.getRuntime().maxMemory() / 1024.0 / 1024 + "M");  // Maximum memory of the system
-System.out.println("free mem=" + Runtime.getRuntime().freeMemory() / 1024.0 / 1024 + "M");  // Free memory of the system
+System.out.println("Xmx=" + Runtime.getRuntime().maxMemory() / 1024.0 / 1024 + "M");  // Dung lượng tối đa của hệ thống
+System.out.println("free mem=" + Runtime.getRuntime().freeMemory() / 1024.0 / 1024 + "M");  // Dung lượng trống của hệ thống
 System.out.println("total mem=" + Runtime.getRuntime().totalMemory() / 1024.0 / 1024 + "M");
 ```
 
 ![](https://static001.geekbang.org/infoq/db/dbeb6aea0a90949f7d7fe4746ddb11a3.png)
 
-Lúc này free memory lại giảm, nhưng total memory không thay đổi. Java sẽ cố gắng duy trì giá trị total mem ở min heap memory size.
+Lúc này free memory lại giảm, nhưng total memory không thay đổi. Java sẽ cố gắng duy trì giá trị total mem ở mức min heap memory size.
 
 ```java
 byte[] b = new byte[10 * 1024 * 1024];
 System.out.println("Allocated 10M to the array");
-System.out.println("Xmx=" + Runtime.getRuntime().maxMemory() / 1024.0 / 1024 + "M");  // Maximum memory of the system
-System.out.println("free mem=" + Runtime.getRuntime().freeMemory() / 1024.0 / 1024 + "M");  // Free memory of the system
-System.out.println("total mem=" + Runtime.getRuntime().totalMemory() / 1024.0 / 1024 + "M");  // Total currently available memory
+System.out.println("Xmx=" + Runtime.getRuntime().maxMemory() / 1024.0 / 1024 + "M");  // Dung lượng tối đa của hệ thống
+System.out.println("free mem=" + Runtime.getRuntime().freeMemory() / 1024.0 / 1024 + "M");  // Dung lượng trống của hệ thống
+System.out.println("total mem=" + Runtime.getRuntime().totalMemory() / 1024.0 / 1024 + "M");  // Tổng dung lượng hiện có
 ```
 
 ![](https://static001.geekbang.org/infoq/b6/b6a7c522166dbd425dbb06eb56c9b071.png)
 
-Lúc này chúng ta tạo một byte array 10M, min heap memory không thể đáp ứng nữa. Chúng ta sẽ thấy total memory hiện đã thành 15M; đây là kết quả của việc đã request memory một lần.
+Lúc này chúng ta tạo một byte array 10M, min heap memory không thể đáp ứng nữa. Chúng ta sẽ thấy total memory hiện đã thành 15M; đây là kết quả của việc đã cấp phát thêm memory một lần.
 
 Tiếp theo chạy lại code này:
 
 ```java
 System.gc();
-System.out.println("Xmx=" + Runtime.getRuntime().maxMemory() / 1024.0 / 1024 + "M");    // Maximum memory of the system
-System.out.println("free mem=" + Runtime.getRuntime().freeMemory() / 1024.0 / 1024 + "M");  // Free memory of the system
-System.out.println("total mem=" + Runtime.getRuntime().totalMemory() / 1024.0 / 1024 + "M");  // Total currently available memory
+System.out.println("Xmx=" + Runtime.getRuntime().maxMemory() / 1024.0 / 1024 + "M");    // Dung lượng tối đa của hệ thống
+System.out.println("free mem=" + Runtime.getRuntime().freeMemory() / 1024.0 / 1024 + "M");  // Dung lượng trống của hệ thống
+System.out.println("total mem=" + Runtime.getRuntime().totalMemory() / 1024.0 / 1024 + "M");  // Tổng dung lượng hiện có
 ```
 
 ![](https://static001.geekbang.org/infoq/8d/8dd6e8fccfd1394b83251c136ee44ceb.png)
@@ -398,9 +398,9 @@ Ví dụ: -XX:NewRatio=4 nghĩa là young generation:old generation=1:4, tức y
 ### 4.3 Điều chỉnh tỷ lệ giữa Survivor area và Eden area
 
 ```plain
--XX:SurvivorRatio (Survivor generation) --- Thiết lập tỷ lệ giữa hai Survivor và eden
+-XX:SurvivorRatio (Survivor generation) --- Thiết lập tỷ lệ giữa hai Survivor và Eden
 
-Ví dụ: 8 nghĩa là two Survivor:eden=2:8, tức một Survivor chiếm 1/10 young generation.
+Ví dụ: 8 nghĩa là hai Survivor:Eden=2:8, tức một Survivor chiếm 1/10 young generation.
 ```
 
 ### 4.4 Thiết lập kích thước young generation và old generation
@@ -422,7 +422,7 @@ Khi OOM, nhớ Dump heap để có thể điều tra hiện trạng. Có thể d
 -Xmx20m -Xms5m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=path to the log output
 ```
 
-Thông thường cũng có thể viết script để gửi thông báo khi OOM xảy ra, chẳng hạn gửi email hoặc restart program để xử lý.
+Thông thường cũng có thể viết script để gửi thông báo khi OOM xảy ra, chẳng hạn gửi email hoặc khởi động lại chương trình để xử lý.
 
 ### 4.6 Thiết lập permanent area (chỉ áp dụng cho HotSpot của JDK 7 trở về trước)
 
@@ -432,7 +432,7 @@ Thông thường cũng có thể viết script để gửi thông báo khi OOM x
 
 `PermSize` thiết lập initial size của permanent generation, `MaxPermSize` thiết lập giới hạn trên; default cụ thể phụ thuộc JVM version và platform, không thể viết thống nhất thành một tỷ lệ cố định của physical memory. Từ JDK 8 trở đi nên chú ý các parameter liên quan đến Metaspace thay vì hai parameter permanent generation này.
 
-tips: nếu heap space chưa dùng hết nhưng vẫn throw OOM, có thể nguyên nhân là permanent area. Heap space thực tế chiếm rất ít nhưng permanent area overflow vẫn throw OOM.
+Mẹo: nếu heap space chưa dùng hết nhưng vẫn phát sinh OOM, nguyên nhân có thể là permanent area. Heap space thực tế chiếm rất ít nhưng permanent area overflow vẫn gây OOM.
 
 ### 4.7 JVM stack parameter tuning
 
@@ -463,31 +463,31 @@ Có rất nhiều parameter khác nhau, nên sẽ không trình bày tất cả;
 
 Parameter này dùng để thiết lập kích thước large memory page; có hiệu lực hay không phụ thuộc operating system, JVM build và cấu hình large page.
 
-#### 4.8.2 Historical parameter `UseFastAccessorMethods`
+#### 4.8.2 Parameter cũ `UseFastAccessorMethods`
 
 ```plain
 -XX:+UseFastAccessorMethods
 ```
 
-HotSpot parameter cũ này tối ưu accessor khi reflection truy cập, không phải “tối ưu nhanh cho primitive type”; JDK hiện đại không còn cung cấp parameter này.
+HotSpot parameter cũ này tối ưu accessor cho việc truy cập bằng reflection, không phải “tối ưu nhanh cho primitive type”; JDK hiện đại không còn cung cấp parameter này.
 
-#### 4.8.3 Thiết lập tắt manual GC
+#### 4.8.3 Tắt manual GC
 
 ```plain
 -XX:+DisableExplicitGC:
-Disable System.gc() (parameter này cần được test nghiêm ngặt)
+Tắt System.gc() (parameter này cần được test nghiêm ngặt)
 ```
 
-#### 4.8.4 Thiết lập max age của garbage
+#### 4.8.4 Thiết lập tuổi tối đa của object
 
 ```plain
 -XX:MaxTenuringThreshold
 Thiết lập giới hạn trên của promotion age của object. Khi đặt bằng 0, generational collector hỗ trợ parameter này sẽ promote object sống trong young generation trực tiếp lên old generation mà không đi qua Survivor. Tăng giá trị này có thể khiến object trải qua nhiều lần copy hơn trong Survivor, nhưng promotion thực tế còn chịu ảnh hưởng của dynamic age judgment, capacity của Survivor và strategy của collector.
 ```
 
-Không phải mọi garbage collector đều sử dụng cùng generational và age promotion mechanism; có hiệu lực hay không cần xem documentation của collector hiện tại.
+Không phải mọi garbage collector đều sử dụng cùng cơ chế generational và age promotion; có hiệu lực hay không cần xem documentation của collector hiện tại.
 
-#### 4.8.5 Historical parameter `AggressiveOpts`
+#### 4.8.5 Parameter cũ `AggressiveOpts`
 
 ```plain
 -XX:+AggressiveOpts
@@ -495,7 +495,7 @@ Không phải mọi garbage collector đều sử dụng cùng generational và 
 
 Đây là parameter dùng trong HotSpot phiên bản cũ để bật experimental performance optimization, không thể hiểu đơn giản là “tăng tốc compile”, và đã bị loại bỏ trong JDK 12.
 
-#### 4.8.6 Historical parameter `UseBiasedLocking`
+#### 4.8.6 Parameter cũ `UseBiasedLocking`
 
 ```plain
 -XX:+UseBiasedLocking
@@ -503,19 +503,19 @@ Không phải mọi garbage collector đều sử dụng cùng generational và 
 
 Biased lock bị tắt mặc định và deprecated trong JDK 15; implementation liên quan sau đó đã bị loại bỏ khỏi HotSpot, không nên xem đây là parameter tuning dùng chung cho JDK hiện đại.
 
-#### 4.8.7 Disable class unloading
+#### 4.8.7 Tắt class unloading
 
 ```plain
 -Xnoclassgc
 ```
 
-Parameter này disable garbage collection của class, không phải garbage collection của object.
+Parameter này tắt garbage collection đối với class, không phải garbage collection đối với object.
 
-#### 4.8.8 Thiết lập object survival time trong heap space
+#### 4.8.8 Thiết lập thời gian tồn tại của object trong heap space
 
 ```plain
 -XX:SoftRefLRUPolicyMSPerMB
-Thiết lập survival time của SoftReference trên mỗi MB heap free space, default là 1s.
+Thiết lập thời gian tồn tại của SoftReference trên mỗi MB heap free space, default là 1s.
 ```
 
 #### 4.8.9 Thiết lập cấp phát object trực tiếp trong old generation
@@ -525,15 +525,15 @@ Thiết lập survival time của SoftReference trên mỗi MB heap free space, 
 Thiết lập kích thước mà object vượt quá sẽ được cấp phát trực tiếp trong old generation, default là 0.
 ```
 
-#### 4.8.10 Thiết lập tỷ lệ TLAB chiếm eden area
+#### 4.8.10 Thiết lập tỷ lệ diện tích Eden mà TLAB chiếm
 
 ```plain
 -XX:TLABWasteTargetPercent
-Thiết lập tỷ lệ phần trăm TLAB chiếm eden area, default là 1%.
+Thiết lập tỷ lệ phần trăm diện tích Eden mà TLAB chiếm, default là 1%.
 ```
 
 ## finally
 
-Thật sự đã trình bày khá dài về chủ đề này. Bài viết tham khảo nhiều nguồn, bao gồm 《Phân tích chuyên sâu virtual machine》 và 《Giải thích chi tiết phỏng vấn Java Core》 của Geek Time, cùng Baidu và phần tổng hợp từ một số khóa học online trong quá trình tự học. Hy vọng bài viết hữu ích cho bạn. Cảm ơn.
+Quả thật bài viết này khá dài. Bài viết tham khảo nhiều nguồn, bao gồm 《Phân tích chuyên sâu virtual machine》 và 《Giải thích chi tiết phỏng vấn Java Core》 của Geek Time, cùng Baidu và phần tổng hợp từ một số khóa học online trong quá trình tự học. Hy vọng bài viết hữu ích cho bạn. Cảm ơn.
 
 <!-- @include: @article-footer.snippet.md -->

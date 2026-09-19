@@ -12,12 +12,12 @@
 
 ## Trạng thái
 
-- Batch hiện tại: 1
+- Batch hiện tại: 2
 - Mục tiêu batch: 50 file
 - Cách chọn: theo thứ tự lộ trình trong `vi/PROGRESS.md`
-- Trạng thái: hoàn tất batch, đã dừng theo yêu cầu
-- Kết quả: 48 file đã tối ưu và commit riêng; 2 file unchanged
-- Kiểm tra: `git diff --check` đạt; `make vi-build` thành công, 721 pages
+- Trạng thái: hoàn tất batch 2
+- Kết quả: 50 file đã tối ưu; không có file unchanged
+- Kiểm tra batch 2: `git diff --check` đạt; `make check` exit 0; `make vi-build` thành công, 721 pages
 
 |   # | File                                                     | Agent       | Trạng thái | Ghi chú                     |
 | --: | -------------------------------------------------------- | ----------- | ---------- | --------------------------- |
@@ -71,3 +71,58 @@
 |  48 | `java/concurrent/java-concurrent-questions-03.md`        | reviewer-48 | verified   | Commit riêng                |
 |  49 | `java/concurrent/jmm.md`                                 | reviewer-49 | verified   | Commit riêng                |
 |  50 | `java/concurrent/java-lock.md`                           | reviewer-50 | verified   | Commit riêng                |
+
+## Batch 2 — 50 file tiếp theo
+
+|   # | File                                                      | Agent        | Trạng thái | Ghi chú                |
+| --: | --------------------------------------------------------- | ------------ | ---------- | ---------------------- |
+|  51 | `java/concurrent/optimistic-lock-and-pessimistic-lock.md` | reviewer-51  | verified   | Đã đối chiếu và tối ưu |
+|  52 | `java/concurrent/cas.md`                                  | reviewer-52  | verified   | Đã đối chiếu và tối ưu |
+|  53 | `java/concurrent/aqs.md`                                  | reviewer-53  | verified   | Đã đối chiếu và tối ưu |
+|  54 | `java/concurrent/reentrantlock.md`                        | reviewer-54  | verified   | Đã đối chiếu và tối ưu |
+|  55 | `java/concurrent/atomic-classes.md`                       | reviewer-55  | verified   | Đã đối chiếu và tối ưu |
+|  56 | `java/concurrent/threadlocal.md`                          | reviewer-56  | verified   | Đã đối chiếu và tối ưu |
+|  57 | `java/concurrent/java-thread-pool-summary.md`             | reviewer-57  | verified   | Đã đối chiếu và tối ưu |
+|  58 | `java/concurrent/java-thread-pool-best-practices.md`      | reviewer-58  | verified   | Đã đối chiếu và tối ưu |
+|  59 | `java/concurrent/java-concurrent-collections.md`          | reviewer-59  | verified   | Đã đối chiếu và tối ưu |
+|  60 | `java/concurrent/completablefuture-intro.md`              | reviewer-60  | verified   | Đã đối chiếu và tối ưu |
+|  61 | `java/concurrent/virtual-thread.md`                       | reviewer-61  | verified   | Đã đối chiếu và tối ưu |
+|  62 | `java/jvm/README.md`                                      | reviewer-62  | verified   | Đã đối chiếu và tối ưu |
+|  63 | `java/jvm/memory-area.md`                                 | reviewer-63  | verified   | Đã đối chiếu và tối ưu |
+|  64 | `java/jvm/jvm-garbage-collection.md`                      | reviewer-64  | verified   | Đã đối chiếu và tối ưu |
+|  65 | `java/jvm/class-file-structure.md`                        | reviewer-65  | verified   | Đã đối chiếu và tối ưu |
+|  66 | `java/jvm/class-loading-process.md`                       | reviewer-66  | verified   | Đã đối chiếu và tối ưu |
+|  67 | `java/jvm/classloader.md`                                 | reviewer-67  | verified   | Đã đối chiếu và tối ưu |
+|  68 | `java/jvm/jvm-parameters-intro.md`                        | reviewer-68  | verified   | Đã đối chiếu và tối ưu |
+|  69 | `java/jvm/jvm-intro.md`                                   | reviewer-69  | verified   | Đã đối chiếu và tối ưu |
+|  70 | `java/jvm/jdk-monitoring-and-troubleshooting-tools.md`    | reviewer-70  | verified   | Đã đối chiếu và tối ưu |
+|  71 | `java/jvm/jvm-in-action.md`                               | reviewer-71  | verified   | Đã đối chiếu và tối ưu |
+|  72 | `java/jvm/jvm-interview-questions.md`                     | reviewer-72  | verified   | Đã đối chiếu và tối ưu |
+|  73 | `java/io/README.md`                                       | reviewer-73  | verified   | Đã đối chiếu và tối ưu |
+|  74 | `java/io/io-basis.md`                                     | reviewer-74  | verified   | Đã đối chiếu và tối ưu |
+|  75 | `java/io/io-design-patterns.md`                           | reviewer-75  | verified   | Đã đối chiếu và tối ưu |
+|  76 | `java/io/io-model.md`                                     | reviewer-76  | verified   | Đã đối chiếu và tối ưu |
+|  77 | `java/io/nio-basis.md`                                    | reviewer-77  | verified   | Đã đối chiếu và tối ưu |
+|  78 | `java/new-features/README.md`                             | reviewer-78  | verified   | Đã đối chiếu và tối ưu |
+|  79 | `java/new-features/java8-common-new-features.md`          | reviewer-79  | verified   | Đã đối chiếu và tối ưu |
+|  80 | `java/new-features/java8-tutorial-translate.md`           | reviewer-80  | verified   | Đã đối chiếu và tối ưu |
+|  81 | `java/new-features/java9.md`                              | reviewer-81  | verified   | Đã đối chiếu và tối ưu |
+|  82 | `java/new-features/java10.md`                             | reviewer-82  | verified   | Đã đối chiếu và tối ưu |
+|  83 | `java/new-features/java11.md`                             | reviewer-83  | verified   | Đã đối chiếu và tối ưu |
+|  84 | `java/new-features/java12-13.md`                          | reviewer-84  | verified   | Đã đối chiếu và tối ưu |
+|  85 | `java/new-features/java14-15.md`                          | reviewer-85  | verified   | Đã đối chiếu và tối ưu |
+|  86 | `java/new-features/java16.md`                             | reviewer-86  | verified   | Đã đối chiếu và tối ưu |
+|  87 | `java/new-features/java17.md`                             | reviewer-87  | verified   | Đã đối chiếu và tối ưu |
+|  88 | `java/new-features/java18.md`                             | reviewer-88  | verified   | Đã đối chiếu và tối ưu |
+|  89 | `java/new-features/java19.md`                             | reviewer-89  | verified   | Đã đối chiếu và tối ưu |
+|  90 | `java/new-features/java20.md`                             | reviewer-90  | verified   | Đã đối chiếu và tối ưu |
+|  91 | `java/new-features/java21.md`                             | reviewer-91  | verified   | Đã đối chiếu và tối ưu |
+|  92 | `java/new-features/java22-23.md`                          | reviewer-92  | verified   | Đã đối chiếu và tối ưu |
+|  93 | `java/new-features/java24.md`                             | reviewer-93  | verified   | Đã đối chiếu và tối ưu |
+|  94 | `java/new-features/java25.md`                             | reviewer-94  | verified   | Đã đối chiếu và tối ưu |
+|  95 | `java/new-features/java26.md`                             | reviewer-95  | verified   | Đã đối chiếu và tối ưu |
+|  96 | `cs-basics/network/README.md`                             | reviewer-96  | verified   | Đã đối chiếu và tối ưu |
+|  97 | `cs-basics/network/osi-and-tcp-ip-model.md`               | reviewer-97  | verified   | Đã đối chiếu và tối ưu |
+|  98 | `cs-basics/network/application-layer-protocol.md`         | reviewer-98  | verified   | Đã đối chiếu và tối ưu |
+|  99 | `cs-basics/network/tcp-connection-and-disconnection.md`   | reviewer-99  | verified   | Đã đối chiếu và tối ưu |
+| 100 | `cs-basics/network/tcp-byte-stream-udp-datagram.md`       | reviewer-100 | verified   | Đã đối chiếu và tối ưu |

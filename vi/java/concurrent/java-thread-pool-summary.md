@@ -1,6 +1,6 @@
 ---
-title: "Giải thích chi tiết về thread pool Java"
-description: "Giải thích chi tiết về thread pool Java: đi sâu vào cấu hình tham số cốt lõi của ThreadPoolExecutor, hệ thống Executor framework, lựa chọn task queue, rejection policy, nguyên lý hoạt động và best practices của thread pool."
+title: "Giải thích chi tiết về thread pool trong Java"
+description: "Giải thích chi tiết về thread pool trong Java: cấu hình tham số cốt lõi của ThreadPoolExecutor, hệ thống Executor framework, lựa chọn task queue, rejection policy, nguyên lý hoạt động và best practices."
 category: Java
 tag:
   - Java Concurrency
@@ -12,23 +12,23 @@ head:
 
 <!-- markdownlint-disable MD024 -->
 
-Chắc hẳn bạn đã quá quen thuộc với pooling technology: thread pool, database connection pool, HTTP connection pool... đều là ứng dụng của tư tưởng này. Tư tưởng của pooling technology chủ yếu nhằm giảm chi phí lấy resource mỗi lần và nâng cao hiệu quả sử dụng resource.
+Chắc hẳn bạn đã rất quen thuộc với kỹ thuật pooling: thread pool, database connection pool và HTTP connection pool đều là ứng dụng của tư tưởng này. Kỹ thuật pooling chủ yếu nhằm giảm chi phí lấy tài nguyên mỗi lần và nâng cao hiệu quả sử dụng tài nguyên.
 
 Bài viết này sẽ giới thiệu chi tiết các khái niệm cơ bản và nguyên lý cốt lõi của thread pool.
 
 ## Giới thiệu về thread pool
 
-Chắc hẳn bạn đã quá quen thuộc với pooling technology: thread pool, database connection pool, HTTP connection pool... đều là ứng dụng của tư tưởng này. Tư tưởng của pooling technology chủ yếu nhằm giảm chi phí lấy resource mỗi lần và nâng cao hiệu quả sử dụng resource.
+Chắc hẳn bạn đã rất quen thuộc với kỹ thuật pooling: thread pool, database connection pool và HTTP connection pool đều là ứng dụng của tư tưởng này. Kỹ thuật pooling chủ yếu nhằm giảm chi phí lấy tài nguyên mỗi lần và nâng cao hiệu quả sử dụng tài nguyên.
 
-Thread pool cung cấp một cách để giới hạn và quản lý resource (bao gồm việc thực thi một task). Mỗi thread pool cũng duy trì một số thông tin thống kê cơ bản, chẳng hạn số task đã hoàn thành. Sử dụng thread pool chủ yếu mang lại các lợi ích sau:
+Thread pool cung cấp một cách để giới hạn và quản lý tài nguyên (bao gồm việc thực thi một task). Mỗi thread pool cũng duy trì một số thông tin thống kê cơ bản, chẳng hạn số task đã hoàn thành. Sử dụng thread pool chủ yếu mang lại các lợi ích sau:
 
-1. **Giảm tiêu hao resource**: các thread trong thread pool có thể được tái sử dụng. Khi một thread hoàn thành task, nó không bị hủy ngay mà quay lại pool để chờ task tiếp theo. Điều này tránh chi phí phát sinh do thường xuyên tạo và hủy thread.
+1. **Giảm tiêu hao tài nguyên**: các thread trong thread pool có thể được tái sử dụng. Khi một thread hoàn thành task, nó không bị hủy ngay mà quay lại pool để chờ task tiếp theo. Điều này tránh chi phí phát sinh do thường xuyên tạo và hủy thread.
 2. **Tăng tốc độ phản hồi**: vì thread pool thường duy trì một số lượng core thread nhất định (hay còn gọi là “worker thường trực”), khi có task, task có thể được giao trực tiếp cho các thread đã tồn tại và đang rảnh để thực thi, bỏ qua thời gian tạo thread nên task được xử lý nhanh hơn.
-3. **Tăng khả năng quản lý thread**: thread pool cho phép quản lý thống nhất các thread trong pool. Bạn có thể cấu hình kích thước thread pool (số core thread, số thread tối đa), loại và kích thước task queue, rejection policy... Nhờ đó có thể kiểm soát tổng số concurrent thread, tránh cạn kiệt resource và bảo đảm tính ổn định của hệ thống. Đồng thời, thread pool thường cung cấp monitoring interface để thuận tiện theo dõi trạng thái hoạt động của thread pool (chẳng hạn có bao nhiêu active thread, bao nhiêu task đang xếp hàng), từ đó tối ưu.
+3. **Tăng khả năng quản lý thread**: thread pool cho phép quản lý thống nhất các thread trong pool. Bạn có thể cấu hình kích thước thread pool (số core thread, số thread tối đa), loại và kích thước task queue, rejection policy... Nhờ đó có thể kiểm soát tổng số thread concurrent, tránh cạn kiệt tài nguyên và bảo đảm tính ổn định của hệ thống. Đồng thời, thread pool thường cung cấp monitoring interface để thuận tiện theo dõi trạng thái hoạt động của thread pool (chẳng hạn có bao nhiêu active thread, bao nhiêu task đang xếp hàng), từ đó tối ưu.
 
 ## Giới thiệu Executor framework
 
-`Executor` framework được đưa vào sau Java 5. Sau Java 5, sử dụng `Executor` để khởi động thread tốt hơn dùng method `start` của `Thread`: ngoài việc dễ quản lý và hiệu quả hơn (dùng thread pool để tiết kiệm chi phí), còn có một điểm quan trọng là giúp tránh vấn đề this escape.
+`Executor` framework được giới thiệu từ sau Java 5. Sau Java 5, sử dụng `Executor` để khởi động thread tốt hơn dùng method `start` của `Thread`: ngoài việc dễ quản lý và hiệu quả hơn (dùng thread pool để tiết kiệm chi phí), còn có một điểm quan trọng là giúp tránh vấn đề this escape.
 
 > This escape là việc thread khác đã giữ reference đến object trước khi constructor trả về. Việc gọi method của object chưa được khởi tạo hoàn chỉnh có thể gây ra lỗi khó hiểu.
 
@@ -70,7 +70,7 @@ public class ScheduledThreadPoolExecutor
 
 **`Future`** interface và class **`FutureTask`** implement `Future` interface đều có thể đại diện cho kết quả tính toán async.
 
-Khi submit class implement **`Runnable` interface** hoặc **`Callable` interface** cho **`ThreadPoolExecutor`** hoặc **`ScheduledThreadPoolExecutor`** thực thi, việc gọi `submit()` sẽ trả về một object implement `Future` interface. Implementation cụ thể không nhất thiết là `FutureTask`; ví dụ scheduled thread pool sẽ trả về implementation tương ứng của `RunnableScheduledFuture`.
+Khi submit một class implement **`Runnable` interface** hoặc **`Callable` interface** cho **`ThreadPoolExecutor`** hoặc **`ScheduledThreadPoolExecutor`** thực thi, việc gọi `submit()` sẽ trả về một object implement `Future` interface. Implementation cụ thể không nhất thiết là `FutureTask`; ví dụ scheduled thread pool sẽ trả về implementation tương ứng của `RunnableScheduledFuture`.
 
 **Sơ đồ minh họa việc sử dụng `Executor` framework**:
 
@@ -117,12 +117,12 @@ Class `ThreadPoolExecutor` cung cấp bốn constructor. Hãy xem constructor d�
     }
 ```
 
-Các tham số dưới đây rất quan trọng và chắc chắn bạn sẽ dùng đến khi sử dụng thread pool sau này. Vì vậy, hãy ghi nhớ thật kỹ.
+Các tham số dưới đây rất quan trọng và chắc chắn bạn sẽ dùng đến khi sử dụng thread pool sau này. Vì vậy, hãy ghi nhớ chúng.
 
 3 tham số quan trọng nhất của `ThreadPoolExecutor`:
 
 - `corePoolSize`: số lượng worker thread mà thread pool ưu tiên duy trì. Theo mặc định, thread được tạo theo nhu cầu; sau khi số worker thread đạt giá trị này, task mới thường được đưa vào queue.
-- `maximumPoolSize`: khi số task lưu trong task queue đạt capacity của queue, số thread có thể chạy đồng thời hiện tại sẽ trở thành số thread tối đa.
+- `maximumPoolSize`: số thread tối đa mà thread pool có thể tạo; khi task queue đầy, thread pool có thể tăng số thread đến mức này.
 - `workQueue`: khi có task mới, trước hết kiểm tra số thread đang chạy hiện tại đã đạt số core thread hay chưa; nếu đã đạt, task mới sẽ được lưu vào queue.
 
 Các tham số phổ biến khác của `ThreadPoolExecutor`:
@@ -154,12 +154,12 @@ Trạng thái chỉ chuyển theo một chiều: đang chạy (`RUNNING`) → đ
 
 `ThreadPoolExecutor` đóng gói mỗi worker thread thành inner class `Worker`. `Worker` kế thừa AQS và implement `Runnable` interface.
 
-**Tại sao `Worker` kế thừa AQS?** `Worker` implement một **exclusive lock không reentrant**, dùng phối hợp với `shutdown()` để phân biệt thread đang idle hay đang làm việc: Worker đang thực thi task sẽ giữ lock; `shutdown()` thử `tryLock()` với từng Worker, nếu thất bại nghĩa là thread đó đang làm việc và sẽ không bị interrupt.
+**Tại sao `Worker` kế thừa AQS?** `Worker` implement một **exclusive lock không reentrant**, phối hợp với `shutdown()` để phân biệt thread đang idle hay đang làm việc: Worker đang thực thi task sẽ giữ lock; `shutdown()` thử `tryLock()` với từng Worker, nếu thất bại nghĩa là thread đó đang làm việc và sẽ không bị interrupt.
 
 **Vòng đời của `Worker`:**
 
-1. **Tạo**: khi `execute()` nhận định cần tạo thread mới, nó gọi `addWorker()` để tạo instance `Worker`, bên trong dùng `ThreadFactory` tạo thread.
-2. **Chạy**: sau khi thread khởi động, nó vào vòng lặp `while` của `runWorker()`, liên tục lấy task từ queue qua `getTask()` để thực thi. Worker không bị đánh dấu vĩnh viễn là “core” hay “non-core”; chỉ khi cho phép core thread timeout, hoặc số worker thread hiện tại lớn hơn `corePoolSize`, `getTask()` mới dùng `workQueue.poll(keepAliveTime, unit)` có timeout, nếu không thì dùng `workQueue.take()` để blocking chờ.
+1. **Tạo**: khi `execute()` xác định cần tạo thread mới, nó gọi `addWorker()` để tạo instance `Worker`, bên trong dùng `ThreadFactory` tạo thread.
+2. **Chạy**: sau khi thread khởi động, nó vào vòng lặp `while` của `runWorker()`, liên tục lấy task từ queue qua `getTask()` để thực thi. Worker không bị đánh dấu vĩnh viễn là “core” hay “non-core”; chỉ khi cho phép core thread hết thời gian chờ, hoặc số worker thread hiện tại lớn hơn `corePoolSize`, `getTask()` mới dùng `workQueue.poll(keepAliveTime, unit)` có timeout, nếu không thì dùng `workQueue.take()` để blocking chờ.
 3. **Thoát**: khi `getTask()` trả về `null`, Worker thoát vòng lặp và cleanup. Các trường hợp trả về `null` gồm: thread pool ở trạng thái dừng (`STOP`), thread pool ở trạng thái đã tắt (`SHUTDOWN`) và queue rỗng, non-core thread chờ timeout, hoặc `maximumPoolSize` bị giảm trong lúc chạy. Nếu sau khi thoát số worker thread thấp hơn số core thread, một thread mới sẽ được tự động bổ sung.
 
 **Định nghĩa rejection policy của `ThreadPoolExecutor`:**
@@ -167,9 +167,9 @@ Trạng thái chỉ chuyển theo một chiều: đang chạy (`RUNNING`) → đ
 Khi thread pool đã tắt, hoặc số worker thread hiện tại đạt giới hạn trên và queue cũng không thể nhận task mới, `ThreadPoolExecutor` sẽ gọi rejection policy:
 
 - `ThreadPoolExecutor.AbortPolicy`: ném `RejectedExecutionException` để từ chối xử lý task mới.
-- `ThreadPoolExecutor.CallerRunsPolicy`: gọi thread thực thi task để chạy task, tức chạy (`run`) task bị từ chối ngay trong thread gọi method `execute`; nếu executor đã tắt thì bỏ task đó. Vì vậy policy này sẽ làm giảm tốc độ submit task mới và ảnh hưởng hiệu năng tổng thể của chương trình. Nếu application có thể chịu được độ trễ này và bạn yêu cầu mọi request task đều phải được thực thi, có thể chọn policy này.
+- `ThreadPoolExecutor.CallerRunsPolicy`: dùng thread gọi method `execute` để chạy task, tức chạy (`run`) task bị từ chối ngay trong thread đó; nếu executor đã tắt thì bỏ task. Vì vậy policy này sẽ làm giảm tốc độ submit task mới và ảnh hưởng hiệu năng tổng thể của chương trình. Nếu application có thể chịu được độ trễ này và yêu cầu mọi task được submit đều phải thực thi, có thể chọn policy này.
 - `ThreadPoolExecutor.DiscardPolicy`: không xử lý task mới mà bỏ ngay.
-- `ThreadPoolExecutor.DiscardOldestPolicy`: policy này bỏ request task chưa xử lý sớm nhất.
+- `ThreadPoolExecutor.DiscardOldestPolicy`: policy này bỏ task chưa xử lý cũ nhất.
 
 Ví dụ:
 
@@ -191,17 +191,17 @@ public static class CallerRunsPolicy implements RejectedExecutionHandler {
 
 ### Trường hợp sử dụng thực tế của 4 rejection policy
 
-Phần trên đã giới thiệu hành vi cơ bản của 4 rejection policy tích hợp. Dưới đây là kinh nghiệm production thực tế và các trường hợp phù hợp với từng policy:
+Phần trên đã giới thiệu hành vi cơ bản của 4 rejection policy tích hợp. Dưới đây là kinh nghiệm production và các trường hợp phù hợp với từng policy:
 
-**`AbortPolicy`**: phù hợp với nghiệp vụ cốt lõi không chấp nhận mất task (như thanh toán, chuyển tiền). Khi task bị từ chối, caller sẽ nhận `RejectedExecutionException`, cần catch trong business code và thực hiện bù trừ (như retry hoặc lưu vào database để thực thi bù trừ). _Alibaba Java Development Manual_ chỉ ra rằng nếu không cấu hình gì, queue đầy sẽ ném exception trực tiếp và developer phải xử lý rõ ràng.
+**`AbortPolicy`**: phù hợp với nghiệp vụ cốt lõi không chấp nhận mất task (như thanh toán, chuyển tiền). Khi task bị từ chối, caller sẽ nhận `RejectedExecutionException`, cần catch trong code nghiệp vụ và thực hiện bù trừ (như retry hoặc lưu vào database để thực thi bù trừ). _Alibaba Java Development Manual_ chỉ ra rằng nếu không cấu hình gì, queue đầy sẽ ném exception trực tiếp và developer phải xử lý rõ ràng.
 
-**`CallerRunsPolicy`**: phù hợp với trường hợp không được bỏ task và cho phép giảm tốc độ submit. Vì task được thực thi trong caller thread, caller không thể submit task mới trong thời gian đó, tạo thành cơ chế **back-pressure** tự nhiên. Đội ngũ kỹ thuật Meituan đề cập trong _Nguyên lý triển khai Java thread pool và thực tiễn trong nghiệp vụ Meituan_ rằng đây là rejection policy được dùng khá thường xuyên trong nghiệp vụ production của họ. Tuy nhiên cần lưu ý: nếu thread submit task là request processing thread của Web container (như Worker thread của Tomcat), response time của request sẽ tăng đáng kể; cần thận trọng trong trường hợp nhạy cảm với latency.
+**`CallerRunsPolicy`**: phù hợp với trường hợp không được bỏ task và cho phép giảm tốc độ submit. Vì task được thực thi trong caller thread, caller không thể submit task mới trong thời gian đó, tạo thành cơ chế **back-pressure** tự nhiên. Đội ngũ kỹ thuật Meituan đề cập trong _Nguyên lý triển khai Java thread pool và thực tiễn trong nghiệp vụ Meituan_ rằng đây là rejection policy được dùng khá thường xuyên trong production của họ. Tuy nhiên cần lưu ý: nếu thread submit task là request processing thread của Web container (như Worker thread của Tomcat), response time của request sẽ tăng đáng kể; cần thận trọng trong trường hợp nhạy cảm với latency.
 
-**`DiscardPolicy`**: phù hợp với non-critical path cho phép mất task, như ghi log async hoặc báo cáo monitoring metric. Policy này hoàn toàn silent (implementation rỗng), task bị từ chối không để lại dấu vết nào nên có thể khó phát hiện task bị mất khi troubleshooting.
+**`DiscardPolicy`**: phù hợp với non-critical path cho phép mất task, như ghi log async hoặc báo cáo metric monitoring. Policy này hoàn toàn silent (implementation rỗng), task bị từ chối không để lại dấu vết nào nên có thể khó phát hiện task bị mất khi troubleshooting.
 
 **`DiscardOldestPolicy`**: phù hợp với trường hợp chỉ quan tâm data mới nhất và task cũ có thể bị ghi đè, như push real-time market data hoặc thu thập sensor data. Cần lưu ý: nếu sử dụng `PriorityBlockingQueue`, `poll()` lấy task có priority cao nhất chứ không phải task cũ nhất, có thể khiến task quan trọng bị bỏ nhầm.
 
-**Cách làm phổ biến trong production**: 4 policy tích hợp trên thường không đáp ứng hoàn toàn nhu cầu. Dubbo tự định nghĩa policy `AbortPolicyWithReport`, ngoài việc ném exception còn dump thông tin task bị từ chối vào file local để tiện troubleshooting sau này. Đội ngũ kỹ thuật Meituan đề xuất monitoring và alert số lần thread pool reject task. Các hướng thường dùng khi tự định nghĩa policy gồm: ghi task bị từ chối vào database hoặc message queue để bù trừ và consume sau, tăng monitoring counter rồi báo cáo lên Prometheus, hoặc gọi `workQueue.put(r)` để blocking chờ queue có chỗ trống (Netty có implementation tương tự).
+**Cách làm phổ biến trong production**: 4 policy tích hợp trên thường không đáp ứng hoàn toàn nhu cầu. Dubbo tự định nghĩa policy `AbortPolicyWithReport`, ngoài việc ném exception còn dump thông tin task bị từ chối vào file local để tiện troubleshooting sau này. Đội ngũ kỹ thuật Meituan đề xuất theo dõi và cảnh báo số lần thread pool reject task. Các hướng thường dùng khi tự định nghĩa policy gồm: ghi task bị từ chối vào database hoặc message queue để bù trừ và consume sau, tăng monitoring counter rồi báo cáo lên Prometheus, hoặc gọi `workQueue.put(r)` để blocking chờ queue có chỗ trống (Netty có implementation tương tự).
 
 ### Hai cách tạo thread pool
 
@@ -211,9 +211,9 @@ Trong Java, chủ yếu có hai cách tạo thread pool:
 
 ![](https://oss.javaguide.cn/github/javaguide/java/concurrent/threadpoolexecutor-construtors.png)
 
-“Thread factory mặc định” và “rejection policy mặc định” trong hình có nghĩa là khi constructor hiện tại không nhận rõ tham số tương ứng, `ThreadPoolExecutor` sẽ dùng implementation mặc định, không phải method và mô tả bị lệch.
+“Thread factory mặc định” và “rejection policy mặc định” trong hình có nghĩa là khi constructor hiện tại không truyền rõ tham số tương ứng, `ThreadPoolExecutor` sẽ dùng implementation mặc định, không phải method và mô tả bị lệch.
 
-Đây là cách được khuyến nghị nhất vì cho phép developer chỉ định rõ các tham số cốt lõi của thread pool, kiểm soát tinh vi hơn hành vi hoạt động của thread pool, từ đó tránh rủi ro cạn kiệt resource.
+Đây là cách được khuyến nghị nhất vì cho phép developer chỉ định rõ các tham số cốt lõi của thread pool, kiểm soát chi tiết hơn hành vi hoạt động của thread pool, từ đó tránh rủi ro cạn kiệt tài nguyên.
 
 **Cách 2: tạo bằng utility class `Executors` (không khuyến nghị dùng trong production)**
 
@@ -223,18 +223,18 @@ Các method tạo thread pool do utility class `Executors` cung cấp được m
 
 Có thể thấy utility class `Executors` có thể tạo nhiều loại thread pool, bao gồm:
 
-- `FixedThreadPool`: khi chạy bình thường sử dụng nhiều nhất một số lượng worker thread cố định. Thread có thể được thay thế sau khi kết thúc bất thường, khi thread pool đóng cũng sẽ thoát, vì vậy số lượng không phải lúc nào cũng bất biến trong toàn bộ vòng đời. Khi task mới được submit, nếu thread pool có idle thread thì thực thi ngay. Nếu không, task mới được tạm lưu trong task queue, chờ thread rảnh rồi xử lý task trong queue.
-- `SingleThreadExecutor`: thread pool chỉ có một thread. Nếu có nhiều hơn một task được submit vào thread pool, task sẽ được lưu trong task queue và chờ thread rảnh để thực thi task trong queue theo thứ tự FIFO.
+- `FixedThreadPool`: khi chạy bình thường sử dụng tối đa một số lượng worker thread cố định. Thread có thể được thay thế sau khi kết thúc bất thường, khi thread pool đóng cũng sẽ thoát, vì vậy số lượng không phải lúc nào cũng bất biến trong toàn bộ vòng đời. Khi task mới được submit, nếu thread pool có idle thread thì thực thi ngay. Nếu không, task mới được tạm lưu trong task queue, chờ thread rảnh rồi xử lý task trong queue.
+- `SingleThreadExecutor`: thread pool chỉ có một thread. Nếu có hơn một task được submit vào thread pool, task sẽ được lưu trong task queue và chờ thread rảnh để thực thi task trong queue theo thứ tự FIFO.
 - `CachedThreadPool`: thread pool có thể điều chỉnh số thread theo tình hình thực tế. Số thread không cố định; nếu có idle thread có thể tái sử dụng thì ưu tiên dùng thread đó. Nếu mọi thread đều đang làm việc mà có task mới được submit, thread mới sẽ được tạo để xử lý task. Sau khi hoàn thành task hiện tại, mọi thread sẽ quay lại thread pool để tái sử dụng.
 - `ScheduledThreadPool`: thread pool chạy task sau một delay nhất định hoặc thực thi task định kỳ.
 
-_Alibaba Java Development Manual_ bắt buộc không được dùng `Executors` để tạo thread pool mà phải dùng constructor của `ThreadPoolExecutor`. Cách này giúp developer hiểu rõ hơn quy tắc hoạt động của thread pool và tránh rủi ro cạn kiệt resource.
+_Alibaba Java Development Manual_ bắt buộc không được dùng `Executors` để tạo thread pool mà phải dùng constructor của `ThreadPoolExecutor`. Cách này giúp developer hiểu rõ hơn quy tắc hoạt động của thread pool và tránh rủi ro cạn kiệt tài nguyên.
 
 Nhược điểm của object thread pool do `Executors` trả về như sau (sẽ được giới thiệu chi tiết ở phần sau):
 
-- `FixedThreadPool` và `SingleThreadExecutor`: sử dụng blocking queue `LinkedBlockingQueue`, độ dài tối đa của task queue là `Integer.MAX_VALUE`, có thể xem là unbounded và có thể tích tụ lượng lớn request, dẫn đến OOM.
+- `FixedThreadPool` và `SingleThreadExecutor`: sử dụng blocking queue `LinkedBlockingQueue`, capacity tối đa của task queue là `Integer.MAX_VALUE`, có thể xem là unbounded và có thể tích tụ lượng lớn request, dẫn đến OOM.
 - `CachedThreadPool`: sử dụng synchronous queue `SynchronousQueue`, cho phép số thread được tạo là `Integer.MAX_VALUE`. Nếu số task quá nhiều và tốc độ thực thi chậm, có thể tạo lượng lớn thread, dẫn đến OOM.
-- `ScheduledThreadPool` và `SingleThreadScheduledExecutor`: sử dụng unbounded delay blocking queue `DelayedWorkQueue`, độ dài tối đa của task queue là `Integer.MAX_VALUE`, có thể tích tụ lượng lớn request, dẫn đến OOM.
+- `ScheduledThreadPool` và `SingleThreadScheduledExecutor`: sử dụng unbounded delay blocking queue `DelayedWorkQueue`, capacity tối đa của task queue là `Integer.MAX_VALUE`, có thể tích tụ lượng lớn request, dẫn đến OOM.
 
 ```java
 public static ExecutorService newFixedThreadPool(int nThreads) {
@@ -270,10 +270,10 @@ public ScheduledThreadPoolExecutor(int corePoolSize) {
 
 Khi có task mới, trước hết kiểm tra số thread đang chạy hiện tại đã đạt số core thread hay chưa; nếu đã đạt thì task mới sẽ được lưu trong queue.
 
-Các thread pool khác nhau sẽ chọn blocking queue khác nhau. Có thể phân tích kết hợp với thread pool tích hợp.
+Các thread pool khác nhau sẽ chọn blocking queue khác nhau. Có thể phân tích kết hợp với các thread pool tích hợp sẵn.
 
 - `LinkedBlockingQueue` có capacity `Integer.MAX_VALUE` (unbounded queue): `FixedThreadPool` và `SingleThreadExecutor`. `FixedThreadPool` nhiều nhất chỉ tạo được số thread bằng số core thread (số core thread bằng số thread tối đa), `SingleThreadExecutor` chỉ tạo được một thread (số core thread và số thread tối đa đều là 1), vì vậy task queue của cả hai trên thực tế hầu như không bị lấp đầy.
-- `SynchronousQueue` (synchronous queue): `CachedThreadPool`. `SynchronousQueue` không có capacity và không lưu element; mục đích là bảo đảm task được submit sẽ dùng idle thread để xử lý nếu có, nếu không thì tạo thread mới để xử lý. Nói cách khác, số thread tối đa của `CachedThreadPool` là `Integer.MAX_VALUE`, có thể hiểu là số thread có thể mở rộng vô hạn, dẫn đến khả năng tạo lượng lớn thread và OOM.
+- `SynchronousQueue` (synchronous queue): `CachedThreadPool`. `SynchronousQueue` không có capacity và không lưu element; mục đích là bảo đảm task được submit sẽ dùng idle thread để xử lý nếu có, nếu không thì tạo thread mới để xử lý. Nói cách khác, số thread tối đa của `CachedThreadPool` là `Integer.MAX_VALUE`, có thể mở rộng đến giới hạn này, dẫn đến khả năng tạo lượng lớn thread và OOM.
 - `DelayedWorkQueue` (delay blocking queue): `ScheduledThreadPool` và `SingleThreadScheduledExecutor`. Element bên trong `DelayedWorkQueue` không được sắp xếp theo thời điểm đưa vào mà theo độ dài delay của task. Bên trong dùng cấu trúc dữ liệu “heap”, bảo đảm task lấy ra mỗi lần là task có thời điểm thực thi sớm nhất trong queue hiện tại. Sau khi `DelayedWorkQueue` đầy, nó tự động tăng capacity thêm 1/2 capacity cũ, tức là không bao giờ blocking; capacity tối đa có thể đạt `Integer.MAX_VALUE`, vì vậy nhiều nhất chỉ tạo được số thread bằng số core thread.
 
 ## Phân tích nguyên lý thread pool (quan trọng)
@@ -457,7 +457,7 @@ Method này rất quan trọng, hãy xem source code:
     }
 ```
 
-Dưới đây là phân tích đơn giản toàn bộ flow (đã giản lược logic để dễ hiểu):
+Dưới đây là phân tích đơn giản toàn bộ quy trình (đã giản lược logic để dễ hiểu):
 
 1. Nếu tổng số worker thread hiện tại nhỏ hơn số core thread thì tạo thread mới để thực thi task.
 2. Nếu tổng số worker thread hiện tại đã đạt số core thread, trước hết thử đưa task vào task queue để chờ thực thi.
@@ -471,9 +471,9 @@ Dưới đây là phân tích đơn giản toàn bộ flow (đã giản lược 
 Trong method `execute`, method `addWorker` được gọi nhiều lần. Method `addWorker` chủ yếu dùng để tạo worker thread mới; nếu trả về true nghĩa là tạo và khởi động worker thread thành công, nếu không thì trả về false.
 
 ```java
-    // Global lock, cần thiết cho concurrent operation
+    // Global lock, cần thiết cho các thao tác concurrent
     private final ReentrantLock mainLock = new ReentrantLock();
-    // Theo dõi kích thước lớn nhất của thread pool; chỉ được truy cập collection này khi đang giữ global lock mainLock
+    // Theo dõi kích thước lớn nhất của thread pool; chỉ được truy cập khi đang giữ global lock mainLock
     private int largestPoolSize;
     // Collection worker thread, lưu mọi (active) worker thread trong thread pool; chỉ được truy cập collection này khi đang giữ global lock mainLock
     private final HashSet<Worker> workers = new HashSet<>();
@@ -546,7 +546,7 @@ Trong method `execute`, method `addWorker` được gọi nhiều lần. Method 
                         if (t.isAlive()) // precheck that t is startable
                             throw new IllegalThreadStateException();
                         workers.add(w);
-                       //Cập nhật capacity tối đa hiện tại của worker thread
+    //Cập nhật kích thước lớn nhất của thread pool
                         int s = workers.size();
                         if (s > largestPoolSize)
                             largestPoolSize = s;
@@ -579,13 +579,13 @@ Bây giờ quay lại code ví dụ. Có phải hiện tại đã khá dễ hi�
 
 Nếu chưa hiểu cũng không sao, hãy xem phân tích của tôi:
 
-> Trong code mô phỏng 10 task, số core thread được cấu hình là 5 và capacity của waiting queue là 100, nên mỗi lần chỉ có thể có 5 task được thực thi đồng thời, 5 task còn lại được đưa vào waiting queue. Nếu một task trong 5 task hiện tại thực thi xong, thread pool sẽ lấy task mới để thực thi.
+> Trong code mô phỏng 10 task, số core thread được cấu hình là 5 và capacity của task queue là 100, nên mỗi lần chỉ có thể có 5 task được thực thi đồng thời, 5 task còn lại được đưa vào task queue. Nếu một task trong 5 task hiện tại thực thi xong, thread pool sẽ lấy task mới để thực thi.
 
 ### Một số so sánh phổ biến
 
 #### `Runnable` vs `Callable`
 
-`Runnable` đã tồn tại từ Java 1.0, còn `Callable` chỉ được đưa vào trong Java 1.5, nhằm xử lý các trường hợp sử dụng mà `Runnable` không hỗ trợ. `Runnable` interface không trả về kết quả và không ném checked exception, nhưng `Callable` interface có thể làm cả hai. Vì vậy, nếu task không cần trả về kết quả hoặc ném exception thì khuyến nghị dùng `Runnable` interface để code gọn hơn.
+`Runnable` đã tồn tại từ Java 1.0, còn `Callable` chỉ được đưa vào trong Java 1.5, nhằm xử lý các trường hợp sử dụng mà `Runnable` không hỗ trợ. `Runnable` interface không trả về kết quả và không ném checked exception, nhưng `Callable` interface có thể trả về kết quả và ném checked exception. Vì vậy, nếu task không cần trả về kết quả hoặc ném exception thì khuyến nghị dùng `Runnable` interface để code gọn hơn.
 
 Utility class `Executors` có thể chuyển object `Runnable` thành object `Callable`. (`Executors.callable(Runnable task)` hoặc `Executors.callable(Runnable task, Object result)`).
 
@@ -617,7 +617,7 @@ public interface Callable<V> {
 
 #### `execute()` vs `submit()`
 
-`execute()` và `submit()` là hai method submit task vào thread pool, có một số điểm khác nhau:
+`execute()` và `submit()` là hai method dùng để submit task vào thread pool, có một số điểm khác nhau:
 
 - **Giá trị trả về**: method `execute()` dùng để submit task `Runnable` không cần giá trị trả về. `submit()` có thể submit task `Runnable` hoặc `Callable` và trả về một object `Future`. `Future.isDone()` chỉ cho biết task đã kết thúc ở một trong các trạng thái hoàn thành bình thường, exception hoặc cancel; chỉ gọi `get()` mới lấy được kết quả hoặc biết exception do task ném ra (`get(long timeout, TimeUnit unit)` sẽ ném `TimeoutException` nếu task chưa hoàn thành trước timeout).
 - **Xử lý exception**: khi dùng method `submit()`, có thể xử lý exception phát sinh trong quá trình thực thi task thông qua object `Future`; còn khi dùng method `execute()`, exception cần được xử lý thông qua `ThreadFactory` tùy chỉnh (đặt object `UncaughtExceptionHandler` khi thread factory tạo thread) hoặc method `afterExecute()` của `ThreadPoolExecutor`.
@@ -690,7 +690,7 @@ Exception in thread "main" java.util.concurrent.TimeoutException
 
 #### Giới thiệu
 
-`FixedThreadPool` được gọi là thread pool có số thread cố định và có thể tái sử dụng. Hãy xem implementation tương ứng trong source code của class `Executors`:
+`FixedThreadPool` được gọi là thread pool có số thread cố định và có thể tái sử dụng. Hãy xem cách triển khai tương ứng trong source code của class `Executors`:
 
 ```java
    /**
@@ -704,7 +704,7 @@ Exception in thread "main" java.util.concurrent.TimeoutException
     }
 ```
 
-Ngoài ra còn một method implementation khác của `FixedThreadPool`, tương tự method trên nên không giải thích thêm ở đây:
+Ngoài ra còn một cách triển khai khác của `FixedThreadPool`, tương tự cách trên nên không giải thích thêm ở đây:
 
 ```java
     public static ExecutorService newFixedThreadPool(int nThreads) {
@@ -732,18 +732,18 @@ Sơ đồ minh họa hoạt động của method `execute()` trong `FixedThreadP
 
 #### Tại sao không khuyến nghị dùng `FixedThreadPool`?
 
-`FixedThreadPool` dùng unbounded queue `LinkedBlockingQueue` (capacity của queue là `Integer.MAX_VALUE`) làm work queue của thread pool, gây ra các ảnh hưởng sau:
+`FixedThreadPool` dùng unbounded queue `LinkedBlockingQueue` (capacity của queue là `Integer.MAX_VALUE`) làm work queue của thread pool, có các ảnh hưởng sau:
 
 1. Khi số thread trong thread pool đạt `corePoolSize`, task mới sẽ chờ trong unbounded queue, vì vậy số thread trong thread pool không vượt quá `corePoolSize`;
 2. Vì khi dùng unbounded queue, `maximumPoolSize` trở thành tham số vô hiệu do task queue không thể đầy. Vì vậy source code tạo `FixedThreadPool` cho thấy `corePoolSize` và `maximumPoolSize` của `FixedThreadPool` được đặt thành cùng một giá trị;
 3. Do 1 và 2, khi dùng unbounded queue, `keepAliveTime` trở thành tham số vô hiệu;
-4. `FixedThreadPool` đang chạy (chưa thực thi `shutdown()` hoặc `shutdownNow()`) sẽ không từ chối task, khi task tương đối nhiều có thể dẫn đến OOM (out of memory).
+4. `FixedThreadPool` đang chạy (chưa thực thi `shutdown()` hoặc `shutdownNow()`) sẽ không từ chối task, khi task tương đối nhiều có thể dẫn đến OOM.
 
 ### SingleThreadExecutor
 
 #### Giới thiệu
 
-`SingleThreadExecutor` là thread pool chỉ có một thread. Hãy xem **implementation của SingleThreadExecutor:**
+`SingleThreadExecutor` là thread pool chỉ có một thread. Hãy xem **cách triển khai SingleThreadExecutor:**
 
 ```java
    /**
@@ -789,7 +789,7 @@ Giống `FixedThreadPool`, `SingleThreadExecutor` sử dụng `LinkedBlockingQue
 
 #### Giới thiệu
 
-`CachedThreadPool` là thread pool tạo thread mới theo nhu cầu. Hãy xem implementation của `CachedThreadPool` qua source code:
+`CachedThreadPool` là thread pool tạo thread mới theo nhu cầu. Hãy xem cách triển khai `CachedThreadPool` qua source code:
 
 ```java
     /**
@@ -812,7 +812,7 @@ Giống `FixedThreadPool`, `SingleThreadExecutor` sử dụng `LinkedBlockingQue
     }
 ```
 
-`corePoolSize` của `CachedThreadPool` được đặt là 0, `maximumPoolSize` được đặt là `Integer.MAX_VALUE`, tức unbounded. Điều này có nghĩa nếu tốc độ main thread submit task cao hơn tốc độ thread trong `maximumPool` xử lý task, `CachedThreadPool` sẽ liên tục tạo thread mới. Trong trường hợp cực đoan, việc này có thể làm cạn kiệt CPU và memory resource.
+`corePoolSize` của `CachedThreadPool` được đặt là 0, `maximumPoolSize` được đặt là `Integer.MAX_VALUE`, tức unbounded. Điều này có nghĩa nếu tốc độ main thread submit task cao hơn tốc độ thread trong `maximumPool` xử lý task, `CachedThreadPool` sẽ liên tục tạo thread mới. Trong trường hợp cực đoan, việc này có thể làm cạn kiệt tài nguyên CPU và bộ nhớ.
 
 #### Giới thiệu quy trình thực thi task
 
@@ -833,7 +833,7 @@ Sơ đồ minh họa hoạt động của method `execute()` trong `CachedThread
 
 #### Giới thiệu
 
-`ScheduledThreadPool` dùng để chạy task sau một delay nhất định hoặc thực thi task định kỳ. Trong project thực tế, thread pool này cơ bản không được dùng và cũng không khuyến nghị sử dụng; bạn chỉ cần hiểu sơ lược.
+`ScheduledThreadPool` dùng để chạy task sau một delay nhất định hoặc thực thi task định kỳ. Trong dự án thực tế, thread pool này cơ bản không được dùng và cũng không khuyến nghị sử dụng; bạn chỉ cần hiểu sơ lược.
 
 ```java
 public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
@@ -849,7 +849,7 @@ public ScheduledThreadPoolExecutor(int corePoolSize) {
 
 Các element bên trong `DelayedWorkQueue` không được sắp xếp theo thời điểm đưa vào mà theo độ dài delay của task. Bên trong dùng cấu trúc dữ liệu “heap”, bảo đảm task lấy ra mỗi lần là task có thời điểm thực thi sớm nhất trong queue hiện tại. Sau khi `DelayedWorkQueue` đầy, nó tự động tăng capacity thêm 1/2 capacity cũ, tức là không bao giờ blocking; capacity tối đa có thể đạt `Integer.MAX_VALUE`, vì vậy nhiều nhất chỉ tạo được số thread bằng số core thread.
 
-`ScheduledThreadPoolExecutor` kế thừa `ThreadPoolExecutor`, vì vậy về bản chất tạo `ScheduledThreadExecutor` cũng là tạo một thread pool `ThreadPoolExecutor`, chỉ khác ở các tham số truyền vào.
+`ScheduledThreadPoolExecutor` kế thừa `ThreadPoolExecutor`, vì vậy về bản chất tạo `ScheduledThreadPoolExecutor` cũng là tạo một thread pool `ThreadPoolExecutor`, chỉ khác ở các tham số truyền vào.
 
 ```java
 public class ScheduledThreadPoolExecutor
@@ -867,7 +867,7 @@ public class ScheduledThreadPoolExecutor
 
 ## Best practices cho thread pool
 
-[Best practices cho thread pool Java](https://javaguide.cn/java/concurrent/java-thread-pool-best-practices.html) tổng hợp một số điểm cần lưu ý khi sử dụng thread pool. Bạn có thể đọc trước khi sử dụng thread pool trong project thực tế.
+[Best practices cho thread pool Java](https://javaguide.cn/java/concurrent/java-thread-pool-best-practices.html) tổng hợp một số điểm cần lưu ý khi sử dụng thread pool. Bạn có thể đọc trước khi sử dụng thread pool trong dự án thực tế.
 
 ## Tài liệu tham khảo
 

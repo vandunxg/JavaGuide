@@ -17,8 +17,8 @@ Phiên bản tiếp theo là JDK 21, phiên bản LTS được phát hành vào 
 JDK 20 có tổng cộng 7 tính năng mới. Bài viết này sẽ chọn một số tính năng mới quan trọng để giới thiệu chi tiết:
 
 - [JEP 429: Scoped Values (giá trị theo phạm vi)](https://openjdk.org/jeps/429) (lần ươm tạo thứ nhất)
-- [JEP 432: Record Patterns (record pattern)](https://openjdk.org/jeps/432) (lần preview thứ hai)
-- [JEP 433: Pattern Matching for switch (pattern matching cho switch)](https://openjdk.org/jeps/433) (lần preview thứ tư)
+- [JEP 432: Record Patterns (record patterns)](https://openjdk.org/jeps/432) (lần preview thứ hai)
+- [JEP 433: Pattern Matching for switch (pattern matching trong switch)](https://openjdk.org/jeps/433) (lần preview thứ tư)
 - [JEP 434: Foreign Function & Memory API (API hàm và bộ nhớ bên ngoài)](https://openjdk.org/jeps/434) (lần preview thứ hai)
 - [JEP 436: Virtual Threads (virtual thread)](https://openjdk.org/jeps/436) (lần preview thứ hai)
 - [JEP 437: Structured Concurrency (structured concurrency)](https://openjdk.org/jeps/437) (lần ươm tạo thứ hai)
@@ -30,7 +30,7 @@ Hình dưới đây cho thấy số lượng tính năng mới và thời điể
 
 ## JEP 429: Scoped Values (giá trị theo phạm vi, lần ươm tạo thứ nhất)
 
-Scoped Values có thể chia sẻ dữ liệu immutable trong cùng một thread và giữa các thread, ưu việt hơn ThreadLocal, đặc biệt khi sử dụng nhiều virtual thread.
+Scoped Values có thể chia sẻ dữ liệu immutable trong cùng một thread và giữa các thread, hiệu quả hơn ThreadLocal, đặc biệt khi sử dụng nhiều virtual thread.
 
 ```java
 final static ScopedValue<...> V = ScopedValue.newInstance();
@@ -43,13 +43,13 @@ ScopedValue.where(V, <value>)
 ... V.get() ...
 ```
 
-Scoped Values cho phép chia sẻ dữ liệu an toàn và hiệu quả giữa các component trong chương trình lớn mà không cần truyền qua tham số method.
+Scoped Values cho phép chia sẻ dữ liệu an toàn và hiệu quả giữa các component trong chương trình lớn mà không cần truyền dữ liệu qua tham số method.
 
 Để tìm hiểu chi tiết về Scoped Values, bạn nên đọc bài [Câu hỏi thường gặp về Scoped Values](https://www.happycoders.eu/java/scoped-values/).
 
-## JEP 432: Record Patterns (record pattern, lần preview thứ hai)
+## JEP 432: Record Patterns (record patterns, lần preview thứ hai)
 
-Record Patterns có thể destructure giá trị của `record`, tức là trích xuất dữ liệu từ Record Class thuận tiện hơn. Ngoài ra, chúng còn có thể được lồng nhau và kết hợp với type pattern để tạo ra cách điều hướng và xử lý dữ liệu mạnh mẽ, mang tính khai báo và có thể kết hợp.
+Record Patterns có thể destructure giá trị của `record`, tức là trích xuất dữ liệu từ Record Class thuận tiện hơn. Ngoài ra, chúng còn có thể được lồng nhau và kết hợp với type pattern để tạo ra cách điều hướng và xử lý dữ liệu mạnh mẽ, có tính khai báo và khả năng kết hợp.
 
 Record Patterns không thể được sử dụng độc lập mà phải kết hợp với `instanceof` hoặc pattern matching của `switch`.
 
@@ -138,7 +138,7 @@ switch(shape) {
 }
 ```
 
-Record Patterns loại bỏ các thao tác ép kiểu không cần thiết, giúp code ngắn gọn và dễ đọc hơn. Bản thân Record Patterns không loại bỏ mọi rủi ro liên quan đến `null` hoặc `NullPointerException`: `null` không khớp với Record Patterns, và tham chiếu của component trong record vẫn có thể là `null`.
+Record Patterns loại bỏ các thao tác ép kiểu không cần thiết, giúp code ngắn gọn và dễ đọc hơn. Bản thân Record Patterns không loại bỏ mọi rủi ro liên quan đến `null` hoặc `NullPointerException`: `null` không khớp với Record Patterns, và tham chiếu của các component trong record vẫn có thể là `null`.
 
 Record Patterns được preview lần đầu trong Java 19, do [JEP 405](https://openjdk.org/jeps/405) đề xuất. Trong JDK 20, đây là lần preview thứ hai, do [JEP 432](https://openjdk.org/jeps/432) đề xuất. Các cải tiến lần này gồm:
 
@@ -148,9 +148,9 @@ Record Patterns được preview lần đầu trong Java 19, do [JEP 405](https:
 
 **Lưu ý**: Không nhầm lẫn Record Patterns với record class được giới thiệu chính thức trong [JDK16](./java16.md).
 
-## JEP 433: Pattern Matching for switch (pattern matching cho switch, lần preview thứ tư)
+## JEP 433: Pattern Matching for switch (pattern matching trong switch, lần preview thứ tư)
 
-Tương tự `instanceof`, `switch` cũng được bổ sung khả năng tự động chuyển đổi khi type matching.
+Tương tự `instanceof`, `switch` cũng được bổ sung khả năng tự động chuyển đổi kiểu khi type matching.
 
 Ví dụ code `instanceof`:
 
@@ -201,7 +201,7 @@ Pattern matching của `switch` đã được preview lần lượt trong Java 1
 
 ## JEP 434: Foreign Function & Memory API (API hàm và bộ nhớ bên ngoài, lần preview thứ hai)
 
-Java program có thể dùng API này để tương tác với code và dữ liệu bên ngoài Java runtime. Bằng cách gọi hiệu quả các foreign function (tức code bên ngoài JVM) và truy cập an toàn vào foreign memory (tức vùng nhớ không do JVM quản lý), API này cho phép Java program gọi native library và xử lý native data mà không nguy hiểm, mong manh như JNI.
+Chương trình Java có thể dùng API này để tương tác với code và dữ liệu bên ngoài Java runtime. Bằng cách gọi hiệu quả các foreign function (tức code bên ngoài JVM) và truy cập an toàn vào foreign memory (tức vùng nhớ không do JVM quản lý), API này cho phép chương trình Java gọi native library và xử lý native data mà không gặp những rủi ro và sự mong manh của JNI.
 
 Foreign Function & Memory API được ươm tạo lần đầu trong Java 17, do [JEP 412](https://openjdk.java.net/jeps/412) đề xuất. Trong Java 18, API này được ươm tạo lần thứ hai, do [JEP 419](https://openjdk.org/jeps/419) đề xuất. Trong Java 19, đây là lần preview đầu tiên, do [JEP 424](https://openjdk.org/jeps/424) đề xuất.
 
@@ -209,13 +209,13 @@ Trong JDK 20, đây là lần preview thứ hai, do [JEP 434](https://openjdk.or
 
 - Hợp nhất các abstraction `MemorySegment` và `MemoryAddress`.
 - Cải thiện hệ thống phân cấp của `MemoryLayout`.
-- Tách `MemorySession` thành `Arena` và `SegmentScope` để hỗ trợ chia sẻ segment xuyên qua ranh giới quản lý.
+- Tách `MemorySession` thành `Arena` và `SegmentScope` để hỗ trợ chia sẻ segment qua các ranh giới quản lý.
 
 Trong [Tổng quan các tính năng mới của Java 19](./java19.md), tôi đã giới thiệu chi tiết về Foreign Function & Memory API, nên ở đây không giới thiệu thêm.
 
 ## JEP 436: Virtual Threads (virtual thread, lần preview thứ hai)
 
-Virtual thread là thread nhẹ do JDK chứ không phải OS triển khai và được JDK scheduling. Nhiều virtual thread chia sẻ cùng một operating system thread, nên số lượng virtual thread có thể lớn hơn rất nhiều so với số lượng operating system thread.
+Virtual thread là thread nhẹ do JDK triển khai thay vì OS và được JDK lập lịch. Nhiều virtual thread chia sẻ cùng một operating system thread, nên số lượng virtual thread có thể lớn hơn rất nhiều so với số lượng operating system thread.
 
 Trước khi virtual thread được giới thiệu, package `java.lang.Thread` đã hỗ trợ platform thread, tức loại thread mà chúng ta vẫn sử dụng trước khi có virtual thread. JVM scheduler quản lý virtual thread thông qua platform thread (carrier thread). Một platform thread có thể thực thi các virtual thread khác nhau ở những thời điểm khác nhau (nhiều virtual thread được mount trên một platform thread). Khi virtual thread bị block hoặc phải chờ, platform thread có thể chuyển sang thực thi một virtual thread khác.
 
@@ -225,7 +225,7 @@ Mối quan hệ giữa virtual thread, platform thread và system kernel thread 
 
 Nói thêm một chút về mối quan hệ tương ứng giữa platform thread và system kernel thread: Trong các operating system phổ biến như Windows và Linux, Java thread sử dụng thread model one-to-one, tức một platform thread tương ứng với một system kernel thread. Solaris là một ngoại lệ: HotSpot VM trên Solaris hỗ trợ mô hình many-to-many và one-to-one. Bạn có thể tham khảo câu trả lời của R: [Thread model trong JVM là user-level phải không?](https://www.zhihu.com/question/23096638/answer/29617153).
 
-So với platform thread, virtual thread rẻ và nhẹ hơn, có thể hủy ngay sau khi sử dụng, vì vậy không cần reuse hoặc pool chúng. Mỗi task có thể chạy trên một virtual thread riêng. Việc suspend và resume virtual thread thường không cần tạo hoặc chuyển đổi một operating system thread cho từng task, từ đó giảm chi phí tài nguyên thread và scheduling do nhiều task blocking gây ra.
+So với platform thread, virtual thread rẻ và nhẹ hơn, có thể hủy ngay sau khi sử dụng, vì vậy không cần tái sử dụng hoặc đưa chúng vào pool. Mỗi task có thể chạy trên một virtual thread riêng. Việc suspend và resume virtual thread thường không cần tạo hoặc chuyển đổi một operating system thread cho từng task, từ đó giảm chi phí tài nguyên thread và scheduling do nhiều task blocking gây ra.
 
 Virtual thread đã được chứng minh là rất hữu ích trong các ngôn ngữ lập trình multi-thread khác, chẳng hạn như Goroutine trong Go và process trong Erlang.
 
@@ -283,7 +283,7 @@ Qua 4 cách tạo virtual thread nêu trên, có thể thấy để hạ thấp 
 
 ## JEP 437: Structured Concurrency (structured concurrency, lần ươm tạo thứ hai)
 
-Java 19 giới thiệu structured concurrency, một phương pháp lập trình multi-thread nhằm đơn giản hóa việc lập trình multi-thread thông qua structured concurrency API, không nhằm thay thế `java.util.concurrent` và hiện vẫn đang ở giai đoạn ươm tạo.
+Java 19 giới thiệu structured concurrency, một phương pháp lập trình đa luồng nhằm đơn giản hóa việc lập trình đa luồng thông qua structured concurrency API, không nhằm thay thế `java.util.concurrent` và hiện vẫn đang ở giai đoạn ươm tạo.
 
 Structured concurrency coi nhiều task chạy trong các thread khác nhau là một work unit duy nhất, từ đó đơn giản hóa việc xử lý lỗi, nâng cao độ tin cậy và tăng khả năng quan sát. Nói cách khác, structured concurrency giữ lại khả năng đọc, bảo trì và quan sát của code single-thread.
 
@@ -305,11 +305,11 @@ Cách sử dụng cơ bản của `StructuredTaskScope` như sau:
 
 Structured concurrency đặc biệt phù hợp với virtual thread, một loại thread nhẹ do JDK triển khai. Nhiều virtual thread chia sẻ cùng một operating system thread, cho phép tạo ra số lượng virtual thread rất lớn.
 
-Thay đổi duy nhất của structured concurrency trong JDK 20 là cập nhật để các thread được tạo trong task scope, `StructuredTaskScope`, kế thừa Scoped Values. Điều này đơn giản hóa việc chia sẻ dữ liệu immutable giữa các thread. Xem chi tiết tại [JEP 429](https://openjdk.org/jeps/429).
+Thay đổi duy nhất của structured concurrency trong JDK 20 là hỗ trợ các thread được tạo trong `StructuredTaskScope` kế thừa Scoped Values. Điều này đơn giản hóa việc chia sẻ dữ liệu immutable giữa các thread. Xem chi tiết tại [JEP 429](https://openjdk.org/jeps/429).
 
 ## JEP 438: Vector API (API vector, lần ươm tạo thứ năm)
 
-Vector computation gồm một chuỗi thao tác trên vector. Vector API dùng để biểu đạt vector computation. Trong runtime, computation này có thể được compile đáng tin cậy thành các vector instruction tối ưu trên CPU architecture được hỗ trợ, từ đó đạt performance tốt hơn scalar computation tương đương.
+Tính toán vector gồm một chuỗi thao tác trên vector. Vector API dùng để biểu đạt các phép tính vector. Trong runtime, các phép tính này có thể được compile đáng tin cậy thành các vector instruction tối ưu trên CPU architecture được hỗ trợ, từ đó đạt performance tốt hơn phép tính scalar tương đương.
 
 Mục tiêu của Vector API là cung cấp cho người dùng cách biểu đạt đơn giản, dễ sử dụng và không phụ thuộc platform cho nhiều loại vector computation.
 

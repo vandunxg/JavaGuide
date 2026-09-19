@@ -1,6 +1,6 @@
 ---
-title: "Giải thích chi tiết về JVM garbage collection (trọng điểm)"
-description: "Giải thích chi tiết về JVM garbage collection: trình bày toàn diện các GC algorithm (mark-sweep, copying, mark-compact), cơ chế generational collection, các garbage collector thường dùng (Serial, Parallel, CMS, G1, ZGC, Shenandoah) và thực tiễn GC tuning."
+title: "Giải thích chi tiết về garbage collection trong JVM (trọng điểm)"
+description: "Giải thích chi tiết về garbage collection trong JVM: trình bày toàn diện các GC algorithm (mark-sweep, copying, mark-compact), cơ chế generational collection, các garbage collector thường dùng (Serial, Parallel, CMS, G1, ZGC, Shenandoah) và thực tiễn GC tuning."
 category: Java
 tag:
   - JVM
@@ -28,29 +28,29 @@ head:
 
 ## Lời nói đầu
 
-Khi cần điều tra các vấn đề memory overflow khác nhau, hoặc khi garbage collection trở thành bottleneck khiến hệ thống không thể đạt mức concurrency cao hơn, chúng ta cần thực hiện việc monitoring và tuning cần thiết cho những kỹ thuật “tự động hóa” này.
+Khi cần điều tra các vấn đề memory overflow, hoặc khi garbage collection trở thành bottleneck cản trở hệ thống đạt mức concurrency cao hơn, cần thực hiện monitoring và tuning cần thiết cho những kỹ thuật “tự động hóa” này.
 
 ## Cấu trúc cơ bản của heap
 
-Java automatic memory management chủ yếu xử lý việc thu hồi và cấp phát memory cho object. Đồng thời, chức năng cốt lõi nhất của Java automatic memory management là cấp phát và thu hồi object trong **heap**.
+Cơ chế quản lý memory tự động của Java chủ yếu xử lý việc thu hồi và cấp phát memory cho object. Đồng thời, chức năng cốt lõi nhất của cơ chế này là cấp phát và thu hồi object trong **heap**.
 
 Java heap là khu vực chính do garbage collector quản lý, vì vậy còn được gọi là **GC heap (Garbage Collected Heap)**.
 
-Xét từ góc độ garbage collection, vì các collector hiện nay về cơ bản đều sử dụng generational garbage collection algorithm, Java heap được chia thành một số khu vực khác nhau, để có thể chọn garbage collection algorithm phù hợp theo đặc điểm của từng khu vực.
+Xét từ góc độ garbage collection, vì các collector hiện nay về cơ bản đều sử dụng generational garbage collection, Java heap được chia thành một số khu vực khác nhau để có thể chọn GC algorithm phù hợp theo đặc điểm của từng khu vực.
 
-Trong HotSpot của JDK 7 và các phiên bản cũ hơn, GC thường được giới thiệu theo ba phần dưới đây; trong đó permanent generation là implementation của method area, không thuộc Java heap:
+Trong HotSpot của JDK 7 và các phiên bản cũ hơn, GC thường được giới thiệu theo ba phần dưới đây; trong đó permanent generation là implementation của method area và không thuộc Java heap:
 
 1. Memory của young generation (Young Generation)
 2. Old generation (Old Generation)
 3. Permanent generation (Permanent Generation)
 
-Eden area, hai Survivor area S0 và S1 trong hình dưới đều thuộc young generation, tầng ở giữa thuộc old generation, còn tầng dưới cùng thuộc permanent generation.
+Eden area cùng hai Survivor area S0 và S1 trong hình dưới đều thuộc young generation, tầng ở giữa thuộc old generation, còn tầng dưới cùng thuộc permanent generation.
 
 ![Cấu trúc heap](https://oss.javaguide.cn/github/javaguide/java/jvm/hotspot-heap-structure.png)
 
-**JDK 8 đã loại bỏ PermGen (permanent generation), class metadata được chuyển sang Metaspace (meta space) sử dụng native memory**.
+**JDK 8 đã loại bỏ PermGen (permanent generation), class metadata được chuyển sang Metaspace sử dụng native memory**.
 
-Bạn có thể xem lại bài [Giải thích chi tiết về Java memory area](./memory-area.md) để tìm hiểu chi tiết hơn về cấu trúc heap.
+Bạn có thể xem lại bài [Giải thích chi tiết về Java memory area](./memory-area.md) để tìm hiểu thêm về cấu trúc heap.
 
 ## Nguyên tắc cấp phát và thu hồi memory
 
@@ -75,7 +75,7 @@ Chạy theo cách sau:
 Parameter được thêm vào: `-XX:+PrintGCDetails`
 ![](https://oss.javaguide.cn/github/javaguide/java/jvm/run-with-PrintGCDetails.png)
 
-Kết quả chạy (phần mô tả bằng chữ màu đỏ không chính xác, đáng ra phải tương ứng với permanent generation của JDK1.7):
+Kết quả chạy (phần mô tả bằng chữ màu đỏ không chính xác, đáng ra phải tương ứng với permanent generation của JDK 1.7):
 
 ![](https://oss.javaguide.cn/github/javaguide/java/jvm/28954286.jpg)
 
@@ -91,7 +91,7 @@ allocation2 = new byte[900*1024];
 
 Khi cấp phát memory cho `allocation2`, memory của Eden area gần như đã được cấp phát hết.
 
-Khi Eden area không còn đủ không gian để cấp phát, VM sẽ thực hiện một lần Minor GC. Trong thời gian GC, VM lại phát hiện `allocation1` không thể chứa trong Survivor space, nên buộc phải dùng **promotion guarantee mechanism** để chuyển object của young generation sang old generation trước. Không gian trong old generation đủ để chứa `allocation1`, nên sẽ không xảy ra Full GC. Sau Minor GC, nếu các object được cấp phát tiếp theo có thể nằm trong Eden area thì chúng vẫn được cấp phát memory trong Eden area. Có thể thực thi code sau để kiểm chứng:
+Khi Eden area không còn đủ không gian để cấp phát, VM sẽ thực hiện một lần Minor GC. Trong thời gian GC, VM phát hiện `allocation1` không thể chứa trong Survivor space, nên buộc phải dùng **promotion guarantee mechanism** để chuyển object của young generation sang old generation trước. Không gian trong old generation đủ để chứa `allocation1`, nên sẽ không xảy ra Full GC. Sau Minor GC, nếu các object được cấp phát tiếp theo có thể nằm trong Eden area thì chúng vẫn được cấp phát memory tại Eden area. Có thể thực thi code sau để kiểm chứng:
 
 ```java
 public class GCTest {
@@ -112,20 +112,20 @@ public class GCTest {
 
 Large object là object cần một lượng lớn không gian memory liên tục (ví dụ: string, array).
 
-Việc large object đi thẳng vào old generation được VM quyết định động, phụ thuộc vào garbage collector và parameter liên quan đang được sử dụng. Đây là một chiến lược optimization nhằm tránh đưa large object vào young generation, từ đó giảm frequency và cost của garbage collection trong young generation.
+Việc large object đi thẳng vào old generation được VM quyết định động, phụ thuộc vào garbage collector và parameter liên quan. Đây là một chiến lược optimization nhằm tránh đưa large object vào young generation, từ đó giảm frequency và cost của garbage collection trong young generation.
 
 - G1 garbage collector xem object có kích thước đạt hoặc vượt quá một nửa Region là Humongous Object, và cấp phát trực tiếp object đó vào các Humongous Region liên tục thuộc old generation. Kích thước Region có thể được thiết lập qua `-XX:G1HeapRegionSize`.
 - Việc các collector khác có đưa large object trực tiếp vào old generation hay không, và trong điều kiện nào, phụ thuộc vào collector cụ thể và phiên bản JDK, không thể khái quát bằng một threshold chung.
 
 ### Object tồn tại lâu sẽ đi vào old generation
 
-Vì VM sử dụng tư tưởng generational collection để quản lý memory, khi thu hồi memory cần nhận biết object nào nên nằm trong young generation và object nào nên nằm trong old generation. Để làm được điều này, VM cấp cho mỗi object một object age (Age) counter.
+Vì VM sử dụng generational collection để quản lý memory, khi thu hồi memory cần nhận biết object nào nên nằm trong young generation và object nào nên nằm trong old generation. Để làm được điều này, VM cấp cho mỗi object một age counter (Age).
 
 Trong phần lớn trường hợp, object trước hết được cấp phát trong Eden area. Nếu object được sinh ra trong Eden và vẫn tồn tại sau lần Minor GC đầu tiên, đồng thời có thể được Survivor chứa, object sẽ được chuyển vào Survivor space (s0 hoặc s1) và age của object được đặt thành 1 (sau khi chuyển từ Eden area -> Survivor area, age ban đầu của object là 1).
 
-Mỗi lần vượt qua một Minor GC trong Survivor, age của object tăng thêm 1. Khi age đạt promotion threshold, object sẽ được promote vào old generation. `-XX:MaxTenuringThreshold` dùng để thiết lập threshold age tối đa để object được promote, giá trị mặc định phụ thuộc vào garbage collector. Ví dụ, trong JDK 8, giá trị mặc định của Parallel GC là 15, của CMS là 6; promotion threshold thực tế cũng có thể được JVM điều chỉnh động.
+Mỗi lần vượt qua một Minor GC trong Survivor, age của object tăng thêm 1. Khi age đạt promotion threshold, object sẽ được promote vào old generation. `-XX:MaxTenuringThreshold` dùng để thiết lập age threshold tối đa để object được promote, giá trị mặc định phụ thuộc vào garbage collector. Ví dụ, trong JDK 8, giá trị mặc định của Parallel GC là 15, của CMS là 6; promotion threshold thực tế cũng có thể được JVM điều chỉnh động.
 
-> Hiệu chỉnh ([issue552](https://github.com/Snailclimb/JavaGuide/issues/552)): “Khi HotSpot duyệt tất cả object, nó cộng dồn kích thước mà các object chiếm dụng theo age từ nhỏ đến lớn. Khi kích thước của một age nào đó sau khi cộng dồn vượt quá 50% Survivor area (giá trị mặc định là 50%, có thể thiết lập bằng `-XX:TargetSurvivorRatio=percent`, xem [issue1199](https://github.com/Snailclimb/JavaGuide/issues/1199)), nó lấy giá trị nhỏ hơn giữa age này và MaxTenuringThreshold làm promotion age threshold mới”.
+> Hiệu chỉnh ([issue552](https://github.com/Snailclimb/JavaGuide/issues/552)): “Khi HotSpot duyệt tất cả object, nó cộng dồn kích thước mà các object chiếm dụng theo age từ nhỏ đến lớn. Khi kích thước cộng dồn đến một age nào đó vượt quá 50% Survivor area (giá trị mặc định là 50%, có thể thiết lập bằng `-XX:TargetSurvivorRatio=percent`, xem [issue1199](https://github.com/Snailclimb/JavaGuide/issues/1199)), nó lấy giá trị nhỏ hơn giữa age này và MaxTenuringThreshold làm promotion age threshold mới”.
 >
 > Trích dẫn từ tài liệu chính thức của jdk8: <https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html>.
 >
@@ -153,14 +153,14 @@ Mỗi lần vượt qua một Minor GC trong Survivor, age của object tăng th
 >
 > ```
 
-Bổ sung thêm ([issue672](https://github.com/Snailclimb/JavaGuide/issues/672)): **Nguồn gốc của nhận định promotion age mặc định là 15 phần lớn đến từ cuốn _Hiểu sâu JVM_.**
+Bổ sung ([issue672](https://github.com/Snailclimb/JavaGuide/issues/672)): **Nguồn gốc của nhận định promotion age mặc định là 15 phần lớn đến từ cuốn _Hiểu sâu JVM_.**
 Nếu đọc [các VM parameter liên quan](https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html) trên website Oracle, bạn sẽ thấy phần mô tả của `-XX:MaxTenuringThreshold=threshold`:
 
 > **Sets the maximum tenuring threshold for use in adaptive GC sizing. The largest value is 15. The default value is 15 for the parallel (throughput) collector, and 6 for the CMS collector. Promotion age mặc định không phải lúc nào cũng là 15, cần phân biệt theo garbage collector; CMS là 6.**
 
 ### Các khu vực chủ yếu thực hiện GC
 
-Ông Chu Chí Minh đã viết như sau ở trang P92 trong lần xuất bản thứ hai của cuốn _Hiểu sâu JVM_:
+Ông Zhou Zhimin đã viết như sau ở trang P92 trong lần xuất bản thứ hai của cuốn _Hiểu sâu JVM_:
 
 > ~~_“GC của old generation (Major GC/Full GC), là GC xảy ra trong old generation...”_~~
 
@@ -170,7 +170,7 @@ Nhận định trên đã được hiệu chỉnh trong lần xuất bản thứ
 
 **Tóm lại:**
 
-Xét implementation của HotSpot VM, GC trong đó thực tế chỉ được phân loại chính xác thành hai loại lớn:
+Xét theo implementation của HotSpot VM, GC thực tế chỉ được phân loại chính xác thành hai loại lớn:
 
 Partial GC:
 
@@ -180,11 +180,11 @@ Partial GC:
 
 Full GC: thực hiện collection cho toàn bộ Java heap; việc đồng thời thu hồi class metadata trong method area hay không phụ thuộc vào collector, phiên bản JDK và điều kiện class unloading.
 
-### Promotion guarantee của memory space
+### Cơ chế bảo đảm cấp phát (promotion guarantee)
 
-Promotion guarantee của memory space nhằm bảo đảm trước Minor GC, bản thân old generation vẫn còn không gian trống để chứa toàn bộ object của young generation.
+Cơ chế bảo đảm cấp phát nhằm bảo đảm rằng trước Minor GC, old generation vẫn còn không gian trống để chứa toàn bộ object của young generation.
 
-Mô tả về promotion guarantee của memory space trong chương thứ ba của _Hiểu sâu JVM_ như sau:
+Mô tả về cơ chế bảo đảm cấp phát trong chương thứ ba của _Hiểu sâu JVM_ như sau:
 
 > Trước JDK 6 Update 24, trước khi xảy ra Minor GC, VM phải kiểm tra xem contiguous space khả dụng lớn nhất của old generation có lớn hơn tổng memory của toàn bộ object trong young generation hay không. Nếu điều kiện này đúng, lần Minor GC đó có thể được bảo đảm là an toàn. Nếu không, VM sẽ kiểm tra giá trị của parameter `-XX:HandlePromotionFailure` có cho phép promotion guarantee failure (Handle Promotion Failure) hay không; nếu cho phép, VM tiếp tục kiểm tra xem contiguous space khả dụng lớn nhất của old generation có lớn hơn kích thước trung bình của các object từng được promote vào old generation hay không. Nếu lớn hơn, VM sẽ thử thực hiện một lần Minor GC, dù lần Minor GC này có rủi ro; nếu nhỏ hơn, hoặc `-XX: HandlePromotionFailure` không cho phép mạo hiểm, khi đó phải chuyển sang thực hiện một lần Full GC.
 >
@@ -192,7 +192,7 @@ Mô tả về promotion guarantee của memory space trong chương thứ ba c�
 
 ## Cách xác định object đã chết
 
-Heap gần như chứa tất cả object instance. Bước đầu tiên trước khi garbage collection heap là xác định object nào đã chết (tức object không thể được sử dụng qua bất kỳ cách nào nữa).
+Heap gần như chứa tất cả object instance. Bước đầu tiên trước khi thu hồi rác trên heap là xác định object nào đã chết (tức object không thể được sử dụng bằng bất kỳ cách nào nữa).
 
 ### Reference counting algorithm
 
@@ -206,7 +206,7 @@ Thêm một reference counter vào object:
 
 ![Circular reference giữa các object](https://oss.javaguide.cn/github/javaguide/java/jvm/object-circular-reference.png)
 
-Vấn đề các object reference lẫn nhau như sau: ngoài việc `objA` và `objB` reference lẫn nhau, giữa hai object này không còn reference nào khác. Tuy nhiên, vì reference lẫn nhau nên reference counter của cả hai đều khác 0. Do đó reference counting algorithm không thể thông báo cho GC collector thu hồi chúng.
+Vấn đề các object reference lẫn nhau như sau: ngoài việc `objA` và `objB` reference lẫn nhau, giữa hai object này không còn reference nào khác. Tuy nhiên, vì reference lẫn nhau nên reference counter của cả hai đều khác 0. Do đó reference counting algorithm không thể thông báo cho GC collector thu hồi hai object này.
 
 ```java
 public class ReferenceCountingGc {
@@ -224,7 +224,7 @@ public class ReferenceCountingGc {
 
 ### Reachability analysis algorithm
 
-Tư tưởng cơ bản của algorithm này là lấy một loạt object được gọi là **“GC Roots”** làm điểm bắt đầu, rồi tìm kiếm xuống dưới từ các node này. Đường đi mà node đi qua được gọi là reference chain. Khi không có reference chain nào nối object với GC Roots, điều đó chứng minh object không thể sử dụng và cần được thu hồi.
+Tư tưởng cơ bản của algorithm này là lấy một loạt object được gọi là **“GC Roots”** làm điểm bắt đầu, rồi tìm kiếm xuống dưới từ các node này. Đường đi mà node đi qua được gọi là reference chain. Khi không có reference chain nào nối object với GC Roots, điều đó chứng tỏ object không thể sử dụng và cần được thu hồi.
 
 Các `Object 6 ~ Object 10` trong hình dưới dù có quan hệ reference với nhau, nhưng không reachable từ GC Roots, nên là các object cần được thu hồi.
 
@@ -252,11 +252,11 @@ Các `Object 6 ~ Object 10` trong hình dưới dù có quan hệ reference vớ
 
 ### Tổng hợp các loại reference
 
-Dù xác định số lượng reference của object bằng reference counting algorithm, hay xác định reference chain của object có reachable bằng reachability analysis algorithm, việc phán đoán object còn sống đều liên quan đến “reference”.
+Dù xác định số lượng reference của object bằng reference counting algorithm hay xác định reference chain của object có reachable bằng reachability analysis algorithm, việc xác định object còn sống đều liên quan đến “reference”.
 
-Trước JDK1.2, định nghĩa reference trong Java khá truyền thống: nếu giá trị được lưu trong data có type reference biểu thị địa chỉ bắt đầu của một vùng memory khác, vùng memory đó được gọi là một reference.
+Trước JDK 1.2, định nghĩa reference trong Java khá truyền thống: nếu giá trị được lưu trong data có type reference biểu thị địa chỉ bắt đầu của một vùng memory khác, vùng memory đó được gọi là một reference.
 
-Sau JDK 1.2, Java mở rộng khái niệm reference, chia reference thành bốn loại: strong reference, soft reference, weak reference và phantom reference (độ mạnh của reference giảm dần). Strong reference là phép gán reference thông thường xuất hiện phổ biến trong code; các class được định nghĩa tương ứng cho soft reference, weak reference và phantom reference trong JDK lần lượt là `SoftReference`, `WeakReference`, `PhantomReference`.
+Sau JDK 1.2, Java mở rộng khái niệm reference, chia reference thành bốn loại: strong reference, soft reference, weak reference và phantom reference (độ mạnh giảm dần). Strong reference là phép gán reference thông thường xuất hiện phổ biến trong code; các class tương ứng với soft reference, weak reference và phantom reference trong JDK lần lượt là `SoftReference`, `WeakReference`, `PhantomReference`.
 
 ![Tổng hợp các loại Java reference](https://oss.javaguide.cn/github/javaguide/java/jvm/java-reference-type.png)
 
@@ -268,11 +268,11 @@ Strong reference thực chất là phép gán reference phổ biến trong code,
 String strongReference = new String("abc");
 ```
 
-Nếu object vẫn có thể được truy cập qua strong reference, nó giống như **vật dụng thiết yếu trong cuộc sống**, garbage collector sẽ không thu hồi object. Khi không gian memory không đủ, Java VM thà ném lỗi `OutOfMemoryError` khiến chương trình kết thúc bất thường, chứ không tùy tiện thu hồi object có strong reachability để giải quyết vấn đề thiếu memory.
+Nếu object vẫn có thể được truy cập qua strong reference, nó giống như **vật dụng thiết yếu trong cuộc sống**, garbage collector sẽ không thu hồi object. Khi không gian memory không đủ, Java VM thà ném lỗi `OutOfMemoryError` khiến chương trình kết thúc bất thường, chứ không tùy tiện thu hồi object có strong reachability để giải quyết tình trạng thiếu memory.
 
 **2. Soft reference (SoftReference)**
 
-Nếu object chỉ có soft reference, nó giống như **vật dụng có cũng được, không có cũng được trong cuộc sống**. Code soft reference như sau:
+Nếu object chỉ có soft reference, nó giống như **vật dụng có cũng được, không có cũng được trong cuộc sống**. Code của soft reference như sau:
 
 ```java
 // --- Ví dụ 1 ---
@@ -284,13 +284,13 @@ str = null; // loại bỏ strong reference
 SoftReference<String> softReference2 = new SoftReference<>(new String("def")); // anonymous object
 ```
 
-Soft reference object có thể bị thu hồi khi memory pressure lớn, nhưng JVM không bảo đảm chỉ dọn dẹp chúng khi memory không đủ. Bảo đảm duy nhất là: trước khi ném `OutOfMemoryError`, tất cả object chỉ reachable thông qua soft reference chắc chắn sẽ được dọn dẹp. Miễn là garbage collector chưa thu hồi object, chương trình vẫn có thể sử dụng object đó. Soft reference có thể dùng để implement memory-sensitive cache.
+Object được tham chiếu mềm có thể bị thu hồi khi memory pressure lớn, nhưng JVM không bảo đảm chỉ dọn dẹp chúng khi memory không đủ. Bảo đảm duy nhất là: trước khi ném `OutOfMemoryError`, tất cả object chỉ reachable thông qua soft reference chắc chắn sẽ được dọn dẹp. Miễn là garbage collector chưa thu hồi object, chương trình vẫn có thể sử dụng object đó. Soft reference có thể dùng để implement memory-sensitive cache.
 
 Soft reference có thể được sử dụng cùng một reference queue (`ReferenceQueue`). Sau khi garbage collector xóa soft reference, nó sẽ đưa soft reference đã đăng ký với reference queue vào queue tương ứng cùng lúc hoặc sau đó. Việc reference được enqueue cho biết garbage collector đã phát hiện thay đổi reachability tương ứng, không dùng để chứng minh memory mà object chiếm dụng đã được giải phóng vật lý.
 
 **3. Weak reference (WeakReference)**
 
-Nếu object chỉ có weak reference, nó giống như **vật dụng có cũng được, không có cũng được trong cuộc sống**. Code weak reference như sau:
+Nếu object chỉ có weak reference, nó giống như **vật dụng có cũng được, không có cũng được trong cuộc sống**. Code của weak reference như sau:
 
 ```java
 // --- Ví dụ 1 ---
@@ -308,7 +308,7 @@ Weak reference có thể được sử dụng cùng một reference queue (`Refe
 
 **4. Phantom reference (PhantomReference)**
 
-“Phantom reference” đúng như tên gọi, chỉ tồn tại trên danh nghĩa. Khác với các loại reference khác, phantom reference không ngăn garbage collector thu hồi object mà nó trỏ đến. Code phantom reference như sau:
+“Phantom reference” đúng như tên gọi, chỉ tồn tại trên danh nghĩa. Khác với các loại reference khác, phantom reference không ngăn garbage collector thu hồi object mà nó trỏ đến. Code của phantom reference như sau:
 
 ```java
 // --- Ví dụ 1 ---
@@ -326,7 +326,7 @@ PhantomReference phantomReference2 = new PhantomReference(new String("abc"), que
 
 **Một điểm khác giữa phantom reference với soft reference và weak reference là:** phantom reference thường được sử dụng cùng reference queue (`ReferenceQueue`). Sau khi garbage collector xác định object đã chuyển sang trạng thái phantom reachable, nó sẽ clear phantom reference liên quan và đưa phantom reference đã đăng ký với reference queue vào queue cùng lúc hoặc sau đó. `PhantomReference.get()` luôn trả về `null`, chương trình không thể lấy lại object thông qua phantom reference; phantom reference chủ yếu dùng để sắp xếp công việc dọn dẹp sau khi object không còn có thể được truy cập.
 
-Cần đặc biệt lưu ý: soft reference chủ yếu dùng để implement cache nhạy với memory, nhưng không thể bảo đảm ứng dụng không xảy ra `OutOfMemoryError`; memory overflow còn có thể do resource ngoài heap cạn kiệt và các nguyên nhân khác.
+Cần đặc biệt lưu ý: soft reference chủ yếu dùng để implement cache nhạy với memory, nhưng không thể bảo đảm ứng dụng không xảy ra `OutOfMemoryError`; lỗi thiếu memory còn có thể do resource ngoài heap cạn kiệt và các nguyên nhân khác.
 
 ### Làm thế nào xác định một constant là constant không còn sử dụng?
 
@@ -344,9 +344,9 @@ Giả sử trong string constant pool có string `"abc"`. Nếu hiện tại kh�
 
 ### Làm thế nào xác định một class là class không còn sử dụng?
 
-Method area chủ yếu thu hồi các class không còn sử dụng. Vậy làm thế nào xác định một class là class không còn sử dụng?
+Method area chủ yếu thu hồi các class không còn sử dụng. Vậy làm thế nào xác định một class không còn sử dụng?
 
-Điều kiện xác định một constant là “constant không còn sử dụng” tương đối đơn giản, còn điều kiện xác định một class là “class không còn sử dụng” khắt khe hơn nhiều. Class phải đồng thời thỏa mãn 3 điều kiện dưới đây mới được xem là **“class không còn sử dụng”**:
+Điều kiện xác định một constant là “constant không còn sử dụng” tương đối đơn giản, còn điều kiện xác định một class không còn sử dụng khắt khe hơn nhiều. Class phải đồng thời thỏa mãn 3 điều kiện dưới đây mới được xem là **“class không còn sử dụng”**:
 
 - Tất cả instance của class đó đã được thu hồi, tức Java heap không còn instance nào của class đó.
 - `ClassLoader` đã load class đó cũng đã được thu hồi.
@@ -362,10 +362,10 @@ VM có thể thu hồi class không còn sử dụng thỏa mãn 3 điều kiệ
 
 Mark-sweep (Mark-and-Sweep) algorithm gồm giai đoạn “mark (đánh dấu)” và “sweep (dọn dẹp)”: trước hết đánh dấu tất cả object không cần thu hồi, sau khi đánh dấu xong thì thu hồi thống nhất tất cả object không được đánh dấu.
 
-Đây là collection algorithm cơ bản nhất, các algorithm về sau đều được cải tiến từ những hạn chế của algorithm này. Garbage collection algorithm này gây ra hai vấn đề rõ ràng:
+Đây là GC algorithm cơ bản nhất; các algorithm về sau đều được cải tiến từ những hạn chế của algorithm này. Algorithm này gây ra hai vấn đề rõ ràng:
 
-1. **Vấn đề performance**: cả hai bước mark và sweep đều không có performance cao.
-2. **Vấn đề space**: sau mark-sweep sẽ tạo ra một lượng lớn memory fragmentation không liên tục.
+1. **Vấn đề performance**: cả hai bước mark và sweep đều có hiệu suất không cao.
+2. **Vấn đề space**: sau mark-sweep sẽ tạo ra nhiều vùng memory fragmentation không liên tục.
 
 ![Mark-sweep algorithm](https://oss.javaguide.cn/github/javaguide/java/jvm/mark-and-sweep-garbage-collection-algorithm.png)
 
@@ -379,7 +379,7 @@ Nếu hiểu theo cách thứ nhất, toàn bộ quy trình mark-sweep đại kh
 
 ### Copying algorithm
 
-Để giải quyết vấn đề performance và memory fragmentation của mark-sweep algorithm, copying (Copying) collection algorithm ra đời. Algorithm chia memory thành hai phần có kích thước bằng nhau, mỗi lần chỉ sử dụng một phần. Khi memory của phần này được sử dụng hết, các object còn sống sẽ được copy sang phần còn lại, sau đó dọn dẹp toàn bộ space đã sử dụng trong một lần. Nhờ vậy, mỗi lần thu hồi memory sẽ thu hồi một nửa memory area.
+Để giải quyết vấn đề performance và memory fragmentation của mark-sweep algorithm, copying (Copying) algorithm ra đời. Algorithm chia memory thành hai phần có kích thước bằng nhau, mỗi lần chỉ sử dụng một phần. Khi memory của phần này được sử dụng hết, các object còn sống sẽ được copy sang phần còn lại, sau đó dọn dẹp toàn bộ space đã sử dụng trong một lần. Nhờ vậy, mỗi lần thu hồi memory sẽ thu hồi một nửa memory area.
 
 ![Copying algorithm](https://oss.javaguide.cn/github/javaguide/java/jvm/copying-garbage-collection-algorithm.png)
 
@@ -394,13 +394,13 @@ Mark-compact (Mark-and-Compact) algorithm là một mark algorithm được đ�
 
 ![Mark-compact algorithm](https://oss.javaguide.cn/github/javaguide/java/jvm/mark-and-compact-garbage-collection-algorithm.png)
 
-Vì có thêm bước compact nên performance cũng không cao, phù hợp với old generation, nơi frequency garbage collection không quá cao.
+Vì có thêm bước compact nên performance cũng không cao, phù hợp với old generation, nơi tần suất garbage collection không quá cao.
 
 ### Generational collection algorithm
 
-Generational garbage collector kinh điển chia memory thành một số phần dựa trên thời gian tồn tại khác nhau của object. Thông thường Java heap được chia thành young generation và old generation, nhờ đó có thể chọn garbage collection algorithm phù hợp theo đặc điểm của từng generation. Cần lưu ý garbage collector không phải lúc nào cũng sử dụng thiết kế generational, ví dụ ZGC thời kỳ đầu là non-generational collector.
+Generational collection algorithm kinh điển chia memory thành một số phần dựa trên thời gian tồn tại khác nhau của object. Thông thường Java heap được chia thành young generation và old generation, nhờ đó có thể chọn garbage collection algorithm phù hợp theo đặc điểm của từng generation. Cần lưu ý garbage collector không phải lúc nào cũng sử dụng thiết kế generational, ví dụ ZGC thời kỳ đầu là non-generational collector.
 
-Ví dụ, trong young generation, mỗi lần collection có rất nhiều object chết, nên có thể chọn copying algorithm; chỉ cần trả một lượng nhỏ cost để copy object là có thể hoàn thành mỗi lần garbage collection. Xác suất object trong old generation còn sống tương đối cao, đồng thời không có space bổ sung để thực hiện promotion guarantee, nên bắt buộc phải chọn mark-sweep hoặc mark-compact algorithm để garbage collection.
+Ví dụ, trong young generation, mỗi lần collection có rất nhiều object chết, nên có thể chọn copying algorithm; chỉ cần trả một lượng nhỏ cost để copy object là có thể hoàn thành mỗi lần garbage collection. Xác suất object trong old generation còn sống tương đối cao, đồng thời không có space bổ sung để thực hiện promotion guarantee, nên phải chọn mark-sweep hoặc mark-compact algorithm để garbage collection.
 
 **Câu hỏi phỏng vấn mở rộng:** Tại sao HotSpot phải chia thành young generation và old generation?
 
@@ -408,9 +408,9 @@ Hãy trả lời dựa trên phần giới thiệu về generational collection 
 
 ## Garbage collector
 
-**Nếu collection algorithm là phương pháp luận của memory reclamation, thì garbage collector là implementation cụ thể của memory reclamation.**
+**Nếu collection algorithm là phương pháp luận của việc thu hồi memory, thì garbage collector là implementation cụ thể của việc thu hồi memory.**
 
-Dù so sánh các collector, mục đích không phải chọn ra một collector tốt nhất. Vì cho đến nay chưa có garbage collector tốt nhất, càng không có garbage collector vạn năng, **điều chúng ta có thể làm là chọn garbage collector phù hợp theo application scenario cụ thể**. Hãy thử nghĩ: nếu tồn tại một collector hoàn hảo, phù hợp với mọi nơi và mọi scenario, HotSpot VM đã không cần implement nhiều garbage collector khác nhau như vậy.
+Dù so sánh các collector, mục đích không phải chọn ra một collector tốt nhất. Vì cho đến nay chưa có garbage collector tốt nhất, càng không có garbage collector vạn năng, **điều có thể làm là chọn garbage collector phù hợp theo application scenario cụ thể**. Hãy thử nghĩ: nếu tồn tại một collector hoàn hảo, phù hợp với mọi nơi và mọi scenario, HotSpot VM đã không cần implement nhiều garbage collector khác nhau như vậy.
 
 Garbage collector mặc định của Oracle/OpenJDK HotSpot trong môi trường Server VM điển hình (lựa chọn thực tế còn chịu ảnh hưởng của platform và runtime environment, có thể dùng command `java -XX:+PrintCommandLineFlags -version` để kiểm tra):
 
@@ -431,13 +431,13 @@ Nhưng Serial collector có ưu điểm hơn các garbage collector khác không
 
 ### ParNew collector
 
-ParNew collector thực chất là phiên bản multi-thread của Serial collector. Ngoài việc sử dụng multi-thread để thực hiện garbage collection, các hành vi còn lại (control parameter, collection algorithm, reclamation strategy, v.v.) hoàn toàn giống Serial collector.
+ParNew collector thực chất là phiên bản multi-thread của Serial collector. Ngoài việc sử dụng multi-thread để thực hiện garbage collection, các đặc điểm còn lại (control parameter, collection algorithm, reclamation strategy, v.v.) hoàn toàn giống Serial collector.
 
 ParNew chỉ phụ trách young generation và sử dụng mark-copy algorithm; nó thường phối hợp với CMS collector phụ trách old generation.
 
 ![ParNew collector ](https://oss.javaguide.cn/github/javaguide/java/jvm/parnew-garbage-collector.png)
 
-Trong các phiên bản JDK vẫn hỗ trợ CMS, ParNew là partner ở young generation của CMS; CMS đã bị loại bỏ trong JDK 14, vì vậy cặp collector này chỉ áp dụng cho HotSpot phiên bản cũ.
+Trong các phiên bản JDK vẫn hỗ trợ CMS, ParNew là collector đi kèm ở young generation của CMS; CMS đã bị loại bỏ trong JDK 14, vì vậy cặp collector này chỉ áp dụng cho HotSpot phiên bản cũ.
 
 **Bổ sung về khái niệm parallel và concurrent:**
 
@@ -486,26 +486,26 @@ JDK1.8 mặc định sử dụng Parallel Scavenge + Parallel Old. Nếu chỉ �
 
 ### Parallel Old collector
 
-**Phiên bản old generation của Parallel Scavenge collector.** Collector này sử dụng multi-thread và mark-compact algorithm. Trong các trường hợp chú trọng throughput và resource CPU, có thể ưu tiên cân nhắc Parallel Scavenge collector và Parallel Old collector.
+**Phiên bản old generation của Parallel Scavenge collector.** Collector này sử dụng multi-thread và mark-compact algorithm. Trong các trường hợp chú trọng throughput và tài nguyên CPU, có thể ưu tiên cân nhắc Parallel Scavenge collector và Parallel Old collector.
 
 ![Sơ đồ hoạt động của Parallel Old collector](https://oss.javaguide.cn/github/javaguide/java/jvm/parallel-scavenge-garbage-collector.png)
 
 ### CMS collector
 
-**CMS (Concurrent Mark Sweep) collector là collector hướng đến mục tiêu đạt pause time ngắn nhất khi reclamation. Nó rất phù hợp với các application chú trọng user experience.**
+**CMS (Concurrent Mark Sweep) collector là collector hướng đến mục tiêu đạt pause time ngắn nhất khi thu hồi memory. Nó rất phù hợp với các application chú trọng user experience.**
 
 **CMS (Concurrent Mark Sweep) collector là concurrent collector đầu tiên của HotSpot VM theo đúng nghĩa, lần đầu tiên thực hiện việc cho garbage collection thread và user thread làm việc (về cơ bản) đồng thời.**
 
 Có thể thấy từ hai từ **Mark Sweep** trong tên, CMS collector là implementation của **mark-sweep algorithm**. Quy trình hoạt động của nó phức tạp hơn các garbage collector trước đó, gồm bốn bước:
 
-- **Initial mark:** pause ngắn, đánh dấu object (root object) reference trực tiếp với root;
+- **Initial mark:** pause ngắn, đánh dấu object (root object) được reference trực tiếp từ root;
 - **Concurrent mark:** đồng thời bật GC và user thread, sử dụng một closure structure để ghi nhận reachable object. Tuy nhiên khi giai đoạn này kết thúc, closure structure không thể bảo đảm chứa toàn bộ reachable object hiện tại. Vì user thread có thể liên tục cập nhật reference field, GC thread không thể bảo đảm tính realtime của reachability analysis. Do đó algorithm này sẽ theo dõi và ghi nhận các nơi xảy ra reference update.
 - **Remark:** giai đoạn remark nhằm hiệu chỉnh record đánh dấu của những object có mark thay đổi trong concurrent mark do user program vẫn tiếp tục chạy. Pause time của giai đoạn này thường dài hơn initial mark một chút, nhưng ngắn hơn rất nhiều so với concurrent mark.
 - **Concurrent sweep:** bật user thread, đồng thời GC thread bắt đầu sweep các khu vực chưa được mark.
 
 ![CMS collector](https://oss.javaguide.cn/github/javaguide/java/jvm/cms-garbage-collector.png)
 
-Chỉ nhìn vào tên cũng có thể thấy đây là một garbage collector ưu tú. Ưu điểm chính: **concurrent collection, low pause**. Tuy nhiên nó có ba nhược điểm rõ ràng:
+Đây là một garbage collector ưu việt. Ưu điểm chính: **concurrent collection, low pause**. Tuy nhiên nó có ba nhược điểm rõ ràng:
 
 - **Nhạy với resource CPU;**
 - **Không thể xử lý floating garbage;**
@@ -515,25 +515,25 @@ Chỉ nhìn vào tên cũng có thể thấy đây là một garbage collector �
 
 ### G1 collector
 
-**G1 (Garbage-First) là garbage collector hướng đến server, chủ yếu dành cho máy có nhiều processor và memory dung lượng lớn. Nó có đặc điểm throughput cao, đồng thời có xác suất rất cao đáp ứng yêu cầu về GC pause time.**
+**G1 (Garbage-First) là garbage collector hướng đến server, chủ yếu dành cho máy có nhiều processor và memory dung lượng lớn. Nó có throughput cao, đồng thời có xác suất rất cao đáp ứng yêu cầu về GC pause time.**
 
 G1 được xem là một đặc điểm tiến hóa quan trọng của HotSpot VM trong JDK1.7. Nó có các đặc điểm sau:
 
 - **Parallel và concurrent**: G1 tận dụng đầy đủ ưu thế phần cứng trong môi trường CPU, multi-core, sử dụng nhiều CPU (CPU hoặc CPU core) để rút ngắn Stop-The-World pause time. Một số GC action mà các collector khác vốn cần pause Java thread để thực hiện, G1 collector vẫn có thể cho Java program tiếp tục chạy bằng cách thực hiện concurrent.
 - **Generational collection**: dù G1 có thể tự quản lý toàn bộ GC heap mà không cần phối hợp với collector khác, nó vẫn giữ lại khái niệm generational.
-- **Space integration**: khác với mark-sweep algorithm của CMS, xét tổng thể G1 là collector dựa trên mark-compact algorithm; xét cục bộ thì dựa trên mark-copy algorithm.
-- **Pause có thể dự đoán**: đây là một ưu điểm lớn khác của G1 so với CMS. Giảm pause time là điểm cùng quan tâm của G1 và CMS. G1 xây dựng prediction model dựa trên pause time target do user thiết lập và chọn collection set, nhưng target này là soft target, không bảo đảm mỗi pause đều không vượt quá giá trị chỉ định.
+- **Tích hợp memory**: khác với mark-sweep algorithm của CMS, xét tổng thể G1 là collector dựa trên mark-compact algorithm; xét cục bộ thì dựa trên mark-copy algorithm.
+- **Pause có thể dự đoán**: đây là một ưu điểm lớn khác của G1 so với CMS. Giảm pause time là mối quan tâm chung của G1 và CMS. G1 xây dựng prediction model dựa trên pause time target do user thiết lập và chọn collection set, nhưng target này là soft target, không bảo đảm mỗi pause đều không vượt quá giá trị chỉ định.
 
 Quy trình hoạt động của G1 collector đại khái gồm các bước sau:
 
 - **Initial mark**: pause ngắn (Stop-The-World, STW), đánh dấu object có thể được reference trực tiếp từ GC Roots, tức đánh dấu tất cả active object reachable trực tiếp.
 - **Concurrent mark**: chạy concurrent với application, đánh dấu tất cả reachable object. Giai đoạn này có thể kéo dài, phụ thuộc vào kích thước heap và số lượng object.
 - **Final mark**: pause ngắn (STW), xử lý một lượng nhỏ reference change còn lại sau khi concurrent mark kết thúc.
-- **Evacuation**: dựa trên kết quả mark, chọn region có reclamation value cao, copy object còn sống sang region mới, thu hồi memory của region cũ. Giai đoạn này gồm một hoặc nhiều pause (STW), tùy vào độ phức tạp của reclamation.
+- **Evacuation**: dựa trên kết quả mark, chọn region có reclamation value cao, copy object còn sống sang region mới, thu hồi memory của region cũ. Giai đoạn này gồm một hoặc nhiều pause (STW), tùy vào độ phức tạp của việc thu hồi.
 
 ![G1 collector](https://oss.javaguide.cn/github/javaguide/java/jvm/g1-garbage-collector.png)
 
-**G1 collector duy trì một priority list ở background. Mỗi lần, dựa trên collection time được cho phép, nó ưu tiên chọn Region có reclamation value lớn nhất (đây là nguồn gốc tên Garbage-First)**. Cách chia memory space thành các Region và thu hồi region theo priority này bảo đảm G1 collector đạt collection efficiency cao nhất có thể trong thời gian giới hạn (chia nhỏ memory thành nhiều phần).
+**G1 collector duy trì một priority list ở background. Mỗi lần, dựa trên collection time được cho phép, nó ưu tiên chọn Region có reclamation value lớn nhất (đây là nguồn gốc tên Garbage-First)**. Cách chia memory space thành các Region và thu hồi region theo priority này giúp G1 collector đạt collection efficiency cao nhất có thể trong thời gian giới hạn (chia nhỏ memory thành nhiều phần).
 
 **Từ JDK9, G1 garbage collector trở thành garbage collector mặc định.**
 
@@ -543,7 +543,7 @@ Tương tự ParNew và G1, ZGC cũng sử dụng mark-copy algorithm, nhưng ZG
 
 ZGC có thể kiểm soát pause time trong phạm vi vài millisecond, pause time không bị ảnh hưởng bởi kích thước heap, tình trạng Stop The World xuất hiện ít hơn, nhưng phải đánh đổi một phần throughput. ZGC hỗ trợ heap tối đa 16TB.
 
-ZGC được giới thiệu trong Java11 và ở giai đoạn thử nghiệm. Sau nhiều lần lặp qua các phiên bản, liên tục hoàn thiện và sửa lỗi, ZGC đã có thể được sử dụng chính thức trong Java15.
+ZGC được giới thiệu trong Java 11 dưới dạng thử nghiệm. Sau nhiều phiên bản liên tục được hoàn thiện và sửa lỗi, ZGC đã có thể được sử dụng chính thức trong Java 15.
 
 Tuy nhiên, garbage collector mặc định vẫn là G1. Có thể enable ZGC bằng parameter sau:
 
@@ -571,9 +571,9 @@ Trong Java 21 và 22, có thể dùng thêm `-XX:+ZGenerational` để enable ge
 
 Tương tự ZGC, Shenandoah cũng là collector hướng đến low latency, do Red Hat chủ trì phát triển. Shenandoah được đưa vào dưới dạng experimental feature trong Java 12 qua [JEP 189](https://openjdk.org/jeps/189), và trở thành official feature từ Java 15 ([JEP 379](https://openjdk.org/jeps/379)).
 
-Tư tưởng cốt lõi của Shenandoah là **concurrent compaction**: phần lớn công việc compact heap diễn ra đồng thời với application thread, pause time có thể được kiểm soát ở mức dưới millisecond và không bị ảnh hưởng bởi kích thước heap. Shenandoah chủ yếu dùng **forwarding pointer (Brooks Pointer)** và **read barrier** để việc di chuyển object trong concurrent compaction trở nên transparent với application thread.
+Tư tưởng cốt lõi của Shenandoah là **concurrent compaction**: phần lớn công việc compact heap diễn ra đồng thời với application thread, pause time có thể được kiểm soát ở mức dưới một millisecond và không bị ảnh hưởng bởi kích thước heap. Shenandoah chủ yếu dùng **forwarding pointer (Brooks Pointer)** và **read barrier** để việc di chuyển object trong concurrent compaction trở nên transparent với application thread.
 
-Cần lưu ý, Shenandoah thời kỳ đầu giống ZGC thời kỳ đầu, là non-generational collector và phải trả một phần cost về throughput. Generational Shenandoah vẫn đang được phát triển (như [JEP 535](https://openjdk.org/jeps/535), [JEP 521](https://openjdk.org/jeps/521)), đáng để tiếp tục theo dõi.
+Cần lưu ý, Shenandoah thời kỳ đầu giống ZGC thời kỳ đầu, là non-generational collector và phải đánh đổi một phần throughput. Generational Shenandoah vẫn đang được phát triển (như [JEP 535](https://openjdk.org/jeps/535), [JEP 521](https://openjdk.org/jeps/521)), đáng để tiếp tục theo dõi.
 
 Có thể enable Shenandoah bằng parameter sau:
 

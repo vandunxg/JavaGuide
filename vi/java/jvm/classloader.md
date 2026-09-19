@@ -1,18 +1,18 @@
 ---
 title: Giải thích chi tiết về Class Loader (trọng điểm)
-description: "Giải thích chi tiết về Java Class Loader: phân tích sâu cơ chế ClassLoader, nguyên lý mô hình Parent Delegation, Bootstrap Class Loader/Platform Class Loader/Application Class Loader, triển khai Class Loader tùy chỉnh và các trường hợp phá vỡ Parent Delegation."
+description: "Giải thích chi tiết về Java Class Loader: phân tích sâu cơ chế load class của ClassLoader, nguyên lý Parent Delegation Model, Bootstrap Class Loader/Platform Class Loader/Application Class Loader, triển khai Class Loader tùy chỉnh và các trường hợp phá vỡ Parent Delegation Model."
 category: Java
 tag:
   - JVM
 head:
   - - meta
     - name: keywords
-      content: Class Loader,ClassLoader,Parent Delegation Model,quá trình load class,Class Loader tùy chỉnh,phá vỡ Parent Delegation
+      content: Class Loader,ClassLoader,Parent Delegation Model,quá trình load class,Class Loader tùy chỉnh,phá vỡ Parent Delegation Model
 ---
 
 ## Ôn lại quá trình load class
 
-Trước khi giới thiệu Class Loader và Parent Delegation Model, hãy cùng ôn lại ngắn gọn quá trình load class.
+Trước khi giới thiệu Class Loader và Parent Delegation Model, hãy ôn lại ngắn gọn quá trình load class.
 
 - Quá trình load class: **load->link->initialize**.
 - Quá trình link có thể chia thành ba bước: **verify->prepare->resolve**.
@@ -21,15 +21,15 @@ Trước khi giới thiệu Class Loader và Parent Delegation Model, hãy cùng
 
 Loading là bước đầu tiên của quá trình load class, chủ yếu hoàn thành 3 việc sau:
 
-1. Lấy binary byte stream của class này thông qua full class name.
-2. Chuyển đổi cấu trúc lưu trữ tĩnh do byte stream biểu diễn thành cấu trúc dữ liệu runtime của method area.
+1. Lấy binary byte stream định nghĩa class thông qua full class name.
+2. Chuyển đổi cấu trúc lưu trữ tĩnh do byte stream biểu diễn thành cấu trúc dữ liệu runtime trong method area.
 3. Tạo một đối tượng `Class` đại diện cho class này trong memory, làm entry point để truy cập các dữ liệu trong method area.
 
 ## Class Loader
 
 ### Giới thiệu về Class Loader
 
-Class Loader xuất hiện từ JDK 1.0, ban đầu chỉ nhằm đáp ứng nhu cầu của Java Applet (đã bị loại bỏ). Sau đó, nó dần trở thành một bộ phận quan trọng trong chương trình Java, trao cho Java khả năng dynamically load class vào JVM và thực thi.
+Class Loader xuất hiện từ JDK 1.0, ban đầu chỉ nhằm đáp ứng nhu cầu của Java Applet (đã bị loại bỏ). Sau đó, nó dần trở thành một bộ phận quan trọng trong chương trình Java, giúp Java dynamically load và thực thi class trong JVM.
 
 Theo giới thiệu trong tài liệu API chính thức:
 
@@ -39,9 +39,9 @@ Theo giới thiệu trong tài liệu API chính thức:
 >
 > Class objects for array classes are not created by class loaders, but are created automatically as required by the Java runtime. The class loader for an array class, as returned by Class.getClassLoader() is the same as the class loader for its element type; if the element type is a primitive type, then the array class has no class loader.
 
-Dịch nôm na là:
+Có thể hiểu là:
 
-> Class Loader là một object chịu trách nhiệm load class. `ClassLoader` là một abstract class. Với binary name của một class, Class Loader phải thử định vị hoặc tạo dữ liệu cấu thành định nghĩa của class đó. Một chiến lược điển hình là chuyển name thành file name, sau đó đọc “class file” có name đó từ file system.
+> Class Loader là một object chịu trách nhiệm load class. `ClassLoader` là một abstract class. Với binary name của một class, Class Loader phải thử định vị hoặc tạo dữ liệu cấu thành định nghĩa của class đó. Một chiến lược điển hình là chuyển name thành file name, sau đó đọc “class file” có tên đó từ file system.
 >
 > Mỗi non-array class hoặc interface đều có một reference trỏ đến `ClassLoader` đã định nghĩa nó. Array class không được tạo thông qua `ClassLoader` mà được JVM tự động tạo khi cần; Class Loader của array class kiểu reference giống với component type, còn array class của primitive type không có Class Loader, `getClassLoader()` trả về `null`.
 
@@ -63,24 +63,24 @@ class Class<T> {
 }
 ```
 
-Nói đơn giản, **vai trò chính của Class Loader là dynamically load bytecode của Java class (file `.class`) vào JVM (tạo một object `Class` đại diện cho class đó trong memory).** Bytecode có thể được biên dịch từ Java source program (file `.java`) bằng `javac`, cũng có thể được dynamic generate bằng tool hoặc download qua network.
+Nói đơn giản, **vai trò chính của Class Loader là dynamically load bytecode của Java class (file `.class`) vào JVM (tạo một object `Class` đại diện cho class đó trong memory).** Bytecode có thể được tạo bằng cách biên dịch Java source program (file `.java`) với `javac`, hoặc được tool dynamic generate hay download qua network.
 
 Ngoài load class, Class Loader còn có thể load các resource mà Java application cần như text, image, config, video và các file resource khác. Bài viết này chỉ thảo luận chức năng cốt lõi của nó: load class.
 
 ### Quy tắc load của Class Loader
 
-Khi JVM khởi động, nó không load tất cả class cùng một lúc mà dynamically load theo nhu cầu. Nói cách khác, phần lớn class chỉ được load khi thực sự được sử dụng, giúp memory thân thiện hơn.
+Khi JVM khởi động, nó không load tất cả class cùng một lúc mà dynamically load theo nhu cầu. Nói cách khác, phần lớn class chỉ được load khi thực sự được sử dụng, giúp tiết kiệm memory hơn.
 
 Khi load class, `ClassLoader#loadClass` trước tiên sẽ thông qua `findLoadedClass` để kiểm tra JVM đã ghi nhận Class Loader hiện tại là initiating loader của class tương ứng với binary name hay chưa. Nếu có thì trả về trực tiếp, nếu không mới tiếp tục delegation hoặc tìm kiếm. Một Class Loader không thể định nghĩa lại class có cùng binary name.
 
 ```java
-// Các field và method sau đây lấy từ implementation ClassLoader của JDK 8, chỉ dùng để minh họa cách ghi nhận ở version này
+// Các field và method sau đây lấy từ implementation của ClassLoader trong JDK 8, chỉ nhằm minh họa cách ghi nhận trong version này
 public abstract class ClassLoader {
   ...
   private final ClassLoader parent;
   // Các class được Class Loader này load.
   private final Vector<Class<?>> classes = new Vector<>();
-  // Được VM gọi để dùng Class Loader này ghi nhận từng class đã load.
+  // Được VM gọi để Class Loader này ghi nhận từng class đã load.
   void addClass(Class<?> c) {
         classes.addElement(c);
    }
@@ -94,20 +94,20 @@ Ba Class Loader quan trọng thường gặp trong JDK 8:
 
 1. **`BootstrapClassLoader` (Bootstrap Class Loader)**: Class Loader built-in của virtual machine ở tầng cao nhất, thường được biểu diễn là `null` trong Java API và không có parent loader. Trong HotSpot của JDK 8, nó chủ yếu load runtime core class library (như `rt.jar`) và các class trong path do `-Xbootclasspath` chỉ định.
 2. **`ExtensionClassLoader` (Extension Class Loader)**: Chủ yếu chịu trách nhiệm load các jar và class trong thư mục `%JRE_HOME%/lib/ext`, cùng toàn bộ class trong path được system variable `java.ext.dirs` chỉ định.
-3. **`AppClassLoader` (Application Class Loader)**: Class Loader hướng đến user, chịu trách nhiệm load toàn bộ jar và class trong classpath của application hiện tại.
+3. **`AppClassLoader` (Application Class Loader)**: Class Loader dành cho user, chịu trách nhiệm load toàn bộ jar và class trong classpath của application hiện tại.
 
 > 🌈 Mở rộng:
 >
-> - **`rt.jar`**: rt là viết tắt của “RunTime”, `rt.jar` là Java base class library, chứa class file của tất cả class được thấy trong Java doc. Nói cách khác, các built-in library thường dùng `java.xxx.*` đều nằm trong đó, chẳng hạn `java.util.*`, `java.io.*`, `java.nio.*`, `java.lang.*`, `java.sql.*`, `java.math.*`.
+> - **`rt.jar`**: rt là viết tắt của “RunTime”, `rt.jar` là Java base class library, chứa class file của tất cả class được liệt kê trong Java doc. Nói cách khác, các built-in library thường dùng `java.xxx.*` đều nằm trong đó, chẳng hạn `java.util.*`, `java.io.*`, `java.nio.*`, `java.lang.*`, `java.sql.*`, `java.math.*`.
 > - Sau khi Java 9 giới thiệu module system, `rt.jar` và cơ chế extension directory không còn được sử dụng; Extension Class Loader được Platform Class Loader thay thế. Bootstrap, platform và application Class Loader lần lượt định nghĩa các runtime module khác nhau; không thể đơn giản khái quát rằng mọi module ngoài `java.base` đều do Platform Class Loader load.
 
 Ngoài ba loại Class Loader này, user còn có thể thêm Class Loader tùy chỉnh để đáp ứng nhu cầu đặc biệt. Chẳng hạn, có thể encrypt bytecode của Java class (file `.class`), sau đó dùng Class Loader tùy chỉnh để decrypt khi load.
 
 ![Sơ đồ quan hệ phân cấp của Class Loader](https://oss.javaguide.cn/github/javaguide/java/jvm/class-loader-parents-delegation-model.png)
 
-Bootstrap Class Loader là built-in của virtual machine, thường được biểu diễn là `null` trong Java API. Platform Class Loader, Application Class Loader và Class Loader tùy chỉnh thông thường đều là instance của `ClassLoader`. Nhờ đó, user có thể tự định nghĩa Class Loader để application quyết định cách lấy class cần thiết.
+Bootstrap Class Loader là Class Loader built-in của virtual machine, thường được biểu diễn là `null` trong Java API. Platform Class Loader, Application Class Loader và Class Loader tùy chỉnh thông thường đều là instance của `ClassLoader`. Nhờ đó, user có thể tự định nghĩa Class Loader để application quyết định cách lấy class cần thiết.
 
-Mỗi `ClassLoader` có thể lấy `ClassLoader` cha của nó thông qua `getParent()`. Nếu `ClassLoader` lấy được là `null`, thì parent loader của Class Loader đó là `BootstrapClassLoader`.
+Mỗi `ClassLoader` có thể lấy `ClassLoader` cha của nó thông qua `getParent()`. Nếu kết quả là `null`, thì parent loader của Class Loader đó là `BootstrapClassLoader`.
 
 ```java
 public abstract class ClassLoader {
@@ -157,7 +157,7 @@ Kết quả output (JDK 8):
         |--null
 ```
 
-Từ kết quả output có thể thấy:
+Từ output có thể thấy:
 
 - `ClassLoader` của Java class `PrintClassLoaderTree` do chúng ta viết là `AppClassLoader`;
 - Parent `ClassLoader` của `AppClassLoader` là `ExtClassLoader`;
@@ -169,8 +169,8 @@ Như đã nói ở trên, ngoài `BootstrapClassLoader`, các Class Loader khác
 
 Class `ClassLoader` có hai method quan trọng:
 
-- `protected Class loadClass(String name, boolean resolve)`: load class có binary name được chỉ định và implement Parent Delegation Model. `name` là binary name của class; nếu `resolve` là true thì gọi method `resolveClass(Class<?> c)` để resolve class đó trong quá trình load.
-- `protected Class findClass(String name)`: tìm class theo binary name; implementation mặc định trực tiếp throw `ClassNotFoundException`.
+- `protected Class loadClass(String name, boolean resolve)`: load class có binary name được chỉ định và thực hiện Parent Delegation Model. `name` là binary name của class; nếu `resolve` là true thì gọi method `resolveClass(Class<?> c)` để resolve class đó trong quá trình load.
+- `protected Class findClass(String name)`: tìm class theo binary name; implementation mặc định ném trực tiếp `ClassNotFoundException`.
 
 Tài liệu API chính thức viết:
 
@@ -178,7 +178,7 @@ Tài liệu API chính thức viết:
 >
 > Khuyến nghị subclass của `ClassLoader` override method `findClass(String name)` thay vì method `loadClass(String name, boolean resolve)`.
 
-Nếu không muốn phá vỡ Parent Delegation Model, chỉ cần override method `findClass()` trong class `ClassLoader`; class không thể được parent loader load cuối cùng sẽ được load thông qua method này. Tuy nhiên, nếu muốn phá vỡ Parent Delegation Model thì cần override method `loadClass()`.
+Nếu không muốn phá vỡ Parent Delegation Model, chỉ cần override method `findClass()` trong class `ClassLoader`; class mà parent loader không thể load cuối cùng sẽ được load thông qua method này. Tuy nhiên, nếu muốn phá vỡ Parent Delegation Model thì cần override method `loadClass()`.
 
 ## Parent Delegation Model
 
@@ -190,10 +190,10 @@ Theo giới thiệu trên website chính thức:
 
 > The ClassLoader class uses a delegation model to search for classes and resources. Each instance of ClassLoader has an associated parent class loader. When requested to find a class or resource, a ClassLoader instance will delegate the search for the class or resource to its parent class loader before attempting to find the class or resource itself. The virtual machine's built-in class loader, called the "bootstrap class loader", does not itself have a parent but may serve as the parent of a ClassLoader instance.
 
-Dịch nôm na là:
+Có thể hiểu là:
 
 > Class `ClassLoader` sử dụng delegation model để tìm kiếm class và resource. Mỗi instance của `ClassLoader` đều có một parent loader tương ứng. Khi cần tìm class hoặc resource, trước khi tự mình thử tìm class hoặc resource đó, instance `ClassLoader` sẽ ủy thác nhiệm vụ tìm kiếm cho parent loader.
-> Built-in Class Loader trong virtual machine, được gọi là “bootstrap class loader”, bản thân không có parent loader nhưng có thể làm parent loader của instance `ClassLoader`.
+> Class Loader built-in của virtual machine, được gọi là “bootstrap class loader”, bản thân không có parent loader nhưng có thể làm parent loader của instance `ClassLoader`.
 
 Từ phần giới thiệu trên có thể thấy:
 
@@ -205,9 +205,9 @@ Quan hệ phân cấp giữa các Class Loader được thể hiện trong hình
 
 ![Sơ đồ quan hệ phân cấp của Class Loader](https://oss.javaguide.cn/github/javaguide/java/jvm/class-loader-parents-delegation-model.png)
 
-Lưu ý ⚠️: Parent Delegation Model không phải constraint bắt buộc mà chỉ là cách thức được JDK official khuyến nghị. Nếu có nhu cầu đặc biệt và muốn phá vỡ Parent Delegation Model thì vẫn có thể thực hiện; các phương pháp cụ thể sẽ được giới thiệu ở phần sau.
+Lưu ý ⚠️: Parent Delegation Model không phải ràng buộc bắt buộc mà chỉ là cách thức được JDK chính thức khuyến nghị. Nếu có nhu cầu đặc biệt và muốn phá vỡ Parent Delegation Model thì vẫn có thể thực hiện; các phương pháp cụ thể sẽ được giới thiệu ở phần sau.
 
-Thực ra, cách dịch “parent” này dễ khiến người khác hiểu lầm; chúng ta thường hiểu “parent” là cha mẹ, nhưng ở đây nó chủ yếu biểu đạt “thế hệ cha mẹ”, chứ không phải thực sự có một `MotherClassLoader` và một `FatherClassLoader`. Cá nhân tôi cho rằng dịch thành Single Parent Delegation Model sẽ tốt hơn, nhưng vì trong nước đã dịch thành Parent Delegation Model và cách gọi này đã được lưu truyền, cứ dùng như vậy cũng không sao, miễn là không bị hiểu lầm.
+Thực ra, cách dịch “parent” này dễ khiến người khác hiểu lầm; chúng ta thường hiểu “parent” là cha mẹ, nhưng ở đây nó chủ yếu biểu đạt “thế hệ cha mẹ”, chứ không phải thực sự có một `MotherClassLoader` và một `FatherClassLoader`. Cá nhân tôi cho rằng dịch thành Single Parent Delegation Model sẽ tốt hơn, nhưng vì ở Trung Quốc đã dịch thành Parent Delegation Model và cách gọi này đã được lưu truyền, cứ dùng như vậy cũng không sao, miễn là không bị hiểu lầm.
 
 Ngoài ra, quan hệ parent-child giữa các Class Loader thường không được implement bằng quan hệ inheritance mà thường dùng quan hệ composition để reuse code của parent loader.
 
@@ -223,11 +223,11 @@ public abstract class ClassLoader {
 }
 ```
 
-Trong object-oriented programming có một design principle rất kinh điển: **composition over inheritance, ưu tiên composition và hạn chế inheritance.**
+Trong lập trình hướng đối tượng có một design principle rất kinh điển: **composition over inheritance, ưu tiên composition và hạn chế inheritance.**
 
-### Flow thực thi của Parent Delegation Model
+### Quy trình thực thi của Parent Delegation Model
 
-Logic chính của Parent Delegation Model tập trung trong `loadClass()` của `java.lang.ClassLoader`. Dưới đây là một đoạn implementation liên quan của JDK 8:
+Logic chính của Parent Delegation Model tập trung trong `loadClass()` của `java.lang.ClassLoader`. Dưới đây là một đoạn implementation liên quan trong JDK 8:
 
 ```java
 protected Class<?> loadClass(String name, boolean resolve)
@@ -253,7 +253,7 @@ protected Class<?> loadClass(String name, boolean resolve)
 
             if (c == null) {
                 // Khi parent loader không thể load, gọi method findClass để load class này
-                // User có thể override method này để tự định nghĩa Class Loader
+                // User có thể override method này để tùy chỉnh Class Loader
                 long t1 = System.nanoTime();
                 c = findClass(name);
 
@@ -272,32 +272,32 @@ protected Class<?> loadClass(String name, boolean resolve)
 }
 ```
 
-Mỗi khi một Class Loader nhận được request load, trước tiên nó forward request cho parent loader. Chỉ khi parent loader không tìm thấy class được request thì Class Loader đó mới thử load.
+Mỗi khi một Class Loader nhận được request load, trước tiên nó forward request cho parent loader. Chỉ khi parent loader không tìm thấy class được yêu cầu thì Class Loader đó mới thử load.
 
-Kết hợp với source code trên, có thể tóm tắt ngắn gọn flow thực thi của Parent Delegation Model như sau:
+Kết hợp với source code trên, có thể tóm tắt ngắn gọn quy trình thực thi của Parent Delegation Model như sau:
 
-- Khi load class, system trước tiên kiểm tra class hiện tại đã được load hay chưa. Class đã được load sẽ được trả về trực tiếp, nếu chưa mới thử load (mỗi parent loader đều đi qua flow này một lần).
+- Khi load class, system trước tiên kiểm tra class hiện tại đã được load hay chưa. Class đã được load sẽ được trả về trực tiếp, nếu chưa mới thử load (mỗi parent loader đều thực hiện quy trình này một lần).
 - Khi load class, Class Loader trước tiên không tự thử load class đó mà ủy thác request cho parent loader thực hiện (gọi method `loadClass()` của parent loader để load class). Như vậy, mọi request cuối cùng đều được chuyển đến Bootstrap Class Loader ở tầng cao nhất.
 - Chỉ khi parent loader phản hồi rằng không thể hoàn thành request load này (không tìm thấy class cần thiết trong phạm vi tìm kiếm của nó), child loader mới thử tự load (gọi method `findClass()` của mình để load class).
-- Nếu child loader cũng không thể load class này, nó sẽ throw exception `ClassNotFoundException`.
+- Nếu child loader cũng không thể load class này, nó sẽ ném exception `ClassNotFoundException`.
 
 🌈 Mở rộng:
 
-**Quy tắc cụ thể để JVM xác định hai Java class có giống nhau hay không**: JVM không chỉ xem full name của class có giống nhau hay không mà còn xem Class Loader load class đó có giống nhau hay không. Chỉ khi cả hai đều giống nhau thì mới coi hai class là giống nhau. Ngay cả khi hai class bắt nguồn từ cùng một file `Class` và được cùng một virtual machine load, chỉ cần Class Loader load chúng khác nhau thì hai class chắc chắn không giống nhau.
+**Quy tắc cụ thể để JVM xác định hai Java class có giống nhau hay không**: JVM không chỉ xem full name của class có giống nhau hay không mà còn xem Class Loader load class đó có giống nhau hay không. Chỉ khi cả hai đều giống nhau thì mới coi hai class là giống nhau. Ngay cả khi hai class bắt nguồn từ cùng một file class và được cùng một virtual machine load, chỉ cần Class Loader load chúng khác nhau thì hai class chắc chắn không giống nhau.
 
 ### Lợi ích của Parent Delegation Model
 
-Parent Delegation Model là một bộ phận quan trọng trong cơ chế load Java class. Việc parent loader được ưu tiên giúp code trong cùng một delegation chain reuse type đã được parent loader định nghĩa, đồng thời giảm rủi ro application code giả mạo platform API; nó không thể ngăn các Class Loader độc lập với nhau lần lượt định nghĩa các class trùng name.
+Parent Delegation Model là một bộ phận quan trọng trong cơ chế load Java class. Việc parent loader được ưu tiên giúp code trong cùng một delegation chain tái sử dụng type đã được parent loader định nghĩa, đồng thời giảm rủi ro application code giả mạo platform API; nó không thể ngăn các Class Loader độc lập với nhau lần lượt định nghĩa các class cùng name.
 
 JVM phân biệt runtime type dựa trên binary name của class hoặc interface và Class Loader đã định nghĩa nó. Parent Delegation sẽ ưu tiên để platform class do built-in Class Loader tương ứng định nghĩa, nhưng không phải mọi core hoặc platform API đều do Bootstrap Class Loader load: sau JDK 9 còn có Platform Class Loader chịu trách nhiệm định nghĩa platform class.
 
-Ví dụ, JVM sẽ ưu tiên giao request load các core class như `java.lang.Object` cho `BootstrapClassLoader` xử lý; nhưng trên thực tế, `ClassLoader#preDefineClass` còn kiểm tra class name ở giai đoạn definition. Mọi class name bắt đầu bằng `java.` đều bị reject, vì vậy không thể dùng Class Loader tùy chỉnh để giả mạo core class.
+Ví dụ, JVM sẽ ưu tiên chuyển request load các core class như `java.lang.Object` cho `BootstrapClassLoader` xử lý; nhưng trên thực tế, `ClassLoader#preDefineClass` còn kiểm tra class name ở giai đoạn definition. Mọi class name bắt đầu bằng `java.` đều bị reject, vì vậy không thể dùng Class Loader tùy chỉnh để giả mạo core class.
 
 Nhiều bạn sẽ nói: “Vậy bypass Parent Delegation Model là được mà?”.
 
-Tuy nhiên, ngay cả khi attacker bypass Parent Delegation Model, Java vẫn có security mechanism ở tầng thấp hơn để bảo vệ core class library. Method `preDefineClass` của `ClassLoader` sẽ kiểm tra class name trước khi define class. Mọi class name bắt đầu bằng `"java."` đều trigger `SecurityException`, ngăn malicious code define hoặc load core class giả mạo.
+Tuy nhiên, ngay cả khi attacker bypass Parent Delegation Model, Java vẫn có cơ chế bảo mật ở tầng thấp hơn để bảo vệ core class library. Method `preDefineClass` của `ClassLoader` sẽ kiểm tra class name trước khi define class. Mọi class name bắt đầu bằng `"java."` đều trigger `SecurityException`, ngăn code độc hại define hoặc load core class giả mạo.
 
-Source code method `ClassLoader#preDefineClass` trong JDK 8 như sau:
+Source code của method `ClassLoader#preDefineClass` trong JDK 8 như sau:
 
 ```java
 private ProtectionDomain preDefineClass(String name,
@@ -308,9 +308,9 @@ private ProtectionDomain preDefineClass(String name,
             throw new NoClassDefFoundError("IllegalName: " + name);
         }
 
-        // Ngăn define class trong package "java.*".
-        // Kiểm tra này rất quan trọng đối với security vì ngăn malicious code thay thế core Java class.
-        // JDK 9 dùng Platform Class Loader để tăng cường security của method preDefineClass
+        // Ngăn định nghĩa class trong package "java.*".
+        // Kiểm tra này rất quan trọng đối với bảo mật vì ngăn code độc hại thay thế core Java class.
+        // JDK 9 dùng Platform Class Loader để tăng cường bảo mật cho method preDefineClass
         if ((name != null) && name.startsWith("java.")) {
             throw new SecurityException
                 ("Tên package bị cấm: " +
@@ -330,27 +330,27 @@ private ProtectionDomain preDefineClass(String name,
     }
 ```
 
-JDK 9 giới thiệu Platform Class Loader, có thể lấy nó thông qua `ClassLoader.getPlatformClassLoader()`. Hạn chế package name `java.*` của `defineClass` vẫn tồn tại, nhưng implementation cụ thể khác JDK 8.
+JDK 9 giới thiệu Platform Class Loader, có thể lấy nó thông qua `ClassLoader.getPlatformClassLoader()`. Giới hạn đối với package name `java.*` của `defineClass` vẫn tồn tại, nhưng implementation cụ thể khác JDK 8.
 
 ### Cách phá vỡ Parent Delegation Model
 
-~~Để tránh cơ chế Parent Delegation, chúng ta có thể tự định nghĩa một Class Loader rồi override `loadClass()`.~~
+~~Để tránh cơ chế Parent Delegation Model, chúng ta có thể tự định nghĩa một Class Loader rồi override `loadClass()`.~~
 
-**🐛 Đính chính (tham khảo [issue871](https://github.com/Snailclimb/JavaGuide/issues/871))**: Khi custom loader, cần kế thừa `ClassLoader`. Nếu không muốn phá vỡ Parent Delegation Model thì chỉ cần override method `findClass()` trong class `ClassLoader`; class không thể được parent loader load cuối cùng sẽ được load thông qua method này. Tuy nhiên, nếu muốn phá vỡ Parent Delegation Model thì cần override method `loadClass()`.
+**🐛 Đính chính (tham khảo [issue871](https://github.com/Snailclimb/JavaGuide/issues/871))**: Khi tự định nghĩa loader, cần kế thừa `ClassLoader`. Nếu không muốn phá vỡ Parent Delegation Model thì chỉ cần override method `findClass()` trong class `ClassLoader`; class mà parent loader không thể load cuối cùng sẽ được load thông qua method này. Tuy nhiên, nếu muốn phá vỡ Parent Delegation Model thì cần override method `loadClass()`.
 
-Tại sao override method `loadClass()` lại phá vỡ Parent Delegation Model? Flow thực thi của Parent Delegation Model đã giải thích điều này:
+Tại sao override method `loadClass()` lại phá vỡ Parent Delegation Model? Quy trình thực thi của Parent Delegation Model đã giải thích điều này:
 
 > Khi load class, Class Loader trước tiên không tự thử load class đó mà ủy thác request cho parent loader thực hiện (gọi method `loadClass()` của parent loader để load class).
 
-Sau khi override method `loadClass()`, chúng ta có thể thay đổi flow thực thi truyền thống của Parent Delegation Model. Chẳng hạn, child loader có thể tự thử load class trước khi delegate cho parent loader, hoặc thử load từ nơi khác sau khi parent loader trả về. Quy tắc cụ thể do chúng ta tự implement và customize theo nhu cầu project.
+Sau khi override method `loadClass()`, chúng ta có thể thay đổi quy trình thực thi truyền thống của Parent Delegation Model. Chẳng hạn, child loader có thể tự thử load class trước khi ủy thác cho parent loader, hoặc thử load từ nơi khác sau khi parent loader trả về. Quy tắc cụ thể do chúng ta tự triển khai và tùy chỉnh theo nhu cầu project.
 
-Server Tomcat khá quen thuộc tự định nghĩa Class Loader `WebAppClassLoader` để phá vỡ cơ chế Parent Delegation, nhằm ưu tiên load class trong thư mục Web application trước rồi mới load class trong các thư mục khác. Đây cũng là nguyên lý cụ thể để class giữa các Web application trong Tomcat được isolation.
+Tomcat là một server quen thuộc, tự định nghĩa Class Loader `WebAppClassLoader` để phá vỡ cơ chế Parent Delegation Model, nhằm ưu tiên load class trong thư mục Web application rồi mới load class trong các thư mục khác. Đây cũng là nguyên lý giúp cách ly class giữa các Web application trong Tomcat.
 
 Cấu trúc phân cấp Class Loader của Tomcat như sau:
 
 ![Cấu trúc phân cấp Class Loader của Tomcat](https://oss.javaguide.cn/github/javaguide/java/jvm/tomcat-class-loader-parents-delegation-model.png)
 
-Tomcat hiện đại mặc định sử dụng hierarchy `Bootstrap -> System -> Common -> WebappX`. Vị trí tìm kiếm của từng loader như sau:
+Tomcat hiện đại mặc định sử dụng cấu trúc phân cấp `Bootstrap -> System -> Common -> WebappX`. Vị trí tìm kiếm của từng loader như sau:
 
 - Vị trí tìm kiếm của `Common` được cấu hình bởi `common.loader` trong `$CATALINA_BASE/conf/catalina.properties`, mặc định chủ yếu gồm `$CATALINA_BASE/lib` và `$CATALINA_HOME/lib`.
 - Mỗi loader `WebappX` chịu trách nhiệm cho `/WEB-INF/classes` và `/WEB-INF/lib/*.jar` của Web application tương ứng.
@@ -358,15 +358,15 @@ Tomcat hiện đại mặc định sử dụng hierarchy `Bootstrap -> System ->
 
 Từ quan hệ delegation trong hình có thể thấy:
 
-- Các class mà loader `Common` nhìn thấy có thể được Tomcat internal component và mọi Web application dùng chung.
-- Nếu cấu hình tường minh, `Server` chỉ hiển thị với Tomcat internal component, còn `Shared` hiển thị với mọi Web application. Cấu hình mặc định không có hai loader này, Web application loader trực tiếp lấy `Common` làm parent loader.
-- Mỗi Web application tạo một `WebAppClassLoader` riêng, đồng thời set thread context Class Loader thành `WebAppClassLoader` trong thread khởi động Web application. Các instance `WebAppClassLoader` được isolation với nhau, qua đó thực hiện class isolation giữa các Web application.
+- Các class mà loader `Common` nhìn thấy có thể được các component nội bộ của Tomcat và mọi Web application dùng chung.
+- Nếu cấu hình tường minh, `Server` chỉ được các component nội bộ của Tomcat nhìn thấy, còn `Shared` được mọi Web application nhìn thấy. Cấu hình mặc định không có hai loader này, Web application loader trực tiếp lấy `Common` làm parent loader.
+- Mỗi Web application tạo một `WebAppClassLoader` riêng, đồng thời set thread context Class Loader thành `WebAppClassLoader` trong thread khởi động Web application. Các instance `WebAppClassLoader` được cách ly với nhau, qua đó thực hiện cách ly class giữa các Web application.
 
-Chỉ dựa vào Class Loader tùy chỉnh không thể đáp ứng yêu cầu của một số scenario. Ví dụ, trong một số trường hợp, Class Loader ở tầng cao cần load class mà chỉ loader ở tầng thấp mới có thể load.
+Chỉ dựa vào Class Loader tùy chỉnh không thể đáp ứng yêu cầu của một số trường hợp. Ví dụ, trong một số trường hợp, Class Loader ở tầng cao cần load class mà chỉ loader ở tầng thấp mới có thể load.
 
 Chẳng hạn trong SPI, interface của SPI (như `java.sql.Driver`) do Java core library cung cấp và được `BootstrapClassLoader` load. Implementation của SPI (như `com.mysql.cj.jdbc.Driver`) do third-party vendor cung cấp, được Application Class Loader hoặc Class Loader tùy chỉnh load. Theo mặc định, một class và các dependency của nó do cùng một Class Loader load. Vì vậy, Class Loader load interface của SPI (`BootstrapClassLoader`) cũng sẽ được dùng để load implementation của SPI. Theo Parent Delegation Model, `BootstrapClassLoader` không thể tìm thấy SPI implementation class vì nó không thể delegate cho child loader để thử load.
 
-Cần lưu ý: sau khi JDK 9+ giới thiệu modularization, JDBC API được tách vào module `java.sql`, không còn do `BootstrapClassLoader` trực tiếp load mà do `PlatformClassLoader` load.
+Cần lưu ý: sau khi JDK 9+ đưa vào module system, JDBC API được tách vào module `java.sql`, không còn do `BootstrapClassLoader` trực tiếp load mà do `PlatformClassLoader` load.
 
 ```java
 public class ClassLoaderTest {
@@ -382,15 +382,15 @@ public class ClassLoaderTest {
 }
 ```
 
-Một ví dụ khác: giả sử project có jar của Spring. Vì jar này được dùng chung giữa các Web application nên nó sẽ do `SharedClassLoader` load (Web server là Tomcat). Project có một số business class sử dụng Spring, chẳng hạn implement interface do Spring cung cấp hoặc sử dụng annotation do Spring cung cấp. Vì vậy, Class Loader load class của Spring (tức `SharedClassLoader`) cũng sẽ được dùng để load các business class này. Tuy nhiên, business class nằm trong thư mục Web application, không nằm trên load path của `SharedClassLoader`, nên `SharedClassLoader` không thể tìm thấy và load chúng.
+Một ví dụ khác: giả sử project có jar của Spring. Vì jar này được dùng chung giữa các Web application nên nó sẽ do `SharedClassLoader` load (Web server là Tomcat). Project có một số business class sử dụng Spring, chẳng hạn implement interface do Spring cung cấp hoặc sử dụng annotation của Spring. Vì vậy, Class Loader load class của Spring (tức `SharedClassLoader`) cũng sẽ được dùng để load các business class này. Tuy nhiên, business class nằm trong thư mục Web application, không nằm trên load path của `SharedClassLoader`, nên `SharedClassLoader` không thể tìm thấy và load chúng.
 
 Giải quyết vấn đề này thế nào? Khi đó cần dùng **Thread Context Class Loader (`ThreadContextClassLoader`)**.
 
 Với ví dụ Spring, khi Spring cần load business class, nó không dùng Class Loader của mình mà dùng context Class Loader của thread hiện tại. Như đã nói ở trên, mỗi Web application tạo một `WebAppClassLoader` riêng và set thread context Class Loader thành `WebAppClassLoader` trong thread khởi động Web application. Nhờ vậy, Class Loader ở tầng cao (`SharedClassLoader`) có thể mượn child loader (`WebAppClassLoader`) để load business class, phá vỡ cơ chế delegation khi load class của Java và cho phép application sử dụng Class Loader theo hướng ngược lại.
 
-Nguyên lý của Thread Context Class Loader là lưu một Class Loader trong dữ liệu private của thread, bind nó với thread, sau đó lấy ra sử dụng khi cần. Class Loader này thường do application hoặc container (như Tomcat) set.
+Nguyên lý của Thread Context Class Loader là lưu một Class Loader trong dữ liệu riêng của thread, gắn nó với thread, sau đó lấy ra sử dụng khi cần. Class Loader này thường do application hoặc container (như Tomcat) set.
 
-`Java.lang.Thread` có `getContextClassLoader()` và `setContextClassLoader(ClassLoader cl)` lần lượt dùng để lấy và set thread context Class Loader. Nếu không set bằng `setContextClassLoader(ClassLoader cl)`, thread sẽ kế thừa thread context Class Loader của parent thread.
+`java.lang.Thread` có `getContextClassLoader()` và `setContextClassLoader(ClassLoader cl)` lần lượt dùng để lấy và set thread context Class Loader. Nếu không set bằng `setContextClassLoader(ClassLoader cl)`, thread sẽ kế thừa thread context Class Loader của parent thread.
 
 Code Spring lấy thread context Class Loader như sau:
 

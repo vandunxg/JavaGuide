@@ -14,17 +14,17 @@ head:
 >
 > Tác giả: Meituan Technical Team
 
-Phần lớn các lớp đồng bộ trong Java (Semaphore, ReentrantLock, v.v.) đều được triển khai dựa trên AbstractQueuedSynchronizer (gọi tắt là AQS). AQS là một framework đơn giản, cung cấp chức năng quản lý atomic đối với trạng thái đồng bộ, block và đánh thức thread, cùng mô hình queue.
+Phần lớn các lớp đồng bộ trong Java (Semaphore, ReentrantLock, v.v.) đều được triển khai dựa trên AbstractQueuedSynchronizer (gọi tắt là AQS). AQS là một framework đơn giản, cung cấp chức năng quản lý trạng thái đồng bộ theo cách atomic, chặn và đánh thức thread, cùng mô hình queue.
 
-Bài viết sẽ đi dần từ application layer xuống principle layer, đồng thời phân tích chuyên sâu kiến thức về exclusive lock liên quan đến AQS thông qua các đặc tính cơ bản của ReentrantLock và mối liên hệ giữa ReentrantLock với AQS. Bài viết cũng sử dụng hình thức hỏi đáp để giúp bạn hiểu AQS. Do giới hạn về độ dài, bài viết này chủ yếu trình bày logic của exclusive lock và Sync Queue trong AQS, không trình bày phần shared lock và Condition Queue (trọng tâm của bài viết là phân tích nguyên lý AQS, ReentrantLock chỉ được giới thiệu ngắn gọn; nếu quan tâm, bạn có thể đọc source code của ReentrantLock).
+Bài viết sẽ đi dần từ tầng ứng dụng xuống tầng nguyên lý, đồng thời phân tích chuyên sâu các kiến thức về exclusive lock trong AQS thông qua những đặc tính cơ bản của ReentrantLock và mối liên hệ giữa ReentrantLock với AQS. Bài viết cũng sử dụng hình thức hỏi đáp để giúp bạn hiểu AQS. Do giới hạn về độ dài, bài viết này chủ yếu trình bày logic của exclusive lock và Sync Queue trong AQS, không trình bày phần shared lock và Condition Queue (trọng tâm của bài viết là phân tích nguyên lý AQS, ReentrantLock chỉ được giới thiệu ngắn gọn; nếu quan tâm, bạn có thể đọc source code của ReentrantLock).
 
-> Phân tích source code trong bài viết dựa trên JDK 8. Cách triển khai bên trong AQS tiếp tục được phát triển: trong JDK 11 vẫn có thể thấy các field và method chính được đề cập trong bài viết, còn field của node cùng cách enqueue và waiting trong JDK 17 và version hiện tại đã có thay đổi tương đối lớn. Các ý tưởng cốt lõi về trạng thái đồng bộ, wait queue và việc acquire/release resource vẫn có thể dùng làm nền tảng để tìm hiểu.
+> Phân tích source code trong bài viết dựa trên JDK 8. Cách triển khai bên trong AQS tiếp tục được phát triển: trong JDK 11 vẫn có thể thấy các field và method chính được đề cập trong bài viết, còn field của node cùng cách enqueue và waiting trong JDK 17 và phiên bản hiện tại đã có thay đổi tương đối lớn. Các ý tưởng cốt lõi về trạng thái đồng bộ, wait queue và việc acquire/release resource vẫn có thể dùng làm nền tảng để tìm hiểu.
 
 ## 1 ReentrantLock
 
 ### 1.1 Tổng quan đặc tính của ReentrantLock
 
-ReentrantLock nghĩa là reentrant lock, tức một thread có thể lock lặp lại một critical resource. Để giúp bạn hiểu rõ hơn về đặc tính của ReentrantLock, trước hết chúng ta so sánh ReentrantLock với Synchronized thường dùng; các đặc tính như sau (phần màu xanh là nội dung được phân tích chính trong bài viết này):
+ReentrantLock nghĩa là reentrant lock, tức một thread có thể lock lặp lại trên cùng một critical resource. Để giúp bạn hiểu rõ hơn về đặc tính của ReentrantLock, trước hết chúng ta so sánh ReentrantLock với synchronized thường dùng; các đặc tính như sau (phần màu xanh là nội dung được phân tích chính trong bài viết này):
 
 ![](https://p0.meituan.net/travelcube/412d294ff5535bbcddc0d979b2a339e6102264.png)
 
@@ -44,12 +44,12 @@ for (int i = 0; i < 100; i++) {
 }
 // **************************Cách sử dụng ReentrantLock**************************
 public void test () throws Exception {
-  // 1.Khởi tạo và chọn fair lock hoặc unfair lock
+// 1.Khởi tạo, chọn fair lock hoặc unfair lock
   ReentrantLock lock = new ReentrantLock(true);
   // 2.Có thể dùng cho code block
   lock.lock();
   try {
-    // 3.Hỗ trợ nhiều cách lock, khá linh hoạt; có đặc tính reentrant
+    // 3.Hỗ trợ nhiều cách lock, khá linh hoạt; có tính reentrant
     if (lock.tryLock(100, TimeUnit.MILLISECONDS)) {
       try {
         // Logic thực thi sau khi lấy lock lần thứ hai
@@ -88,8 +88,8 @@ static final class NonfairSync extends Sync {
 
 Ý nghĩa của đoạn code này là:
 
-- Nếu dùng CAS để set variable State (trạng thái đồng bộ) thành công, tức lấy lock thành công, thì set thread hiện tại thành exclusive thread.
-- Nếu dùng CAS để set variable State (trạng thái đồng bộ) thất bại, tức lấy lock thất bại, thì đi vào method Acquire để xử lý tiếp.
+- Nếu dùng CAS để set biến State (trạng thái đồng bộ) thành công, tức lấy lock thành công, thì đặt thread hiện tại làm exclusive thread.
+- Nếu dùng CAS để set biến State (trạng thái đồng bộ) thất bại, tức lấy lock thất bại, thì đi vào method Acquire để xử lý tiếp.
 
 Bước đầu tiên khá dễ hiểu, nhưng sau khi lấy lock thất bại ở bước thứ hai thì strategy xử lý tiếp theo là gì? Có thể có các suy nghĩ sau:
 
@@ -97,7 +97,7 @@ Bước đầu tiên khá dễ hiểu, nhưng sau khi lấy lock thất bại �
 
 (1) Set kết quả lấy lock của thread hiện tại thành thất bại, kết thúc quy trình lấy lock. Cách thiết kế này sẽ làm giảm mạnh concurrency của hệ thống, không đáp ứng nhu cầu thực tế. Vì vậy cần quy trình dưới đây, tức quy trình xử lý của framework AQS.
 
-(2) Có một cơ chế xếp hàng chờ nào đó, thread tiếp tục waiting và vẫn giữ khả năng lấy lock, quy trình lấy lock vẫn tiếp tục.
+(2) Có một cơ chế xếp hàng chờ nào đó, thread tiếp tục waiting và vẫn có cơ hội lấy lock, quy trình lấy lock vẫn tiếp tục.
 
 - Với trường hợp thứ hai của vấn đề 1, vì đã nói đến cơ chế xếp hàng chờ thì nhất định sẽ hình thành một queue nào đó; queue này dùng data structure gì?
 - Thread đang trong cơ chế xếp hàng chờ có thể có cơ hội lấy lock vào lúc nào?
@@ -117,7 +117,7 @@ static final class FairSync extends Sync {
 }
 ```
 
-Nhìn vào đoạn code này, có thể chúng ta sẽ thắc mắc: function Lock lock bằng method Acquire, nhưng cụ thể nó lock như thế nào?
+Nhìn vào đoạn code này, có thể chúng ta sẽ thắc mắc: method Lock thực hiện lock bằng method Acquire, nhưng cụ thể nó lock như thế nào?
 
 Kết hợp quy trình lock của fair lock và unfair lock, tuy quy trình có một số điểm khác nhau nhưng đều gọi method Acquire, còn method Acquire là method cốt lõi trong AQS, class cha của FairSync và UnfairSync.
 
@@ -141,37 +141,37 @@ Tiếp theo chúng ta sẽ phân tích framework AQS lần lượt từ tổng t
 
 Ý tưởng cốt lõi của AQS là: nếu shared resource được request đang rảnh, thì set thread đang request resource thành worker thread hợp lệ và set shared resource thành trạng thái locked; nếu shared resource đang bị chiếm dụng, cần một cơ chế block, waiting và wakeup nhất định để bảo đảm việc phân phối lock. Cơ chế này chủ yếu được triển khai bằng một biến thể của CLH queue, đưa các thread tạm thời chưa lấy được lock vào queue.
 
-CLH: queue Craig, Landin and Hagersten, là một singly linked list; queue trong AQS là một virtual doubly linked queue (FIFO) dạng biến thể của CLH, AQS triển khai việc phân phối lock bằng cách đóng gói mỗi thread request shared resource thành một node.
+CLH (Craig, Landin and Hagersten) là một singly linked list; queue trong AQS là một virtual doubly linked queue (FIFO) dạng biến thể của CLH. AQS triển khai việc phân phối lock bằng cách đóng gói mỗi thread request shared resource thành một node.
 
 Sơ đồ nguyên lý chính như sau:
 
 ![](https://p0.meituan.net/travelcube/7132e4cef44c26f62835b197b239147b18062.png)
 
-AQS sử dụng một member variable kiểu int có tính Volatile để biểu thị trạng thái đồng bộ, dùng FIFO queue bên trong để thực hiện việc xếp hàng acquire resource, và dùng CAS để hoàn tất việc thay đổi giá trị State.
+AQS sử dụng một member variable kiểu int volatile để biểu thị trạng thái đồng bộ, dùng FIFO queue bên trong để thực hiện việc xếp hàng acquire resource, và dùng CAS để hoàn tất việc thay đổi giá trị State.
 
 #### 2.1.1 Data structure của AQS
 
-Trước hết xem data structure cơ bản nhất trong AQS — Node; Node chính là node trong queue dạng biến thể CLH ở trên.
+Trước hết hãy xem data structure cơ bản nhất trong AQS — Node; Node chính là một node trong queue dạng biến thể CLH ở trên.
 
 ![](https://p1.meituan.net/travelcube/960271cf2b5c8a185eed23e98b72c75538637.png)
 
-Giải thích ý nghĩa của một số method và attribute:
+Giải thích ý nghĩa của một số method và thuộc tính:
 
-| Method và attribute | Ý nghĩa                                                                                                                                 |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| waitStatus          | Trạng thái của node hiện tại trong queue                                                                                                |
-| thread              | Thread nằm tại node đó                                                                                                                  |
-| prev                | Pointer trỏ đến node trước                                                                                                              |
-| predecessor         | Trả về node trước, nếu không có thì throw npe                                                                                           |
-| nextWaiter          | Trỏ đến node tiếp theo đang ở trạng thái CONDITION (bài viết này không trình bày Condition Queue nên không giới thiệu thêm pointer này) |
-| next                | Pointer trỏ đến node sau                                                                                                                |
+| Method và thuộc tính | Ý nghĩa                                                                                                                                 |
+| :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| waitStatus           | Trạng thái của node hiện tại trong queue                                                                                                |
+| thread               | Thread tương ứng với node đó                                                                                                            |
+| prev                 | Pointer trỏ đến node trước                                                                                                              |
+| predecessor          | Trả về node trước, nếu không có thì throw npe                                                                                           |
+| nextWaiter           | Trỏ đến node tiếp theo đang ở trạng thái CONDITION (bài viết này không trình bày Condition Queue nên không giới thiệu thêm pointer này) |
+| next                 | Pointer trỏ đến node sau                                                                                                                |
 
-Hai mode lock của thread:
+Hai mode của thread khi lock:
 
-| Mode      | Ý nghĩa                                 |
-| :-------- | :-------------------------------------- |
-| SHARED    | Thread waiting lock theo shared mode    |
-| EXCLUSIVE | Thread waiting lock theo exclusive mode |
+| Mode      | Ý nghĩa                          |
+| :-------- | :------------------------------- |
+| SHARED    | Thread chờ lock ở shared mode    |
+| EXCLUSIVE | Thread chờ lock ở exclusive mode |
 
 waitStatus có các enum value sau:
 
@@ -185,7 +185,7 @@ waitStatus có các enum value sau:
 
 #### 2.1.2 Trạng thái đồng bộ State
 
-Sau khi hiểu data structure, tiếp theo hãy tìm hiểu trạng thái đồng bộ State của AQS. AQS duy trì một field tên là state, nghĩa là trạng thái đồng bộ, được đánh dấu bằng Volatile, dùng để thể hiện tình trạng lock của critical resource hiện tại.
+Sau khi hiểu data structure, tiếp theo hãy tìm hiểu trạng thái đồng bộ State của AQS. AQS duy trì một field tên là state, nghĩa là trạng thái đồng bộ, được khai báo volatile, dùng để thể hiện tình trạng lock của critical resource hiện tại.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -207,7 +207,7 @@ Các method này đều được đánh dấu bằng Final, nghĩa là subclass 
 
 ![](https://p0.meituan.net/travelcube/3f1e1a44f5b7d77000ba4f9476189b2e32806.png)
 
-Đối với custom synchronizer, cần custom cách acquire và release trạng thái đồng bộ, tức API layer ở tầng thứ nhất trong sơ đồ kiến trúc AQS.
+Đối với custom synchronizer, cần tự định nghĩa cách acquire và release trạng thái đồng bộ, tức API layer ở tầng thứ nhất trong sơ đồ kiến trúc AQS.
 
 ### 2.2 Method quan trọng của AQS và mối liên hệ với ReentrantLock
 
@@ -215,7 +215,7 @@ Từ sơ đồ kiến trúc có thể biết AQS cung cấp nhiều Protected me
 
 | Tên method                                  | Mô tả                                                                                                                                                                                          |
 | :------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| protected boolean isHeldExclusively()       | Thread hiện tại có đang độc chiếm resource không. Chỉ cần triển khai khi dùng Condition.                                                                                                       |
+| protected boolean isHeldExclusively()       | Thread hiện tại có đang giữ resource theo exclusive mode không. Chỉ cần triển khai khi dùng Condition.                                                                                         |
 | protected boolean tryAcquire(int arg)       | Exclusive mode. arg là số lần lấy lock, thử acquire resource; thành công trả về True, thất bại trả về False.                                                                                   |
 | protected boolean tryRelease(int arg)       | Exclusive mode. arg là số lần release lock, thử release resource; thành công trả về True, thất bại trả về False.                                                                               |
 | protected int tryAcquireShared(int arg)     | Shared mode. arg là số lần lấy lock, thử acquire resource. Số âm biểu thị thất bại; 0 biểu thị thành công nhưng không còn resource khả dụng; số dương biểu thị thành công và vẫn còn resource. |
@@ -227,7 +227,7 @@ Lấy unfair lock làm ví dụ, phần này chủ yếu trình bày mối liên
 
 ![](https://p1.meituan.net/travelcube/b8b53a70984668bc68653efe9531573e78636.png)
 
-> 🐛 Đính chính (tham khảo: [issue#1761](https://github.com/Snailclimb/JavaGuide/issues/1761)): một lỗi nhỏ trong hình, sau khi (AQS) CAS sửa shared resource State thành công thì phải là lấy lock thành công (unfair lock).
+> 🐛 Đính chính (tham khảo: [issue#1761](https://github.com/Snailclimb/JavaGuide/issues/1761)): một lỗi nhỏ trong hình, sau khi CAS của AQS sửa shared resource State thành công thì kết quả phải là lấy lock thành công (unfair lock).
 >
 > Source code tương ứng như sau:
 >
@@ -252,7 +252,7 @@ Lấy unfair lock làm ví dụ, phần này chủ yếu trình bày mối liên
 >      }
 > ```
 
-Để giúp bạn hiểu interaction giữa method của ReentrantLock và AQS, lấy unfair lock làm ví dụ, chúng ta tách riêng flow interaction của lock và unlock để nhấn mạnh, qua đó thuận tiện cho việc hiểu nội dung phía sau.
+Để giúp bạn hiểu sự tương tác giữa các method của ReentrantLock và AQS, lấy unfair lock làm ví dụ, chúng ta tách riêng flow của lock và unlock để nhấn mạnh, qua đó thuận tiện cho việc hiểu nội dung phía sau.
 
 ![](https://p1.meituan.net/travelcube/7aadb272069d871bdee8bf3a218eed8136919.png)
 
@@ -270,13 +270,13 @@ Unlock:
 - Release sẽ gọi method tryRelease. tryRelease cần được custom synchronizer triển khai, và tryRelease chỉ được triển khai trong Sync của ReentrantLock, vì vậy có thể thấy quy trình release lock không phân biệt fair lock hay unfair lock.
 - Sau khi release thành công, toàn bộ việc xử lý do framework AQS hoàn thành, không liên quan đến custom synchronizer.
 
-Qua mô tả trên, có thể tổng kết mapping giữa các method cốt lõi ở API layer khi ReentrantLock lock và unlock.
+Qua mô tả trên, có thể tổng kết sự ánh xạ giữa các method cốt lõi ở API layer khi ReentrantLock lock và unlock.
 
 ![](https://p0.meituan.net/travelcube/f30c631c8ebbf820d3e8fcb6eee3c0ef18748.png)
 
 ## 3 Tìm hiểu AQS qua ReentrantLock
 
-Fair lock và unfair lock trong ReentrantLock có tầng dưới giống nhau; phần này lấy unfair lock làm ví dụ phân tích.
+Fair lock và unfair lock trong ReentrantLock có cách triển khai bên trong giống nhau; phần này lấy unfair lock làm ví dụ phân tích.
 
 Trong unfair lock có một đoạn code như sau:
 
@@ -316,7 +316,7 @@ protected boolean tryAcquire(int arg) {
 }
 ```
 
-Có thể thấy đây chỉ là triển khai đơn giản của AQS; method triển khai việc lấy lock cụ thể do fair lock và unfair lock tương ứng tự triển khai (lấy ReentrantLock làm ví dụ). Nếu method này trả về True, nghĩa là thread hiện tại lấy lock thành công và không cần thực thi tiếp; nếu lấy lock thất bại thì cần thêm vào wait queue. Tiếp theo sẽ giải thích chi tiết thread được thêm vào wait queue khi nào và như thế nào.
+Có thể thấy đây chỉ là triển khai đơn giản của AQS; method thực hiện việc lấy lock cụ thể do fair lock và unfair lock tương ứng tự triển khai (lấy ReentrantLock làm ví dụ). Nếu method này trả về True, nghĩa là thread hiện tại lấy lock thành công và không cần thực thi tiếp; nếu lấy lock thất bại thì cần thêm vào wait queue. Tiếp theo sẽ giải thích chi tiết thread được thêm vào wait queue khi nào và như thế nào.
 
 ### 3.1 Thread tham gia wait queue
 
@@ -350,11 +350,11 @@ private final boolean compareAndSetTail(Node expect, Node update) {
 }
 ```
 
-Flow chính như sau:
+Quy trình chính như sau:
 
 - Tạo một node mới bằng thread hiện tại và lock mode.
 - Pointer Pred trỏ đến tail node Tail.
-- Cho Prev pointer của Node trong New trỏ đến Pred.
+- Cho Prev pointer của Node mới trỏ đến Pred.
 - Hoàn tất việc set tail node thông qua method compareAndSetTail. Method này chủ yếu so sánh tailOffset với Expect; nếu địa chỉ Node của tailOffset và Node của Expect giống nhau thì set giá trị Tail thành giá trị của Update.
 
 ```java
@@ -373,9 +373,9 @@ static {
 }
 ```
 
-Từ static code block của AQS có thể thấy các thao tác đều lấy offset của attribute của một object trong memory so với object đó. Nhờ offset này, chúng ta có thể tìm attribute trong memory của object. tailOffset là offset tương ứng với tail, vì vậy lúc này Node được new sẽ trở thành tail node của queue hiện tại. Đồng thời, vì đây là doubly linked list nên cũng cần cho node trước trỏ đến tail node.
+Từ static code block của AQS có thể thấy các thao tác đều lấy offset của thuộc tính của một object trong memory so với object đó. Nhờ offset này, chúng ta có thể tìm thuộc tính trong memory của object. tailOffset là offset tương ứng với tail, vì vậy lúc này Node được new sẽ trở thành tail node của queue hiện tại. Đồng thời, vì đây là doubly linked list nên cũng cần cho node trước trỏ đến tail node.
 
-- Nếu pointer Pred là Null (cho biết trong wait queue không có element), hoặc vị trí mà pointer Pred hiện tại trỏ đến khác vị trí Tail trỏ đến (cho biết đã bị thread khác sửa), thì cần xem method Enq.
+- Nếu pointer Pred là Null (cho biết trong wait queue không có element), hoặc Pred và Tail hiện không trỏ tới cùng một vị trí (cho biết đã bị thread khác sửa), thì cần xem method Enq.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -425,9 +425,9 @@ public final boolean hasQueuedPredecessors() {
 }
 ```
 
-Đến đây, hãy hiểu vì sao h != t && ((s = h.next) == null || s.thread != Thread.currentThread()); phải kiểm tra node sau head. Data được lưu trong node đầu tiên là gì?
+Đến đây, hãy xem vì sao h != t && ((s = h.next) == null || s.thread != Thread.currentThread()); phải kiểm tra node sau head. Data được lưu trong node đầu tiên là gì?
 
-> Trong doubly linked list, node đầu tiên là virtual node, thực ra không lưu thông tin nào mà chỉ dùng để giữ chỗ. Node đầu tiên thực sự có data bắt đầu từ node thứ hai. Khi h != t: nếu (s = h.next) == null, wait queue đang được thread initialize nhưng mới chỉ thực hiện đến bước Tail trỏ đến node cuối, còn Head chưa trỏ đến Tail; lúc này queue có element nên cần trả về True (chi tiết xem phần phân tích code bên dưới). Nếu (s = h.next) != null, cho biết lúc này queue có ít nhất một valid node. Nếu s.thread == Thread.currentThread(), cho biết thread trong valid node đầu tiên của wait queue giống thread hiện tại, nên thread hiện tại có thể acquire resource; nếu s.thread != Thread.currentThread(), cho biết thread trong valid node đầu tiên của wait queue khác thread hiện tại, thread hiện tại phải tham gia wait queue.
+> Trong doubly linked list, node đầu tiên là virtual node, thực ra không lưu thông tin nào mà chỉ dùng để giữ chỗ. Node đầu tiên chứa data thực sự là node thứ hai. Khi h != t: nếu (s = h.next) == null, wait queue đang được thread initialize nhưng mới chỉ thực hiện đến bước Tail trỏ đến node cuối, còn Head chưa trỏ đến Tail; lúc này queue có element nên cần trả về True (chi tiết xem phần phân tích code bên dưới). Nếu (s = h.next) != null, cho biết lúc này queue có ít nhất một valid node. Nếu s.thread == Thread.currentThread(), cho biết thread trong valid node đầu tiên của wait queue giống thread hiện tại, nên thread hiện tại có thể acquire resource; nếu s.thread != Thread.currentThread(), cho biết thread trong valid node đầu tiên của wait queue khác thread hiện tại, thread hiện tại phải tham gia wait queue.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer#enq
@@ -461,7 +461,7 @@ public final void acquire(int arg) {
 
 Phần trên đã giải thích method addWaiter; method này thực ra đưa thread tương ứng vào doubly linked queue dưới dạng data structure Node và trả về một Node chứa thread đó. Node này sẽ được truyền làm parameter vào method acquireQueued. Method acquireQueued có thể thực hiện thao tác “lấy lock” với các thread đang xếp hàng.
 
-Nhìn chung, sau khi thread lấy lock thất bại, nó sẽ được đưa vào wait queue; `acquireQueued` sẽ cho thread tiếp tục waiting và thử lấy lock cho đến khi thành công. `acquire(int)` là cách acquire không thể bị interrupt: khi bị interrupt trong thời gian waiting, nó sẽ ghi nhận trạng thái interrupt trước, sau khi lấy lock thành công mới khôi phục bằng `selfInterrupt()`, chứ không cancel lần acquire này.
+Nhìn chung, sau khi thread lấy lock thất bại, nó sẽ được đưa vào wait queue; `acquireQueued` sẽ cho thread tiếp tục waiting và thử lấy lock cho đến khi thành công. `acquire(int)` là cách acquire không phản hồi interrupt: khi bị interrupt trong thời gian waiting, nó sẽ ghi nhận trạng thái interrupt trước, sau khi lấy lock thành công mới khôi phục bằng `selfInterrupt()`, chứ không cancel lần acquire này.
 
 Tiếp theo chúng ta phân tích source code acquireQueued theo hai hướng “khi nào dequeue?” và “dequeue như thế nào?”:
 
@@ -474,7 +474,7 @@ final boolean acquireQueued(final Node node, int arg) {
   try {
     // Đánh dấu trong quá trình waiting có từng bị interrupt hay không
     boolean interrupted = false;
-    // Bắt đầu spin, hoặc lấy lock hoặc bị interrupt
+    // Bắt đầu spin, tiếp tục thử lấy lock và ghi nhận interrupt nếu có
     for (;;) {
       // Lấy predecessor của node hiện tại
       final Node p = node.predecessor();
@@ -486,7 +486,7 @@ final boolean acquireQueued(final Node node, int arg) {
         failed = false;
         return interrupted;
       }
-      // p là head node nhưng hiện tại chưa lấy được lock (có thể bị unfair lock tranh trước), hoặc p không phải head node; lúc này cần xác định node hiện tại có nên bị block hay không (điều kiện block: waitStatus của predecessor là -1), tránh vòng lặp vô hạn gây lãng phí resource. Hai method cụ thể sẽ được phân tích kỹ bên dưới.
+      // p là head node nhưng hiện tại chưa lấy được lock (có thể bị unfair lock giành trước), hoặc p không phải head node; lúc này cần xác định node hiện tại có nên bị block hay không (điều kiện block: waitStatus của predecessor là -1), tránh vòng lặp vô hạn gây lãng phí resource. Hai method cụ thể sẽ được phân tích kỹ bên dưới.
       if (shouldParkAfterFailedAcquire(p, node) && parkAndCheckInterrupt())
         interrupted = true;
     }
@@ -497,7 +497,7 @@ final boolean acquireQueued(final Node node, int arg) {
 }
 ```
 
-Lưu ý: method setHead set node hiện tại thành virtual node nhưng không sửa waitStatus, vì waitStatus là data luôn cần được sử dụng.
+Lưu ý: method setHead set node hiện tại thành virtual node nhưng không sửa waitStatus, vì waitStatus vẫn cần được sử dụng.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -514,7 +514,7 @@ private void setHead(Node node) {
 private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
   // Lấy trạng thái node của predecessor
   int ws = pred.waitStatus;
-  // Cho biết predecessor đang ở trạng thái wakeup
+  // Cho biết predecessor đang ở trạng thái SIGNAL
   if (ws == Node.SIGNAL)
     return true;
   // Qua enum value có thể biết waitStatus>0 là trạng thái cancel
@@ -525,14 +525,14 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
     } while (pred.waitStatus > 0);
     pred.next = node;
   } else {
-    // Set trạng thái waiting của node trước thành SIGNAL
+  // Set trạng thái waiting của predecessor thành SIGNAL
     compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
   }
   return false;
 }
 ```
 
-parkAndCheckInterrupt chủ yếu dùng để suspend thread hiện tại, block call stack và trả về interrupt status của thread hiện tại.
+parkAndCheckInterrupt chủ yếu dùng để suspend thread hiện tại, block call stack và trả về interrupt status của thread đó.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -543,7 +543,7 @@ private final boolean parkAndCheckInterrupt() {
 }
 ```
 
-Flow của method trên như sơ đồ sau:
+Quy trình của method trên như sơ đồ sau:
 
 ![](https://p0.meituan.net/travelcube/c124b76dcbefb9bdc778458064703d1135485.png)
 
@@ -551,14 +551,14 @@ Từ hình trên có thể thấy điều kiện thoát khỏi loop hiện tại
 
 ![](https://p0.meituan.net/travelcube/9af16e2481ad85f38ca322a225ae737535740.png)
 
-Sau khi giải đáp nghi vấn về việc release node khỏi queue, lại xuất hiện các vấn đề mới:
+Sau khi giải đáp nghi vấn về việc loại node khỏi queue, lại xuất hiện các vấn đề mới:
 
-- Cancel node trong shouldParkAfterFailedAcquire được tạo ra như thế nào? waitStatus của một node được set thành -1 vào lúc nào?
+- Node bị cancel trong shouldParkAfterFailedAcquire được tạo ra như thế nào? waitStatus của một node được set thành -1 vào lúc nào?
 - Node được release và thông báo đến thread đang suspend vào thời điểm nào?
 
 ### 3.2 Tạo node ở trạng thái CANCELLED
 
-Đoạn Finally trong method acquireQueued:
+Đoạn finally trong method acquireQueued:
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -582,7 +582,7 @@ final boolean acquireQueued(final Node node, int arg) {
 }
 ```
 
-Thông qua method cancelAcquire, trạng thái của Node được đánh dấu thành CANCELLED. Tiếp theo chúng ta phân tích nguyên lý của method này theo từng dòng:
+Thông qua method cancelAcquire, trạng thái của Node được đánh dấu là CANCELLED. Tiếp theo chúng ta phân tích nguyên lý của method này theo từng dòng:
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -623,7 +623,7 @@ private void cancelAcquire(Node node) {
 }
 ```
 
-Flow hiện tại:
+Quy trình hiện tại:
 
 - Lấy predecessor của node hiện tại. Nếu trạng thái của predecessor là CANCELLED thì duyệt liên tục về phía trước, tìm node đầu tiên có waitStatus <= 0, liên kết Pred tìm được với Node hiện tại và set Node hiện tại thành CANCELLED.
 - Xét ba trường hợp sau tùy vị trí của node hiện tại:
@@ -648,9 +648,9 @@ Node hiện tại không phải successor của Head cũng không phải tail no
 
 ![](https://p0.meituan.net/travelcube/45d0d9e4a6897eddadc4397cf53d6cd522452.png)
 
-Qua flow trên, chúng ta đã hiểu sơ bộ việc tạo và thay đổi trạng thái của CANCELLED node. Nhưng vì sao mọi thay đổi đều thao tác trên Next pointer mà không thao tác trên Prev pointer? Khi nào sẽ thao tác trên Prev pointer?
+Qua quy trình trên, chúng ta đã hiểu sơ bộ việc tạo và thay đổi trạng thái của CANCELLED node. Nhưng vì sao mọi thay đổi đều thao tác trên Next pointer mà không thao tác trên Prev pointer? Khi nào sẽ thao tác trên Prev pointer?
 
-> Khi thực thi cancelAcquire, predecessor của node hiện tại có thể đã rời queue (đã thực thi method shouldParkAfterFailedAcquire trong khối Try). Nếu sửa Prev pointer lúc này thì có thể khiến Prev trỏ đến một Node khác đã bị remove khỏi queue, vì vậy thay đổi Prev pointer ở đây không an toàn. Trong method shouldParkAfterFailedAcquire có thực thi đoạn code dưới đây, thực ra là xử lý Prev pointer. shouldParkAfterFailedAcquire chỉ được thực thi khi lấy lock thất bại; sau khi vào method này, cho biết shared resource đã được acquire, các node trước node hiện tại sẽ không thay đổi, vì vậy lúc này thay đổi Prev pointer tương đối an toàn.
+> Khi thực thi cancelAcquire, predecessor của node hiện tại có thể đã rời queue (đã thực thi method shouldParkAfterFailedAcquire trong khối try). Nếu sửa Prev pointer lúc này thì có thể khiến Prev trỏ đến một Node khác đã bị remove khỏi queue, vì vậy thay đổi Prev pointer ở đây không an toàn. Trong method shouldParkAfterFailedAcquire có thực thi đoạn code dưới đây, thực ra là xử lý Prev pointer. shouldParkAfterFailedAcquire chỉ được thực thi khi lấy lock thất bại; sau khi vào method này, shared resource đã được acquire, các node trước node hiện tại sẽ không thay đổi, vì vậy lúc này thay đổi Prev pointer tương đối an toàn.
 >
 > ```java
 > do {
@@ -670,7 +670,7 @@ public void unlock() {
 }
 ```
 
-Có thể thấy nơi thực sự release lock được hoàn thành thông qua framework.
+Có thể thấy việc release lock thực sự do framework hoàn thành.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -691,15 +691,15 @@ Trong ReentrantLock, class cha Sync của fair lock và unfair lock định ngh�
 ```java
 // java.util.concurrent.locks.ReentrantLock.Sync
 
-// Method trả về việc lock hiện tại có còn được thread nào nắm giữ hay không
+// Method cho biết lock hiện tại còn được thread nào giữ hay không
 protected final boolean tryRelease(int releases) {
-  // Giảm số lần reentrant
+  // Giảm số lần reentrant lock
   int c = getState() - releases;
   // Thread hiện tại không phải thread đang giữ lock, throw exception
   if (Thread.currentThread() != getExclusiveOwnerThread())
     throw new IllegalMonitorStateException();
   boolean free = false;
-  // Nếu thread đang giữ lock đã release toàn bộ, set thread sở hữu exclusive lock hiện tại thành null và update state
+  // Nếu thread giữ lock đã release đủ số lần, set thread sở hữu exclusive lock hiện tại thành null và update state
   if (c == 0) {
     free = true;
     setExclusiveOwnerThread(null);
@@ -719,7 +719,7 @@ public final boolean release(int arg) {
   if (tryRelease(arg)) {
     // Lấy head node
     Node h = head;
-    // Head node không null và waitStatus của head node không phải trạng thái node được initialize, bỏ trạng thái suspend của thread
+    // Head node không null và waitStatus của head node không phải trạng thái node được initialize, hủy trạng thái suspend của thread
     if (h != null && h.waitStatus != 0)
       unparkSuccessor(h);
     return true;
@@ -756,13 +756,13 @@ private void unparkSuccessor(Node node) {
       if (t.waitStatus <= 0)
         s = t;
   }
-  // Nếu node tiếp theo của node hiện tại không null và trạng thái <=0, unpark node hiện tại
+  // Nếu node tiếp theo của node hiện tại không null và trạng thái <=0, unpark thread của node đó
   if (s != null)
     LockSupport.unpark(s.thread);
 }
 ```
 
-Vì sao phải tìm node đầu tiên không bị Cancelled từ phía sau về phía trước? Nguyên nhân như sau.
+Vì sao phải tìm node đầu tiên không ở trạng thái CANCELLED từ phía sau về phía trước? Nguyên nhân như sau.
 
 Method addWaiter trước đó:
 
@@ -785,13 +785,13 @@ private Node addWaiter(Node mode) {
 }
 ```
 
-Từ đây có thể thấy node enqueue không phải atomic operation, tức node.prev = pred và compareAndSetTail(pred, node) có thể xem là atomic operation để Tail enqueue, nhưng lúc này pred.next = node chưa được thực thi. Nếu method unparkSuccessor được thực thi đúng lúc đó thì không thể tìm từ trước ra sau, nên cần tìm từ sau về trước. Một nguyên nhân khác là khi tạo node ở trạng thái CANCELLED, Next pointer bị ngắt trước còn Prev pointer chưa bị ngắt, vì vậy cũng bắt buộc phải duyệt từ sau về trước mới có thể duyệt hết tất cả Node.
+Từ đây có thể thấy node enqueue không phải atomic operation, tức node.prev = pred và compareAndSetTail(pred, node) có thể xem là phần atomic của thao tác enqueue vào Tail, nhưng lúc này pred.next = node chưa được thực thi. Nếu method unparkSuccessor được thực thi đúng lúc đó thì không thể tìm từ trước ra sau, nên cần tìm từ sau về trước. Một nguyên nhân khác là khi tạo node ở trạng thái CANCELLED, Next pointer bị ngắt trước còn Prev pointer chưa bị ngắt, vì vậy cũng bắt buộc phải duyệt từ sau về trước mới có thể duyệt hết tất cả Node.
 
-Tóm lại, nếu tìm từ trước ra sau thì trong trường hợp cực đoan, do atomic operation khi enqueue và thao tác ngắt Next pointer trong quá trình tạo CANCELLED node, có thể không duyệt được toàn bộ node. Vì vậy sau khi wakeup thread tương ứng, thread đó sẽ tiếp tục thực thi. Sau khi tiếp tục thực thi method acquireQueued, interrupt được xử lý như thế nào?
+Tóm lại, nếu tìm từ trước ra sau thì trong trường hợp cực đoan, do thao tác enqueue không atomic hoàn toàn và thao tác ngắt Next pointer trong quá trình tạo CANCELLED node, có thể không duyệt được toàn bộ node. Vì vậy sau khi wakeup thread tương ứng, thread đó sẽ tiếp tục thực thi. Sau khi tiếp tục thực thi method acquireQueued, interrupt được xử lý như thế nào?
 
 ### 3.4 Flow thực thi sau khi khôi phục interrupt
 
-Sau khi wakeup, sẽ thực thi return Thread.interrupted(); function này trả về interrupt status của thread hiện tại và clear status đó.
+Sau khi wakeup, sẽ thực thi return Thread.interrupted(); hàm này trả về interrupt status của thread hiện tại và xóa status đó.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -802,7 +802,7 @@ private final boolean parkAndCheckInterrupt() {
 }
 ```
 
-Quay lại code acquireQueued: khi parkAndCheckInterrupt trả về True hoặc False, giá trị của interrupted khác nhau, nhưng đều thực thi vòng lặp tiếp theo. Nếu lúc này lấy lock thành công thì sẽ return interrupted hiện tại.
+Quay lại code acquireQueued: khi parkAndCheckInterrupt trả về True hoặc False, giá trị của interrupted khác nhau, nhưng đều thực thi vòng lặp tiếp theo. Nếu lúc này lấy lock thành công thì sẽ trả về giá trị hiện tại của interrupted.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -829,7 +829,7 @@ final boolean acquireQueued(final Node node, int arg) {
 }
 ```
 
-Nếu acquireQueued là True thì sẽ thực thi method selfInterrupt.
+Nếu acquireQueued trả về True thì sẽ thực thi method selfInterrupt.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -839,12 +839,12 @@ static void selfInterrupt() {
 }
 ```
 
-Method này thực ra dùng để interrupt thread. Nhưng vì sao sau khi lấy lock lại còn phải interrupt thread? Phần này thuộc kiến thức về cooperative interrupt do Java cung cấp; nếu quan tâm, bạn có thể tìm hiểu thêm. Ở đây chỉ giới thiệu ngắn gọn:
+Method này thực ra dùng để khôi phục interrupt status cho thread. Nhưng vì sao sau khi lấy lock lại còn phải interrupt thread? Phần này thuộc kiến thức về cooperative interrupt do Java cung cấp; nếu quan tâm, bạn có thể tìm hiểu thêm. Ở đây chỉ giới thiệu ngắn gọn:
 
-1. Khi thread bị interrupt được wakeup, không biết nguyên nhân wakeup là gì: có thể thread hiện tại bị interrupt trong lúc waiting, cũng có thể được wakeup sau khi lock được release. Vì vậy dùng method Thread.interrupted() để kiểm tra interrupt flag (method này trả về interrupt status của thread hiện tại và set interrupt flag của thread hiện tại thành False), ghi nhận lại; nếu phát hiện thread đã từng bị interrupt thì interrupt thêm một lần nữa.
-2. Thread được wakeup trong quá trình waiting resource vẫn sẽ liên tục thử lấy lock sau khi wakeup, cho đến khi tranh được lock. Nói cách khác, trong toàn bộ flow, thread không phản hồi interrupt mà chỉ ghi nhận interrupt. Cuối cùng khi lấy lock thành công và return, nếu thread từng bị interrupt thì cần bổ sung thêm một lần interrupt.
+1. Khi thread bị interrupt được wakeup, không biết nguyên nhân wakeup là gì: có thể thread hiện tại bị interrupt trong lúc waiting, cũng có thể được wakeup sau khi lock được release. Vì vậy dùng method Thread.interrupted() để kiểm tra interrupt flag (method này trả về interrupt status của thread hiện tại và set interrupt flag của thread hiện tại thành False), ghi nhận lại; nếu phát hiện thread đã từng bị interrupt thì gọi interrupt lại.
+2. Thread được wakeup trong quá trình waiting resource vẫn sẽ liên tục thử lấy lock sau khi wakeup, cho đến khi giành được lock. Nói cách khác, trong toàn bộ flow, thread không phản hồi interrupt mà chỉ ghi nhận interrupt. Cuối cùng khi lấy lock thành công và return, nếu thread từng bị interrupt thì cần bổ sung thêm một lần interrupt.
 
-Cách xử lý này chủ yếu sử dụng `runWorker` trong `Worker`, đơn vị vận hành cơ bản trong thread pool, để kiểm tra và xử lý bổ sung thông qua `Thread.interrupted()`. Nếu quan tâm, bạn có thể xem source code của ThreadPoolExecutor.
+Cách xử lý này chủ yếu sử dụng `runWorker` trong `Worker`, đơn vị vận hành cơ bản của thread pool, để kiểm tra và xử lý bổ sung thông qua `Thread.interrupted()`. Nếu quan tâm, bạn có thể xem source code của ThreadPoolExecutor.
 
 ### 3.5 Tóm tắt
 
@@ -864,7 +864,7 @@ Cách xử lý này chủ yếu sử dụng `runWorker` trong `Worker`, đơn v�
 >
 > Q: Nếu thread đang trong cơ chế xếp hàng chờ mãi không thể lấy lock thì có phải tiếp tục waiting không? Hay có strategy khác để giải quyết vấn đề này?
 >
-> A: Trạng thái node chứa thread sẽ chuyển thành trạng thái cancel; node ở trạng thái cancel sẽ được release khỏi queue, cụ thể xem mục 2.3.2.
+> A: Trạng thái node chứa thread sẽ chuyển thành trạng thái cancel; node ở trạng thái cancel sẽ được loại khỏi queue, cụ thể xem mục 2.3.2.
 >
 > Q: Function Lock thực hiện lock thông qua method Acquire, nhưng cụ thể lock như thế nào?
 >
@@ -872,9 +872,9 @@ Cách xử lý này chủ yếu sử dụng `runWorker` trong `Worker`, đơn v�
 
 ## 4 Ứng dụng AQS
 
-### 4.1 Ứng dụng reentrant của ReentrantLock
+### 4.1 Ứng dụng tính reentrant của ReentrantLock
 
-Tính reentrant của ReentrantLock là một trong những ứng dụng tốt của AQS. Sau khi hiểu các kiến thức trên, chúng ta có thể dễ dàng biết cách ReentrantLock triển khai reentrant. Trong ReentrantLock, dù là fair lock hay unfair lock đều có một đoạn logic.
+Tính reentrant của ReentrantLock là một trong những ứng dụng của AQS. Sau khi hiểu các kiến thức trên, chúng ta có thể dễ dàng biết cách ReentrantLock triển khai reentrant. Trong ReentrantLock, dù là fair lock hay unfair lock đều có một đoạn logic.
 
 Fair lock:
 
@@ -916,7 +916,7 @@ else if (current == getExclusiveOwnerThread()) {
 }
 ```
 
-Từ hai đoạn trên đều có thể thấy có một trạng thái đồng bộ State dùng để kiểm soát toàn bộ tình trạng reentrant. State được đánh dấu bằng Volatile, dùng để bảo đảm visibility và order nhất định.
+Từ hai đoạn trên đều có thể thấy có một trạng thái đồng bộ State dùng để kiểm soát toàn bộ tình trạng reentrant. State được khai báo volatile, dùng để bảo đảm visibility và thứ tự nhất định.
 
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -932,15 +932,15 @@ Tiếp theo xem quy trình chính của field State:
 
 ### 4.2 Trường hợp sử dụng trong JUC
 
-Ngoài ứng dụng tính reentrant của ReentrantLock ở trên, AQS với vai trò framework cho concurrent programming còn cung cấp solution tốt cho nhiều công cụ đồng bộ khác. Dưới đây là một số công cụ đồng bộ trong JUC và phần giới thiệu khái quát về các trường hợp sử dụng AQS:
+Ngoài ứng dụng tính reentrant của ReentrantLock ở trên, AQS với vai trò framework cho lập trình concurrent còn cung cấp giải pháp tốt cho nhiều công cụ đồng bộ khác. Dưới đây là một số công cụ đồng bộ trong JUC và phần giới thiệu khái quát về các trường hợp sử dụng AQS:
 
-| Công cụ đồng bộ        | Mối liên hệ giữa công cụ đồng bộ và AQS                                                                                                                                                                    |
-| :--------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ReentrantLock          | Dùng AQS để lưu số lần lock được giữ lặp lại. Khi một thread lấy lock, ReentrantLock ghi nhận định danh của thread đang lấy lock để kiểm tra việc lấy lặp lại và xử lý exception khi thread sai cố unlock. |
-| Semaphore              | Dùng trạng thái đồng bộ của AQS để lưu counter hiện tại của semaphore. tryRelease tăng counter, acquireShared giảm counter.                                                                                |
-| CountDownLatch         | Dùng trạng thái đồng bộ của AQS để biểu thị counter. Chỉ khi counter bằng 0 thì mọi thao tác Acquire (method await của CountDownLatch) mới có thể đi qua.                                                  |
-| ReentrantReadWriteLock | Dùng 16 bit trong trạng thái đồng bộ của AQS để lưu số lần write lock được giữ, 16 bit còn lại để lưu số lần read lock được giữ.                                                                           |
-| ThreadPoolExecutor     | Worker dùng trạng thái đồng bộ của AQS để triển khai việc set exclusive thread variable (tryAcquire và tryRelease).                                                                                        |
+| Công cụ đồng bộ        | Mối liên hệ giữa công cụ đồng bộ và AQS                                                                                                                                                                           |
+| :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ReentrantLock          | Dùng AQS để lưu số lần lock được giữ lặp lại. Khi một thread lấy lock, ReentrantLock ghi nhận định danh của thread đang giữ lock để kiểm tra việc lấy lặp lại và xử lý exception khi thread không đúng cố unlock. |
+| Semaphore              | Dùng trạng thái đồng bộ của AQS để lưu counter hiện tại của semaphore. tryRelease tăng counter, acquireShared giảm counter.                                                                                       |
+| CountDownLatch         | Dùng trạng thái đồng bộ của AQS để biểu thị counter. Chỉ khi counter bằng 0 thì mọi thao tác Acquire (method await của CountDownLatch) mới có thể đi qua.                                                         |
+| ReentrantReadWriteLock | Dùng 16 bit trong trạng thái đồng bộ của AQS để lưu số lần write lock được giữ, 16 bit còn lại để lưu số lần read lock được giữ.                                                                                  |
+| ThreadPoolExecutor     | Worker dùng trạng thái đồng bộ của AQS để triển khai việc set exclusive thread variable (tryAcquire và tryRelease).                                                                                               |
 
 ### 4.3 Custom synchronizer
 
@@ -1028,12 +1028,12 @@ Kết quả mỗi lần chạy đoạn code trên đều là 20000. Chỉ với 
 
 ## 5 Tổng kết
 
-Trong quá trình phát triển hằng ngày, có rất nhiều trường hợp sử dụng concurrency, nhưng không nhiều người hiểu nguyên lý của framework cơ bản bên trong concurrency. Do giới hạn về độ dài, bài viết chỉ giới thiệu nguyên lý của reentrant lock ReentrantLock và nguyên lý AQS, hy vọng có thể trở thành “viên gạch đầu tiên” giúp bạn tìm hiểu AQS, ReentrantLock và các synchronizer khác.
+Trong quá trình phát triển hằng ngày, có rất nhiều trường hợp sử dụng concurrency, nhưng không nhiều người hiểu nguyên lý của framework cốt lõi bên trong concurrency. Do giới hạn về độ dài, bài viết chỉ giới thiệu nguyên lý của reentrant lock ReentrantLock và nguyên lý AQS, hy vọng có thể trở thành “bước đệm” giúp bạn tìm hiểu AQS, ReentrantLock và các synchronizer khác.
 
 ## Tài liệu tham khảo
 
 - Lea D. The java. util. concurrent synchronizer framework\[J]. Science of Computer Programming, 2005, 58(3): 293-309.
-- “Thực chiến lập trình concurrent Java”
+- “Lập trình concurrent Java trong thực tế”
 - [Chuyện về “lock” trong Java không thể không nói](https://tech.meituan.com/2018/11/15/java-lock.html)
 
 <!-- @include: @article-footer.snippet.md -->

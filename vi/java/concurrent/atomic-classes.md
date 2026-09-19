@@ -1,28 +1,28 @@
 ---
-title: Tổng hợp Atomic atomic classes
-description: "Giải thích chi tiết Java atomic classes: tổng hợp toàn diện hệ thống Atomic atomic classes trong gói JUC, các class thường dùng như AtomicInteger/AtomicLong/AtomicReference, triển khai thread-safe dựa trên CAS, trường hợp sử dụng và ưu thế về performance."
+title: Tổng hợp các atomic class Atomic
+description: "Giải thích chi tiết về atomic class trong Java: tổng hợp toàn diện hệ thống atomic class của gói JUC, các class thường dùng như AtomicInteger/AtomicLong/AtomicReference, cách triển khai thread-safe dựa trên CAS, các trường hợp sử dụng và ưu thế về performance."
 category: Java
 tag:
   - Java Concurrency
 head:
   - - meta
     - name: keywords
-      content: Atomic atomic classes,AtomicInteger,AtomicLong,AtomicReference,CAS atomic operation,gói JUC concurrency,cách sử dụng atomic classes
+      content: Atomic atomic class,AtomicInteger,AtomicLong,AtomicReference,CAS atomic operation,gói concurrency JUC,cách sử dụng atomic class
 ---
 
-## Giới thiệu về Atomic atomic classes
+## Giới thiệu về Atomic atomic class
 
 `Atomic` dịch sang tiếng Việt có nghĩa là “nguyên tử”. Trong hóa học, nguyên tử là đơn vị nhỏ nhất cấu tạo nên vật chất và không thể bị phân chia trong phản ứng hóa học. Trong lập trình, `Atomic` chỉ một operation có tính atomic, tức operation đó không thể bị phân chia hoặc ngắt giữa chừng. Ngay cả khi được thực thi đồng thời bởi nhiều thread, operation đó hoặc hoàn tất toàn bộ, hoặc không thực thi; các thread khác sẽ không nhìn thấy trạng thái hoàn tất một phần.
 
-Nói đơn giản, atomic class là class có đặc trưng operation atomic.
+Nói đơn giản, atomic class là class có các operation mang tính atomic.
 
-Các atomic class `Atomic` trong package `java.util.concurrent.atomic` cung cấp một cách thread-safe để thao tác với một biến đơn lẻ.
+Các atomic class trong package `java.util.concurrent.atomic` cung cấp một cách thread-safe để thao tác với một biến đơn lẻ.
 
-Các class `Atomic` dựa trên optimistic lock CAS (Compare-And-Swap, so sánh và trao đổi) để bảo đảm tính atomic cho method, không cần sử dụng cơ chế lock truyền thống (chẳng hạn block `synchronized` hoặc `ReentrantLock`).
+Các atomic class dựa trên optimistic lock CAS (Compare-And-Swap, so sánh và trao đổi) để bảo đảm tính atomic cho method, không cần sử dụng cơ chế lock truyền thống (chẳng hạn block `synchronized` hoặc `ReentrantLock`).
 
-Bài viết này chỉ giới thiệu khái niệm về Atomic atomic classes; để biết nguyên lý triển khai cụ thể, bạn có thể đọc bài viết [Giải thích chi tiết về CAS](./cas.md) do tác giả viết.
+Bài viết này chỉ giới thiệu khái niệm về Atomic atomic class; để biết nguyên lý triển khai cụ thể, bạn có thể đọc bài viết [Giải thích chi tiết về CAS](./cas.md) do tác giả viết.
 
-![Tổng quan về JUC atomic classes](https://oss.javaguide.cn/github/javaguide/java/JUC%E5%8E%9F%E5%AD%90%E7%B1%BB%E6%A6%82%E8%A7%88.png)
+![Tổng quan về các atomic class JUC](https://oss.javaguide.cn/github/javaguide/java/JUC%E5%8E%9F%E5%AD%90%E7%B1%BB%E6%A6%82%E8%A7%88.png)
 
 Dựa trên kiểu dữ liệu được thao tác, có thể chia các atomic class trong gói JUC thành 4 nhóm:
 
@@ -30,29 +30,29 @@ Dựa trên kiểu dữ liệu được thao tác, có thể chia các atomic cl
 
 Cập nhật basic type theo cách atomic
 
-- `AtomicInteger`: atomic class kiểu integer
-- `AtomicLong`: atomic class kiểu long
+- `AtomicInteger`: atomic class cho kiểu `int`
+- `AtomicLong`: atomic class cho kiểu `long`
 - `AtomicBoolean`: atomic class kiểu boolean
 
 **2. Array types**
 
 Cập nhật một phần tử trong array theo cách atomic
 
-- `AtomicIntegerArray`: atomic class cho array kiểu integer
-- `AtomicLongArray`: atomic class cho array kiểu long
+- `AtomicIntegerArray`: atomic class cho array kiểu `int`
+- `AtomicLongArray`: atomic class cho array kiểu `long`
 - `AtomicReferenceArray`: atomic class cho array kiểu reference
 
 **3. Reference types**
 
 - `AtomicReference`: atomic class kiểu reference
-- `AtomicMarkableReference`: cập nhật atomic một reference có mark. Class này liên kết mark boolean với reference, có thể phát hiện sự thay đổi giữa hai trạng thái do business quy ước; tuy nhiên, mark một bit không thể ghi lại số lần thay đổi version tùy ý.
-- `AtomicStampedReference`: cập nhật atomic một reference có version number. Class này liên kết một giá trị integer với reference, có thể dùng để cập nhật atomic data và version number của data, đồng thời giải quyết vấn đề ABA có thể xảy ra khi dùng CAS để cập nhật atomic.
+- `AtomicMarkableReference`: cập nhật atomic một reference có mark. Class này liên kết mark boolean với reference, có thể phát hiện sự thay đổi giữa hai trạng thái do business quy ước; tuy nhiên, mark một bit không thể ghi lại số lần thay đổi version bất kỳ.
+- `AtomicStampedReference`: cập nhật atomic một reference có version number. Class này liên kết một giá trị `int` với reference, có thể dùng để cập nhật data và version number của data một cách atomic, đồng thời giải quyết vấn đề ABA có thể xảy ra khi dùng CAS để cập nhật atomic.
 
-So với nó, `AtomicStampedReference` dùng version number kiểu integer, phù hợp hơn để phát hiện reference đã trải qua nhiều lần thay đổi giữa hai lần đọc hay chưa.
+So với `AtomicMarkableReference`, `AtomicStampedReference` dùng version number kiểu `int`, phù hợp hơn để phát hiện reference đã trải qua nhiều lần thay đổi giữa hai lần đọc hay chưa.
 
-**4. Atomic classes cho việc cập nhật thuộc tính của object**
+**4. Atomic class cập nhật thuộc tính của object**
 
-- `AtomicIntegerFieldUpdater`: updater để cập nhật atomic field kiểu integer
+- `AtomicIntegerFieldUpdater`: updater để cập nhật atomic field kiểu `int`
 - `AtomicLongFieldUpdater`: updater để cập nhật atomic field kiểu long
 - `AtomicReferenceFieldUpdater`: updater để cập nhật atomic field kiểu reference
 
@@ -60,7 +60,7 @@ So với nó, `AtomicStampedReference` dùng version number kiểu integer, phù
 
 Cập nhật basic type theo cách atomic
 
-- `AtomicInteger`: atomic class kiểu integer
+- `AtomicInteger`: atomic class cho kiểu `int`
 - `AtomicLong`: atomic class kiểu long
 - `AtomicBoolean`: atomic class kiểu boolean
 
@@ -71,11 +71,11 @@ Ba class trên cung cấp các method gần như giống nhau, vì vậy ở đ�
 ```java
 public final int get() // Lấy giá trị hiện tại
 public final int getAndSet(int newValue)// Lấy giá trị hiện tại và đặt giá trị mới
-public final int getAndIncrement()// Lấy giá trị hiện tại và tăng dần
-public final int getAndDecrement() // Lấy giá trị hiện tại và giảm dần
-public final int getAndAdd(int delta) // Lấy giá trị hiện tại và cộng thêm giá trị dự kiến
+public final int getAndIncrement()// Lấy giá trị hiện tại và tăng lên 1
+public final int getAndDecrement() // Lấy giá trị hiện tại và giảm đi 1
+public final int getAndAdd(int delta) // Lấy giá trị hiện tại và cộng thêm delta
 boolean compareAndSet(int expect, int update) // Nếu giá trị đầu vào bằng giá trị dự kiến, đặt giá trị đó thành giá trị đầu vào (update) theo cách atomic
-public final void lazySet(int newValue)// Cuối cùng đặt thành newValue; lazySet cung cấp semantic yếu hơn method set, có thể khiến các thread khác vẫn đọc được giá trị cũ trong một khoảng thời gian ngắn sau đó, nhưng có thể hiệu quả hơn.
+public final void lazySet(int newValue)// Cuối cùng đặt thành newValue; lazySet cung cấp ngữ nghĩa yếu hơn method set, có thể khiến các thread khác vẫn đọc được giá trị cũ trong một khoảng thời gian ngắn sau đó, nhưng có thể hiệu quả hơn.
 ```
 
 **Ví dụ sử dụng class `AtomicInteger`**:
@@ -88,7 +88,7 @@ AtomicInteger atomicInt = new AtomicInteger(0);
 int tempValue = atomicInt.getAndSet(3);
 System.out.println("tempValue: " + tempValue + "; atomicInt: " + atomicInt);
 
-// Dùng method getAndIncrement để lấy giá trị hiện tại và tăng 1
+// Dùng method getAndIncrement để lấy giá trị hiện tại và tăng lên 1
 tempValue = atomicInt.getAndIncrement();
 System.out.println("tempValue: " + tempValue + "; atomicInt: " + atomicInt);
 
@@ -109,7 +109,7 @@ atomicInt.lazySet(15);
 System.out.println("After lazySet, atomicInt: " + atomicInt);
 ```
 
-Output:
+Kết quả:
 
 ```java
 tempValue: 0; atomicInt: 3
@@ -124,8 +124,8 @@ After lazySet, atomicInt: 15
 
 Cập nhật một phần tử trong array theo cách atomic
 
-- `AtomicIntegerArray`: atomic class cho array kiểu integer
-- `AtomicLongArray`: atomic class cho array kiểu long
+- `AtomicIntegerArray`: atomic class cho array kiểu `int`
+- `AtomicLongArray`: atomic class cho array kiểu `long`
 - `AtomicReferenceArray`: atomic class cho array kiểu reference
 
 Ba class trên cung cấp các method gần như giống nhau, vì vậy ở đây dùng `AtomicIntegerArray` làm ví dụ để giới thiệu.
@@ -133,11 +133,11 @@ Ba class trên cung cấp các method gần như giống nhau, vì vậy ở đ�
 **Các method thường dùng của class `AtomicIntegerArray`**:
 
 ```java
-public final int get(int i) // Lấy giá trị phần tử tại vị trí index=i
-public final int getAndSet(int i, int newValue)// Trả về giá trị hiện tại tại vị trí index=i và đặt nó thành giá trị mới: newValue
-public final int getAndIncrement(int i)// Lấy giá trị phần tử tại vị trí index=i và tăng phần tử tại vị trí đó
-public final int getAndDecrement(int i) // Lấy giá trị phần tử tại vị trí index=i và giảm phần tử tại vị trí đó
-public final int getAndAdd(int i, int delta) // Lấy giá trị phần tử tại vị trí index=i và cộng thêm giá trị dự kiến
+public final int get(int i) // Lấy giá trị phần tử tại vị trí có index=i
+public final int getAndSet(int i, int newValue)// Trả về giá trị hiện tại ở vị trí index=i và đặt nó thành giá trị mới: newValue
+public final int getAndIncrement(int i)// Lấy giá trị phần tử tại vị trí index=i và tăng phần tử ở vị trí đó lên 1
+public final int getAndDecrement(int i) // Lấy giá trị phần tử tại vị trí index=i và giảm phần tử ở vị trí đó đi 1
+public final int getAndAdd(int i, int delta) // Lấy giá trị phần tử tại vị trí index=i và cộng thêm delta
 boolean compareAndSet(int i, int expect, int update) // Nếu giá trị đầu vào bằng giá trị dự kiến, đặt giá trị phần tử tại vị trí index=i thành giá trị đầu vào (update) theo cách atomic
 public final void lazySet(int i, int newValue)// Cuối cùng đặt phần tử tại vị trí index=i thành newValue; sau khi dùng lazySet, các thread khác có thể vẫn đọc được giá trị cũ trong một khoảng thời gian ngắn sau đó.
 ```
@@ -180,7 +180,7 @@ for (int j = 0; j < atomicArray.length(); j++) {
 }
 ```
 
-Output:
+Kết quả:
 
 ```plain
 Initial values in AtomicIntegerArray:
@@ -201,7 +201,7 @@ Index 0: 8 Index 1: 2 Index 2: 3 Index 3: 4 Index 4: 5 Index 5: 6
 Atomic class cho basic type chỉ có thể cập nhật một biến. Nếu cần cập nhật atomic nhiều biến, cần dùng atomic class cho reference type.
 
 - `AtomicReference`: atomic class kiểu reference
-- `AtomicStampedReference`: cập nhật atomic một reference có version number. Class này liên kết một giá trị integer với reference, có thể dùng để cập nhật atomic data và version number của data, đồng thời giải quyết vấn đề ABA có thể xảy ra khi dùng CAS để cập nhật atomic.
+- `AtomicStampedReference`: cập nhật atomic một reference có version number. Class này liên kết một giá trị `int` với reference, có thể dùng để cập nhật data và version number của data một cách atomic, đồng thời giải quyết vấn đề ABA có thể xảy ra khi dùng CAS để cập nhật atomic.
 - `AtomicMarkableReference`: cập nhật atomic một reference có mark. Class này liên kết mark boolean với reference, ~~cũng có thể giải quyết vấn đề ABA có thể xảy ra khi dùng CAS để cập nhật atomic.~~
 
 Ba class trên cung cấp các method gần như giống nhau, vì vậy ở đây dùng `AtomicReference` làm ví dụ để giới thiệu.
@@ -239,7 +239,7 @@ System.out.println("Second Update Success: " + isUpdated);
 System.out.println("Final Person: " + ar.get().toString());
 ```
 
-Output:
+Kết quả:
 
 ```plain
 Initial Person: Person{name='SnailClimb', age=22}
@@ -283,7 +283,7 @@ String finalRef = asr.get(finalStamp);
 System.out.println("Final Reference: " + finalRef + ", Final Stamp: " + finalStamp[0]);
 ```
 
-Output như sau:
+Kết quả như sau:
 
 ```plain
 Initial Reference: SnailClimb, Initial Stamp: 1
@@ -328,7 +328,7 @@ String finalRef = amr.get(finalMark);
 System.out.println("Final Reference: " + finalRef + ", Final Mark: " + finalMark[0]);
 ```
 
-Output như sau:
+Kết quả như sau:
 
 ```plain
 Initial Reference: SnailClimb, Initial Mark: false
@@ -338,15 +338,15 @@ Update with Wrong Mark Success: false
 Final Reference: Daisy, Final Mark: true
 ```
 
-## Atomic class cho việc cập nhật thuộc tính của object
+## Atomic class cập nhật thuộc tính của object
 
-Khi cần cập nhật atomic một field trong một class, cần dùng atomic class cho việc cập nhật thuộc tính của object.
+Khi cần cập nhật atomic một field trong một class, cần dùng atomic class cập nhật field của object.
 
-- `AtomicIntegerFieldUpdater`: updater để cập nhật atomic field kiểu integer
-- `AtomicLongFieldUpdater`: updater để cập nhật atomic field kiểu long
+- `AtomicIntegerFieldUpdater`: updater để cập nhật atomic field kiểu `int`
+- `AtomicLongFieldUpdater`: updater để cập nhật atomic field kiểu `long`
 - `AtomicReferenceFieldUpdater`: updater để cập nhật atomic field kiểu reference
 
-Để cập nhật atomic thuộc tính của object cần hai bước. Bước đầu tiên, vì các atomic class cho việc cập nhật thuộc tính của object đều là abstract class, nên mỗi lần sử dụng phải dùng static method `newUpdater()` để tạo updater, đồng thời chỉ định class và thuộc tính cần cập nhật. Bước thứ hai, target field phải được bổ sung `volatile` và khớp với type của updater: lần lượt là `int`, `long` hoặc reference type; đồng thời không được là field `static` hoặc `final`.
+Để cập nhật atomic một thuộc tính của object, cần hai bước. Thứ nhất, vì các atomic class cập nhật thuộc tính của object đều là abstract class, mỗi lần sử dụng phải dùng static method `newUpdater()` để tạo updater, đồng thời chỉ định class và field cần cập nhật. Thứ hai, target field phải được khai báo với `volatile` và có type khớp với updater: `int`, `long` hoặc reference type; đồng thời không được là field `static` hoặc `final`.
 
 Ba class trên cung cấp các method gần như giống nhau, vì vậy ở đây dùng `AtomicIntegerFieldUpdater` làm ví dụ để giới thiệu.
 
@@ -371,7 +371,7 @@ Person person = new Person("SnailClimb", 22);
 System.out.println("Initial Person: " + person);
 
 // Cập nhật field age
-ageUpdater.incrementAndGet(person); // Tăng dần
+ageUpdater.incrementAndGet(person); // Tăng lên 1
 System.out.println("After Increment: " + person);
 
 ageUpdater.addAndGet(person, 5); // Tăng thêm 5
@@ -386,7 +386,7 @@ System.out.println("Compare and Set (28 to 35) Success: " + isUpdated);
 System.out.println("Final Person: " + person);
 ```
 
-Output:
+Kết quả:
 
 ```plain
 Initial Person: Name: SnailClimb, Age: 22

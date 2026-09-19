@@ -1,6 +1,6 @@
 ---
 title: Tổng hợp các câu hỏi thường gặp về virtual thread
-description: "Giải thích chi tiết về virtual thread trong Java 21: làm rõ vị trí, nguyên lý scheduling, khác biệt với platform thread, trường hợp sử dụng, cách tạo, giới hạn hiệu năng, cách tích hợp vào Spring Boot và các lưu ý thực tiễn của Virtual Threads."
+description: "Giải thích chi tiết về virtual thread trong Java 21: làm rõ vai trò, nguyên lý scheduling, khác biệt với platform thread, trường hợp sử dụng, cách tạo, giới hạn hiệu năng, cách tích hợp vào Spring Boot và các lưu ý thực tiễn của Virtual Threads."
 category: Java
 tag:
   - Java Concurrency
@@ -12,7 +12,7 @@ head:
 
 <!-- @include: @article-header.snippet.md -->
 
-Một request Web đi vào, code cần truy vấn database, gọi API từ xa, đọc ghi file. Với cách viết synchronous truyền thống, request này sẽ chiếm một platform thread, dù phần lớn thời gian đang chờ I/O.
+Một request Web đến, code cần truy vấn database, gọi API từ xa, đọc ghi file. Với cách viết synchronous truyền thống, request này sẽ chiếm một platform thread, dù phần lớn thời gian đang chờ I/O.
 
 Thread pool có thể giảm chi phí tạo thread, nhưng không thay đổi được một thực tế: số lượng platform thread vẫn bị giới hạn bởi số lượng thread của hệ điều hành, bộ nhớ và chi phí scheduling. Khi số request đồng thời tiếp tục tăng, các thread trong thread pool sẽ nhanh chóng bị task đang xếp hàng chiếm hết, throughput nhanh chóng chạm giới hạn.
 
@@ -28,10 +28,10 @@ Vì vậy, số lượng virtual thread có thể lớn hơn rất nhiều số 
 
 Một số điểm chính của virtual thread:
 
-- Virtual thread vẫn là `Thread`, hỗ trợ `ThreadLocal`, interrupt, exception stack, debugging và quan sát bằng JFR.
-- Virtual thread phù hợp với task có nhiều thời gian blocking chờ đợi, chẳng hạn HTTP call, database query, truy cập message queue, file hoặc network I/O.
-- Virtual thread không phải execution unit CPU nhanh hơn và sẽ không làm code thuần computation chạy nhanh hơn.
-- Virtual thread rất rẻ, thông thường nên áp dụng mô hình “mỗi task một virtual thread”, thay vì pool và reuse như platform thread.
+- Virtual thread vẫn là `Thread`, hỗ trợ `ThreadLocal`, interrupt, exception stack trace, debugging và quan sát bằng JFR.
+- Virtual thread phù hợp với task dành phần lớn thời gian blocking để chờ, chẳng hạn HTTP call, database query, truy cập message queue, file hoặc network I/O.
+- Virtual thread không phải là execution unit CPU nhanh hơn và sẽ không làm code thuần computation chạy nhanh hơn.
+- Virtual thread rất rẻ, thông thường nên áp dụng mô hình “mỗi task một virtual thread”, thay vì pool hóa và reuse như platform thread.
 
 ## Virtual thread có quan hệ gì với platform thread?
 
@@ -41,13 +41,13 @@ Trong Java, quan hệ giữa virtual thread, platform thread và thread của h�
 
 Trong các hệ điều hành phổ biến như Windows, Linux, platform thread của HotSpot JVM thường dùng mô hình thread một-một, tức là một platform thread tương ứng với một thread của hệ điều hành. Sau khi virtual thread được đưa vào, JDK thêm một lớp scheduling phía trên platform thread:
 
-- Virtual thread là nơi chứa task; `Thread.currentThread()` mà code nghiệp vụ nhìn thấy trả về chính virtual thread.
-- Platform thread là vật mang (Carrier Thread) của virtual thread, chịu trách nhiệm thực thi code Java trong virtual thread.
+- Virtual thread là nơi đảm nhận task; `Thread.currentThread()` mà code nghiệp vụ nhìn thấy trả về chính virtual thread.
+- Platform thread là carrier (Carrier Thread) của virtual thread, chịu trách nhiệm thực thi code Java trong virtual thread.
 - Hệ điều hành vẫn chỉ scheduling platform thread và không biết virtual thread tồn tại.
 
-Khi bắt đầu thực thi, một virtual thread được scheduler của JDK mount lên một platform thread. Khi thực thi đến điểm blocking như I/O, `BlockingQueue.take()`, `Future.get()` có hỗ trợ suspend, virtual thread có thể unmount, giải phóng platform thread để tiếp tục thực thi virtual thread khác. Sau khi thao tác blocking sẵn sàng, virtual thread lại được submit về scheduler, mount lên một platform thread để tiếp tục thực thi.
+Khi bắt đầu thực thi, một virtual thread được scheduler của JDK mount lên một platform thread. Khi thực thi đến điểm blocking như I/O, `BlockingQueue.take()`, `Future.get()` có hỗ trợ suspend, virtual thread có thể unmount, giải phóng platform thread để tiếp tục thực thi virtual thread khác. Khi thao tác blocking hoàn tất, virtual thread lại được submit về scheduler, mount lên một platform thread để tiếp tục thực thi.
 
-Quá trình mount và unmount này trong suốt với code nghiệp vụ. Code bạn viết vẫn là code synchronous thông thường:
+Quá trình mount và unmount này không ảnh hưởng đến code nghiệp vụ. Code bạn viết vẫn là code synchronous thông thường:
 
 ```java
 String body = httpClient.send(request, BodyHandlers.ofString()).body();
@@ -55,45 +55,45 @@ Result result = repository.query(body);
 return service.handle(result);
 ```
 
-Nếu các call này phát sinh blocking bên trong, virtual thread có thể tự suspend; nếu đổi sang platform thread, thread đó sẽ liên tục chiếm thread tương ứng của hệ điều hành.
+Nếu các call này phát sinh blocking bên trong, virtual thread có thể tự suspend; nếu đổi sang platform thread, thread đó sẽ chiếm giữ thread tương ứng của hệ điều hành.
 
 ## Project Loom có quan hệ gì với virtual thread?
 
 Project Loom là project trong OpenJDK nhằm cải tiến mô hình concurrency của Java, còn virtual thread là một trong những thành quả quan trọng nhất của Loom. Virtual thread lần lượt được preview trong JDK 19, JDK 20, cuối cùng được chính thức đưa vào JDK 21 thông qua [JEP 444](https://openjdk.org/jeps/444).
 
-Loom không chỉ bổ sung một API lightweight thread. Nó còn thúc đẩy việc điều chỉnh các năng lực đi kèm của JDK như blocking I/O, debugging, JFR và thread dump, giúp phong cách lập trình thread-per-request truyền thống một lần nữa có khả năng mở rộng trong các scenario I/O concurrency cao.
+Loom không chỉ bổ sung một API lightweight thread. Nó còn thúc đẩy việc điều chỉnh các khả năng hỗ trợ của JDK như blocking I/O, debugging, JFR và thread dump, giúp phong cách lập trình thread-per-request truyền thống một lần nữa có khả năng mở rộng trong các scenario có concurrency I/O cao.
 
 Đây cũng là điểm khác biệt quan trọng giữa virtual thread và “coroutine library” thông thường: virtual thread được đưa vào thread model của Java platform. Debugger, Profiler, JFR và thread dump đều có thể hiểu nó theo đơn vị thread, thay vì tách call chain nghiệp vụ thành một loạt callback stage.
 
 ## Virtual thread giải quyết vấn đề gì?
 
-Nhiều chương trình server vốn phù hợp với mô hình “mỗi request một thread”. Ưu điểm của nó rất rõ: code thực thi tuần tự, exception có thể được throw dọc theo call stack, debugger có thể theo dõi từng bước, thread dump cũng cho thấy request đang bị kẹt ở đâu.
+Nhiều chương trình server vốn phù hợp với mô hình “mỗi request một thread”. Ưu điểm của nó rất rõ: code chạy tuần tự, exception có thể lan theo call stack, debugger có thể theo dõi từng bước, thread dump cũng cho thấy request đang bị kẹt ở đâu.
 
 Vấn đề là platform thread quá đắt.
 
-Giả sử một API có thời gian xử lý trung bình 50ms, hệ thống cần đạt 2000 QPS thì theo ước tính sơ bộ bằng Little's Law, cần xử lý đồng thời khoảng 100 request. Nếu thời gian xử lý trung bình của API tăng lên 500ms, cùng mức 2000 QPS sẽ cần khoảng 1000 request concurrent. Khi mỗi request chiếm một platform thread, số lượng thread rất dễ trở thành bottleneck trước cả CPU, network bandwidth, database connection và các resource khác.
+Giả sử một API có thời gian xử lý trung bình 50ms, hệ thống cần đạt 2000 QPS thì theo ước tính sơ bộ bằng Little's Law, cần xử lý đồng thời khoảng 100 request. Nếu thời gian xử lý trung bình của API tăng lên 500ms, cùng mức 2000 QPS sẽ cần khoảng 1000 request đồng thời. Khi mỗi request chiếm một platform thread, số lượng thread rất dễ trở thành bottleneck trước cả CPU, network bandwidth, database connection và các tài nguyên khác.
 
 Lập trình asynchronous và Reactive có thể giải phóng thread khỏi việc chờ I/O, nhưng cái giá cũng rất rõ: call chain bị tách thành callback, chain `CompletableFuture` hoặc reactive pipeline; xử lý exception, debugging, flame graph và thread context đều trở nên phức tạp hơn.
 
-Virtual thread cố gắng giữ lại khả năng đọc của code synchronous, đồng thời giảm chi phí chiếm platform thread trong lúc blocking chờ đợi. Thứ nó chủ yếu cải thiện là throughput và khả năng tiếp nhận concurrency, không phải tốc độ thực thi của một request.
+Virtual thread cố gắng giữ lại khả năng đọc của code synchronous, đồng thời giảm chi phí chiếm platform thread trong lúc blocking chờ đợi. Thứ nó chủ yếu cải thiện là throughput và khả năng xử lý đồng thời, không phải tốc độ thực thi của một request.
 
-## Virtual thread phù hợp với những scenario nào?
+## Virtual thread phù hợp với những trường hợp sử dụng nào?
 
 Virtual thread phù hợp nhất với các task có đặc điểm sau:
 
-- Số lượng task concurrent rất lớn, thường ở mức hàng nghìn hoặc hàng chục nghìn.
+- Số lượng task đồng thời rất lớn, thường ở mức hàng nghìn hoặc hàng chục nghìn.
 - Task dành phần lớn thời gian chờ I/O, chẳng hạn database, Redis, HTTP/RPC, message queue, file và network read/write.
 - Code hiện tại chủ yếu theo mô hình synchronous blocking và không muốn chuyển sang async chain phức tạp để tăng khả năng mở rộng.
 - Muốn giữ call stack truyền thống để thuận tiện cho debugging, phân tích load test và xử lý sự cố production.
 
-Các scenario điển hình gồm:
+Các trường hợp điển hình gồm:
 
 - Gọi database và external HTTP service trong API Spring MVC / Servlet.
 - Task nền gọi hàng loạt API của bên thứ ba.
-- Gateway hoặc service aggregation gọi concurrent nhiều downstream service.
+- Gateway hoặc service aggregation đồng thời gọi nhiều downstream service.
 - Logic consume message có database write hoặc remote call dạng blocking.
 
-Virtual thread không phù hợp để làm task CPU-intensive “chạy nhanh hơn”. Nếu task chủ yếu là tính hash, nén image, sort array lớn hoặc chạy rule engine phức tạp, sau khi số lượng thread vượt số core CPU, throughput thường sẽ không tiếp tục tăng. Với công việc CPU-intensive, vẫn nên tập trung vào algorithm, data structure, batch processing, parallel stream, thread pool chuyên dụng cho computation hoặc tối ưu native.
+Virtual thread không phù hợp để làm task CPU-intensive “chạy nhanh hơn”. Nếu task chủ yếu là tính hash, nén image, sắp xếp array lớn hoặc chạy rule engine phức tạp, sau khi số lượng thread vượt số core CPU, throughput thường sẽ không tiếp tục tăng. Với công việc CPU-intensive, vẫn nên tập trung vào algorithm, data structure, batch processing, parallel stream, thread pool chuyên dụng cho computation hoặc tối ưu native.
 
 ## Tạo virtual thread như thế nào?
 
@@ -165,7 +165,7 @@ public class VirtualThreadDemo {
 
 ### Sử dụng `Executors.newVirtualThreadPerTaskExecutor()`
 
-Trong phát triển nghiệp vụ, đây là cách phổ biến nhất. Nó tạo một virtual thread mới cho mỗi task được submit:
+Trong phát triển ứng dụng, đây là cách phổ biến nhất. Nó tạo một virtual thread mới cho mỗi task được submit:
 
 ```java
 import java.util.concurrent.ExecutorService;
@@ -191,9 +191,9 @@ public class VirtualThreadDemo {
 
 Không nên pool virtual thread.
 
-Mục tiêu chính của thread pool là reuse platform thread đắt giá và đồng thời giới hạn concurrency. Bản thân virtual thread không phải resource khan hiếm, việc pool chúng thường không có ý nghĩa, thậm chí còn đưa mô hình “mỗi task một thread” quay lại cách nghĩ cũ.
+Mục tiêu chính của thread pool là reuse platform thread đắt giá và đồng thời giới hạn concurrency. Bản thân virtual thread không phải resource khan hiếm, việc pool hóa chúng thường không có ý nghĩa, thậm chí còn đưa mô hình “mỗi task một thread” quay lại cách nghĩ cũ.
 
-Nếu mục tiêu thực tế là giới hạn concurrency khi truy cập một resource nào đó, nên giới hạn resource thay vì giới hạn số lượng virtual thread. Ví dụ, một hệ thống cũ chỉ chịu được tối đa 20 request concurrent thì có thể dùng `Semaphore` để kiểm soát concurrency:
+Nếu mục tiêu thực tế là giới hạn concurrency khi truy cập một resource nào đó, nên giới hạn resource thay vì giới hạn số lượng virtual thread. Ví dụ, một hệ thống cũ chỉ chịu được tối đa 20 request đồng thời thì có thể dùng `Semaphore` để kiểm soát concurrency:
 
 ```java
 import java.util.concurrent.Semaphore;
@@ -216,11 +216,11 @@ public class OldServiceClient {
 }
 ```
 
-Nếu bottleneck là database connection thì điều chỉnh kích thước connection pool; nếu bottleneck là downstream interface rate limiting thì thực hiện rate limiting, circuit breaker và retry backoff. Virtual thread có thể khiến việc chờ đợi trở nên rẻ hơn, nhưng không thể làm database connection, capacity của downstream, CPU và memory trở nên vô hạn.
+Nếu bottleneck là database connection thì điều chỉnh kích thước connection pool; nếu bottleneck là rate limiting của downstream thì thực hiện rate limiting, circuit breaker và retry backoff. Virtual thread có thể khiến việc chờ đợi trở nên rẻ hơn, nhưng không thể làm database connection, capacity của downstream, CPU và memory trở nên vô hạn.
 
 ## So sánh hiệu năng giữa virtual thread và platform thread
 
-Kết luận trước: virtual thread không phải “thread chạy nhanh hơn”, mà là “thread có thể tạo rất nhiều và có chi phí blocking thấp hơn”. Nó thường có thể cải thiện throughput của service I/O-intensive, nhưng không giảm thời gian của bản thân một database query hoặc một HTTP call.
+Kết luận trước: virtual thread không phải “thread chạy nhanh hơn”, mà là “thread có thể tạo với số lượng lớn và có chi phí blocking thấp hơn”. Nó thường có thể cải thiện throughput của service I/O-intensive, nhưng không giảm thời gian của bản thân một database query hoặc một HTTP call.
 
 Ví dụ dưới đây mô phỏng 10,000 task blocking trong 1 giây:
 
@@ -248,7 +248,7 @@ public class VirtualThreadCompareDemo {
 }
 ```
 
-Nếu đổi sang `Executors.newFixedThreadPool(200)`, cùng một thời điểm nhiều nhất chỉ có 200 task đang thực thi, 10,000 task sẽ được xử lý theo từng batch. Ước tính sơ bộ mỗi batch mất 1 giây, tổng thời gian gần 50 giây. Version virtual thread có thể đưa 10,000 task này vào trạng thái chờ gần như đồng thời; platform thread được giải phóng trong lúc chờ, nên tổng thời gian gần với thời gian chờ của một task hơn.
+Nếu đổi sang `Executors.newFixedThreadPool(200)`, cùng một thời điểm nhiều nhất chỉ có 200 task đang thực thi, 10,000 task sẽ được xử lý theo từng batch. Ước tính sơ bộ mỗi batch mất 1 giây, tổng thời gian gần 50 giây. Phiên bản dùng virtual thread có thể đưa 10,000 task này vào trạng thái chờ gần như đồng thời; platform thread được giải phóng trong lúc chờ, nên tổng thời gian gần với thời gian chờ của một task hơn.
 
 Ví dụ này chỉ cho thấy virtual thread phù hợp với “blocking wait”, không phải benchmark nghiêm ngặt. Service thực tế còn phụ thuộc vào database connection pool, HTTP client connection pool, downstream rate limiting, GC, object allocation, lock contention, container CPU quota và các yếu tố khác.
 
@@ -258,14 +258,14 @@ Có thể tách quá trình thực thi virtual thread thành ba phần: scheduli
 
 ### Scheduling
 
-Platform thread phụ thuộc vào scheduling của hệ điều hành. Virtual thread được scheduler của JDK scheduling, sau đó do platform thread mang và thực thi. JEP 444 chỉ ra rằng scheduler của virtual thread là một `ForkJoinPool` work-stealing sử dụng chế độ FIFO; nó không phải pool giống common pool được parallel stream sử dụng.
+Platform thread phụ thuộc vào scheduling của hệ điều hành. Virtual thread được scheduler của JDK điều phối, sau đó được platform thread mang và thực thi. JEP 444 chỉ ra rằng scheduler của virtual thread là một `ForkJoinPool` work-stealing sử dụng chế độ FIFO; nó không phải pool giống common pool được parallel stream sử dụng.
 
 Theo mặc định, mức parallelism của scheduler liên quan đến số processor khả dụng và có thể điều chỉnh bằng các system property sau:
 
 - `jdk.virtualThreadScheduler.parallelism`: parallelism mục tiêu của scheduler.
 - `jdk.virtualThreadScheduler.maxPoolSize`: giới hạn platform thread mà scheduler có thể mở rộng.
 
-Phần lớn hệ thống nghiệp vụ không cần thay đổi hai parameter này. Nên ưu tiên kiểm tra connection pool, rate limiting, lock và blocking point; thông thường hiệu quả sẽ cao hơn điều chỉnh parameter của scheduler.
+Phần lớn hệ thống nghiệp vụ không cần thay đổi hai tham số này. Nên ưu tiên kiểm tra connection pool, rate limiting, lock và blocking point; thông thường hiệu quả sẽ cao hơn điều chỉnh tham số của scheduler.
 
 ### Mount và unmount
 
@@ -273,11 +273,11 @@ Khi thực thi code Java, virtual thread sẽ mount lên một platform thread. 
 
 Các thao tác blocking phổ biến của JDK đã được điều chỉnh cho virtual thread. Ví dụ network I/O, `BlockingQueue`, `Future.get()` khi blocking trong virtual thread thường không chiếm platform thread bên dưới trong thời gian dài.
 
-Không phải mọi blocking đều có thể unmount. Trong JDK 21 đến JDK 23, virtual thread bị blocking trong block hoặc method `synchronized` sẽ gặp Pinning, tức là bị cố định trên carrier thread. [JEP 491](https://openjdk.org/jeps/491) của JDK 24 đã cải thiện điểm này, giúp virtual thread khi blocking trong `synchronized` cũng giải phóng được platform thread bên dưới, loại bỏ phần lớn scenario Pinning do `synchronized` gây ra. Khi gọi native method hoặc code liên quan đến Foreign Function & Memory API, vẫn cần chú ý rủi ro Pinning còn lại.
+Không phải mọi blocking đều có thể unmount. Trong JDK 21 đến JDK 23, virtual thread bị blocking trong `synchronized` block hoặc method sẽ gặp Pinning, tức là bị cố định trên carrier thread. [JEP 491](https://openjdk.org/jeps/491) của JDK 24 đã cải thiện điểm này, giúp virtual thread khi blocking trong `synchronized` cũng giải phóng được platform thread bên dưới, loại bỏ phần lớn scenario Pinning do `synchronized` gây ra. Khi gọi native method hoặc code liên quan đến Foreign Function & Memory API, vẫn cần chú ý rủi ro Pinning còn lại.
 
 ### Quản lý stack
 
-Platform thread thường sử dụng stack có kích thước cố định của thread hệ điều hành. Stack của virtual thread được lưu dưới dạng stack chunk object trong Java heap và có thể tăng giảm theo quá trình thực thi. Đây cũng là một trong những nguyên nhân quan trọng giúp có thể tạo số lượng lớn virtual thread.
+Platform thread thường sử dụng stack có kích thước cố định của thread hệ điều hành. Stack của virtual thread được lưu dưới dạng stack chunk object trong Java heap và có thể tăng giảm theo quá trình thực thi. Đây cũng là một lý do quan trọng giúp tạo được số lượng lớn virtual thread.
 
 Tuy nhiên, điều này không có nghĩa virtual thread không tốn memory. Mỗi virtual thread vẫn là một object, đồng thời có chi phí memory cho stack chunk, local variable, `ThreadLocal` và các thành phần khác. Hàng triệu virtual thread không miễn phí, chỉ là thực tế hơn nhiều so với hàng triệu platform thread.
 
@@ -285,7 +285,7 @@ Tuy nhiên, điều này không có nghĩa virtual thread không tốn memory. M
 
 Có thể hiểu Pinning là tình trạng “virtual thread tạm thời không thể unmount khỏi carrier thread”. Sau khi virtual thread bị cố định trên một platform thread, trong thời gian blocking nó sẽ kéo theo việc chiếm thread của hệ điều hành bên dưới, khiến khả năng mở rộng cũng giảm theo.
 
-Trong JDK 21 đến JDK 23, scenario Pinning điển hình nhất là virtual thread thực hiện blocking I/O bên trong block hoặc method `synchronized`.
+Trong JDK 21 đến JDK 23, scenario Pinning điển hình nhất là virtual thread thực hiện blocking I/O bên trong `synchronized` block hoặc method.
 
 ```java
 public synchronized String load() throws IOException {
@@ -293,22 +293,22 @@ public synchronized String load() throws IOException {
 }
 ```
 
-`synchronized` ngắn và chỉ thao tác trên memory thường không đáng ngại. Điều thực sự cần chú ý là việc giữ lock và thực hiện I/O chậm trên đường đi thường xuyên, chẳng hạn truy vấn database, gọi remote interface hoặc đọc file lớn trong khi đang giữ object lock.
+Các đoạn `synchronized` ngắn, chỉ thao tác trên memory, thường không đáng ngại. Điều thực sự cần chú ý là việc giữ lock và thực hiện I/O chậm trên các đường chạy thường xuyên, chẳng hạn truy vấn database, gọi remote interface hoặc đọc file lớn trong khi đang giữ object lock.
 
 Nếu sử dụng JDK 21 đến JDK 23, có thể cân nhắc:
 
 - Tránh thực hiện I/O chậm bên trong `synchronized`.
-- Với scenario lock blocking thường xuyên, sử dụng `ReentrantLock` và release lock trong `try/finally`.
+- Với các trường hợp lock blocking thường xuyên, sử dụng `ReentrantLock` và release lock trong `try/finally`.
 - Dùng JFR để quan sát event `jdk.VirtualThreadPinned`.
 - Tạm thời dùng `-Djdk.tracePinnedThreads=full` để định vị call stack bị cố định.
 
-Nếu sử dụng JDK 24 hoặc cao hơn, vấn đề Pinning chính do `synchronized` gây ra đã được JEP 491 giải quyết. Việc chọn `synchronized` hay `java.util.concurrent.locks` có thể quay lại đánh giá dựa trên semantics của code, khả năng maintain và năng lực của lock.
+Nếu sử dụng JDK 24 hoặc cao hơn, vấn đề Pinning chính do `synchronized` gây ra đã được JEP 491 giải quyết. Việc chọn `synchronized` hay `java.util.concurrent.locks` có thể quay lại đánh giá dựa trên ngữ nghĩa code, khả năng bảo trì và tính năng của lock.
 
 ## Các lưu ý khi sử dụng virtual thread
 
 ### Đừng xem virtual thread là công cụ tăng tốc CPU
 
-Virtual thread cải thiện khả năng tiếp nhận concurrency của task dạng chờ đợi. CPU-intensive task cuối cùng vẫn phải tranh chấp CPU time slice; dù số lượng virtual thread có nhiều đến đâu cũng không thể vượt qua giới hạn vật lý của số core CPU.
+Virtual thread cải thiện khả năng xử lý đồng thời các task dạng chờ. CPU-intensive task cuối cùng vẫn phải tranh chấp CPU time slice; dù số lượng virtual thread có nhiều đến đâu cũng không thể vượt qua giới hạn vật lý của số core CPU.
 
 ### Đừng dùng tư duy thread pool để giới hạn virtual thread
 
@@ -316,7 +316,7 @@ Không nên tạo virtual thread pool có số lượng cố định. Khi cần 
 
 ### Cẩn thận khi `ThreadLocal` cache object lớn
 
-Bản Java 21 chính thức đảm bảo virtual thread hỗ trợ `ThreadLocal`, điều này có lợi cho việc tương thích với code cũ và framework. Tuy nhiên, không nên dùng `ThreadLocal` để cache object lớn trong mỗi virtual thread.
+Java 21 bản chính thức đảm bảo virtual thread hỗ trợ `ThreadLocal`, điều này có lợi cho việc tương thích với code cũ và framework. Tuy nhiên, không nên dùng `ThreadLocal` để cache object lớn trong mỗi virtual thread.
 
 Trước đây trong thread pool, một `ThreadLocal<SimpleDateFormat>` có thể chỉ tương ứng với vài chục hoặc vài trăm platform thread. Sau khi migrate sang virtual thread, nếu mỗi task có một virtual thread, cách viết tương tự có thể biến thành mỗi task tạo một cache object, khiến áp lực memory và allocation tăng lên.
 
@@ -324,31 +324,31 @@ Nếu chỉ truyền request context, user ID hoặc Trace ID thì thường kh�
 
 ### Virtual thread không loại bỏ vấn đề thread safety
 
-Virtual thread khiến việc tạo thread rẻ hơn, đồng nghĩa bạn dễ chạy đồng thời một lượng lớn task concurrent hơn. Data race trước đây chưa lộ ra vì thread pool nhỏ có thể dễ xuất hiện hơn sau khi chuyển sang virtual thread.
+Virtual thread khiến việc tạo thread rẻ hơn, đồng nghĩa bạn dễ chạy đồng thời một lượng lớn task concurrent hơn. Data race trước đây chưa lộ ra vì thread pool nhỏ có thể dễ lộ ra hơn sau khi chuyển sang virtual thread.
 
-Vẫn cần tuân thủ các nguyên tắc cơ bản của concurrent programming: shared mutable state phải được lock hoặc isolate; database connection, session object và client không thread-safe không được nhiều virtual thread sử dụng đồng thời một cách tùy tiện.
+Vẫn cần tuân thủ các nguyên tắc cơ bản của concurrent programming: shared mutable state phải được bảo vệ bằng lock hoặc cô lập; database connection, session object và client không thread-safe không được nhiều virtual thread sử dụng đồng thời một cách tùy tiện.
 
 ### Chú ý connection pool và capacity của downstream
 
 Sau khi nhiều service migrate sang virtual thread, bottleneck đầu tiên thường không còn là business thread pool mà là database connection pool, HTTP connection pool, số lượng Redis connection hoặc downstream rate limiting.
 
-Đây không phải vấn đề của virtual thread. Virtual thread chỉ giúp nhiều task có cơ hội tiến hành đồng thời hơn; shared resource thực sự vẫn phải được quản lý theo capacity. Khi load test nên đồng thời theo dõi:
+Đây không phải vấn đề của virtual thread. Virtual thread chỉ giúp nhiều task có cơ hội được xử lý đồng thời hơn; shared resource thực sự vẫn phải được quản lý theo capacity. Khi load test nên đồng thời theo dõi:
 
 - QPS, response time và error rate của application.
 - Active connection, wait queue và số lần timeout của database connection pool.
 - HTTP client connection pool và downstream 429/5xx.
 - CPU, heap memory, GC và tốc độ object allocation.
-- Event virtual thread và lock contention trong JFR.
+- Các event của virtual thread và lock contention trong JFR.
 
 ### Đừng trộn quá nhiều mô hình asynchronous
 
 Virtual thread phù hợp nhất với code synchronous blocking. Với hệ thống đã được viết asynchronous end-to-end bằng Reactive/WebFlux/Netty, việc bật virtual thread chưa chắc mang lại lợi ích rõ rệt.
 
-Việc trộn các model còn phức tạp hơn: outer layer là virtual thread, inner layer lại dùng nhiều async callback và thread pool; khi điều tra sự cố có thể phải đồng thời đối mặt với virtual thread, event loop, business thread pool và connection pool, tức nhiều loại context. Khi migrate, tốt hơn nên thử nghiệm trước một blocking chain synchronous, thay vì thay thế toàn bộ hệ thống bằng một lần.
+Việc trộn các mô hình còn phức tạp hơn: lớp ngoài là virtual thread, lớp trong lại dùng nhiều async callback và thread pool; khi điều tra sự cố có thể phải đồng thời đối mặt với virtual thread, event loop, business thread pool và connection pool, tức nhiều loại context. Khi migrate, tốt hơn nên thử nghiệm trước một synchronous blocking chain, thay vì thay thế toàn bộ hệ thống bằng một lần.
 
 ## Bật virtual thread trong Spring Boot như thế nào?
 
-Spring Boot bắt đầu cung cấp công tắc tương đối trực tiếp từ phiên bản 3.2. Khi sử dụng Java 21 hoặc cao hơn, có thể bật trong configuration:
+Spring Boot bắt đầu cung cấp công tắc tương đối trực tiếp từ phiên bản 3.2. Khi sử dụng Java 21 hoặc cao hơn, có thể bật trong cấu hình:
 
 ```properties
 spring.threads.virtual.enabled=true
@@ -360,7 +360,7 @@ Tài liệu chính thức của Spring Boot cũng nêu một số điểm thực
 - Virtual thread là daemon thread. Nếu application cần các background task như `@Scheduled` để giữ JVM sống, nên thiết lập `spring.main.keep-alive=true`.
 - Hiện tại Spring Boot khuyến nghị Java 24 hoặc cao hơn để có trải nghiệm virtual thread tốt hơn, chủ yếu nhờ các cải tiến về Pinning.
 
-Một configuration đơn giản như sau:
+Một cấu hình đơn giản như sau:
 
 ```yaml
 spring:
@@ -371,13 +371,13 @@ spring:
     keep-alive: true
 ```
 
-Sau khi bật, không có nghĩa mọi API đều chạy nhanh hơn. Nó có khả năng cải thiện nhiều hơn với API synchronous blocking, chờ I/O rõ rệt và concurrency cao. Nếu API chủ yếu tốn thời gian ở CPU, lock contention, bản thân slow SQL hoặc downstream rate limiting, virtual thread chỉ khiến vấn đề lộ ra sớm hơn.
+Sau khi bật, không có nghĩa mọi API đều chạy nhanh hơn. Nó có khả năng cải thiện nhiều hơn với API synchronous blocking, chờ I/O rõ rệt và concurrency cao. Nếu API chủ yếu tốn thời gian cho CPU, lock contention, bản thân SQL chậm hoặc downstream rate limiting, virtual thread chỉ khiến vấn đề lộ ra sớm hơn.
 
-## Điều tra vấn đề virtual thread như thế nào?
+## Làm thế nào để chẩn đoán vấn đề virtual thread?
 
 JDK đã bổ sung khá nhiều năng lực quan sát cho virtual thread.
 
-### Dùng `jcmd` để export thread dump
+### Dùng `jcmd` để xuất thread dump
 
 `jstack` truyền thống không thật sự phù hợp khi phải xử lý hàng nghìn virtual thread. JDK cung cấp năng lực thread dump mới:
 
@@ -385,13 +385,13 @@ JDK đã bổ sung khá nhiều năng lực quan sát cho virtual thread.
 jcmd <pid> Thread.dump_to_file -format=json thread-dump.json
 ```
 
-Cũng có thể export ở dạng text:
+Cũng có thể xuất ở dạng text:
 
 ```bash
 jcmd <pid> Thread.dump_to_file -format=text thread-dump.txt
 ```
 
-Định dạng JSON phù hợp hơn cho tool phân tích, đặc biệt khi có rất nhiều virtual thread.
+Định dạng JSON phù hợp hơn cho công cụ phân tích, đặc biệt khi có rất nhiều virtual thread.
 
 ### Dùng JFR để quan sát event virtual thread
 
@@ -402,7 +402,7 @@ Các event liên quan đến virtual thread trong JFR gồm:
 - `jdk.VirtualThreadPinned`
 - `jdk.VirtualThreadSubmitFailed`
 
-Trong đó `jdk.VirtualThreadPinned` rất hữu ích khi điều tra Pinning. Sau JDK 24, phần lớn Pinning liên quan đến `synchronized` đã được giải quyết, nhưng các scenario còn lại như native/FFM vẫn có thể được quan sát qua JFR.
+Trong đó `jdk.VirtualThreadPinned` rất hữu ích khi điều tra Pinning. Từ JDK 24 trở đi, phần lớn Pinning liên quan đến `synchronized` đã được giải quyết, nhưng các scenario còn lại như native/FFM vẫn có thể được quan sát qua JFR.
 
 ### Tạm thời bật Pinning stack trace
 
@@ -412,17 +412,17 @@ Trong JDK 21 đến JDK 23, có thể tạm thời dùng:
 -Djdk.tracePinnedThreads=full
 ```
 
-Khi virtual thread blocking và bị cố định, nó sẽ in call stack, phù hợp để định vị vấn đề trong môi trường local hoặc test. Sau JEP 491 của JDK 24, các scenario Pinning chính liên quan đến `synchronized` đã được cải thiện; với boundary còn lại như native/FFM, vẫn nên kết hợp JFR và thread dump để đánh giá.
+Khi virtual thread blocking và bị cố định, nó sẽ in call stack, phù hợp để định vị vấn đề trong môi trường local hoặc test. Sau JEP 491 của JDK 24, các scenario Pinning chính liên quan đến `synchronized` đã được cải thiện; với các giới hạn còn lại như native/FFM, vẫn nên kết hợp JFR và thread dump để đánh giá.
 
 ## Các câu hỏi phỏng vấn thường gặp về virtual thread
 
 ### Virtual thread khác platform thread như thế nào?
 
-Platform thread thường tương ứng một-một với thread của hệ điều hành, có chi phí tạo và context switch cao hơn, đồng thời số lượng có hạn. Virtual thread do JDK scheduling, có thể ánh xạ một lượng lớn virtual thread vào số ít platform thread. Khi blocking chờ I/O, virtual thread thường có thể unmount khỏi carrier thread, để platform thread tiếp tục thực thi virtual thread khác.
+Platform thread thường tương ứng một-một với thread của hệ điều hành, có chi phí tạo và context switch cao hơn, đồng thời số lượng có hạn. Virtual thread được scheduler của JDK điều phối, có thể ánh xạ một lượng lớn virtual thread vào số ít platform thread. Khi blocking chờ I/O, virtual thread thường có thể unmount khỏi carrier thread, để platform thread tiếp tục thực thi virtual thread khác.
 
 ### Vì sao virtual thread phù hợp với task I/O-intensive?
 
-Task I/O-intensive dành phần lớn thời gian chờ resource bên ngoài. Khi platform thread chờ, nó chiếm thread của hệ điều hành; khi virtual thread chờ, nó có thể tự suspend và giải phóng carrier thread. Nhờ vậy, cùng số lượng platform thread có thể đảm nhận nhiều task concurrent hơn.
+Task I/O-intensive dành phần lớn thời gian chờ resource bên ngoài. Khi platform thread chờ, nó chiếm thread của hệ điều hành; khi virtual thread chờ, nó có thể tự suspend và giải phóng carrier thread. Nhờ vậy, cùng số lượng platform thread có thể đảm nhận nhiều task đồng thời hơn.
 
 ### Virtual thread có phù hợp với task CPU-intensive không?
 
@@ -438,11 +438,11 @@ Cả hai đều thuộc cách tiếp cận lightweight concurrency, nhưng Java 
 
 ### Sau khi dùng virtual thread có còn cần Reactive programming không?
 
-Tùy scenario. Nhiều API server synchronous blocking có thể dùng virtual thread để có khả năng đọc tốt hơn và throughput đủ cao, không cần viết callback chain phức tạp chỉ để giải phóng thread. Nhưng Reactive vẫn phù hợp với stream processing, backpressure, event-driven, long connection và hệ thống đã asynchronous end-to-end. Virtual thread không phải silver bullet thay thế mọi model asynchronous.
+Tùy trường hợp. Nhiều API server synchronous blocking có thể dùng virtual thread để có khả năng đọc tốt hơn và throughput đủ cao, không cần viết callback chain phức tạp chỉ để giải phóng thread. Nhưng Reactive vẫn phù hợp với stream processing, backpressure, event-driven, long connection và hệ thống đã asynchronous end-to-end. Virtual thread không phải silver bullet thay thế mọi mô hình asynchronous.
 
 ### `synchronized` trong JDK 21 còn dùng được không?
 
-Có thể dùng, nhưng cần chú ý boundary. Trong JDK 21 đến JDK 23, virtual thread thực hiện blocking operation bên trong `synchronized` có thể gặp Pinning. Với synchronization trên memory ngắn, vấn đề không lớn; trên đường đi thường xuyên, không nên giữ lock `synchronized` để thực hiện I/O chậm. Sau cải tiến của JEP 491 trong JDK 24, Pinning liên quan đến `synchronized` về cơ bản đã được giải quyết.
+Có thể dùng, nhưng cần chú ý giới hạn. Trong JDK 21 đến JDK 23, virtual thread thực hiện blocking operation bên trong `synchronized` có thể gặp Pinning. Các đoạn `synchronized` ngắn, chỉ thao tác trong memory, không đáng ngại; trên các đường chạy thường xuyên, không nên giữ lock `synchronized` để thực hiện I/O chậm. Sau cải tiến của JEP 491 trong JDK 24, Pinning liên quan đến `synchronized` về cơ bản đã được giải quyết.
 
 ## Tài liệu tham khảo
 

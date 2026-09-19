@@ -27,11 +27,11 @@ Bài viết này sẽ chọn một số tính năng mới quan trọng để gi�
 - [JEP 330: Launch Single-File Source-Code Programs](https://openjdk.org/jeps/330)
 - [JEP 333: ZGC: A Scalable Low-Latency Garbage Collector (Experimental)](https://openjdk.org/jeps/333)
 
-## JEP 321: HTTP Client (HTTP client, bản chuẩn)
+## JEP 321: HTTP Client (HTTP client, bản tiêu chuẩn)
 
-Java 11 đã chuẩn hóa HTTP Client API được giới thiệu trong Java 9 và cập nhật trong Java 10. Trong thời gian incubate ở hai phiên bản trước, HTTP Client gần như được viết lại hoàn toàn và hiện hỗ trợ đầy đủ asynchronous non-blocking.
+Java 11 đã chuẩn hóa HTTP Client API được giới thiệu trong Java 9 và cập nhật trong Java 10. Sau giai đoạn incubator ở hai phiên bản trước, HTTP Client gần như được viết lại hoàn toàn và hiện hỗ trợ đầy đủ chế độ bất đồng bộ, non-blocking.
 
-Ngoài ra, trong Java 11, package của HTTP Client được đổi từ `jdk.incubator.http` thành `java.net.http`. API này cung cấp semantics request và response non-blocking thông qua `CompletableFuture`. Cách sử dụng cũng rất đơn giản, như sau:
+Ngoài ra, trong Java 11, package của HTTP Client được đổi từ `jdk.incubator.http` thành `java.net.http`. API này cung cấp semantics non-blocking cho request và response thông qua `CompletableFuture`. Cách sử dụng cũng rất đơn giản:
 
 ```java
 var request = HttpRequest.newBuilder()
@@ -50,7 +50,7 @@ client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
     .thenAccept(System.out::println);
 ```
 
-## JEP 333: ZGC (garbage collector độ trễ thấp, có khả năng mở rộng, experimental)
+## JEP 333: ZGC (garbage collector có khả năng mở rộng, độ trễ thấp, experimental)
 
 **ZGC là Z Garbage Collector**, một garbage collector có khả năng mở rộng và độ trễ thấp.
 
@@ -58,21 +58,21 @@ ZGC được thiết kế chủ yếu để đáp ứng các mục tiêu sau:
 
 - Thời gian dừng GC không quá 10ms
 - Có thể xử lý cả heap nhỏ vài trăm MB và heap lớn vài TB
-- Throughput của ứng dụng không giảm quá 15% (so với thuật toán thu gom G1)
-- Tạo nền tảng thuận tiện để đưa vào các tính năng GC mới và tối ưu bằng colored pointers cùng Load barriers
+- Throughput của ứng dụng không giảm quá 15% (so với thuật toán GC G1)
+- Tạo nền tảng để bổ sung các tính năng GC mới và tối ưu bằng colored pointers cùng Load barriers
 - Hiện chỉ hỗ trợ nền tảng Linux/x64
 
-ZGC hiện **đang ở giai đoạn experimental**, chỉ hỗ trợ nền tảng Linux/x64. Lưu ý: ZGC trở thành tính năng chính thức trong Java 15 và ZGC phân thế hệ được giới thiệu trong Java 21.
+ZGC hiện **đang ở giai đoạn experimental**, chỉ hỗ trợ nền tảng Linux/x64. Lưu ý: ZGC trở thành tính năng chính thức trong Java 15 và generational ZGC được giới thiệu trong Java 21.
 
 Tương tự ParNew và G1 trong CMS, ZGC cũng sử dụng thuật toán mark-copy, nhưng ZGC đã cải tiến đáng kể thuật toán này.
 
 Trong ZGC, tình huống Stop The World xảy ra ít hơn!
 
-Có thể xem chi tiết tại: [《Khám phá và thực tiễn về garbage collector thế hệ mới ZGC》](https://tech.meituan.com/2020/08/06/new-zgc-practice-in-meituan.html)
+Có thể xem chi tiết tại: [Khám phá và thực tiễn về garbage collector thế hệ mới ZGC](https://tech.meituan.com/2020/08/06/new-zgc-practice-in-meituan.html)
 
 ## JEP 323: Local-Variable Syntax for Lambda Parameters (cú pháp biến cục bộ cho tham số Lambda)
 
-Từ Java 10, Java đã giới thiệu tính năng quan trọng là suy luận kiểu biến cục bộ. Suy luận kiểu cho phép dùng keyword `var` làm kiểu của biến cục bộ thay vì kiểu thực tế; compiler sẽ suy luận kiểu dựa trên giá trị được gán cho biến.
+Từ Java 10, Java đã giới thiệu tính năng quan trọng là suy luận kiểu biến cục bộ. Suy luận kiểu cho phép dùng keyword `var` làm kiểu của biến cục bộ thay vì kiểu thực tế; compiler sẽ suy luận kiểu dựa trên giá trị gán cho biến.
 
 Trong Java 10, keyword `var` có một số giới hạn:
 
@@ -81,7 +81,7 @@ Trong Java 10, keyword `var` có một số giới hạn:
 - Không thể dùng làm tham số method
 - Không thể sử dụng trong biểu thức Lambda
 
-Từ Java 11, developer được phép sử dụng `var` để khai báo tham số trong biểu thức Lambda.
+Từ Java 11, lập trình viên được phép sử dụng `var` để khai báo tham số trong biểu thức Lambda.
 
 ```java
 // Hai cách dưới đây tương đương nhau
@@ -89,17 +89,17 @@ Consumer<String> consumer = (var i) -> System.out.println(i);
 Consumer<String> consumer = (String i) -> System.out.println(i);
 ```
 
-## JEP 330: Launch Single-File Source-Code Programs (khởi chạy chương trình source code một file)
+## JEP 330: Launch Single-File Source-Code Programs (khởi chạy chương trình từ source code một file)
 
-Điều này có nghĩa là chúng ta có thể chạy source code Java chỉ gồm một file. Tính năng này cho phép dùng Java interpreter để thực thi trực tiếp source code Java. Source code được compile trong memory rồi thực thi bởi interpreter, không cần tạo file `.class` trên disk. Ràng buộc duy nhất là tất cả class liên quan phải được định nghĩa trong cùng một file Java.
+Điều này có nghĩa là có thể chạy source code Java chỉ trong một file. Tính năng này cho phép dùng Java interpreter để thực thi trực tiếp source code Java. Source code được compile trong memory rồi thực thi bởi interpreter, không cần tạo file `.class` trên disk. Ràng buộc duy nhất là tất cả class liên quan phải được định nghĩa trong cùng một file Java.
 
-Tính năng này đặc biệt hữu ích với người mới học Java và muốn thử các chương trình đơn giản. Nó cũng có thể dùng cùng jshell, qua đó phần nào tăng khả năng sử dụng Java để viết script.
+Tính năng này đặc biệt hữu ích với người mới học Java và muốn thử các chương trình đơn giản. Nó cũng có thể dùng cùng jshell, qua đó phần nào tăng khả năng dùng Java để viết script.
 
 ## Cải tiến API
 
 Không phải mọi thay đổi API đều được phát hành thông qua JEP (Java Enhancement Proposal).
 
-Trong quy trình phát triển JDK: **JEP** thường được dùng cho những thay đổi lớn, chẳng hạn như giới thiệu language feature mới (ví dụ `var`), cơ chế JVM mới (ví dụ ZGC) hoặc refactor library quy mô lớn. Những thay đổi như thêm một vài method vào class hiện có, chẳng hạn `String.isBlank()`, thường được xem là hoạt động bảo trì library thông thường. Chúng được developer JDK gửi và review trực tiếp thông qua ticket của **JBS (JDK Bug System)**, sau đó phát hành trực tiếp cùng phiên bản.
+Trong quy trình phát triển JDK: **JEP** thường được dùng cho những thay đổi lớn, chẳng hạn như giới thiệu tính năng ngôn ngữ mới (ví dụ `var`), cơ chế JVM mới (ví dụ ZGC) hoặc refactor library quy mô lớn. Những thay đổi như thêm một vài method vào class hiện có, chẳng hạn `String.isBlank()`, thường được xem là hoạt động bảo trì library thông thường. Các thay đổi này được các developer JDK gửi và review trực tiếp qua ticket của **JBS (JDK Bug System)**, sau đó phát hành cùng phiên bản.
 
 ### Cải tiến String
 
@@ -116,31 +116,31 @@ Java 11 bổ sung một loạt method xử lý chuỗi:
 " Java ".stripTrailing();  // "Java"
 // Lặp chuỗi bao nhiêu lần
 "Java".repeat(3);             // "JavaJavaJava"
-// Trả về collection các chuỗi được phân tách bởi line terminator.
+// Trả về tập hợp các chuỗi được phân tách bằng line terminator.
 "A\nB\nC".lines().count();    // 3
 "A\nB\nC".lines().collect(Collectors.toList());
 ```
 
 ### Cải tiến Optional
 
-Bổ sung method `isEmpty()` để kiểm tra object `Optional` được chỉ định có trống hay không.
+Bổ sung method `isEmpty()` để kiểm tra `Optional` đã cho có rỗng hay không.
 
 ```java
 var op = Optional.empty();
-System.out.println(op.isEmpty());//Kiểm tra object Optional được chỉ định có trống hay không
+System.out.println(op.isEmpty());// Kiểm tra Optional đã cho có rỗng hay không
 ```
 
 ## Các tính năng mới khác
 
-- **Garbage collector mới Epsilon**: một triển khai GC hoàn toàn thụ động, phân bổ tài nguyên memory có giới hạn, giảm tối đa memory usage và memory throughput latency
-- **Heap Profiling overhead thấp**: Java 11 cung cấp phương pháp sampling allocation trên Java heap với overhead thấp, có thể lấy thông tin về các Java object được phân bổ trên heap và truy cập thông tin heap thông qua JVMTI
-- **Protocol TLS1.3**: Java 11 bao gồm triển khai specification TLS 1.3 (RFC 8446), thay thế TLS có trong các phiên bản trước, bao gồm TLS 1.2. Đồng thời, Java 11 cũng cải tiến các tính năng TLS khác, chẳng hạn OCSP stapling extension (RFC 6066, RFC 6961), session hash và extended master secret extension (RFC 7627), mang lại nhiều cải tiến về security và performance
+- **Garbage collector mới Epsilon**: một triển khai GC hoàn toàn thụ động, chỉ cấp phát lượng memory giới hạn, giảm tối đa memory footprint và memory throughput latency
+- **Heap Profiling overhead thấp**: Java 11 cung cấp phương pháp sampling allocation trên Java heap với overhead thấp, qua đó lấy thông tin về các Java object được phân bổ trên heap và truy cập thông tin heap thông qua JVMTI
+- **Giao thức TLS 1.3**: Java 11 bao gồm triển khai đặc tả TLS 1.3 (RFC 8446), thay thế các phiên bản TLS trước đó, bao gồm TLS 1.2. Đồng thời, Java 11 cũng cải tiến các tính năng TLS khác, chẳng hạn OCSP stapling extension (RFC 6066, RFC 6961), session hash extension và extended master secret extension (RFC 7627), cải thiện security và performance
 - **Flight Recorder (Java Flight Recorder)**: trước đây Flight Recorder là một công cụ profiling của JDK bản thương mại, nhưng trong Java 11, code của công cụ này được đưa vào public codebase để mọi người đều có thể sử dụng.
 - ......
 
 ## Tham khảo
 
-- JDK 11 Release Notes：<https://www.oracle.com/java/technologies/javase/11-relnote-issues.html>
-- Java 11 – Features and Comparison：<https://www.geeksforgeeks.org/java-11-features-and-comparison/>
+- JDK 11 Release Notes: <https://www.oracle.com/java/technologies/javase/11-relnote-issues.html>
+- Java 11 – Features and Comparison: <https://www.geeksforgeeks.org/java-11-features-and-comparison/>
 
 <!-- @include: @article-footer.snippet.md -->
